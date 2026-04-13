@@ -23,10 +23,10 @@ export async function GET() {
         status: "error",
         message: error instanceof Error ? error.message : String(error),
         env: {
+          hasBase64: !!process.env.FIREBASE_SERVICE_ACCOUNT_BASE64,
           hasProjectId: !!process.env.FIREBASE_PROJECT_ID,
           hasClientEmail: !!process.env.FIREBASE_CLIENT_EMAIL,
           hasPrivateKey: !!process.env.FIREBASE_PRIVATE_KEY,
-          privateKeyLength: process.env.FIREBASE_PRIVATE_KEY?.length ?? 0,
         },
       },
       { status: 500 }
