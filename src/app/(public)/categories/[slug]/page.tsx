@@ -31,6 +31,7 @@ export default async function CategoryPage({ params }: Props) {
     const { articles: rawArticles } = await articlesRepo.getArticles({
       status: "published",
       categoryId: category.id as string,
+      take: 100,
     });
     categoryArticles = await Promise.all(
       rawArticles.map(async (article) => {
@@ -38,8 +39,8 @@ export default async function CategoryPage({ params }: Props) {
         return { ...article, author, category } as Record<string, unknown>;
       })
     );
-  } catch {
-    // Firestore index may not be ready
+  } catch (error) {
+    console.error("Error fetching category articles:", error);
   }
 
   return (

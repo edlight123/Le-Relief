@@ -12,8 +12,8 @@ export default async function CategoriesIndexPage() {
   let categories: (Record<string, unknown> & { _count: { articles: number } })[] = [];
   try {
     categories = await categoriesRepo.getCategoriesWithCounts(true);
-  } catch {
-    // Firestore index may not be ready
+  } catch (error) {
+    console.error("Error fetching categories:", error);
   }
 
   return (
