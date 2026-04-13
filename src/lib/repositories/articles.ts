@@ -162,5 +162,5 @@ export async function getPublishedArticles(take: number = 6) {
     .orderBy("publishedAt", "desc")
     .limit(take)
     .get();
-  return snap.docs.map((d) => ({ id: d.id, ...d.data() }) as Record<string, unknown>);
+  return snap.docs.map((d) => serializeTimestamps({ id: d.id, ...d.data() } as Record<string, unknown>));
 }
