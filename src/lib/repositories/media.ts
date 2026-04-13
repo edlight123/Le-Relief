@@ -1,5 +1,5 @@
 import { FieldValue } from "firebase-admin/firestore";
-import { getDb } from "@/lib/firebase";
+import { getDb, serializeTimestamps } from "@/lib/firebase";
 
 const COLLECTION = "media";
 
@@ -22,18 +22,18 @@ export async function createMedia(data: {
     createdAt: now,
   });
   const snap = await ref.get();
-  return { id: ref.id, ...snap.data() } as Record<string, unknown>;
+  return serializeTimestamps({ id: ref.id, ...snap.data() } as Record<string, unknown>);
 }
 
 export async function getMedia() {
   const snap = await collection().orderBy("createdAt", "desc").get();
-  return snap.docs.map((d) => ({ id: d.id, ...d.data() }) as Record<string, unknown>);
+  return snap.docs.map((d) => serializeTimestamps({ id: d.id, ...d.data() } as Record<string, unknown>));
 }
 
 export async function getMediaItem(id: string) {
   const snap = await collection().doc(id).get();
   if (!snap.exists) return null;
-  return { id: snap.id, ...snap.data() } as Record<string, unknown>;
+  return serializeTimestamps({ id: snap.id, ...snap.data() } as Record<string, unknown>);
 }
 
 export async function deleteMedia(id: string) {

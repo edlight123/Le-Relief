@@ -1,5 +1,5 @@
 import { FieldValue } from "firebase-admin/firestore";
-import { getDb } from "@/lib/firebase";
+import { getDb, serializeTimestamps } from "@/lib/firebase";
 
 const COLLECTION = "social_links";
 
@@ -9,7 +9,7 @@ function collection() {
 
 export async function getSocialLinks() {
   const snap = await collection().get();
-  return snap.docs.map((d) => ({ id: d.id, ...d.data() }) as Record<string, unknown>);
+  return snap.docs.map((d) => serializeTimestamps({ id: d.id, ...d.data() } as Record<string, unknown>));
 }
 
 export async function upsertSocialLink(platform: string, url: string) {

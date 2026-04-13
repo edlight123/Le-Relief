@@ -1,5 +1,5 @@
 import { FieldValue } from "firebase-admin/firestore";
-import { getDb } from "@/lib/firebase";
+import { getDb, serializeTimestamps } from "@/lib/firebase";
 
 const COLLECTION = "articles";
 
@@ -36,20 +36,20 @@ export async function createArticle(data: {
     updatedAt: now,
   });
   const snap = await ref.get();
-  return { id: ref.id, ...snap.data() } as Record<string, unknown>;
+  return serializeTimestamps({ id: ref.id, ...snap.data() } as Record<string, unknown>);
 }
 
 export async function getArticle(id: string) {
   const snap = await collection().doc(id).get();
   if (!snap.exists) return null;
-  return { id: snap.id, ...snap.data() } as Record<string, unknown>;
+  return serializeTimestamps({ id: snap.id, ...snap.data() } as Record<string, unknown>);
 }
 
 export async function findBySlug(slug: string) {
   const snap = await collection().where("slug", "==", slug).limit(1).get();
   if (snap.empty) return null;
   const doc = snap.docs[0]!;
-  return { id: doc.id, ...doc.data() } as Record<string, unknown>;
+  return serializeTimestamps({ id: doc.id, ...doc.data() } as Record<string, unknown>);
 }
 
 export async function getArticles(options?: {
@@ -77,7 +77,7 @@ export async function getArticles(options?: {
   query = query.orderBy("updatedAt", "desc");
 
   const snap = await query.get();
-  let docs = snap.docs.map((d) => ({ id: d.id, ...d.data() }) as Record<string, unknown>);
+  let docs = snap.docs.map((d) => serializeTimestamps({ id: d.id, ...d.data() } as Record<string, unknown>));
 
   // Client-side filtering for search (Firestore doesn't do full-text search)
   if (options?.search) {
@@ -141,7 +141,7 @@ export async function getRecentArticles(take: number = 5) {
     .orderBy("updatedAt", "desc")
     .limit(take)
     .get();
-  return snap.docs.map((d) => ({ id: d.id, ...d.data() }) as Record<string, unknown>);
+  return snap.docs.map((d) => serializeTimestamps({ id: d.id, ...d.data() } as Record<string, unknown>));
 }
 
 export async function getFeaturedArticle() {
@@ -153,7 +153,7 @@ export async function getFeaturedArticle() {
     .get();
   if (snap.empty) return null;
   const doc = snap.docs[0]!;
-  return { id: doc.id, ...doc.data() } as Record<string, unknown>;
+  return serializeTimestamps({ id: doc.id, ...doc.data() } as Record<string, unknown>);
 }
 
 export async function getPublishedArticles(take: number = 6) {

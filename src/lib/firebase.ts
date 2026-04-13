@@ -102,3 +102,40 @@ export function getDb(): Firestore {
   }
   return db;
 }
+
+/**
+ * Convert Firestore Timestamp objects to ISO strings in a document.
+ * Handles { _seconds, _nanoseconds } and { seconds, nanoseconds } shapes,
+ * plus Firestore Timestamp instances with toDate().
+ */
+export function serializeTimestamps<T extends Record<string, unknown>>(
+  doc: T,
+): T {
+  const result = { ...doc };
+  for (const [key, value] of Object.entries(result)) {
+    if (value && typeof value === "object") {
+      const v = value as Record<string, unknown>;
+      // Firestore Timestamp instance
+      if (typeof (v as { toDate?: unknown }).toDate === "function") {
+        (result as Record<string, unknown>)[key] = (
+          v as { toDate: () => Date }
+        )
+          .toDate()
+          .toISOString();
+      }
+      // Plain object with _seconds (REST mode)
+      else if ("_seconds" in v && typeof v._seconds === "number") {
+        (result as Record<string, unknown>)[key] = new Date(
+          v._seconds * 1000,
+        ).toISOString();
+      }
+      // Plain object with seconds
+      else if ("seconds" in v && typeof v.seconds === "number") {
+        (result as Record<string, unknown>)[key] = new Date(
+          (v.seconds as number) * 1000,
+        ).toISOString();
+      }
+    }
+  }
+  return result;
+}
