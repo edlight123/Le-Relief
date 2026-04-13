@@ -9,14 +9,16 @@ export const metadata = {
 export default function ContactPage() {
   return (
     <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-      <h1 className="text-3xl md:text-4xl font-bold text-neutral-900 dark:text-white tracking-tight">
+      <h1 className="text-3xl md:text-4xl font-bold text-foreground tracking-tight animate-fade-in-up">
         Contact Us
       </h1>
+
+      <div className="mt-4 h-px bg-gradient-to-r from-primary/60 via-accent-rose/20 to-transparent" />
 
       <div className="mt-8 space-y-10">
         {/* Contact Info */}
         <div>
-          <h2 className="text-lg font-semibold text-neutral-900 dark:text-white mb-3">
+          <h2 className="text-lg font-semibold text-foreground mb-3">
             Reach Out
           </h2>
           <p className="text-neutral-600 dark:text-neutral-400 leading-relaxed">
@@ -27,7 +29,7 @@ export default function ContactPage() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           <div>
-            <h3 className="text-sm font-semibold text-neutral-900 dark:text-white uppercase tracking-wider mb-2">
+            <h3 className="text-sm font-semibold text-foreground uppercase tracking-wider mb-2">
               Editorial
             </h3>
             <p className="text-neutral-600 dark:text-neutral-400">
@@ -35,7 +37,7 @@ export default function ContactPage() {
             </p>
           </div>
           <div>
-            <h3 className="text-sm font-semibold text-neutral-900 dark:text-white uppercase tracking-wider mb-2">
+            <h3 className="text-sm font-semibold text-foreground uppercase tracking-wider mb-2">
               General Inquiries
             </h3>
             <p className="text-neutral-600 dark:text-neutral-400">
@@ -62,7 +64,7 @@ export default function ContactPage() {
               id="name"
               name="name"
               required
-              className="w-full rounded-lg border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-900 text-neutral-900 dark:text-neutral-100 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-neutral-400"
+              className="w-full rounded-lg border border-border-subtle bg-surface text-foreground px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
             />
           </div>
           <div>
@@ -77,7 +79,7 @@ export default function ContactPage() {
               id="email"
               name="email"
               required
-              className="w-full rounded-lg border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-900 text-neutral-900 dark:text-neutral-100 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-neutral-400"
+              className="w-full rounded-lg border border-border-subtle bg-surface text-foreground px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
             />
           </div>
           <div>
@@ -92,12 +94,12 @@ export default function ContactPage() {
               name="message"
               rows={5}
               required
-              className="w-full rounded-lg border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-900 text-neutral-900 dark:text-neutral-100 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-neutral-400 resize-none"
+              className="w-full rounded-lg border border-border-subtle bg-surface text-foreground px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 resize-none"
             />
           </div>
           <button
             type="submit"
-            className="px-6 py-2.5 bg-neutral-900 text-white dark:bg-white dark:text-neutral-900 rounded-lg font-medium text-sm hover:opacity-90 transition-opacity"
+            className="px-6 py-2.5 bg-gradient-to-r from-primary to-accent-rose text-white rounded-xl font-medium text-sm hover:shadow-lg hover:shadow-primary/25 hover:-translate-y-0.5 transition-all duration-300"
           >
             Send Message
           </button>
@@ -105,7 +107,7 @@ export default function ContactPage() {
 
         {/* Social */}
         <div>
-          <h2 className="text-lg font-semibold text-neutral-900 dark:text-white mb-3">
+          <h2 className="text-lg font-semibold text-foreground mb-3">
             Follow Us
           </h2>
           <SocialLinks />

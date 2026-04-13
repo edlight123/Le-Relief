@@ -11,21 +11,25 @@ export default function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
 
   return (
-    <header className="sticky top-0 z-50 bg-white/80 dark:bg-neutral-950/80 backdrop-blur-md border-b border-neutral-200 dark:border-neutral-800">
+    <header className="sticky top-0 z-50 bg-white/80 dark:bg-[#0D0D1A]/85 backdrop-blur-xl border-b border-border-subtle">
       <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           <Link
             href="/"
-            className="flex items-center gap-2 text-xl font-bold tracking-tight text-neutral-900 dark:text-white"
+            className="flex items-center gap-2.5 text-xl font-bold tracking-tight text-foreground group"
           >
             <Image
               src="/logo.png"
               alt="Le Relief"
-              width={36}
-              height={36}
-              className="rounded-full"
+              width={40}
+              height={40}
+              className="rounded-full ring-2 ring-primary/20 group-hover:ring-primary/50 transition-all duration-300"
+              priority
+              unoptimized
             />
-            {siteConfig.name}
+            <span className="group-hover:text-primary transition-colors duration-300">
+              {siteConfig.name}
+            </span>
           </Link>
 
           {/* Desktop nav */}
@@ -34,7 +38,7 @@ export default function Navbar() {
               <Link
                 key={item.href}
                 href={item.href}
-                className="text-sm font-medium text-neutral-600 hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-white transition-colors"
+                className="text-sm font-medium text-foreground/60 hover:text-primary transition-colors duration-300 color-underline"
               >
                 {item.label}
               </Link>
@@ -44,20 +48,20 @@ export default function Navbar() {
           <div className="hidden md:flex items-center gap-3">
             <Link
               href="/search"
-              className="p-2 rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors"
+              className="p-2 rounded-lg hover:bg-primary/10 transition-colors duration-300"
             >
-              <Search className="h-4 w-4 text-neutral-600 dark:text-neutral-400" />
+              <Search className="h-4 w-4 text-foreground/50" />
             </Link>
             <ThemeToggle />
             <Link
               href="/login"
-              className="text-sm font-medium text-neutral-600 hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-white transition-colors"
+              className="text-sm font-medium text-foreground/60 hover:text-primary transition-colors duration-300"
             >
               Login
             </Link>
             <Link
               href="/signup"
-              className="text-sm font-medium px-4 py-2 bg-neutral-900 text-white dark:bg-white dark:text-neutral-900 rounded-lg hover:opacity-90 transition-opacity"
+              className="text-sm font-medium px-5 py-2 bg-gradient-to-r from-primary to-accent-rose text-white rounded-xl hover:shadow-lg hover:shadow-primary/25 transition-all duration-300 hover:-translate-y-0.5"
             >
               Sign Up
             </Link>
@@ -65,41 +69,41 @@ export default function Navbar() {
 
           {/* Mobile toggle */}
           <button
-            className="md:hidden p-2 rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800"
+            className="md:hidden p-2 rounded-lg hover:bg-surface-elevated transition-colors"
             onClick={() => setMobileOpen(!mobileOpen)}
           >
             {mobileOpen ? (
-              <X className="h-5 w-5 text-neutral-700 dark:text-neutral-300" />
+              <X className="h-5 w-5 text-foreground" />
             ) : (
-              <Menu className="h-5 w-5 text-neutral-700 dark:text-neutral-300" />
+              <Menu className="h-5 w-5 text-foreground" />
             )}
           </button>
         </div>
 
         {/* Mobile nav */}
         {mobileOpen && (
-          <div className="md:hidden pb-4 border-t border-neutral-100 dark:border-neutral-800 mt-2 pt-4 space-y-2">
+          <div className="md:hidden pb-4 border-t border-border-subtle mt-2 pt-4 space-y-1 animate-fade-in">
             {siteConfig.nav.public.map((item) => (
               <Link
                 key={item.href}
                 href={item.href}
                 onClick={() => setMobileOpen(false)}
-                className="block px-3 py-2 text-sm font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded-lg"
+                className="block px-3 py-2.5 text-sm font-medium text-foreground/80 hover:text-primary hover:bg-primary/5 rounded-lg transition-colors"
               >
                 {item.label}
               </Link>
             ))}
-            <div className="flex items-center gap-3 px-3 pt-2">
+            <div className="flex items-center gap-3 px-3 pt-3 border-t border-border-subtle mt-2">
               <ThemeToggle />
               <Link
                 href="/login"
-                className="text-sm font-medium text-neutral-600 dark:text-neutral-400"
+                className="text-sm font-medium text-foreground/60"
               >
                 Login
               </Link>
               <Link
                 href="/signup"
-                className="text-sm font-medium px-4 py-2 bg-neutral-900 text-white dark:bg-white dark:text-neutral-900 rounded-lg"
+                className="text-sm font-medium px-5 py-2 bg-gradient-to-r from-primary to-accent-rose text-white rounded-xl"
               >
                 Sign Up
               </Link>

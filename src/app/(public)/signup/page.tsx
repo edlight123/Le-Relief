@@ -57,7 +57,7 @@ export default function SignupPage() {
     <div className="min-h-[80vh] flex items-center justify-center px-4">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
-          <h1 className="text-2xl font-bold text-neutral-900 dark:text-white">
+          <h1 className="text-2xl font-bold text-foreground">
             Create an account
           </h1>
           <p className="mt-2 text-sm text-neutral-500 dark:text-neutral-400">
@@ -106,10 +106,10 @@ export default function SignupPage() {
         <div className="mt-6">
           <div className="relative">
             <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-neutral-200 dark:border-neutral-800" />
+              <div className="w-full border-t border-border-subtle" />
             </div>
             <div className="relative flex justify-center text-xs">
-              <span className="px-2 bg-white dark:bg-neutral-950 text-neutral-400">
+              <span className="px-2 bg-surface text-neutral-400">
                 or sign up with
               </span>
             </div>
@@ -118,19 +118,19 @@ export default function SignupPage() {
           <div className="mt-4 grid grid-cols-3 gap-3">
             <button
               onClick={() => signIn("google", { callbackUrl: "/dashboard" })}
-              className="flex items-center justify-center px-4 py-2.5 border border-neutral-300 dark:border-neutral-700 rounded-lg hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-colors text-sm font-medium text-neutral-700 dark:text-neutral-300"
+              className="flex items-center justify-center px-4 py-2.5 border border-border-subtle rounded-lg hover:bg-surface-elevated transition-colors text-sm font-medium text-neutral-700 dark:text-neutral-300"
             >
               Google
             </button>
             <button
               onClick={() => signIn("facebook", { callbackUrl: "/dashboard" })}
-              className="flex items-center justify-center px-4 py-2.5 border border-neutral-300 dark:border-neutral-700 rounded-lg hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-colors text-sm font-medium text-neutral-700 dark:text-neutral-300"
+              className="flex items-center justify-center px-4 py-2.5 border border-border-subtle rounded-lg hover:bg-surface-elevated transition-colors text-sm font-medium text-neutral-700 dark:text-neutral-300"
             >
               Facebook
             </button>
             <button
               onClick={() => signIn("twitter", { callbackUrl: "/dashboard" })}
-              className="flex items-center justify-center px-4 py-2.5 border border-neutral-300 dark:border-neutral-700 rounded-lg hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-colors text-sm font-medium text-neutral-700 dark:text-neutral-300"
+              className="flex items-center justify-center px-4 py-2.5 border border-border-subtle rounded-lg hover:bg-surface-elevated transition-colors text-sm font-medium text-neutral-700 dark:text-neutral-300"
             >
               X
             </button>
@@ -141,7 +141,7 @@ export default function SignupPage() {
           Already have an account?{" "}
           <Link
             href="/login"
-            className="font-medium text-neutral-900 dark:text-white hover:underline"
+            className="font-medium text-primary hover:text-primary-light"
           >
             Sign in
           </Link>

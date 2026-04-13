@@ -38,9 +38,11 @@ export default async function CategoryPage({ params }: Props) {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
       <header className="mb-12">
-        <h1 className="text-3xl md:text-4xl font-bold text-neutral-900 dark:text-white tracking-tight">
+        <h1 className="text-3xl md:text-4xl font-bold text-foreground tracking-tight animate-fade-in-up">
           {category.name}
         </h1>
+
+        <div className="mt-4 h-px bg-gradient-to-r from-primary/60 via-accent-rose/20 to-transparent" />
         {category.description && (
           <p className="mt-3 text-lg text-neutral-500 dark:text-neutral-400 max-w-2xl">
             {category.description}

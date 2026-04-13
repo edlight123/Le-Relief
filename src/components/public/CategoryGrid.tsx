@@ -14,12 +14,12 @@ interface CategoryGridProps {
 }
 
 const categoryColors = [
-  "from-blue-600 to-blue-800",
-  "from-emerald-600 to-emerald-800",
-  "from-purple-600 to-purple-800",
-  "from-orange-600 to-orange-800",
-  "from-rose-600 to-rose-800",
-  "from-cyan-600 to-cyan-800",
+  { bg: "from-purple-600 to-indigo-700", dot: "bg-purple-400" },
+  { bg: "from-rose-500 to-pink-700", dot: "bg-rose-400" },
+  { bg: "from-teal-500 to-emerald-700", dot: "bg-teal-400" },
+  { bg: "from-amber-500 to-orange-700", dot: "bg-amber-400" },
+  { bg: "from-blue-500 to-cyan-700", dot: "bg-blue-400" },
+  { bg: "from-fuchsia-500 to-purple-700", dot: "bg-fuchsia-400" },
 ];
 
 export default function CategoryGrid({
@@ -29,7 +29,7 @@ export default function CategoryGrid({
   return (
     <div
       className={clsx(
-        "grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4",
+        "grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5",
         className
       )}
     >
@@ -38,16 +38,23 @@ export default function CategoryGrid({
           key={cat.slug}
           href={`/categories/${cat.slug}`}
           className={clsx(
-            "relative rounded-xl p-6 bg-gradient-to-br text-white overflow-hidden group transition-transform hover:scale-[1.02]",
-            categoryColors[i % categoryColors.length]
+            "relative rounded-xl p-6 bg-gradient-to-br text-white overflow-hidden group transition-all duration-400 hover:scale-[1.03] hover:shadow-xl",
+            categoryColors[i % categoryColors.length].bg
           )}
         >
-          <h3 className="font-bold text-lg">{cat.name}</h3>
-          {cat._count && (
-            <p className="text-sm text-white/70 mt-1">
-              {cat._count.articles} article{cat._count.articles !== 1 ? "s" : ""}
-            </p>
-          )}
+          {/* Shine overlay */}
+          <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+          <div className="relative">
+            <div className="flex items-center gap-2 mb-1">
+              <span className={clsx("w-2 h-2 rounded-full", categoryColors[i % categoryColors.length].dot)} />
+              <h3 className="font-bold text-lg">{cat.name}</h3>
+            </div>
+            {cat._count && (
+              <p className="text-sm text-white/70 mt-1">
+                {cat._count.articles} article{cat._count.articles !== 1 ? "s" : ""}
+              </p>
+            )}
+          </div>
         </Link>
       ))}
     </div>

@@ -56,14 +56,14 @@ export default async function ArticlePage({ params }: Props) {
       {article.category && (
         <Link
           href={`/categories/${article.category.slug}`}
-          className="text-xs font-semibold uppercase tracking-widest text-blue-600 dark:text-blue-400 hover:underline"
+          className="text-xs font-semibold uppercase tracking-widest text-primary hover:text-primary-light"
         >
           {article.category.name}
         </Link>
       )}
 
       {/* Title */}
-      <h1 className="mt-4 text-3xl md:text-5xl font-bold text-neutral-900 dark:text-white tracking-tight leading-tight">
+      <h1 className="mt-4 text-3xl md:text-5xl font-bold text-foreground tracking-tight leading-tight animate-fade-in-up">
         {article.title}
       </h1>
 

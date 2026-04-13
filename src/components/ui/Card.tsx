@@ -11,8 +11,8 @@ export default function Card({ children, className, hover = false }: CardProps) 
   return (
     <div
       className={clsx(
-        "bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-xl overflow-hidden",
-        hover && "transition-shadow hover:shadow-lg",
+        "bg-surface border border-border-subtle rounded-xl overflow-hidden",
+        hover && "premium-card gradient-border",
         className
       )}
     >
@@ -31,7 +31,7 @@ export function CardHeader({
   return (
     <div
       className={clsx(
-        "px-6 py-4 border-b border-neutral-100 dark:border-neutral-800",
+        "px-6 py-4 border-b border-border-subtle",
         className
       )}
     >

@@ -44,9 +44,11 @@ function SearchPageContent() {
 
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-      <h1 className="text-3xl font-bold text-neutral-900 dark:text-white mb-8">
+      <h1 className="text-3xl font-bold text-foreground mb-2 animate-fade-in-up">
         Search
       </h1>
+
+      <div className="mb-8 h-px bg-gradient-to-r from-primary/60 via-accent-rose/20 to-transparent" />
 
       <div className="relative mb-12">
         <SearchIcon className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-neutral-400" />
@@ -55,7 +57,7 @@ function SearchPageContent() {
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder="Search articles..."
-          className="w-full pl-12 pr-4 py-3 rounded-xl border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-900 text-neutral-900 dark:text-neutral-100 text-base focus:outline-none focus:ring-2 focus:ring-neutral-400"
+          className="w-full pl-12 pr-4 py-3 rounded-xl border border-border-subtle bg-surface text-foreground text-base focus:outline-none focus:ring-2 focus:ring-primary/50"
         />
       </div>
 
