@@ -74,7 +74,7 @@ export default function HeroSection({ article }: HeroSectionProps) {
                   )}
                   {article.author?.name && (
                     <p className="mt-4 text-sm text-white/60">
-                      By <span className="text-white/90 font-medium">{article.author.name}</span>
+                      By <span className="text-accent-amber font-medium">{article.author.name}</span>
                     </p>
                   )}
                 </div>

@@ -79,7 +79,7 @@ export default function ArticleCard({
           )}
           <div className="mt-4 flex items-center gap-2 text-xs text-muted">
             {article.author?.name && (
-              <span className="font-medium text-foreground/70">{article.author.name}</span>
+              <span className="font-medium text-accent-blue">{article.author.name}</span>
             )}
             {article.author?.name && date && (
               <span>&middot;</span>

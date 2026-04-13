@@ -76,7 +76,7 @@ export default async function ArticlePage({ params }: Props) {
 
       {/* Meta */}
       <div className="mt-6 flex items-center gap-3 text-sm text-neutral-500">
-        {article.author?.name && <span>By {article.author.name}</span>}
+        {article.author?.name && <span>By <span className="font-medium text-accent-blue">{article.author.name}</span></span>}
         {article.publishedAt && (
           <>
             <span>&middot;</span>
