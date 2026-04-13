@@ -8,24 +8,39 @@ import CategoryGrid from "@/components/public/CategoryGrid";
 export const dynamic = "force-dynamic";
 
 export default async function HomePage() {
-  const rawFeatured = await articlesRepo.getFeaturedArticle();
   let featuredArticle: Record<string, unknown> | null = null;
-  if (rawFeatured) {
-    const author = rawFeatured.authorId ? await usersRepo.getUser(rawFeatured.authorId as string) : null;
-    const category = rawFeatured.categoryId ? await categoriesRepo.getCategory(rawFeatured.categoryId as string) : null;
-    featuredArticle = { ...rawFeatured, author, category } as Record<string, unknown>;
+  let latestArticles: Record<string, unknown>[] = [];
+  let categories: (Record<string, unknown> & { _count: { articles: number } })[] = [];
+
+  try {
+    const rawFeatured = await articlesRepo.getFeaturedArticle();
+    if (rawFeatured) {
+      const author = rawFeatured.authorId ? await usersRepo.getUser(rawFeatured.authorId as string) : null;
+      const category = rawFeatured.categoryId ? await categoriesRepo.getCategory(rawFeatured.categoryId as string) : null;
+      featuredArticle = { ...rawFeatured, author, category } as Record<string, unknown>;
+    }
+  } catch {
+    // Index may not be created yet
   }
 
-  const rawLatest = await articlesRepo.getPublishedArticles(6);
-  const latestArticles = await Promise.all(
-    rawLatest.map(async (article) => {
-      const author = article.authorId ? await usersRepo.getUser(article.authorId as string) : null;
-      const category = article.categoryId ? await categoriesRepo.getCategory(article.categoryId as string) : null;
-      return { ...article, author, category } as Record<string, unknown>;
-    })
-  );
+  try {
+    const rawLatest = await articlesRepo.getPublishedArticles(6);
+    latestArticles = await Promise.all(
+      rawLatest.map(async (article) => {
+        const author = article.authorId ? await usersRepo.getUser(article.authorId as string) : null;
+        const category = article.categoryId ? await categoriesRepo.getCategory(article.categoryId as string) : null;
+        return { ...article, author, category } as Record<string, unknown>;
+      })
+    );
+  } catch {
+    // Index may not be created yet
+  }
 
-  const categories = await categoriesRepo.getCategoriesWithCounts(true);
+  try {
+    categories = await categoriesRepo.getCategoriesWithCounts(true);
+  } catch {
+    // Fallback to empty
+  }
 
   return (
     <>

@@ -9,7 +9,12 @@ export const metadata = {
 };
 
 export default async function CategoriesIndexPage() {
-  const categories = await categoriesRepo.getCategoriesWithCounts(true);
+  let categories: (Record<string, unknown> & { _count: { articles: number } })[] = [];
+  try {
+    categories = await categoriesRepo.getCategoriesWithCounts(true);
+  } catch {
+    // Firestore index may not be ready
+  }
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">

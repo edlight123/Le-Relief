@@ -26,17 +26,21 @@ export default async function CategoryPage({ params }: Props) {
   const category = await categoriesRepo.findBySlug(slug);
   if (!category) notFound();
 
-  const { articles: rawArticles } = await articlesRepo.getArticles({
-    status: "published",
-    categoryId: category.id as string,
-  });
-
-  const categoryArticles = await Promise.all(
-    rawArticles.map(async (article) => {
-      const author = article.authorId ? await usersRepo.getUser(article.authorId as string) : null;
-      return { ...article, author, category } as Record<string, unknown>;
-    })
-  );
+  let categoryArticles: Record<string, unknown>[] = [];
+  try {
+    const { articles: rawArticles } = await articlesRepo.getArticles({
+      status: "published",
+      categoryId: category.id as string,
+    });
+    categoryArticles = await Promise.all(
+      rawArticles.map(async (article) => {
+        const author = article.authorId ? await usersRepo.getUser(article.authorId as string) : null;
+        return { ...article, author, category } as Record<string, unknown>;
+      })
+    );
+  } catch {
+    // Firestore index may not be ready
+  }
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">

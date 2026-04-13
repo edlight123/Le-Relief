@@ -37,27 +37,32 @@ export default async function ArticlePage({ params }: Props) {
   await articlesRepo.incrementViews(article.id as string);
 
   // Related articles
-  const { articles: rawRelated } = await articlesRepo.getArticles({
-    status: "published",
-    categoryId: (article.categoryId as string) || undefined,
-    excludeId: article.id as string,
-    take: 3,
-  });
-  const related = await Promise.all(
-    rawRelated.map(async (a) => {
-      const rAuthor = a.authorId ? await usersRepo.getUser(a.authorId as string) : null;
-      const rCategory = a.categoryId ? await categoriesRepo.getCategory(a.categoryId as string) : null;
-      return {
-        title: a.title as string,
-        slug: a.slug as string,
-        excerpt: a.excerpt as string | null,
-        coverImage: a.coverImage as string | null,
-        publishedAt: a.publishedAt as string | null,
-        author: rAuthor ? { name: rAuthor.name as string | null } : null,
-        category: rCategory ? { name: rCategory.name as string, slug: rCategory.slug as string } : null,
-      };
-    })
-  );
+  let related: { title: string; slug: string; excerpt: string | null; coverImage: string | null; publishedAt: string | null; author: { name: string | null } | null; category: { name: string; slug: string } | null }[] = [];
+  try {
+    const { articles: rawRelated } = await articlesRepo.getArticles({
+      status: "published",
+      categoryId: (article.categoryId as string) || undefined,
+      excludeId: article.id as string,
+      take: 3,
+    });
+    related = await Promise.all(
+      rawRelated.map(async (a) => {
+        const rAuthor = a.authorId ? await usersRepo.getUser(a.authorId as string) : null;
+        const rCategory = a.categoryId ? await categoriesRepo.getCategory(a.categoryId as string) : null;
+        return {
+          title: a.title as string,
+          slug: a.slug as string,
+          excerpt: a.excerpt as string | null,
+          coverImage: a.coverImage as string | null,
+          publishedAt: a.publishedAt as string | null,
+          author: rAuthor ? { name: rAuthor.name as string | null } : null,
+          category: rCategory ? { name: rCategory.name as string, slug: rCategory.slug as string } : null,
+        };
+      })
+    );
+  } catch {
+    // Firestore index may not be ready
+  }
 
   const cat = article.category as Record<string, unknown> | null;
   const auth = article.author as Record<string, unknown> | null;

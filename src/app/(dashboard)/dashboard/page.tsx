@@ -11,28 +11,32 @@ import { format } from "date-fns";
 export const dynamic = "force-dynamic";
 
 export default async function DashboardPage() {
-  const [totalArticles, publishedCount, draftCount, totalViews, totalUsers, rawRecentArticles] =
-    await Promise.all([
-      articlesRepo.countArticles(),
-      articlesRepo.countArticles("published"),
-      articlesRepo.countArticles("draft"),
-      articlesRepo.sumViews(),
-      usersRepo.countUsers(),
-      articlesRepo.getRecentArticles(5),
-    ]);
-
-  // Hydrate author and category
-  const recentArticles = await Promise.all(
-    rawRecentArticles.map(async (article) => {
-      const author = article.authorId
-        ? await usersRepo.getUser(article.authorId as string)
-        : null;
-      const category = article.categoryId
-        ? await categoriesRepo.getCategory(article.categoryId as string)
-        : null;
-      return { ...article, author, category } as Record<string, unknown>;
-    })
-  );
+  let totalArticles = 0, publishedCount = 0, draftCount = 0, totalViews = 0, totalUsers = 0;
+  let recentArticles: Record<string, unknown>[] = [];
+  try {
+    [totalArticles, publishedCount, draftCount, totalViews, totalUsers] =
+      await Promise.all([
+        articlesRepo.countArticles(),
+        articlesRepo.countArticles("published"),
+        articlesRepo.countArticles("draft"),
+        articlesRepo.sumViews(),
+        usersRepo.countUsers(),
+      ]);
+    const rawRecentArticles = await articlesRepo.getRecentArticles(5);
+    recentArticles = await Promise.all(
+      rawRecentArticles.map(async (article) => {
+        const author = article.authorId
+          ? await usersRepo.getUser(article.authorId as string)
+          : null;
+        const category = article.categoryId
+          ? await categoriesRepo.getCategory(article.categoryId as string)
+          : null;
+        return { ...article, author, category } as Record<string, unknown>;
+      })
+    );
+  } catch {
+    // Firestore queries may fail without indexes
+  }
 
   const stats = [
     { label: "Total Articles", value: totalArticles, icon: FileText },
