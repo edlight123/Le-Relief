@@ -3,7 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
-import { getNewsArticleBySlug, getHaitiNews, encodeNewsSlug } from "@/services/news.service";
+import { getNewsArticleBySlug, getHaitiNews, encodeNewsSlug, fetchFullArticleContent } from "@/services/news.service";
 import NewsCard from "@/components/public/NewsCard";
 
 export const dynamic = "force-dynamic";
@@ -36,14 +36,23 @@ export default async function NewsDetailPage({ params }: Props) {
   let relatedNews = await getHaitiNews(10);
   relatedNews = relatedNews.filter((a) => a.url !== article.url).slice(0, 4);
 
-  // Build summary paragraphs from description + content
-  const summaryParts: string[] = [];
-  if (article.description) summaryParts.push(article.description);
-  if (article.content) {
-    // GNews content often ends with "[XXX chars]" — remove that
-    const cleaned = article.content.replace(/\[\d+ chars\]$/, "").trim();
-    if (cleaned && cleaned !== article.description) {
-      summaryParts.push(cleaned);
+  // Build summary paragraphs — scrape the full article for detailed content
+  const scrapedParagraphs = await fetchFullArticleContent(article.url);
+
+  let contentParagraphs: string[];
+
+  if (scrapedParagraphs.length >= 2) {
+    // We have rich scraped content — use it
+    contentParagraphs = scrapedParagraphs;
+  } else {
+    // Fallback: expand from GNews description + content
+    contentParagraphs = [];
+    if (article.description) contentParagraphs.push(article.description);
+    if (article.content) {
+      const cleaned = article.content.replace(/\[\d+ chars\]$/, "").trim();
+      if (cleaned && cleaned !== article.description) {
+        contentParagraphs.push(cleaned);
+      }
     }
   }
 
@@ -99,13 +108,55 @@ export default async function NewsDetailPage({ params }: Props) {
             </div>
           )}
 
-          {/* Summary Content */}
-          <div className="mt-8 prose prose-lg dark:prose-invert max-w-none">
-            {summaryParts.map((paragraph, i) => (
-              <p key={i} className="leading-relaxed">
-                {paragraph}
+          {/* Article Content */}
+          <div className="mt-8 max-w-none">
+            {/* Lead paragraph — larger text */}
+            {contentParagraphs.length > 0 && (
+              <p className="text-lg md:text-xl leading-relaxed text-foreground/90 font-medium mb-6">
+                {contentParagraphs[0]}
               </p>
-            ))}
+            )}
+
+            {/* Separator */}
+            {contentParagraphs.length > 1 && (
+              <div className="flex items-center gap-3 mb-6">
+                <div className="h-px flex-1 bg-border-subtle" />
+                <div className="w-1.5 h-1.5 rounded-full bg-primary/40" />
+                <div className="h-px flex-1 bg-border-subtle" />
+              </div>
+            )}
+
+            {/* Body paragraphs */}
+            <div className="space-y-5 text-base leading-[1.85] text-foreground/80">
+              {contentParagraphs.slice(1).map((paragraph, i) => (
+                <p key={i}>{paragraph}</p>
+              ))}
+            </div>
+
+            {/* Key points box — if we have enough content */}
+            {contentParagraphs.length >= 4 && (
+              <div className="mt-10 p-6 rounded-2xl bg-primary/[0.03] border border-primary/10">
+                <h3 className="text-sm font-semibold uppercase tracking-[0.12em] text-primary mb-4 flex items-center gap-2">
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09ZM18.259 8.715 18 9.75l-.259-1.035a3.375 3.375 0 0 0-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 0 0 2.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 0 0 2.455 2.456L21.75 6l-1.036.259a3.375 3.375 0 0 0-2.455 2.456ZM16.894 20.567 16.5 21.75l-.394-1.183a2.25 2.25 0 0 0-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 0 0 1.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 0 0 1.423 1.423l1.183.394-1.183.394a2.25 2.25 0 0 0-1.423 1.423Z" />
+                  </svg>
+                  Points Clés
+                </h3>
+                <ul className="space-y-3">
+                  {contentParagraphs.slice(0, 3).map((p, i) => {
+                    // Extract first sentence as a key point
+                    const sentence = p.split(/[.!?]/)[0]?.trim();
+                    if (!sentence || sentence.length < 20) return null;
+                    return (
+                      <li key={i} className="flex items-start gap-3 text-sm text-foreground/75 leading-relaxed">
+                        <span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-primary flex-shrink-0" />
+                        {sentence.length > 150 ? sentence.slice(0, 150) + "…" : sentence}
+                      </li>
+                    );
+                  })}
+                </ul>
+              </div>
+            )}
           </div>
 
           {/* Source Credit */}

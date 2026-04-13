@@ -213,3 +213,85 @@ export async function getNewsArticleBySlug(slug: string): Promise<NewsArticle | 
 export function encodeNewsSlug(articleUrl: string): string {
   return Buffer.from(articleUrl).toString("base64url");
 }
+
+// Cache for scraped full article content
+const articleContentCache = new Map<string, { paragraphs: string[]; timestamp: number }>();
+const ARTICLE_CACHE_DURATION = 60 * 60 * 1000; // 1 hour
+
+/**
+ * Scrape the original article page to extract full text content.
+ * Returns an array of clean paragraphs.
+ */
+export async function fetchFullArticleContent(articleUrl: string): Promise<string[]> {
+  const cached = articleContentCache.get(articleUrl);
+  if (cached && Date.now() - cached.timestamp < ARTICLE_CACHE_DURATION) {
+    return cached.paragraphs;
+  }
+
+  try {
+    const res = await fetch(articleUrl, {
+      headers: {
+        "User-Agent": "Mozilla/5.0 (compatible; LeReliefBot/1.0)",
+        Accept: "text/html",
+      },
+      signal: AbortSignal.timeout(8000),
+      cache: "no-store",
+    });
+
+    if (!res.ok) return [];
+
+    const html = await res.text();
+
+    // Extract text from <p> tags — handles most news sites
+    const pTagRegex = /<p[^>]*>([\s\S]*?)<\/p>/gi;
+    const rawParagraphs: string[] = [];
+    let match;
+    while ((match = pTagRegex.exec(html)) !== null) {
+      // Strip inner HTML tags to get plain text
+      const text = match[1]
+        .replace(/<[^>]+>/g, "")
+        .replace(/&nbsp;/g, " ")
+        .replace(/&amp;/g, "&")
+        .replace(/&lt;/g, "<")
+        .replace(/&gt;/g, ">")
+        .replace(/&quot;/g, '"')
+        .replace(/&#039;/g, "'")
+        .replace(/&rsquo;/g, "\u2019")
+        .replace(/&lsquo;/g, "\u2018")
+        .replace(/&rdquo;/g, "\u201D")
+        .replace(/&ldquo;/g, "\u201C")
+        .replace(/&mdash;/g, "\u2014")
+        .replace(/&ndash;/g, "\u2013")
+        .replace(/&hellip;/g, "\u2026")
+        .replace(/&#\d+;/g, "")
+        .trim();
+
+      // Keep only meaningful paragraphs (>60 chars, filter out navigation/ads)
+      if (
+        text.length > 60 &&
+        !text.startsWith("Cookie") &&
+        !text.startsWith("Subscribe") &&
+        !text.startsWith("Sign up") &&
+        !text.startsWith("Advertisement") &&
+        !text.includes("javascript") &&
+        !text.includes("getElementById")
+      ) {
+        rawParagraphs.push(text);
+      }
+    }
+
+    // Deduplicate paragraphs
+    const seen = new Set<string>();
+    const paragraphs = rawParagraphs.filter((p) => {
+      if (seen.has(p)) return false;
+      seen.add(p);
+      return true;
+    });
+
+    articleContentCache.set(articleUrl, { paragraphs, timestamp: Date.now() });
+    return paragraphs;
+  } catch (error) {
+    console.error("Failed to scrape article:", error);
+    return [];
+  }
+}
