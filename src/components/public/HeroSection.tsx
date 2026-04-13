@@ -23,8 +23,8 @@ export default function HeroSection({ article }: HeroSectionProps) {
 
         <div className="relative max-w-4xl mx-auto text-center">
           <div className="inline-block mb-6 animate-fade-in">
-            <span className="text-xs font-semibold uppercase tracking-[0.3em] text-accent-rose">
-              Premium Editorial
+            <span className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.3em] text-accent-rose">
+              <span className="text-sm">✦</span> Premium Editorial <span className="text-sm">✦</span>
             </span>
             <div className="mt-3 h-0.5 w-16 mx-auto bg-gradient-to-r from-primary via-accent-rose to-accent-teal animate-line-expand rounded-full" />
           </div>

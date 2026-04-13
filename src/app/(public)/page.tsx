@@ -39,13 +39,37 @@ export default async function HomePage() {
         }
       />
 
+      {/* Featured Topics */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-16 pb-4">
+        <div className="flex flex-wrap justify-center gap-3">
+          {[
+            { label: "Business", emoji: "💼" },
+            { label: "Technology", emoji: "⚡" },
+            { label: "Culture", emoji: "🎭" },
+            { label: "Science", emoji: "🔬" },
+            { label: "World", emoji: "🌍" },
+          ].map((topic) => (
+            <span
+              key={topic.label}
+              className="inline-flex items-center gap-2 px-5 py-2.5 bg-surface border border-border-subtle rounded-full text-sm font-medium text-foreground/70 shadow-sm hover:border-primary/40 hover:text-primary transition-all duration-300 cursor-default"
+            >
+              <span>{topic.emoji}</span>
+              {topic.label}
+            </span>
+          ))}
+        </div>
+      </section>
+
       {/* Latest Articles */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
-        <div className="flex items-center gap-4 mb-10">
-          <h2 className="text-2xl font-bold text-foreground tracking-tight">
-            Latest <span className="gradient-text">Articles</span>
-          </h2>
-          <div className="flex-1 h-px bg-gradient-to-r from-primary/30 via-accent-rose/20 to-transparent" />
+        <div className="flex items-center gap-4 mb-12">
+          <div className="inline-flex items-center gap-2.5 px-5 py-2 bg-surface border border-border-subtle rounded-full shadow-sm">
+            <span className="text-base">📰</span>
+            <h2 className="text-sm font-semibold uppercase tracking-[0.15em] text-foreground/80">
+              Latest Articles
+            </h2>
+          </div>
+          <div className="flex-1 h-px bg-gradient-to-r from-primary/20 to-transparent" />
         </div>
         {latestArticles.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-7">
@@ -54,20 +78,26 @@ export default async function HomePage() {
             ))}
           </div>
         ) : (
-          <p className="text-neutral-500 dark:text-neutral-400">
-            No articles published yet. Check back soon.
-          </p>
+          <div className="text-center py-16">
+            <span className="text-4xl mb-4 block">✨</span>
+            <p className="text-foreground/50">
+              No articles published yet. Check back soon.
+            </p>
+          </div>
         )}
       </section>
 
       {/* Categories */}
       {categories.length > 0 && (
-        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-20">
-          <div className="flex items-center gap-4 mb-10">
-            <h2 className="text-2xl font-bold text-foreground tracking-tight">
-              Categories
-            </h2>
-            <div className="flex-1 h-px bg-gradient-to-r from-border-subtle to-transparent" />
+        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-24">
+          <div className="flex items-center gap-4 mb-12">
+            <div className="inline-flex items-center gap-2.5 px-5 py-2 bg-surface border border-border-subtle rounded-full shadow-sm">
+              <span className="text-base">🗂️</span>
+              <h2 className="text-sm font-semibold uppercase tracking-[0.15em] text-foreground/80">
+                Explore Categories
+              </h2>
+            </div>
+            <div className="flex-1 h-px bg-gradient-to-r from-primary/20 to-transparent" />
           </div>
           <CategoryGrid categories={categories} />
         </section>

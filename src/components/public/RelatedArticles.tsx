@@ -18,10 +18,13 @@ export default function RelatedArticles({ articles }: RelatedArticlesProps) {
   return (
     <section className="mt-16 pt-12 border-t border-border-subtle">
       <div className="flex items-center gap-4 mb-8">
-        <h2 className="text-2xl font-bold text-foreground tracking-tight">
-          Related <span className="gradient-text">Articles</span>
-        </h2>
-        <div className="flex-1 h-px bg-gradient-to-r from-primary/30 via-accent-rose/20 to-transparent" />
+        <div className="inline-flex items-center gap-2.5 px-5 py-2 bg-surface border border-border-subtle rounded-full shadow-sm">
+          <span className="text-base">📚</span>
+          <h2 className="text-sm font-semibold uppercase tracking-[0.15em] text-foreground/80">
+            Related Articles
+          </h2>
+        </div>
+        <div className="flex-1 h-px bg-gradient-to-r from-primary/20 to-transparent" />
       </div>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {articles.map((article) => (
