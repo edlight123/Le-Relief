@@ -1,8 +1,23 @@
 @import "tailwindcss";
+@plugin "@tailwindcss/typography";
+
+@custom-variant dark (&:where(.dark, .dark *));
 
 :root {
   --background: #ffffff;
-  --foreground: #171717;
+  --foreground: #0a0a0a;
+  --tooltip-bg: #ffffff;
+  --tooltip-border: #e5e7eb;
+  --chart-primary: 221 83% 53%;
+  --chart-secondary: 160 84% 39%;
+  --chart-accent: 262 83% 58%;
+}
+
+.dark {
+  --background: #0a0a0a;
+  --foreground: #fafafa;
+  --tooltip-bg: #171717;
+  --tooltip-border: #262626;
 }
 
 @theme inline {
@@ -12,15 +27,35 @@
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans), system-ui, -apple-system, sans-serif;
+}
+
+/* Prose dark mode */
+.dark .prose {
+  --tw-prose-body: #d4d4d4;
+  --tw-prose-headings: #fafafa;
+  --tw-prose-links: #60a5fa;
+  --tw-prose-bold: #fafafa;
+  --tw-prose-counters: #a3a3a3;
+  --tw-prose-bullets: #a3a3a3;
+  --tw-prose-hr: #262626;
+  --tw-prose-quotes: #d4d4d4;
+  --tw-prose-quote-borders: #404040;
+  --tw-prose-code: #fafafa;
+  --tw-prose-pre-code: #d4d4d4;
+  --tw-prose-pre-bg: #171717;
+}
+
+/* Smooth scrolling */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Selection color */
+::selection {
+  background: #3b82f6;
+  color: white;
 }
