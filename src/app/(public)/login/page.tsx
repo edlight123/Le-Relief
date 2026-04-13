@@ -86,24 +86,12 @@ export default function LoginPage() {
             </div>
           </div>
 
-          <div className="mt-4 grid grid-cols-3 gap-3">
+          <div className="mt-4">
             <button
               onClick={() => signIn("google", { callbackUrl: "/dashboard" })}
-              className="flex items-center justify-center px-4 py-2.5 border border-border-subtle rounded-lg hover:bg-surface-elevated transition-colors text-sm font-medium text-neutral-700 dark:text-neutral-300"
+              className="flex items-center justify-center w-full px-4 py-2.5 border border-border-subtle rounded-lg hover:bg-surface-elevated transition-colors text-sm font-medium text-neutral-700 dark:text-neutral-300"
             >
               Google
-            </button>
-            <button
-              onClick={() => signIn("facebook", { callbackUrl: "/dashboard" })}
-              className="flex items-center justify-center px-4 py-2.5 border border-border-subtle rounded-lg hover:bg-surface-elevated transition-colors text-sm font-medium text-neutral-700 dark:text-neutral-300"
-            >
-              Facebook
-            </button>
-            <button
-              onClick={() => signIn("twitter", { callbackUrl: "/dashboard" })}
-              className="flex items-center justify-center px-4 py-2.5 border border-border-subtle rounded-lg hover:bg-surface-elevated transition-colors text-sm font-medium text-neutral-700 dark:text-neutral-300"
-            >
-              X
             </button>
           </div>
         </div>
