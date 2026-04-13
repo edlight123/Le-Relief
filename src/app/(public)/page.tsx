@@ -3,6 +3,8 @@ import HeroSection from "@/components/public/HeroSection";
 import ArticleCard from "@/components/public/ArticleCard";
 import CategoryGrid from "@/components/public/CategoryGrid";
 
+export const dynamic = "force-dynamic";
+
 export default async function HomePage() {
   const featuredArticle = await db.article.findFirst({
     where: { status: "published", featured: true },

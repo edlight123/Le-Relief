@@ -6,6 +6,8 @@ import Badge from "@/components/ui/Badge";
 import Button from "@/components/ui/Button";
 import { format } from "date-fns";
 
+export const dynamic = "force-dynamic";
+
 export default async function DashboardPage() {
   const [totalArticles, publishedCount, draftCount, totalViews, totalUsers, recentArticles] =
     await Promise.all([

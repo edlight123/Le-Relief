@@ -5,6 +5,8 @@ import { format } from "date-fns";
 import { db } from "@/lib/db";
 import RelatedArticles from "@/components/public/RelatedArticles";
 
+export const dynamic = "force-dynamic";
+
 interface Props {
   params: Promise<{ slug: string }>;
 }

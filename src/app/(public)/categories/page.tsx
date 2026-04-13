@@ -1,6 +1,8 @@
 import { db } from "@/lib/db";
 import CategoryGrid from "@/components/public/CategoryGrid";
 
+export const dynamic = "force-dynamic";
+
 export const metadata = {
   title: "Categories | Le Relief Haiti",
   description: "Browse all content categories",

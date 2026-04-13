@@ -4,6 +4,8 @@ import StatsCards from "@/components/dashboard/StatsCards";
 import AnalyticsCharts from "@/components/dashboard/AnalyticsCharts";
 import { format, subDays } from "date-fns";
 
+export const dynamic = "force-dynamic";
+
 export default async function AnalyticsPage() {
   const [totalArticles, publishedCount, draftCount, totalViews, totalUsers] =
     await Promise.all([
