@@ -1,5 +1,5 @@
 export const siteConfig = {
-  name: "Le Relief",
+  name: "Le Relief Haiti",
   description: "Premium Digital News and Editorial Platform",
   url: process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000",
   locale: "en-US",

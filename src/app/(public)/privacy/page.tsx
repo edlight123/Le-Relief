@@ -1,5 +1,5 @@
 export const metadata = {
-  title: "Privacy Policy | Le Relief",
+  title: "Privacy Policy | Le Relief Haiti",
   description: "Privacy policy and data handling practices",
 };
 
@@ -14,7 +14,7 @@ export default function PrivacyPage() {
 
       <div className="mt-8 prose prose-lg dark:prose-invert max-w-none">
         <p>
-          Le Relief is committed to protecting your privacy. This policy
+          Le Relief Haiti is committed to protecting your privacy. This policy
           explains what data we collect, how we use it, and your rights.
         </p>
 
@@ -42,7 +42,7 @@ export default function PrivacyPage() {
 
         <h2>Third-Party Services</h2>
         <p>
-          Le Relief integrates with third-party authentication providers
+          Le Relief Haiti integrates with third-party authentication providers
           (Google, Facebook, X) for sign-in convenience. We do not sell or
           share your personal data with third parties.
         </p>

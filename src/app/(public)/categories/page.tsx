@@ -2,7 +2,7 @@ import { db } from "@/lib/db";
 import CategoryGrid from "@/components/public/CategoryGrid";
 
 export const metadata = {
-  title: "Categories | Le Relief",
+  title: "Categories | Le Relief Haiti",
   description: "Browse all content categories",
 };
 

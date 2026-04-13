@@ -19,7 +19,7 @@ export default function Footer() {
             <div className="flex items-center gap-2.5 mb-4">
               <Image
                 src="/logo.png"
-                alt="Le Relief"
+                alt="Le Relief Haiti"
                 width={48}
                 height={48}
                 className="rounded-full ring-2 ring-primary/20"

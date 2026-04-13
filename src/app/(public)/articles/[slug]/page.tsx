@@ -17,7 +17,7 @@ export async function generateMetadata({ params }: Props) {
   });
   if (!article) return {};
   return {
-    title: `${article.title} | Le Relief`,
+    title: `${article.title} | Le Relief Haiti`,
     description: article.excerpt || "",
   };
 }

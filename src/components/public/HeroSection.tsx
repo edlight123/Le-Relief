@@ -29,7 +29,7 @@ export default function HeroSection({ article }: HeroSectionProps) {
             <div className="mt-3 h-0.5 w-16 mx-auto bg-gradient-to-r from-primary via-accent-rose to-accent-teal animate-line-expand rounded-full" />
           </div>
           <h1 className="text-5xl md:text-8xl font-bold tracking-tight animate-fade-in-up gradient-text">
-            Le Relief
+            Le Relief Haiti
           </h1>
           <p className="mt-8 text-lg md:text-xl text-neutral-300 max-w-2xl mx-auto animate-fade-in-up animation-delay-200 leading-relaxed">
             Premium news and editorial content crafted for the{" "}

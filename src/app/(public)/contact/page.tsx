@@ -2,8 +2,8 @@ import { siteConfig } from "@/config/site.config";
 import SocialLinks from "@/components/public/SocialLinks";
 
 export const metadata = {
-  title: "Contact | Le Relief",
-  description: "Get in touch with Le Relief",
+  title: "Contact | Le Relief Haiti",
+  description: "Get in touch with Le Relief Haiti",
 };
 
 export default function ContactPage() {

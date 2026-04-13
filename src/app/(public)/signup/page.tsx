@@ -61,7 +61,7 @@ export default function SignupPage() {
             Create an account
           </h1>
           <p className="mt-2 text-sm text-neutral-500 dark:text-neutral-400">
-            Join Le Relief today
+            Join Le Relief Haiti today
           </p>
         </div>
 

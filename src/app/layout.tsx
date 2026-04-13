@@ -13,9 +13,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Le Relief — Premium Digital News & Editorial",
+  title: "Le Relief Haiti — Premium Digital News & Editorial",
   description:
-    "Le Relief is a premium digital news platform delivering high-quality journalism and editorial content.",
+    "Le Relief Haiti is a premium digital news platform delivering high-quality journalism and editorial content.",
   icons: {
     icon: "/favicon.ico",
     apple: "/apple-touch-icon.png",

@@ -1,8 +1,8 @@
 import { siteConfig } from "@/config/site.config";
 
 export const metadata = {
-  title: "About | Le Relief",
-  description: "Learn about Le Relief and our mission",
+  title: "About | Le Relief Haiti",
+  description: "Learn about Le Relief Haiti and our mission",
 };
 
 export default function AboutPage() {
@@ -16,7 +16,7 @@ export default function AboutPage() {
 
       <div className="mt-8 prose prose-lg dark:prose-invert max-w-none">
         <p>
-          Le Relief is a premium digital news and editorial platform dedicated
+          Le Relief Haiti is a premium digital news and editorial platform dedicated
           to delivering high-quality, trustworthy journalism to a global
           audience.
         </p>
@@ -30,14 +30,14 @@ export default function AboutPage() {
 
         <h2>Editorial Principles</h2>
         <p>
-          Every article published on Le Relief is reviewed for accuracy,
+          Every article published on Le Relief Haiti is reviewed for accuracy,
           clarity, and editorial integrity. We are committed to fair,
           independent journalism that serves the public interest.
         </p>
 
         <h2>Trust &amp; Credibility</h2>
         <p>
-          Le Relief is built on a foundation of trust. We maintain strict
+          Le Relief Haiti is built on a foundation of trust. We maintain strict
           editorial standards and are transparent about our processes,
           sources, and editorial decisions.
         </p>

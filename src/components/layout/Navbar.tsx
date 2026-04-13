@@ -20,7 +20,7 @@ export default function Navbar() {
           >
             <Image
               src="/logo.png"
-              alt="Le Relief"
+              alt="Le Relief Haiti"
               width={40}
               height={40}
               className="rounded-full ring-2 ring-primary/20 group-hover:ring-primary/50 transition-all duration-300"
