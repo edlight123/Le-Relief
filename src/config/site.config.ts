@@ -4,9 +4,9 @@ export const siteConfig = {
   url: process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000",
   locale: "en-US",
   socials: {
-    instagram: "",
+    instagram: "https://www.instagram.com/lereliefhaiti",
     facebook: "",
-    x: "",
+    x: "https://x.com/lereliefhaiti",
   },
   nav: {
     public: [

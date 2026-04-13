@@ -30,19 +30,14 @@ export default function ContactPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           <div>
             <h3 className="text-sm font-semibold text-foreground uppercase tracking-wider mb-2">
-              Editorial
-            </h3>
-            <p className="text-neutral-600 dark:text-neutral-400">
-              editorial@lerelief.com
-            </p>
-          </div>
-          <div>
-            <h3 className="text-sm font-semibold text-foreground uppercase tracking-wider mb-2">
               General Inquiries
             </h3>
-            <p className="text-neutral-600 dark:text-neutral-400">
-              hello@lerelief.com
-            </p>
+            <a
+              href="mailto:lereliefhaiti@gmail.com"
+              className="text-primary hover:text-primary-light transition-colors duration-300"
+            >
+              lereliefhaiti@gmail.com
+            </a>
           </div>
         </div>
 

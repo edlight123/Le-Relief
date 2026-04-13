@@ -2,9 +2,9 @@ import Link from "next/link";
 import { Camera, Globe, MessageCircle } from "lucide-react";
 
 const platforms = [
-  { key: "instagram", icon: Camera, href: "#", color: "hover:text-pink-400 hover:border-pink-400/30 hover:bg-pink-400/10" },
+  { key: "instagram", icon: Camera, href: "https://www.instagram.com/lereliefhaiti", color: "hover:text-pink-400 hover:border-pink-400/30 hover:bg-pink-400/10" },
   { key: "facebook", icon: Globe, href: "#", color: "hover:text-blue-400 hover:border-blue-400/30 hover:bg-blue-400/10" },
-  { key: "x", icon: MessageCircle, href: "#", color: "hover:text-purple-400 hover:border-purple-400/30 hover:bg-purple-400/10" },
+  { key: "x", icon: MessageCircle, href: "https://x.com/lereliefhaiti", color: "hover:text-purple-400 hover:border-purple-400/30 hover:bg-purple-400/10" },
 ];
 
 export default function SocialLinks() {
