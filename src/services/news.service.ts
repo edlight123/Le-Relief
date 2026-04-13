@@ -44,24 +44,19 @@ export async function getHaitiNews(pageSize = 10): Promise<NewsArticle[]> {
   }
 
   try {
-    // Try French first, then English if no results
-    for (const lang of ["fr", "en"]) {
-      const params = new URLSearchParams({
-        q: "Haiti OR Haïti OR Port-au-Prince OR Caraïbes OR Caribbean",
-        max: String(Math.min(pageSize, 10)),
-        lang,
-        apikey: API_KEY,
-      });
+    // Search for Haiti news in English (more results available)
+    const searchParams = new URLSearchParams({
+      q: "Haiti",
+      max: String(Math.min(pageSize, 10)),
+      lang: "en",
+      apikey: API_KEY,
+    });
 
-      const res = await fetch(`${GNEWS_BASE}/search?${params}`, {
-        next: { revalidate: 1800 },
-      });
+    const res = await fetch(`${GNEWS_BASE}/search?${searchParams}`, {
+      cache: "no-store",
+    });
 
-      if (!res.ok) {
-        console.error("GNews error:", res.status, await res.text());
-        continue;
-      }
-
+    if (res.ok) {
       const data: GNewsResponse = await res.json();
       if (data.articles && data.articles.length > 0) {
         const articles = data.articles.map(toNewsArticle);
@@ -70,7 +65,7 @@ export async function getHaitiNews(pageSize = 10): Promise<NewsArticle[]> {
       }
     }
 
-    // Fallback: top headlines in French
+    // Fallback: French top headlines
     const fallbackParams = new URLSearchParams({
       max: String(Math.min(pageSize, 10)),
       lang: "fr",
@@ -78,7 +73,7 @@ export async function getHaitiNews(pageSize = 10): Promise<NewsArticle[]> {
     });
 
     const fallbackRes = await fetch(`${GNEWS_BASE}/top-headlines?${fallbackParams}`, {
-      next: { revalidate: 1800 },
+      cache: "no-store",
     });
 
     if (fallbackRes.ok) {
@@ -130,7 +125,7 @@ export async function getNewsByCategory(
     });
 
     const res = await fetch(`${GNEWS_BASE}/top-headlines?${params}`, {
-      next: { revalidate: 1800 },
+      cache: "no-store",
     });
 
     if (!res.ok) {
@@ -172,7 +167,7 @@ export async function getTopHeadlines(
     });
 
     const res = await fetch(`${GNEWS_BASE}/top-headlines?${params}`, {
-      next: { revalidate: 1800 },
+      cache: "no-store",
     });
 
     if (!res.ok) {
