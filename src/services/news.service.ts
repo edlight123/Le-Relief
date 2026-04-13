@@ -184,3 +184,32 @@ export async function getTopHeadlines(
     return [];
   }
 }
+
+// Find a cached news article by its base64-encoded URL
+export async function getNewsArticleBySlug(slug: string): Promise<NewsArticle | null> {
+  try {
+    const url = Buffer.from(slug, "base64url").toString("utf-8");
+
+    // Search all caches first
+    for (const entry of cache.values()) {
+      const found = entry.data.find((a) => a.url === url);
+      if (found) return found;
+    }
+
+    // If not in cache, refetch to populate
+    await getHaitiNews(10);
+    for (const entry of cache.values()) {
+      const found = entry.data.find((a) => a.url === url);
+      if (found) return found;
+    }
+
+    return null;
+  } catch {
+    return null;
+  }
+}
+
+// Generate a URL-safe slug from an article URL
+export function encodeNewsSlug(articleUrl: string): string {
+  return Buffer.from(articleUrl).toString("base64url");
+}

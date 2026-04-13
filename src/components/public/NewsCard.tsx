@@ -1,6 +1,8 @@
 import Image from "next/image";
+import Link from "next/link";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
+import { encodeNewsSlug } from "@/services/news.service";
 import type { NewsArticle } from "@/types/news";
 
 interface NewsCardProps {
@@ -12,10 +14,11 @@ export default function NewsCard({ article, variant = "default" }: NewsCardProps
   const date = article.publishedAt
     ? format(new Date(article.publishedAt), "d MMM yyyy", { locale: fr })
     : null;
+  const href = `/news/${encodeNewsSlug(article.url)}`;
 
   if (variant === "compact") {
     return (
-      <a href={article.url} target="_blank" rel="noopener noreferrer">
+      <Link href={href}>
         <div className="flex gap-4 p-4 bg-surface border border-border-subtle rounded-xl article-card group">
           {article.urlToImage && (
             <div className="relative w-20 h-20 flex-shrink-0 rounded-lg overflow-hidden">
@@ -38,12 +41,12 @@ export default function NewsCard({ article, variant = "default" }: NewsCardProps
             </div>
           </div>
         </div>
-      </a>
+      </Link>
     );
   }
 
   return (
-    <a href={article.url} target="_blank" rel="noopener noreferrer">
+    <Link href={href}>
       <div className="group bg-surface border border-border-subtle rounded-2xl overflow-hidden article-card hover:border-primary/20">
         {article.urlToImage ? (
           <div className="relative aspect-[16/10] overflow-hidden">
@@ -99,6 +102,6 @@ export default function NewsCard({ article, variant = "default" }: NewsCardProps
           </div>
         </div>
       </div>
-    </a>
+    </Link>
   );
 }
