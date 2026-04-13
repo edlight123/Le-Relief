@@ -44,27 +44,51 @@ export async function getHaitiNews(pageSize = 10): Promise<NewsArticle[]> {
   }
 
   try {
-    const params = new URLSearchParams({
-      q: "Haiti OR Haïti OR Port-au-Prince OR Caraïbes",
+    // Try French first, then English if no results
+    for (const lang of ["fr", "en"]) {
+      const params = new URLSearchParams({
+        q: "Haiti OR Haïti OR Port-au-Prince OR Caraïbes OR Caribbean",
+        max: String(Math.min(pageSize, 10)),
+        lang,
+        apikey: API_KEY,
+      });
+
+      const res = await fetch(`${GNEWS_BASE}/search?${params}`, {
+        next: { revalidate: 1800 },
+      });
+
+      if (!res.ok) {
+        console.error("GNews error:", res.status, await res.text());
+        continue;
+      }
+
+      const data: GNewsResponse = await res.json();
+      if (data.articles && data.articles.length > 0) {
+        const articles = data.articles.map(toNewsArticle);
+        setCache(cacheKey, articles);
+        return articles.slice(0, pageSize);
+      }
+    }
+
+    // Fallback: top headlines in French
+    const fallbackParams = new URLSearchParams({
       max: String(Math.min(pageSize, 10)),
       lang: "fr",
       apikey: API_KEY,
     });
 
-    const res = await fetch(`${GNEWS_BASE}/search?${params}`, {
+    const fallbackRes = await fetch(`${GNEWS_BASE}/top-headlines?${fallbackParams}`, {
       next: { revalidate: 1800 },
     });
 
-    if (!res.ok) {
-      console.error("GNews error:", res.status, await res.text());
-      return [];
+    if (fallbackRes.ok) {
+      const fallbackData: GNewsResponse = await fallbackRes.json();
+      const articles = fallbackData.articles.map(toNewsArticle);
+      setCache(cacheKey, articles);
+      return articles.slice(0, pageSize);
     }
 
-    const data: GNewsResponse = await res.json();
-    const articles = data.articles.map(toNewsArticle);
-
-    setCache(cacheKey, articles);
-    return articles.slice(0, pageSize);
+    return [];
   } catch (error) {
     console.error("Failed to fetch news:", error);
     return [];

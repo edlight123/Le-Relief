@@ -10,15 +10,13 @@ export async function GET(request: Request) {
     50
   );
 
-  const hasKey = !!process.env.GNEWS_API_KEY;
-
   try {
     const articles =
       type === "headlines"
         ? await getTopHeadlines(category, pageSize)
         : await getHaitiNews(pageSize);
 
-    return NextResponse.json({ articles, total: articles.length, hasKey });
+    return NextResponse.json({ articles, total: articles.length });
   } catch {
     return NextResponse.json(
       { error: "Failed to fetch news" },
