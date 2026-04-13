@@ -12,8 +12,21 @@ export interface NewsArticle {
   content: string | null;
 }
 
-export interface NewsAPIResponse {
-  status: string;
-  totalResults: number;
-  articles: NewsArticle[];
+// GNews.io response format
+export interface GNewsArticle {
+  title: string;
+  description: string;
+  content: string;
+  url: string;
+  image: string | null;
+  publishedAt: string;
+  source: {
+    name: string;
+    url: string;
+  };
+}
+
+export interface GNewsResponse {
+  totalArticles: number;
+  articles: GNewsArticle[];
 }

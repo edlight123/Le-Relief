@@ -128,7 +128,7 @@ export default async function HomePage() {
           </div>
           <div className="text-center mt-8">
             <p className="text-xs text-muted">
-              Powered by NewsAPI · Updated every 30 minutes
+              Powered by GNews · Updated every 30 minutes
             </p>
           </div>
         </section>

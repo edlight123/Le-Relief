@@ -1,9 +1,9 @@
-import { NewsAPIResponse, NewsArticle } from "@/types/news";
+import { NewsArticle, GNewsResponse } from "@/types/news";
 
-const NEWS_API_BASE = "https://newsapi.org/v2";
-const API_KEY = process.env.NEWS_API_KEY;
+const GNEWS_BASE = "https://gnews.io/api/v4";
+const API_KEY = process.env.GNEWS_API_KEY;
 
-// Cache news for 30 minutes to avoid hitting rate limits
+// Cache news for 30 minutes to stay within free tier (100 req/day)
 let cachedNews: { data: NewsArticle[]; timestamp: number } | null = null;
 const CACHE_DURATION = 30 * 60 * 1000; // 30 minutes
 
@@ -18,48 +18,48 @@ function setCachedNews(data: NewsArticle[]) {
   cachedNews = { data, timestamp: Date.now() };
 }
 
+// Convert GNews format to our unified NewsArticle format
+function toNewsArticle(g: GNewsResponse["articles"][number]): NewsArticle {
+  return {
+    source: { id: null, name: g.source.name },
+    author: null,
+    title: g.title,
+    description: g.description,
+    url: g.url,
+    urlToImage: g.image,
+    publishedAt: g.publishedAt,
+    content: g.content,
+  };
+}
+
 export async function getHaitiNews(pageSize = 12): Promise<NewsArticle[]> {
   const cached = getCachedNews();
   if (cached) return cached.slice(0, pageSize);
 
   if (!API_KEY) {
-    console.warn("NEWS_API_KEY not set — skipping live news fetch");
+    console.warn("GNEWS_API_KEY not set — skipping live news fetch");
     return [];
   }
 
   try {
-    // Search for Haiti and Caribbean news
-    const queries = [
-      "Haiti",
-      "Caribbean",
-      "Port-au-Prince",
-      "Haïti",
-    ];
-    const query = queries.join(" OR ");
-
     const params = new URLSearchParams({
-      q: query,
-      pageSize: String(Math.min(pageSize, 100)),
-      sortBy: "publishedAt",
-      language: "en",
-      apiKey: API_KEY,
+      q: "Haiti OR Caribbean OR Port-au-Prince",
+      max: String(Math.min(pageSize, 10)), // GNews free tier: max 10 per request
+      lang: "en",
+      apikey: API_KEY,
     });
 
-    const res = await fetch(`${NEWS_API_BASE}/everything?${params}`, {
-      next: { revalidate: 1800 }, // ISR: revalidate every 30 min
+    const res = await fetch(`${GNEWS_BASE}/search?${params}`, {
+      next: { revalidate: 1800 },
     });
 
     if (!res.ok) {
-      console.error("NewsAPI error:", res.status, await res.text());
+      console.error("GNews error:", res.status, await res.text());
       return [];
     }
 
-    const data: NewsAPIResponse = await res.json();
-
-    // Filter out removed articles
-    const articles = data.articles.filter(
-      (a) => a.title !== "[Removed]" && a.description !== "[Removed]"
-    );
+    const data: GNewsResponse = await res.json();
+    const articles = data.articles.map(toNewsArticle);
 
     setCachedNews(articles);
     return articles.slice(0, pageSize);
@@ -74,36 +74,32 @@ export async function getTopHeadlines(
   pageSize = 10
 ): Promise<NewsArticle[]> {
   if (!API_KEY) {
-    console.warn("NEWS_API_KEY not set — skipping headlines fetch");
+    console.warn("GNEWS_API_KEY not set — skipping headlines fetch");
     return [];
   }
 
   try {
     const params = new URLSearchParams({
-      // Use US headlines as fallback since Haiti isn't a supported country
-      country: "us",
-      pageSize: String(Math.min(pageSize, 100)),
-      apiKey: API_KEY,
+      max: String(Math.min(pageSize, 10)),
+      lang: "en",
+      apikey: API_KEY,
     });
 
     if (category) {
-      params.set("category", category);
+      params.set("topic", category);
     }
 
-    const res = await fetch(`${NEWS_API_BASE}/top-headlines?${params}`, {
+    const res = await fetch(`${GNEWS_BASE}/top-headlines?${params}`, {
       next: { revalidate: 1800 },
     });
 
     if (!res.ok) {
-      console.error("NewsAPI headlines error:", res.status, await res.text());
+      console.error("GNews headlines error:", res.status, await res.text());
       return [];
     }
 
-    const data: NewsAPIResponse = await res.json();
-
-    return data.articles.filter(
-      (a) => a.title !== "[Removed]" && a.description !== "[Removed]"
-    );
+    const data: GNewsResponse = await res.json();
+    return data.articles.map(toNewsArticle);
   } catch (error) {
     console.error("Failed to fetch headlines:", error);
     return [];
