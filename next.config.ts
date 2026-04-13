@@ -7,6 +7,10 @@ const FIREBASE_EXTERNALS = [
   "@google-cloud/firestore",
   "@grpc/grpc-js",
   "google-auth-library",
+  "google-gax",
+  "gtoken",
+  "gaxios",
+  "crypto",
 ];
 
 const nextConfig: NextConfig = {
@@ -27,14 +31,29 @@ const nextConfig: NextConfig = {
           { request }: { request?: string },
           callback: (err: null, result?: string) => void,
         ) {
+          if (!request) return callback(null);
+
+          // Externalize firebase-admin and its transitive deps
           if (
-            request &&
             FIREBASE_EXTERNALS.some(
               (pkg) => request === pkg || request.startsWith(pkg + "/"),
             )
           ) {
             return callback(null, `commonjs ${request}`);
           }
+
+          // Ensure Node.js builtins used by firebase-admin are never polyfilled
+          if (
+            request === "crypto" ||
+            request === "node:crypto" ||
+            request === "tls" ||
+            request === "node:tls" ||
+            request === "net" ||
+            request === "node:net"
+          ) {
+            return callback(null, `commonjs ${request}`);
+          }
+
           callback(null);
         },
       ];

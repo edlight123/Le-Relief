@@ -1,66 +1,90 @@
-import { initializeApp, cert, getApps, type App } from "firebase-admin/app";
+import {
+  initializeApp,
+  applicationDefault,
+  getApps,
+  type App,
+} from "firebase-admin/app";
 import { initializeFirestore, type Firestore } from "firebase-admin/firestore";
 import { writeFileSync, existsSync } from "fs";
-import { join } from "path";
 import { tmpdir } from "os";
+import { join } from "path";
 
 let app: App;
 let db: Firestore;
 
+const SA_PATH = join(tmpdir(), "firebase-sa.json");
+
 /**
- * Write the service account JSON to a temp file so firebase-admin loads
- * credentials via native Node.js crypto (not bundled/polyfilled crypto).
- * This avoids the "DECODER routines::unsupported" error on Vercel.
+ * Write a service-account JSON to a temp file and point
+ * GOOGLE_APPLICATION_CREDENTIALS at it so the SDK uses ADC
+ * instead of cert(). This avoids the crypto.createPrivateKey()
+ * call that triggers "DECODER routines::unsupported" on Vercel.
  */
-function getServiceAccount(): string {
-  const filePath = join(tmpdir(), "le-relief-firebase-sa.json");
-
-  if (!existsSync(filePath)) {
-    const b64 = process.env.FIREBASE_SERVICE_ACCOUNT_BASE64;
-    if (b64) {
-      // Preferred: full service account JSON, base64-encoded
-      writeFileSync(filePath, Buffer.from(b64, "base64").toString("utf8"));
-    } else {
-      // Fallback: construct from individual env vars
-      let privateKey = process.env.FIREBASE_PRIVATE_KEY || "";
-      privateKey = privateKey.replace(/\\n/g, "\n").replace(/^["']|["']$/g, "");
-
-      const sa = {
-        type: "service_account",
-        project_id: process.env.FIREBASE_PROJECT_ID,
-        client_email: process.env.FIREBASE_CLIENT_EMAIL,
-        private_key: privateKey,
-      };
-      writeFileSync(filePath, JSON.stringify(sa));
-    }
+function ensureCredentials(): void {
+  if (process.env.GOOGLE_APPLICATION_CREDENTIALS) return;
+  if (existsSync(SA_PATH)) {
+    process.env.GOOGLE_APPLICATION_CREDENTIALS = SA_PATH;
+    return;
   }
 
-  return filePath;
+  // Option 1 — base64-encoded full service-account JSON (most reliable)
+  const b64 = process.env.FIREBASE_SERVICE_ACCOUNT_BASE64;
+  if (b64) {
+    writeFileSync(SA_PATH, Buffer.from(b64, "base64").toString("utf8"), {
+      mode: 0o600,
+    });
+    process.env.GOOGLE_APPLICATION_CREDENTIALS = SA_PATH;
+    return;
+  }
+
+  // Option 2 — individual env vars → construct the JSON ourselves
+  const projectId = process.env.FIREBASE_PROJECT_ID;
+  const clientEmail = process.env.FIREBASE_CLIENT_EMAIL;
+  let privateKey = process.env.FIREBASE_PRIVATE_KEY || "";
+
+  if (!privateKey || !clientEmail || !projectId) {
+    if (process.env.VERCEL) {
+      throw new Error(
+        "Firebase init failed: credentials missing. " +
+          `PROJECT_ID=${!!projectId} CLIENT_EMAIL=${!!clientEmail} PRIVATE_KEY=${!!privateKey}`,
+      );
+    }
+    return; // local dev without full creds
+  }
+
+  // Normalise the key regardless of how Vercel stored it
+  privateKey = privateKey.replace(/^["']|["']$/g, ""); // strip wrapping quotes
+  privateKey = privateKey.replace(/\\n/g, "\n"); // literal \n → real newline
+
+  const sa = {
+    type: "service_account",
+    project_id: projectId,
+    private_key_id: "env",
+    private_key: privateKey,
+    client_email: clientEmail,
+    client_id: "",
+    auth_uri: "https://accounts.google.com/o/oauth2/auth",
+    token_uri: "https://oauth2.googleapis.com/token",
+    auth_provider_x509_cert_url:
+      "https://www.googleapis.com/oauth2/v1/certs",
+  };
+
+  writeFileSync(SA_PATH, JSON.stringify(sa), { mode: 0o600 });
+  process.env.GOOGLE_APPLICATION_CREDENTIALS = SA_PATH;
 }
 
 export function getApp(): App {
   if (!app) {
     if (getApps().length === 0) {
-      const hasCredentials =
-        process.env.FIREBASE_SERVICE_ACCOUNT_BASE64 ||
-        (process.env.FIREBASE_PROJECT_ID &&
-          process.env.FIREBASE_CLIENT_EMAIL &&
-          process.env.FIREBASE_PRIVATE_KEY);
+      ensureCredentials();
 
-      if (hasCredentials) {
-        // Write creds to file, then load via require() so all PEM parsing
-        // happens in Node.js native crypto, not bundled code.
-        const credPath = getServiceAccount();
-        // eslint-disable-next-line @typescript-eslint/no-require-imports
-        const serviceAccount = require(credPath);
+      if (process.env.GOOGLE_APPLICATION_CREDENTIALS) {
         app = initializeApp({
-          credential: cert(serviceAccount),
+          credential: applicationDefault(),
+          projectId: process.env.FIREBASE_PROJECT_ID ?? undefined,
         });
-      } else if (process.env.VERCEL) {
-        throw new Error(
-          "Firebase init failed — set FIREBASE_SERVICE_ACCOUNT_BASE64 in Vercel env vars."
-        );
       } else {
+        // Local dev without credentials
         app = initializeApp({
           projectId: process.env.FIREBASE_PROJECT_ID ?? undefined,
         });
