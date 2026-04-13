@@ -15,7 +15,7 @@ interface HeroSectionProps {
 export default function HeroSection({ article }: HeroSectionProps) {
   if (!article) {
     return (
-      <section className="relative bg-gradient-to-br from-[#0D0D1A] via-[#1A1040] to-[#0D1A2E] py-36 px-4 overflow-hidden">
+      <section className="relative bg-black py-36 px-4 overflow-hidden">
         {/* Decorative gradient orbs */}
         <div className="gradient-orb w-96 h-96 bg-purple-600 top-[-10%] left-[-5%]" />
         <div className="gradient-orb w-80 h-80 bg-pink-500 bottom-[-15%] right-[10%]" />
@@ -55,7 +55,7 @@ export default function HeroSection({ article }: HeroSectionProps) {
   }
 
   return (
-    <section className="relative bg-gradient-to-br from-[#0D0D1A] via-[#1A1040] to-[#0D1A2E] overflow-hidden">
+    <section className="relative bg-black overflow-hidden">
       {/* Decorative gradient orbs */}
       <div className="gradient-orb w-96 h-96 bg-purple-600 bottom-0 left-[-5%]" />
       <div className="gradient-orb w-64 h-64 bg-pink-500 top-0 right-[20%] opacity-10" />
@@ -111,8 +111,8 @@ export default function HeroSection({ article }: HeroSectionProps) {
               priority
             />
             {/* Colorful overlay gradient */}
-            <div className="absolute inset-0 bg-gradient-to-r from-[#0D0D1A] via-[#1A1040]/60 to-transparent lg:block hidden" />
-            <div className="absolute inset-0 bg-gradient-to-t from-[#0D0D1A]/40 to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-r from-black via-black/60 to-transparent lg:block hidden" />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
           </div>
         )}
       </div>

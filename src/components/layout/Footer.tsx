@@ -5,7 +5,7 @@ import SocialLinks from "@/components/public/SocialLinks";
 
 export default function Footer() {
   return (
-    <footer className="bg-gradient-to-b from-[#0D0D1A] to-[#080818] text-neutral-400 mt-auto relative overflow-hidden">
+    <footer className="bg-black text-neutral-400 mt-auto relative overflow-hidden">
       {/* Colorful gradient accent at top */}
       <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-primary/40 to-transparent" />
       {/* Ambient orbs */}
