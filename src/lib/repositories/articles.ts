@@ -76,6 +76,12 @@ export async function getArticles(options?: {
 
   query = query.orderBy("updatedAt", "desc");
 
+  // When there's no client-side filtering needed, use Firestore limit for efficiency
+  const needsClientFilter = !!(options?.search || options?.excludeId);
+  if (!needsClientFilter && !options?.skip) {
+    query = query.limit(options?.take || 20);
+  }
+
   const snap = await query.get();
   let docs = snap.docs.map((d) => serializeTimestamps({ id: d.id, ...d.data() } as Record<string, unknown>));
 
@@ -97,7 +103,9 @@ export async function getArticles(options?: {
   const total = docs.length;
   const skip = options?.skip || 0;
   const take = options?.take || 20;
-  docs = docs.slice(skip, skip + take);
+  if (needsClientFilter || options?.skip) {
+    docs = docs.slice(skip, skip + take);
+  }
 
   return { articles: docs, total };
 }

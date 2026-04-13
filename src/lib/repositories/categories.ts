@@ -48,7 +48,8 @@ export async function getCategories() {
  */
 export async function getCategoriesWithCounts(publishedOnly = false) {
   const categories = await getCategories();
-  const articlesSnap = await getDb().collection("articles").get();
+  // Only fetch categoryId and status fields to minimize data transfer
+  const articlesSnap = await getDb().collection("articles").select("categoryId", "status").get();
   const articles = articlesSnap.docs.map((d) => d.data());
 
   return categories.map((cat) => {

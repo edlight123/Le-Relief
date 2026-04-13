@@ -31,14 +31,23 @@ export default async function CategoryPage({ params }: Props) {
     const { articles: rawArticles } = await articlesRepo.getArticles({
       status: "published",
       categoryId: category.id as string,
-      take: 100,
+      take: 30,
     });
-    categoryArticles = await Promise.all(
-      rawArticles.map(async (article) => {
-        const author = article.authorId ? await usersRepo.getUser(article.authorId as string) : null;
-        return { ...article, author, category } as Record<string, unknown>;
+
+    // Batch-fetch unique authors to avoid N+1 queries
+    const authorIds = [...new Set(rawArticles.map((a) => a.authorId as string).filter(Boolean))];
+    const authorMap = new Map<string, Record<string, unknown> | null>();
+    await Promise.all(
+      authorIds.map(async (id) => {
+        const author = await usersRepo.getUser(id);
+        authorMap.set(id, author);
       })
     );
+
+    categoryArticles = rawArticles.map((article) => {
+      const author = article.authorId ? authorMap.get(article.authorId as string) || null : null;
+      return { ...article, author, category } as Record<string, unknown>;
+    });
   } catch (error) {
     console.error("Error fetching category articles:", error);
   }
