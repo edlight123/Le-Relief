@@ -1,4 +1,5 @@
-import { db } from "@/lib/db";
+import * as articlesRepo from "@/lib/repositories/articles";
+import * as usersRepo from "@/lib/repositories/users";
 import { FileText, Eye, Users, FileCheck } from "lucide-react";
 import StatsCards from "@/components/dashboard/StatsCards";
 import AnalyticsCharts from "@/components/dashboard/AnalyticsCharts";
@@ -9,17 +10,17 @@ export const dynamic = "force-dynamic";
 export default async function AnalyticsPage() {
   const [totalArticles, publishedCount, draftCount, totalViews, totalUsers] =
     await Promise.all([
-      db.article.count(),
-      db.article.count({ where: { status: "published" } }),
-      db.article.count({ where: { status: "draft" } }),
-      db.article.aggregate({ _sum: { views: true } }),
-      db.user.count(),
+      articlesRepo.countArticles(),
+      articlesRepo.countArticles("published"),
+      articlesRepo.countArticles("draft"),
+      articlesRepo.sumViews(),
+      usersRepo.countUsers(),
     ]);
 
   const stats = [
     { label: "Total Articles", value: totalArticles, icon: FileText },
     { label: "Published", value: publishedCount, icon: FileCheck },
-    { label: "Total Views", value: totalViews._sum.views || 0, icon: Eye },
+    { label: "Total Views", value: totalViews, icon: Eye },
     { label: "Users", value: totalUsers, icon: Users },
   ];
 

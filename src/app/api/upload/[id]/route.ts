@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { db } from "@/lib/db";
+import * as mediaRepo from "@/lib/repositories/media";
 import { auth } from "@/lib/auth";
 import { unlink } from "fs/promises";
 import path from "path";
@@ -15,19 +15,19 @@ export async function DELETE(req: NextRequest, { params }: RouteParams) {
   }
 
   const { id } = await params;
-  const media = await db.media.findUnique({ where: { id } });
+  const media = await mediaRepo.getMediaItem(id);
 
   if (!media) {
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   }
 
   try {
-    const filePath = path.join(process.cwd(), "public", media.url);
+    const filePath = path.join(process.cwd(), "public", media.url as string);
     await unlink(filePath);
   } catch {
     // file may not exist
   }
 
-  await db.media.delete({ where: { id } });
+  await mediaRepo.deleteMedia(id);
   return NextResponse.json({ success: true });
 }

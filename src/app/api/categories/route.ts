@@ -1,13 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
-import { db } from "@/lib/db";
+import * as categoriesRepo from "@/lib/repositories/categories";
 import { auth } from "@/lib/auth";
 import { generateSlug } from "@/lib/slug";
 
 export async function GET() {
-  const categories = await db.category.findMany({
-    include: { _count: { select: { articles: true } } },
-    orderBy: { name: "asc" },
-  });
+  const categories = await categoriesRepo.getCategoriesWithCounts();
   return NextResponse.json({ categories });
 }
 
@@ -20,12 +17,10 @@ export async function POST(req: NextRequest) {
   const body = await req.json();
   const slug = generateSlug(body.name);
 
-  const category = await db.category.create({
-    data: {
-      name: body.name,
-      slug,
-      description: body.description || null,
-    },
+  const category = await categoriesRepo.createCategory({
+    name: body.name,
+    slug,
+    description: body.description || null,
   });
 
   return NextResponse.json(category, { status: 201 });

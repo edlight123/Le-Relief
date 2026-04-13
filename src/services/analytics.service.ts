@@ -1,21 +1,22 @@
-import { db } from "@/lib/db";
+import * as articlesRepo from "@/lib/repositories/articles";
+import * as usersRepo from "@/lib/repositories/users";
 import { subDays, format } from "date-fns";
 
 export async function getStats() {
   const [totalArticles, published, drafts, totalViews, totalUsers] =
     await Promise.all([
-      db.article.count(),
-      db.article.count({ where: { status: "published" } }),
-      db.article.count({ where: { status: "draft" } }),
-      db.article.aggregate({ _sum: { views: true } }),
-      db.user.count(),
+      articlesRepo.countArticles(),
+      articlesRepo.countArticles("published"),
+      articlesRepo.countArticles("draft"),
+      articlesRepo.sumViews(),
+      usersRepo.countUsers(),
     ]);
 
   return {
     totalArticles,
     published,
     drafts,
-    totalViews: totalViews._sum.views || 0,
+    totalViews,
     totalUsers,
   };
 }

@@ -1,37 +1,38 @@
 import { NextRequest, NextResponse } from "next/server";
-import { db } from "@/lib/db";
+import * as articlesRepo from "@/lib/repositories/articles";
+import * as usersRepo from "@/lib/repositories/users";
+import * as categoriesRepo from "@/lib/repositories/categories";
 import { auth } from "@/lib/auth";
 import { generateSlug } from "@/lib/slug";
 
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
-  const status = searchParams.get("status");
-  const search = searchParams.get("search");
+  const status = searchParams.get("status") || undefined;
+  const search = searchParams.get("search") || undefined;
   const take = parseInt(searchParams.get("take") || "20");
   const skip = parseInt(searchParams.get("skip") || "0");
 
-  const where: Record<string, unknown> = {};
-  if (status && status !== "all") where.status = status;
-  if (search) {
-    where.OR = [
-      { title: { contains: search } },
-      { body: { contains: search } },
-      { excerpt: { contains: search } },
-    ];
-  }
+  const { articles, total } = await articlesRepo.getArticles({
+    status: status !== "all" ? status : undefined,
+    search,
+    take,
+    skip,
+  });
 
-  const [articles, total] = await Promise.all([
-    db.article.findMany({
-      where,
-      include: { author: { select: { id: true, name: true, image: true } }, category: true },
-      orderBy: { updatedAt: "desc" },
-      take,
-      skip,
-    }),
-    db.article.count({ where }),
-  ]);
+  // Hydrate author and category
+  const hydrated = await Promise.all(
+    articles.map(async (article) => {
+      const author = article.authorId
+        ? await usersRepo.getUser(article.authorId as string)
+        : null;
+      const category = article.categoryId
+        ? await categoriesRepo.getCategory(article.categoryId as string)
+        : null;
+      return { ...article, author, category } as Record<string, unknown>;
+    })
+  );
 
-  return NextResponse.json({ articles, total });
+  return NextResponse.json({ articles: hydrated, total });
 }
 
 export async function POST(req: NextRequest) {
@@ -44,20 +45,18 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const slug = generateSlug(body.title);
 
-    const article = await db.article.create({
-      data: {
-        title: body.title,
-        subtitle: body.subtitle || null,
-        slug,
-        body: body.body,
-        excerpt: body.excerpt || null,
-        coverImage: body.coverImage || null,
-        status: body.status || "draft",
-        featured: body.featured || false,
-        authorId: session.user.id,
-        categoryId: body.categoryId || null,
-        publishedAt: body.status === "published" ? new Date() : null,
-      },
+    const article = await articlesRepo.createArticle({
+      title: body.title,
+      subtitle: body.subtitle || null,
+      slug,
+      body: body.body,
+      excerpt: body.excerpt || null,
+      coverImage: body.coverImage || null,
+      status: body.status || "draft",
+      featured: body.featured || false,
+      authorId: session.user.id,
+      categoryId: body.categoryId || null,
+      publishedAt: body.status === "published" ? new Date() : null,
     });
 
     return NextResponse.json(article, { status: 201 });

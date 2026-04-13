@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
-import { db } from "@/lib/db";
+import * as socialLinksRepo from "@/lib/repositories/social-links";
 import { auth } from "@/lib/auth";
 
 export async function GET() {
-  const links = await db.socialLink.findMany();
+  const links = await socialLinksRepo.getSocialLinks();
   return NextResponse.json({ links });
 }
 
@@ -16,13 +16,9 @@ export async function PUT(req: NextRequest) {
   const body = await req.json();
 
   for (const [platform, url] of Object.entries(body)) {
-    await db.socialLink.upsert({
-      where: { platform },
-      update: { url: url as string },
-      create: { platform, url: url as string },
-    });
+    await socialLinksRepo.upsertSocialLink(platform, url as string);
   }
 
-  const links = await db.socialLink.findMany();
+  const links = await socialLinksRepo.getSocialLinks();
   return NextResponse.json({ links });
 }

@@ -1,12 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
-import { db } from "@/lib/db";
+import * as mediaRepo from "@/lib/repositories/media";
 import { auth } from "@/lib/auth";
 import { writeFile, mkdir } from "fs/promises";
 import path from "path";
 import crypto from "crypto";
 
 export async function GET() {
-  const media = await db.media.findMany({ orderBy: { createdAt: "desc" } });
+  const media = await mediaRepo.getMedia();
   return NextResponse.json({ media });
 }
 
@@ -33,13 +33,11 @@ export async function POST(req: NextRequest) {
   await writeFile(path.join(uploadDir, filename), buffer);
 
   const url = `/uploads/${filename}`;
-  const media = await db.media.create({
-    data: {
-      filename: file.name,
-      url,
-      type: file.type,
-      size: file.size,
-    },
+  const media = await mediaRepo.createMedia({
+    filename: file.name,
+    url,
+    type: file.type,
+    size: file.size,
   });
 
   return NextResponse.json(media, { status: 201 });

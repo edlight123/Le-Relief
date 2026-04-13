@@ -1,7 +1,7 @@
-import { db } from "@/lib/db";
+import * as mediaRepo from "@/lib/repositories/media";
 
 export async function getMedia() {
-  return db.media.findMany({ orderBy: { createdAt: "desc" } });
+  return mediaRepo.getMedia();
 }
 
 export async function createMedia(data: {
@@ -11,9 +11,9 @@ export async function createMedia(data: {
   size: number;
   alt?: string;
 }) {
-  return db.media.create({ data });
+  return mediaRepo.createMedia(data);
 }
 
 export async function deleteMedia(id: string) {
-  return db.media.delete({ where: { id } });
+  return mediaRepo.deleteMedia(id);
 }

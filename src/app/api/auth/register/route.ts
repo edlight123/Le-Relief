@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
-import { db } from "@/lib/db";
+import * as usersRepo from "@/lib/repositories/users";
 import { signupSchema } from "@/lib/validation";
 
 export async function POST(req: NextRequest) {
@@ -17,7 +17,7 @@ export async function POST(req: NextRequest) {
 
     const { name, email, password } = parsed.data;
 
-    const existing = await db.user.findUnique({ where: { email } });
+    const existing = await usersRepo.findByEmail(email);
     if (existing) {
       return NextResponse.json(
         { error: "Email already in use" },
@@ -27,13 +27,11 @@ export async function POST(req: NextRequest) {
 
     const hashedPassword = await bcrypt.hash(password, 12);
 
-    const user = await db.user.create({
-      data: {
-        name,
-        email,
-        hashedPassword,
-        role: "publisher",
-      },
+    const user = await usersRepo.createUser({
+      name,
+      email,
+      hashedPassword,
+      role: "publisher",
     });
 
     return NextResponse.json(

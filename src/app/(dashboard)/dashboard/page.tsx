@@ -1,4 +1,6 @@
-import { db } from "@/lib/db";
+import * as articlesRepo from "@/lib/repositories/articles";
+import * as usersRepo from "@/lib/repositories/users";
+import * as categoriesRepo from "@/lib/repositories/categories";
 import { FileText, Eye, Users, PenSquare } from "lucide-react";
 import StatsCards from "@/components/dashboard/StatsCards";
 import Link from "next/link";
@@ -9,24 +11,33 @@ import { format } from "date-fns";
 export const dynamic = "force-dynamic";
 
 export default async function DashboardPage() {
-  const [totalArticles, publishedCount, draftCount, totalViews, totalUsers, recentArticles] =
+  const [totalArticles, publishedCount, draftCount, totalViews, totalUsers, rawRecentArticles] =
     await Promise.all([
-      db.article.count(),
-      db.article.count({ where: { status: "published" } }),
-      db.article.count({ where: { status: "draft" } }),
-      db.article.aggregate({ _sum: { views: true } }),
-      db.user.count(),
-      db.article.findMany({
-        include: { author: true, category: true },
-        orderBy: { updatedAt: "desc" },
-        take: 5,
-      }),
+      articlesRepo.countArticles(),
+      articlesRepo.countArticles("published"),
+      articlesRepo.countArticles("draft"),
+      articlesRepo.sumViews(),
+      usersRepo.countUsers(),
+      articlesRepo.getRecentArticles(5),
     ]);
+
+  // Hydrate author and category
+  const recentArticles = await Promise.all(
+    rawRecentArticles.map(async (article) => {
+      const author = article.authorId
+        ? await usersRepo.getUser(article.authorId as string)
+        : null;
+      const category = article.categoryId
+        ? await categoriesRepo.getCategory(article.categoryId as string)
+        : null;
+      return { ...article, author, category } as Record<string, unknown>;
+    })
+  );
 
   const stats = [
     { label: "Total Articles", value: totalArticles, icon: FileText },
     { label: "Published", value: publishedCount, icon: FileText },
-    { label: "Total Views", value: totalViews._sum.views || 0, icon: Eye },
+    { label: "Total Views", value: totalViews, icon: Eye },
     { label: "Users", value: totalUsers, icon: Users },
   ];
 
@@ -67,17 +78,17 @@ export default async function DashboardPage() {
           ) : (
             recentArticles.map((article) => (
               <Link
-                key={article.id}
+                key={article.id as string}
                 href={`/dashboard/articles/${article.id}/edit`}
                 className="flex items-center justify-between px-6 py-4 hover:bg-neutral-50 dark:hover:bg-neutral-800/50 transition-colors"
               >
                 <div className="min-w-0 flex-1">
                   <p className="font-medium text-neutral-900 dark:text-white truncate">
-                    {article.title}
+                    {String(article.title)}
                   </p>
                   <p className="text-xs text-neutral-500 mt-1">
-                    {article.author?.name || "Unknown"} &middot;{" "}
-                    {format(new Date(article.updatedAt), "MMM d, yyyy")}
+                    {String((article.author as Record<string, unknown>)?.name || "Unknown")} &middot;{" "}
+                    {article.updatedAt ? format(new Date((article.updatedAt as {toDate?: () => Date})?.toDate?.() ?? article.updatedAt as string), "MMM d, yyyy") : ""}
                   </p>
                 </div>
                 <Badge
@@ -85,7 +96,7 @@ export default async function DashboardPage() {
                     article.status === "published" ? "success" : "warning"
                   }
                 >
-                  {article.status}
+                  {String(article.status)}
                 </Badge>
               </Link>
             ))

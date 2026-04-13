@@ -1,4 +1,4 @@
-import { db } from "@/lib/db";
+import * as articlesRepo from "@/lib/repositories/articles";
 import { generateSlug } from "@/lib/slug";
 
 export async function getArticles(options?: {
@@ -7,36 +7,33 @@ export async function getArticles(options?: {
   take?: number;
   skip?: number;
 }) {
-  const where: Record<string, unknown> = {};
-  if (options?.status) where.status = options.status;
-  if (options?.search) {
-    where.OR = [
-      { title: { contains: options.search } },
-      { body: { contains: options.search } },
-    ];
-  }
-
-  return db.article.findMany({
-    where,
-    include: {
-      author: { select: { id: true, name: true, image: true } },
-      category: true,
-    },
-    orderBy: { updatedAt: "desc" },
-    take: options?.take || 20,
-    skip: options?.skip || 0,
-  });
+  const { articles } = await articlesRepo.getArticles(options);
+  // Hydrate author and category
+  const { usersRepo, categoriesRepo } = await import("@/lib/repositories");
+  return Promise.all(
+    articles.map(async (article) => {
+      const author = article.authorId
+        ? await usersRepo.getUser(article.authorId as string)
+        : null;
+      const category = article.categoryId
+        ? await categoriesRepo.getCategory(article.categoryId as string)
+        : null;
+      return { ...article, author, category } as Record<string, unknown>;
+    })
+  );
 }
 
 export async function getArticleBySlug(slug: string) {
-  return db.article.findUnique({
-    where: { slug },
-    include: {
-      author: { select: { id: true, name: true, image: true } },
-      category: true,
-      tags: { include: { tag: true } },
-    },
-  });
+  const article = await articlesRepo.findBySlug(slug);
+  if (!article) return null;
+  const { usersRepo, categoriesRepo } = await import("@/lib/repositories");
+  const author = article.authorId
+    ? await usersRepo.getUser(article.authorId as string)
+    : null;
+  const category = article.categoryId
+    ? await categoriesRepo.getCategory(article.categoryId as string)
+    : null;
+  return { ...article, author, category } as Record<string, unknown>;
 }
 
 export async function createArticle(data: {
@@ -51,17 +48,15 @@ export async function createArticle(data: {
   authorId: string;
 }) {
   const slug = generateSlug(data.title);
-  return db.article.create({
-    data: {
-      ...data,
-      slug,
-      subtitle: data.subtitle || null,
-      excerpt: data.excerpt || null,
-      coverImage: data.coverImage || null,
-      categoryId: data.categoryId || null,
-      status: data.status || "draft",
-      featured: data.featured || false,
-      publishedAt: data.status === "published" ? new Date() : null,
-    },
+  return articlesRepo.createArticle({
+    ...data,
+    slug,
+    subtitle: data.subtitle || null,
+    excerpt: data.excerpt || null,
+    coverImage: data.coverImage || null,
+    categoryId: data.categoryId || null,
+    status: data.status || "draft",
+    featured: data.featured || false,
+    publishedAt: data.status === "published" ? new Date() : null,
   });
 }

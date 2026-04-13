@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { db } from "@/lib/db";
+import * as usersRepo from "@/lib/repositories/users";
 import { auth } from "@/lib/auth";
 
 export async function GET() {
@@ -8,11 +8,7 @@ export async function GET() {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const user = await db.user.findUnique({
-    where: { id: session.user.id },
-    select: { id: true, name: true, email: true, role: true, image: true },
-  });
-
+  const user = await usersRepo.getUser(session.user.id);
   return NextResponse.json(user);
 }
 
@@ -26,11 +22,6 @@ export async function PATCH(req: NextRequest) {
   const data: Record<string, unknown> = {};
   if (body.name !== undefined) data.name = body.name;
 
-  const user = await db.user.update({
-    where: { id: session.user.id },
-    data,
-    select: { id: true, name: true, email: true, role: true },
-  });
-
+  const user = await usersRepo.updateUser(session.user.id, data);
   return NextResponse.json(user);
 }

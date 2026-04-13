@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import { db } from "@/lib/db";
+import * as articlesRepo from "@/lib/repositories/articles";
+import * as usersRepo from "@/lib/repositories/users";
+import * as categoriesRepo from "@/lib/repositories/categories";
 import { auth } from "@/lib/auth";
 
 interface RouteParams {
@@ -8,20 +10,20 @@ interface RouteParams {
 
 export async function GET(req: NextRequest, { params }: RouteParams) {
   const { id } = await params;
-  const article = await db.article.findUnique({
-    where: { id },
-    include: {
-      author: { select: { id: true, name: true, image: true } },
-      category: true,
-      tags: { include: { tag: true } },
-    },
-  });
+  const article = await articlesRepo.getArticle(id);
 
   if (!article) {
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   }
 
-  return NextResponse.json(article);
+  const author = article.authorId
+    ? await usersRepo.getUser(article.authorId as string)
+    : null;
+  const category = article.categoryId
+    ? await categoriesRepo.getCategory(article.categoryId as string)
+    : null;
+
+  return NextResponse.json({ ...article, author, category });
 }
 
 export async function PATCH(req: NextRequest, { params }: RouteParams) {
@@ -48,7 +50,7 @@ export async function PATCH(req: NextRequest, { params }: RouteParams) {
     }
   }
 
-  const article = await db.article.update({ where: { id }, data });
+  const article = await articlesRepo.updateArticle(id, data);
   return NextResponse.json(article);
 }
 
@@ -59,6 +61,6 @@ export async function DELETE(req: NextRequest, { params }: RouteParams) {
   }
 
   const { id } = await params;
-  await db.article.delete({ where: { id } });
+  await articlesRepo.deleteArticle(id);
   return NextResponse.json({ success: true });
 }

@@ -1,4 +1,6 @@
-import { db } from "@/lib/db";
+import * as articlesRepo from "@/lib/repositories/articles";
+import * as usersRepo from "@/lib/repositories/users";
+import * as categoriesRepo from "@/lib/repositories/categories";
 import HeroSection from "@/components/public/HeroSection";
 import ArticleCard from "@/components/public/ArticleCard";
 import CategoryGrid from "@/components/public/CategoryGrid";
@@ -6,23 +8,24 @@ import CategoryGrid from "@/components/public/CategoryGrid";
 export const dynamic = "force-dynamic";
 
 export default async function HomePage() {
-  const featuredArticle = await db.article.findFirst({
-    where: { status: "published", featured: true },
-    include: { author: true, category: true },
-    orderBy: { publishedAt: "desc" },
-  });
+  const rawFeatured = await articlesRepo.getFeaturedArticle();
+  let featuredArticle: Record<string, unknown> | null = null;
+  if (rawFeatured) {
+    const author = rawFeatured.authorId ? await usersRepo.getUser(rawFeatured.authorId as string) : null;
+    const category = rawFeatured.categoryId ? await categoriesRepo.getCategory(rawFeatured.categoryId as string) : null;
+    featuredArticle = { ...rawFeatured, author, category } as Record<string, unknown>;
+  }
 
-  const latestArticles = await db.article.findMany({
-    where: { status: "published" },
-    include: { author: true, category: true },
-    orderBy: { publishedAt: "desc" },
-    take: 6,
-  });
+  const rawLatest = await articlesRepo.getPublishedArticles(6);
+  const latestArticles = await Promise.all(
+    rawLatest.map(async (article) => {
+      const author = article.authorId ? await usersRepo.getUser(article.authorId as string) : null;
+      const category = article.categoryId ? await categoriesRepo.getCategory(article.categoryId as string) : null;
+      return { ...article, author, category } as Record<string, unknown>;
+    })
+  );
 
-  const categories = await db.category.findMany({
-    include: { _count: { select: { articles: { where: { status: "published" } } } } },
-    orderBy: { name: "asc" },
-  });
+  const categories = await categoriesRepo.getCategoriesWithCounts(true);
 
   return (
     <>
@@ -30,12 +33,12 @@ export default async function HomePage() {
         article={
           featuredArticle
             ? {
-                title: featuredArticle.title,
-                slug: featuredArticle.slug,
-                excerpt: featuredArticle.excerpt,
-                coverImage: featuredArticle.coverImage,
-                category: featuredArticle.category,
-                author: featuredArticle.author,
+                title: featuredArticle.title as string,
+                slug: featuredArticle.slug as string,
+                excerpt: featuredArticle.excerpt as string | null,
+                coverImage: featuredArticle.coverImage as string | null,
+                category: featuredArticle.category as { name: string; slug: string } | null,
+                author: featuredArticle.author as { name: string | null } | null,
               }
             : undefined
         }
@@ -52,7 +55,18 @@ export default async function HomePage() {
         {latestArticles.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {latestArticles.map((article) => (
-              <ArticleCard key={article.id} article={article} />
+              <ArticleCard
+                key={String(article.id)}
+                article={{
+                  title: article.title as string,
+                  slug: article.slug as string,
+                  excerpt: article.excerpt as string | null,
+                  coverImage: article.coverImage as string | null,
+                  publishedAt: article.publishedAt as string | null,
+                  author: article.author as { name: string | null } | null,
+                  category: article.category as { name: string; slug: string } | null,
+                }}
+              />
             ))}
           </div>
         ) : (
@@ -73,7 +87,12 @@ export default async function HomePage() {
               <div className="section-divider mt-2" />
             </div>
           </div>
-          <CategoryGrid categories={categories} />
+          <CategoryGrid categories={categories.map(c => ({
+            name: c.name as string,
+            slug: c.slug as string,
+            description: c.description as string | null,
+            _count: c._count as { articles: number },
+          }))} />
         </section>
       )}
     </>

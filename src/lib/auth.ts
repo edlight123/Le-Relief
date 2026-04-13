@@ -3,13 +3,11 @@ import Credentials from "next-auth/providers/credentials";
 import Google from "next-auth/providers/google";
 import Facebook from "next-auth/providers/facebook";
 import Twitter from "next-auth/providers/twitter";
-import { PrismaAdapter } from "@auth/prisma-adapter";
 import bcrypt from "bcryptjs";
-import { db } from "@/lib/db";
+import * as usersRepo from "@/lib/repositories/users";
 import type { Role } from "@/types/user";
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
-  adapter: PrismaAdapter(db),
   session: { strategy: "jwt" },
   pages: {
     signIn: "/login",
@@ -36,25 +34,23 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) return null;
 
-        const user = await db.user.findUnique({
-          where: { email: credentials.email as string },
-        });
+        const user = await usersRepo.findByEmail(credentials.email as string);
 
         if (!user || !user.hashedPassword) return null;
 
         const isValid = await bcrypt.compare(
           credentials.password as string,
-          user.hashedPassword
+          user.hashedPassword as string
         );
 
         if (!isValid) return null;
 
         return {
-          id: user.id,
-          name: user.name,
-          email: user.email,
-          image: user.image,
-          role: user.role,
+          id: user.id as string,
+          name: user.name as string,
+          email: user.email as string,
+          image: user.image as string | null,
+          role: user.role as string,
         };
       },
     }),
@@ -73,6 +69,26 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         (session.user as unknown as { role: Role }).role = token.role as Role;
       }
       return session;
+    },
+    async signIn({ user, account }) {
+      // For OAuth providers, create or find user in Firestore
+      if (account?.provider !== "credentials" && user.email) {
+        const existing = await usersRepo.findByEmail(user.email);
+        if (!existing) {
+          const newUser = await usersRepo.createUser({
+            name: user.name || "",
+            email: user.email,
+            hashedPassword: "",
+            role: "reader",
+            image: user.image || null,
+          });
+          user.id = newUser.id as string;
+        } else {
+          user.id = existing.id as string;
+          (user as { role?: string }).role = existing.role as string;
+        }
+      }
+      return true;
     },
   },
 });

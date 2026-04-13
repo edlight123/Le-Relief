@@ -1,18 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
-import { db } from "@/lib/db";
+import * as usersRepo from "@/lib/repositories/users";
 import { auth } from "@/lib/auth";
 
 export async function GET() {
-  const users = await db.user.findMany({
-    select: {
-      id: true,
-      name: true,
-      email: true,
-      role: true,
-      image: true,
-      createdAt: true,
-    },
-    orderBy: { createdAt: "desc" },
-  });
+  const users = await usersRepo.getUsers();
   return NextResponse.json({ users });
 }
