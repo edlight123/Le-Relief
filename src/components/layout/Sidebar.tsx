@@ -94,7 +94,7 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
             className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-neutral-600 dark:text-neutral-400 hover:bg-neutral-50 dark:hover:bg-neutral-900 hover:text-neutral-900 dark:hover:text-white transition-colors w-full"
           >
             <LogOut className="h-5 w-5" />
-            Sign Out
+            Déconnexion
           </button>
         </div>
       </aside>

@@ -57,13 +57,13 @@ export default function Navbar() {
               href="/login"
               className="text-sm text-muted hover:text-foreground transition-colors duration-200 ml-2"
             >
-              Login
+              Connexion
             </Link>
             <Link
               href="/signup"
               className="text-sm font-medium px-4 py-2 bg-primary text-white rounded-full hover:bg-primary-dark transition-colors duration-200 ml-1"
             >
-              Sign Up
+              S&apos;inscrire
             </Link>
           </div>
 
@@ -99,13 +99,13 @@ export default function Navbar() {
                 href="/login"
                 className="text-sm text-muted"
               >
-                Login
+                Connexion
               </Link>
               <Link
                 href="/signup"
                 className="text-sm font-medium px-4 py-2 bg-primary text-white rounded-full"
               >
-                Sign Up
+                S&apos;inscrire
               </Link>
             </div>
           </div>

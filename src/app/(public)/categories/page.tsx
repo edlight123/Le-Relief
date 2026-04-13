@@ -4,8 +4,8 @@ import CategoryGrid from "@/components/public/CategoryGrid";
 export const dynamic = "force-dynamic";
 
 export const metadata = {
-  title: "Categories | Le Relief Haiti",
-  description: "Browse all content categories",
+  title: "Catégories | Le Relief Haïti",
+  description: "Parcourir toutes les catégories de contenu",
 };
 
 export default async function CategoriesIndexPage() {
@@ -19,7 +19,7 @@ export default async function CategoriesIndexPage() {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
       <h1 className="text-3xl md:text-4xl font-bold text-foreground tracking-tight animate-fade-in-up">
-        Categories
+        Catégories
       </h1>
 
       <div className="section-divider mt-3 mb-12" />
@@ -32,7 +32,7 @@ export default async function CategoriesIndexPage() {
         }))} />
       ) : (
         <p className="text-neutral-500 dark:text-neutral-400">
-          No categories yet.
+          Aucune catégorie pour le moment.
         </p>
       )}
     </div>

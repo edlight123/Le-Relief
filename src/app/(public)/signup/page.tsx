@@ -29,7 +29,7 @@ export default function SignupPage() {
 
       if (!res.ok) {
         const data = await res.json();
-        setError(data.error || "Something went wrong");
+        setError(data.error || "Une erreur est survenue");
         setLoading(false);
         return;
       }
@@ -42,13 +42,13 @@ export default function SignupPage() {
       });
 
       if (result?.error) {
-        setError("Account created. Please sign in.");
+        setError("Compte créé. Veuillez vous connecter.");
         router.push("/login");
       } else {
         router.push("/dashboard");
       }
     } catch {
-      setError("Something went wrong");
+      setError("Une erreur est survenue");
       setLoading(false);
     }
   }
@@ -58,38 +58,38 @@ export default function SignupPage() {
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
           <h1 className="text-2xl font-bold text-foreground">
-            Create an account
+            Créer un compte
           </h1>
           <p className="mt-2 text-sm text-neutral-500 dark:text-neutral-400">
-            Join Le Relief Haiti today
+            Rejoignez Le Relief Haïti aujourd&apos;hui
           </p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-5">
           <Input
-            label="Name"
+            label="Nom"
             id="name"
             value={name}
             onChange={(e) => setName(e.target.value)}
-            placeholder="Your name"
+            placeholder="Votre nom"
             required
           />
           <Input
-            label="Email"
+            label="Courriel"
             id="email"
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            placeholder="you@example.com"
+            placeholder="vous@exemple.com"
             required
           />
           <Input
-            label="Password"
+            label="Mot de passe"
             id="password"
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            placeholder="At least 6 characters"
+            placeholder="Au moins 6 caractères"
             required
             minLength={6}
           />
@@ -99,7 +99,7 @@ export default function SignupPage() {
           )}
 
           <Button type="submit" className="w-full" size="lg" disabled={loading}>
-            {loading ? "Creating account..." : "Sign Up"}
+            {loading ? "Création du compte..." : "S'inscrire"}
           </Button>
         </form>
 
@@ -110,40 +110,28 @@ export default function SignupPage() {
             </div>
             <div className="relative flex justify-center text-xs">
               <span className="px-2 bg-surface text-neutral-400">
-                or sign up with
+                ou s&apos;inscrire avec
               </span>
             </div>
           </div>
 
-          <div className="mt-4 grid grid-cols-3 gap-3">
+          <div className="mt-4">
             <button
               onClick={() => signIn("google", { callbackUrl: "/dashboard" })}
-              className="flex items-center justify-center px-4 py-2.5 border border-border-subtle rounded-lg hover:bg-surface-elevated transition-colors text-sm font-medium text-neutral-700 dark:text-neutral-300"
+              className="flex items-center justify-center w-full px-4 py-2.5 border border-border-subtle rounded-lg hover:bg-surface-elevated transition-colors text-sm font-medium text-neutral-700 dark:text-neutral-300"
             >
               Google
-            </button>
-            <button
-              onClick={() => signIn("facebook", { callbackUrl: "/dashboard" })}
-              className="flex items-center justify-center px-4 py-2.5 border border-border-subtle rounded-lg hover:bg-surface-elevated transition-colors text-sm font-medium text-neutral-700 dark:text-neutral-300"
-            >
-              Facebook
-            </button>
-            <button
-              onClick={() => signIn("twitter", { callbackUrl: "/dashboard" })}
-              className="flex items-center justify-center px-4 py-2.5 border border-border-subtle rounded-lg hover:bg-surface-elevated transition-colors text-sm font-medium text-neutral-700 dark:text-neutral-300"
-            >
-              X
             </button>
           </div>
         </div>
 
         <p className="mt-8 text-center text-sm text-neutral-500 dark:text-neutral-400">
-          Already have an account?{" "}
+          Déjà un compte ?{" "}
           <Link
             href="/login"
             className="font-medium text-primary hover:text-primary-light"
           >
-            Sign in
+            Se connecter
           </Link>
         </p>
       </div>

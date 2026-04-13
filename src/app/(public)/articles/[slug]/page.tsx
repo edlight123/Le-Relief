@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 import { format } from "date-fns";
+import { fr } from "date-fns/locale";
 import * as articlesRepo from "@/lib/repositories/articles";
 import * as usersRepo from "@/lib/repositories/users";
 import * as categoriesRepo from "@/lib/repositories/categories";
@@ -18,7 +19,7 @@ export async function generateMetadata({ params }: Props) {
   const article = await articlesRepo.findBySlug(slug);
   if (!article) return {};
   return {
-    title: `${article.title} | Le Relief Haiti`,
+    title: `${article.title} | Le Relief Haïti`,
     description: (article.excerpt as string) || "",
   };
 }
@@ -93,11 +94,11 @@ export default async function ArticlePage({ params }: Props) {
 
       {/* Meta */}
       <div className="mt-6 flex items-center gap-3 text-sm text-neutral-500">
-        {auth?.name ? <span>By <span className="font-medium text-accent-blue">{String(auth.name)}</span></span> : null}
+        {auth?.name ? <span>Par <span className="font-medium text-accent-blue">{String(auth.name)}</span></span> : null}
         {article.publishedAt ? (
           <>
             <span>&middot;</span>
-            <time>{format(new Date(article.publishedAt as string), "MMMM d, yyyy")}</time>
+            <time>{format(new Date(article.publishedAt as string), "d MMMM yyyy", { locale: fr })}</time>
           </>
         ) : null}
       </div>

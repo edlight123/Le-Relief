@@ -15,8 +15,8 @@ export async function generateMetadata({ params }: Props) {
   const category = await categoriesRepo.findBySlug(slug);
   if (!category) return {};
   return {
-    title: `${category.name} | Le Relief Haiti`,
-    description: (category.description as string) || `Articles in ${category.name}`,
+    title: `${category.name} | Le Relief Haïti`,
+    description: (category.description as string) || `Articles dans ${category.name}`,
   };
 }
 
@@ -76,7 +76,7 @@ export default async function CategoryPage({ params }: Props) {
         </div>
       ) : (
         <p className="text-neutral-500 dark:text-neutral-400">
-          No articles in this category yet.
+          Aucun article dans cette catégorie pour le moment.
         </p>
       )}
     </div>

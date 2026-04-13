@@ -13,9 +13,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Le Relief Haiti — Premium Digital News & Editorial",
+  title: "Le Relief Haïti — Nouvelles & Éditoriaux Premium",
   description:
-    "Le Relief Haiti is a premium digital news platform delivering high-quality journalism and editorial content.",
+    "Le Relief Haïti est une plateforme de nouvelles numériques premium offrant un journalisme de qualité et du contenu éditorial.",
   icons: {
     icon: "/favicon.ico",
     apple: "/apple-touch-icon.png",
@@ -29,7 +29,7 @@ export default function RootLayout({
 }>) {
   return (
     <html
-      lang="en"
+      lang="fr"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
       suppressHydrationWarning
     >

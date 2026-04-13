@@ -1,6 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { format } from "date-fns";
+import { fr } from "date-fns/locale";
 
 interface ArticleCardProps {
   article: {
@@ -20,7 +21,7 @@ export default function ArticleCard({
   variant = "default",
 }: ArticleCardProps) {
   const date = article.publishedAt
-    ? format(new Date(article.publishedAt), "MMM d, yyyy")
+    ? format(new Date(article.publishedAt), "d MMM yyyy", { locale: fr })
     : null;
 
   if (variant === "compact") {

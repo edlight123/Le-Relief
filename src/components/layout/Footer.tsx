@@ -31,7 +31,7 @@ export default function Footer() {
           {/* Navigation */}
           <div>
             <h4 className="text-xs font-semibold text-foreground uppercase tracking-widest mb-4">
-              Navigate
+              Navigation
             </h4>
             <ul className="space-y-2.5">
               {siteConfig.nav.public.map((item) => (
@@ -50,7 +50,7 @@ export default function Footer() {
           {/* Legal */}
           <div>
             <h4 className="text-xs font-semibold text-foreground uppercase tracking-widest mb-4">
-              Legal
+              Légal
             </h4>
             <ul className="space-y-2.5">
               <li>
@@ -58,7 +58,7 @@ export default function Footer() {
                   href="/privacy"
                   className="text-sm hover:text-primary transition-colors duration-200"
                 >
-                  Privacy Policy
+                  Politique de Confidentialité
                 </Link>
               </li>
               <li>
@@ -75,15 +75,15 @@ export default function Footer() {
           {/* Social */}
           <div>
             <h4 className="text-xs font-semibold text-foreground uppercase tracking-widest mb-4">
-              Follow Us
+              Suivez-nous
             </h4>
             <SocialLinks />
           </div>
         </div>
 
         <div className="mt-12 pt-6 border-t border-border-subtle text-center text-xs tracking-wide">
-          &copy; {new Date().getFullYear()} {siteConfig.name}. All rights
-          reserved.
+          &copy; {new Date().getFullYear()} {siteConfig.name}. Tous droits
+          réservés.
         </div>
       </div>
     </footer>

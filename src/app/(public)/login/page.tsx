@@ -26,7 +26,7 @@ export default function LoginPage() {
     });
 
     if (result?.error) {
-      setError("Invalid email or password");
+      setError("Courriel ou mot de passe invalide");
       setLoading(false);
     } else {
       router.push("/dashboard");
@@ -38,25 +38,25 @@ export default function LoginPage() {
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
           <h1 className="text-2xl font-bold text-foreground">
-            Welcome back
+            Bon retour
           </h1>
           <p className="mt-2 text-sm text-neutral-500 dark:text-neutral-400">
-            Sign in to access your dashboard
+            Connectez-vous pour accéder à votre tableau de bord
           </p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-5">
           <Input
-            label="Email"
+            label="Courriel"
             id="email"
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            placeholder="you@example.com"
+            placeholder="vous@exemple.com"
             required
           />
           <Input
-            label="Password"
+            label="Mot de passe"
             id="password"
             type="password"
             value={password}
@@ -70,7 +70,7 @@ export default function LoginPage() {
           )}
 
           <Button type="submit" className="w-full" size="lg" disabled={loading}>
-            {loading ? "Signing in..." : "Sign In"}
+            {loading ? "Connexion en cours..." : "Se Connecter"}
           </Button>
         </form>
 
@@ -81,7 +81,7 @@ export default function LoginPage() {
             </div>
             <div className="relative flex justify-center text-xs">
               <span className="px-2 bg-surface text-neutral-400">
-                or continue with
+                ou continuer avec
               </span>
             </div>
           </div>
@@ -97,12 +97,12 @@ export default function LoginPage() {
         </div>
 
         <p className="mt-8 text-center text-sm text-neutral-500 dark:text-neutral-400">
-          Don&apos;t have an account?{" "}
+          Pas encore de compte ?{" "}
           <Link
             href="/signup"
             className="font-medium text-primary hover:text-primary-light"
           >
-            Sign up
+            S&apos;inscrire
           </Link>
         </p>
       </div>

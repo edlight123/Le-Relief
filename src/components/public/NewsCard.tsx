@@ -1,5 +1,6 @@
 import Image from "next/image";
 import { format } from "date-fns";
+import { fr } from "date-fns/locale";
 import type { NewsArticle } from "@/types/news";
 
 interface NewsCardProps {
@@ -9,7 +10,7 @@ interface NewsCardProps {
 
 export default function NewsCard({ article, variant = "default" }: NewsCardProps) {
   const date = article.publishedAt
-    ? format(new Date(article.publishedAt), "MMM d, yyyy")
+    ? format(new Date(article.publishedAt), "d MMM yyyy", { locale: fr })
     : null;
 
   if (variant === "compact") {
@@ -70,7 +71,7 @@ export default function NewsCard({ article, variant = "default" }: NewsCardProps
               <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 6H5.25A2.25 2.25 0 0 0 3 8.25v10.5A2.25 2.25 0 0 0 5.25 21h10.5A2.25 2.25 0 0 0 18 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
               </svg>
-              Live
+              En Direct
             </span>
             <span className="text-[11px] text-muted font-medium">{article.source.name}</span>
           </div>

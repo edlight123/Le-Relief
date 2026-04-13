@@ -32,7 +32,7 @@ export default function ArticleEditor({
   initial,
   categories,
   onSubmit,
-  submitLabel = "Publish",
+  submitLabel = "Publier",
 }: ArticleEditorProps) {
   const [title, setTitle] = useState(initial?.title || "");
   const [subtitle, setSubtitle] = useState(initial?.subtitle || "");
@@ -70,24 +70,24 @@ export default function ArticleEditor({
   return (
     <div className="max-w-4xl space-y-6">
       <Input
-        label="Title"
+        label="Titre"
         id="title"
-        placeholder="Article title"
+        placeholder="Titre de l'article"
         value={title}
         onChange={(e) => setTitle(e.target.value)}
       />
 
       <Input
-        label="Subtitle"
+        label="Sous-titre"
         id="subtitle"
-        placeholder="Optional subtitle"
+        placeholder="Sous-titre optionnel"
         value={subtitle}
         onChange={(e) => setSubtitle(e.target.value)}
       />
 
       <div>
         <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1.5">
-          Cover Image
+          Image de Couverture
         </label>
         <MediaUploader
           onUpload={uploadFile}
@@ -98,14 +98,14 @@ export default function ArticleEditor({
 
       <div>
         <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1.5">
-          Category
+          Catégorie
         </label>
         <select
           value={categoryId}
           onChange={(e) => setCategoryId(e.target.value)}
           className="w-full rounded-lg border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-900 text-neutral-900 dark:text-neutral-100 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-neutral-400"
         >
-          <option value="">Select category</option>
+          <option value="">Sélectionner une catégorie</option>
           {categories.map((cat) => (
             <option key={cat.id} value={cat.id}>
               {cat.name}
@@ -119,12 +119,12 @@ export default function ArticleEditor({
           htmlFor="excerpt"
           className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1.5"
         >
-          Excerpt
+          Extrait
         </label>
         <textarea
           id="excerpt"
           rows={3}
-          placeholder="Short description..."
+          placeholder="Courte description..."
           value={excerpt}
           onChange={(e) => setExcerpt(e.target.value)}
           className="w-full rounded-lg border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-900 text-neutral-900 dark:text-neutral-100 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-neutral-400 resize-none"
@@ -136,12 +136,12 @@ export default function ArticleEditor({
           htmlFor="body"
           className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1.5"
         >
-          Body
+          Contenu
         </label>
         <textarea
           id="body"
           rows={16}
-          placeholder="Write your article content..."
+          placeholder="Écrivez le contenu de votre article..."
           value={body}
           onChange={(e) => setBody(e.target.value)}
           className="w-full rounded-lg border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-900 text-neutral-900 dark:text-neutral-100 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-neutral-400 font-mono leading-relaxed resize-none"
@@ -153,14 +153,14 @@ export default function ArticleEditor({
           onClick={() => handleSubmit("published")}
           disabled={saving || !title || !body}
         >
-          {saving ? "Saving..." : submitLabel}
+          {saving ? "Enregistrement..." : submitLabel}
         </Button>
         <Button
           variant="outline"
           onClick={() => handleSubmit("draft")}
           disabled={saving || !title}
         >
-          Save Draft
+          Sauvegarder Brouillon
         </Button>
       </div>
     </div>

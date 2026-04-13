@@ -1,52 +1,52 @@
 import { siteConfig } from "@/config/site.config";
 
 export const metadata = {
-  title: "About | Le Relief Haiti",
-  description: "Learn about Le Relief Haiti and our mission",
+  title: "À Propos | Le Relief Haïti",
+  description: "Découvrez Le Relief Haïti et notre mission",
 };
 
 export default function AboutPage() {
   return (
     <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
       <h1 className="text-3xl md:text-4xl font-bold text-foreground tracking-tight animate-fade-in-up">
-        About {siteConfig.name}
+        À Propos de {siteConfig.name}
       </h1>
 
       <div className="section-divider mt-3 mb-8" />
 
       <div className="prose prose-lg dark:prose-invert max-w-none">
         <p>
-          Le Relief Haiti is a premium digital news and editorial platform dedicated
-          to delivering high-quality, trustworthy journalism to a global
-          audience.
+          Le Relief Haïti est une plateforme de nouvelles numériques premium dédiée
+          à offrir un journalisme de haute qualité et digne de confiance à un
+          public mondial.
         </p>
 
-        <h2>Our Mission</h2>
+        <h2>Notre Mission</h2>
         <p>
-          We believe that quality reporting matters. Our mission is to provide
-          readers with well-researched, beautifully presented news and editorial
-          content that informs, inspires, and empowers.
+          Nous croyons que le journalisme de qualité compte. Notre mission est de fournir
+          aux lecteurs des nouvelles bien recherchées, magnifiquement présentées
+          et du contenu éditorial qui informe, inspire et responsabilise.
         </p>
 
-        <h2>Editorial Principles</h2>
+        <h2>Principes Éditoriaux</h2>
         <p>
-          Every article published on Le Relief Haiti is reviewed for accuracy,
-          clarity, and editorial integrity. We are committed to fair,
-          independent journalism that serves the public interest.
+          Chaque article publié sur Le Relief Haïti est vérifié pour son exactitude,
+          sa clarté et son intégrité éditoriale. Nous nous engageons pour un
+          journalisme juste et indépendant qui sert l&apos;intérêt public.
         </p>
 
-        <h2>Trust &amp; Credibility</h2>
+        <h2>Confiance & Crédibilité</h2>
         <p>
-          Le Relief Haiti is built on a foundation of trust. We maintain strict
-          editorial standards and are transparent about our processes,
-          sources, and editorial decisions.
+          Le Relief Haïti est fondé sur la confiance. Nous maintenons des normes
+          éditoriales strictes et sommes transparents sur nos processus,
+          sources et décisions éditoriales.
         </p>
 
-        <h2>Our Platform</h2>
+        <h2>Notre Plateforme</h2>
         <p>
-          We combine the experience of a polished public news website with the
-          internal power of a professional newsroom workspace, ensuring both
-          readers and publishers get a premium experience.
+          Nous combinons l&apos;expérience d&apos;un site d&apos;information public soigné avec la
+          puissance interne d&apos;un espace de travail de rédaction professionnelle, garantissant
+          aux lecteurs comme aux éditeurs une expérience premium.
         </p>
       </div>
     </div>

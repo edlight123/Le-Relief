@@ -45,7 +45,7 @@ function SearchPageContent() {
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
       <h1 className="text-3xl font-bold text-foreground mb-2 animate-fade-in-up">
-        Search
+        Recherche
       </h1>
 
       <div className="section-divider mb-8" />
@@ -56,18 +56,18 @@ function SearchPageContent() {
           type="text"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          placeholder="Search articles..."
+          placeholder="Rechercher des articles..."
           className="w-full pl-12 pr-4 py-3 rounded-xl border border-border-subtle bg-surface text-foreground text-base focus:outline-none focus:ring-2 focus:ring-primary/50"
         />
       </div>
 
       {loading && (
-        <p className="text-neutral-500 dark:text-neutral-400">Searching...</p>
+        <p className="text-neutral-500 dark:text-neutral-400">Recherche en cours...</p>
       )}
 
       {!loading && debouncedQuery && results.length === 0 && (
         <p className="text-neutral-500 dark:text-neutral-400">
-          No results found for &ldquo;{debouncedQuery}&rdquo;
+          Aucun résultat pour &ldquo;{debouncedQuery}&rdquo;
         </p>
       )}
 
@@ -84,7 +84,7 @@ function SearchPageContent() {
 
 export default function SearchPage() {
   return (
-    <Suspense fallback={<div className="max-w-4xl mx-auto px-4 py-16"><p className="text-neutral-500">Loading...</p></div>}>
+    <Suspense fallback={<div className="max-w-4xl mx-auto px-4 py-16"><p className="text-neutral-500">Chargement...</p></div>}>
       <SearchPageContent />
     </Suspense>
   );

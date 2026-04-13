@@ -24,24 +24,24 @@ export default function HeroSection({ article }: HeroSectionProps) {
             Premium Journalism
           </div>
           <h1 className="text-5xl md:text-7xl font-bold tracking-tight text-foreground animate-fade-in-up leading-[1.1]">
-            Le Relief <span className="text-primary">Haiti</span>
+            Le Relief <span className="text-primary">Haïti</span>
           </h1>
           <p className="mt-6 text-lg md:text-xl text-muted max-w-2xl mx-auto animate-fade-in-up animation-delay-200 leading-relaxed">
-            Your source for premium news, in-depth analysis, and editorial content from Haiti and beyond.
+            Votre source pour des nouvelles premium, des analyses approfondies et du contenu éditorial d&apos;Haïti et d&apos;ailleurs.
           </p>
           <div className="mt-10 flex justify-center gap-4 animate-fade-in-up animation-delay-300">
             <Link
               href="/categories"
               className="group px-8 py-3.5 bg-primary text-white rounded-full font-medium hover:bg-primary-dark transition-all duration-300 shadow-lg shadow-primary/25 hover:shadow-primary/40 hover:-translate-y-0.5"
             >
-              Explore Articles
+              Explorer les Articles
               <span className="inline-block ml-1.5 transition-transform duration-300 group-hover:translate-x-1">&rarr;</span>
             </Link>
             <Link
               href="/about"
               className="px-8 py-3.5 border border-border-subtle text-foreground rounded-full font-medium hover:bg-surface-elevated hover:border-muted/30 transition-all duration-300"
             >
-              Learn More
+              En Savoir Plus
             </Link>
           </div>
         </div>
@@ -85,7 +85,7 @@ export default function HeroSection({ article }: HeroSectionProps) {
                         {article.author.name.charAt(0)}
                       </div>
                       <span className="text-sm text-white/60">
-                        By <span className="text-white/90 font-medium">{article.author.name}</span>
+                        Par <span className="text-white/90 font-medium">{article.author.name}</span>
                       </span>
                     </div>
                   )}
@@ -114,7 +114,7 @@ export default function HeroSection({ article }: HeroSectionProps) {
                       {article.author.name.charAt(0)}
                     </div>
                     <span className="text-sm text-muted">
-                      By <span className="text-foreground font-medium">{article.author.name}</span>
+                      Par <span className="text-foreground font-medium">{article.author.name}</span>
                     </span>
                   </div>
                 )}

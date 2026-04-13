@@ -74,8 +74,8 @@ export default async function HomePage() {
       <section className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
         <div className="flex items-center justify-between mb-10">
           <div>
-            <span className="text-xs font-semibold uppercase tracking-[0.2em] text-primary">What&apos;s New</span>
-            <h2 className="text-3xl font-bold text-foreground mt-1">Latest Articles</h2>
+            <span className="text-xs font-semibold uppercase tracking-[0.2em] text-primary">Nouveautés</span>
+            <h2 className="text-3xl font-bold text-foreground mt-1">Derniers Articles</h2>
             <div className="section-divider mt-3" />
           </div>
         </div>
@@ -99,7 +99,7 @@ export default async function HomePage() {
         ) : (
           <div className="text-center py-16">
             <p className="text-muted">
-              No articles published yet. Check back soon.
+              Aucun article publié pour le moment. Revenez bientôt.
             </p>
           </div>
         )}
@@ -115,9 +115,9 @@ export default async function HomePage() {
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-accent-coral opacity-75"></span>
                   <span className="relative inline-flex rounded-full h-2 w-2 bg-accent-coral"></span>
                 </span>
-                Live Feed
+                Fil en Direct
               </span>
-              <h2 className="text-3xl font-bold text-foreground mt-1">Haiti & Caribbean News</h2>
+              <h2 className="text-3xl font-bold text-foreground mt-1">Actualités Haïti & Caraïbes</h2>
               <div className="section-divider mt-3" />
             </div>
           </div>
@@ -128,7 +128,7 @@ export default async function HomePage() {
           </div>
           <div className="text-center mt-8">
             <p className="text-xs text-muted">
-              Powered by GNews · Updated every 30 minutes
+              Propulsé par GNews · Mis à jour toutes les 30 minutes
             </p>
           </div>
         </section>
@@ -139,8 +139,8 @@ export default async function HomePage() {
         <section className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pb-24">
           <div className="flex items-center justify-between mb-10">
             <div>
-              <span className="text-xs font-semibold uppercase tracking-[0.2em] text-accent-teal">Browse</span>
-              <h2 className="text-3xl font-bold text-foreground mt-1">Categories</h2>
+              <span className="text-xs font-semibold uppercase tracking-[0.2em] text-accent-teal">Parcourir</span>
+              <h2 className="text-3xl font-bold text-foreground mt-1">Catégories</h2>
               <div className="section-divider mt-3" />
             </div>
           </div>

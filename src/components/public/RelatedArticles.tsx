@@ -18,7 +18,7 @@ export default function RelatedArticles({ articles }: RelatedArticlesProps) {
   return (
     <section className="mt-16 pt-12 border-t border-border-subtle">
       <div className="mb-8">
-        <h2 className="text-2xl font-bold text-foreground">Related Articles</h2>
+        <h2 className="text-2xl font-bold text-foreground">Articles Connexes</h2>
         <div className="section-divider mt-2" />
       </div>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
