@@ -13,6 +13,15 @@ interface CategoryGridProps {
   className?: string;
 }
 
+const categoryIcons: Record<string, string> = {
+  world: "🌍",
+  technology: "⚡",
+  culture: "🎭",
+  business: "📊",
+  science: "🔬",
+  opinion: "💬",
+};
+
 export default function CategoryGrid({
   categories,
   className,
@@ -20,7 +29,7 @@ export default function CategoryGrid({
   return (
     <div
       className={clsx(
-        "grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4",
+        "grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3",
         className
       )}
     >
@@ -28,16 +37,22 @@ export default function CategoryGrid({
         <Link
           key={cat.slug}
           href={`/categories/${cat.slug}`}
-          className="group rounded-xl p-5 bg-surface border border-border-subtle hover:border-primary/40 transition-all duration-200 article-card"
+          className="group relative rounded-2xl p-5 bg-surface border border-border-subtle hover:border-primary/30 transition-all duration-300 article-card overflow-hidden text-center"
         >
-          <h3 className="font-semibold text-foreground group-hover:text-primary transition-colors duration-200">
-            {cat.name}
-          </h3>
-          {cat._count && (
-            <p className="text-xs text-muted mt-1">
-              {cat._count.articles} article{cat._count.articles !== 1 ? "s" : ""}
-            </p>
-          )}
+          <div className="absolute inset-0 bg-gradient-to-br from-primary/[0.03] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+          <div className="relative">
+            <div className="text-2xl mb-3">
+              {categoryIcons[cat.slug] || "📰"}
+            </div>
+            <h3 className="font-semibold text-sm text-foreground group-hover:text-primary transition-colors duration-300">
+              {cat.name}
+            </h3>
+            {cat._count && (
+              <p className="text-[11px] text-muted mt-1.5 font-medium">
+                {cat._count.articles} article{cat._count.articles !== 1 ? "s" : ""}
+              </p>
+            )}
+          </div>
         </Link>
       ))}
     </div>

@@ -153,14 +153,14 @@ html {
 
 /* Article card hover */
 .article-card {
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.4s cubic-bezier(0.22, 1, 0.36, 1), border-color 0.3s ease;
 }
 .article-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 12px 32px -8px rgba(0, 0, 0, 0.12);
+  transform: translateY(-6px);
+  box-shadow: 0 20px 40px -12px rgba(0, 0, 0, 0.1), 0 4px 12px -4px rgba(0, 0, 0, 0.05);
 }
 .dark .article-card:hover {
-  box-shadow: 0 12px 32px -8px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 20px 40px -12px rgba(0, 0, 0, 0.5), 0 4px 12px -4px rgba(0, 0, 0, 0.3);
 }
 
 /* Clean underline effect */
@@ -187,7 +187,14 @@ html {
 /* Section divider */
 .section-divider {
   height: 3px;
-  width: 60px;
-  background: var(--primary);
+  width: 48px;
+  background: linear-gradient(90deg, var(--primary), var(--accent-coral));
   border-radius: 2px;
+}
+
+/* Premium focus ring */
+:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+  border-radius: 4px;
 }

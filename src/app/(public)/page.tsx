@@ -60,11 +60,12 @@ export default async function HomePage() {
       />
 
       {/* Latest Articles */}
-      <section className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        <div className="flex items-center justify-between mb-8">
+      <section className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
+        <div className="flex items-center justify-between mb-10">
           <div>
-            <h2 className="text-2xl font-bold text-foreground">Latest Articles</h2>
-            <div className="section-divider mt-2" />
+            <span className="text-xs font-semibold uppercase tracking-[0.2em] text-primary">What&apos;s New</span>
+            <h2 className="text-3xl font-bold text-foreground mt-1">Latest Articles</h2>
+            <div className="section-divider mt-3" />
           </div>
         </div>
         {latestArticles.length > 0 ? (
@@ -95,11 +96,12 @@ export default async function HomePage() {
 
       {/* Categories */}
       {categories.length > 0 && (
-        <section className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pb-20">
-          <div className="flex items-center justify-between mb-8">
+        <section className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pb-24">
+          <div className="flex items-center justify-between mb-10">
             <div>
-              <h2 className="text-2xl font-bold text-foreground">Categories</h2>
-              <div className="section-divider mt-2" />
+              <span className="text-xs font-semibold uppercase tracking-[0.2em] text-accent-teal">Browse</span>
+              <h2 className="text-3xl font-bold text-foreground mt-1">Categories</h2>
+              <div className="section-divider mt-3" />
             </div>
           </div>
           <CategoryGrid categories={categories.map(c => ({
