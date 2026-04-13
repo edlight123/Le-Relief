@@ -15,6 +15,11 @@ const FIREBASE_EXTERNALS = [
 
 const nextConfig: NextConfig = {
   serverExternalPackages: FIREBASE_EXTERNALS,
+  images: {
+    remotePatterns: [
+      { protocol: "https", hostname: "**" },
+    ],
+  },
   webpack(config, { isServer }) {
     if (isServer) {
       // Unconditionally externalize firebase-admin family regardless of
