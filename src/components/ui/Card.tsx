@@ -12,7 +12,7 @@ export default function Card({ children, className, hover = false }: CardProps) 
     <div
       className={clsx(
         "bg-surface border border-border-subtle rounded-xl overflow-hidden",
-        hover && "premium-card gradient-border",
+        hover && "article-card",
         className
       )}
     >

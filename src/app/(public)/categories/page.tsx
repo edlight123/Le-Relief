@@ -22,7 +22,7 @@ export default async function CategoriesIndexPage() {
         Categories
       </h1>
 
-      <div className="mt-4 mb-12 h-px bg-gradient-to-r from-primary/60 via-accent-rose/20 to-transparent" />
+      <div className="section-divider mt-3 mb-12" />
       {categories.length > 0 ? (
         <CategoryGrid categories={categories} />
       ) : (

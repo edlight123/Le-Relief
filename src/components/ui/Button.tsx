@@ -14,13 +14,13 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         className={clsx(
           "inline-flex items-center justify-center font-medium rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed",
           {
-            "bg-gradient-to-r from-primary to-primary-dark text-white hover:shadow-lg hover:shadow-primary/25 hover:-translate-y-0.5 transition-all focus:ring-primary/50":
+            "bg-primary text-white hover:bg-primary-dark focus:ring-primary/50 transition-colors":
               variant === "primary",
-            "bg-surface-elevated text-foreground hover:bg-primary/10 hover:text-primary focus:ring-primary/30":
+            "bg-surface-elevated text-foreground hover:bg-border-subtle focus:ring-primary/30 transition-colors":
               variant === "secondary",
-            "border border-border-subtle bg-transparent text-foreground/80 hover:border-primary/40 hover:text-primary focus:ring-primary/30":
+            "border border-border-subtle bg-transparent text-foreground hover:border-primary hover:text-primary focus:ring-primary/30 transition-colors":
               variant === "outline",
-            "bg-transparent text-foreground/70 hover:text-primary hover:bg-primary/5 focus:ring-primary/30":
+            "bg-transparent text-muted hover:text-foreground hover:bg-surface-elevated focus:ring-primary/30 transition-colors":
               variant === "ghost",
             "bg-accent-coral text-white hover:bg-red-600 focus:ring-red-500":
               variant === "danger",

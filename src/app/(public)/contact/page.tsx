@@ -13,7 +13,7 @@ export default function ContactPage() {
         Contact Us
       </h1>
 
-      <div className="mt-4 h-px bg-gradient-to-r from-primary/60 via-accent-rose/20 to-transparent" />
+      <div className="section-divider mt-3 mb-8" />
 
       <div className="mt-8 space-y-10">
         {/* Contact Info */}
@@ -94,7 +94,7 @@ export default function ContactPage() {
           </div>
           <button
             type="submit"
-            className="px-6 py-2.5 bg-gradient-to-r from-primary to-accent-rose text-white rounded-xl font-medium text-sm hover:shadow-lg hover:shadow-primary/25 hover:-translate-y-0.5 transition-all duration-300"
+            className="px-6 py-2.5 bg-primary text-white rounded-full font-medium text-sm hover:bg-primary-dark transition-colors duration-200"
           >
             Send Message
           </button>

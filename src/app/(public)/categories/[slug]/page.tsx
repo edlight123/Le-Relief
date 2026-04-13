@@ -42,7 +42,7 @@ export default async function CategoryPage({ params }: Props) {
           {category.name}
         </h1>
 
-        <div className="mt-4 h-px bg-gradient-to-r from-primary/60 via-accent-rose/20 to-transparent" />
+        <div className="section-divider mt-3" />
         {category.description && (
           <p className="mt-3 text-lg text-neutral-500 dark:text-neutral-400 max-w-2xl">
             {category.description}

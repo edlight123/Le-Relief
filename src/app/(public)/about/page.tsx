@@ -12,9 +12,9 @@ export default function AboutPage() {
         About {siteConfig.name}
       </h1>
 
-      <div className="mt-4 h-px bg-gradient-to-r from-primary/60 via-accent-rose/20 to-transparent" />
+      <div className="section-divider mt-3 mb-8" />
 
-      <div className="mt-8 prose prose-lg dark:prose-invert max-w-none">
+      <div className="prose prose-lg dark:prose-invert max-w-none">
         <p>
           Le Relief Haiti is a premium digital news and editorial platform dedicated
           to delivering high-quality, trustworthy journalism to a global

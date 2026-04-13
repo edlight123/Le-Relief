@@ -48,7 +48,7 @@ function SearchPageContent() {
         Search
       </h1>
 
-      <div className="mb-8 h-px bg-gradient-to-r from-primary/60 via-accent-rose/20 to-transparent" />
+      <div className="section-divider mb-8" />
 
       <div className="relative mb-12">
         <SearchIcon className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-neutral-400" />
