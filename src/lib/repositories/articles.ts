@@ -74,7 +74,8 @@ export async function getArticles(options?: {
     query = query.where("categoryId", "==", options.categoryId);
   }
 
-  query = query.orderBy("updatedAt", "desc");
+  const orderField = options?.orderBy || "publishedAt";
+  query = query.orderBy(orderField, "desc");
 
   // When there's no client-side filtering needed, use Firestore limit for efficiency
   const needsClientFilter = !!(options?.search || options?.excludeId);

@@ -1,4 +1,4 @@
-import { NewsArticle, GNewsResponse } from "@/types/news";
+ import { NewsArticle, GNewsResponse } from "@/types/news";
 
 const GNEWS_BASE = "https://gnews.io/api/v4";
 const API_KEY = process.env.GNEWS_API_KEY;
