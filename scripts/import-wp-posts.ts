@@ -22,7 +22,7 @@ import {
   FieldValue,
   Timestamp,
 } from "firebase-admin/firestore";
-import { writeFileSync, existsSync, readFileSync } from "fs";
+import { writeFileSync, existsSync } from "fs";
 import { tmpdir, homedir } from "os";
 import { join } from "path";
 

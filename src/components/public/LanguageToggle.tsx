@@ -8,7 +8,7 @@ export default function LanguageToggle() {
   return (
     <button
       onClick={toggleLocale}
-      className="flex items-center gap-0.5 px-2 py-1.5 rounded-full hover:bg-surface-elevated transition-colors duration-200 font-label text-xs font-bold uppercase tracking-wide"
+      className="flex items-center gap-0.5 border border-border-subtle px-2 py-2 font-label text-[10px] font-bold uppercase transition-colors duration-200 hover:bg-surface-elevated sm:text-xs"
       aria-label={locale === "fr" ? "Chanje lang an Kreyòl" : "Changer la langue en Français"}
       title={locale === "fr" ? "Lire en Kreyòl Ayisyen" : "Li an Fransè"}
     >

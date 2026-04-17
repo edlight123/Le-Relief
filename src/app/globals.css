@@ -5,52 +5,55 @@
 
 :root {
   --background: #FFFFFF;
-  --foreground: #1a1a1a;
+  --foreground: #111111;
   --tooltip-bg: #ffffff;
-  --tooltip-border: #e5e7eb;
-  --chart-primary: 221 83% 53%;
-  --chart-secondary: 160 84% 39%;
-  --chart-accent: 262 83% 58%;
+  --tooltip-border: #d8d8d8;
+  --chart-primary: 352 78% 42%;
+  --chart-secondary: 165 48% 31%;
+  --chart-accent: 38 78% 45%;
 
-  /* Clean Modern Palette */
-  --primary: #E63946;
-  --primary-light: #FF6B6B;
-  --primary-dark: #C1121F;
-  --accent-rose: #E63946;
-  --accent-rose-light: #FF6B6B;
-  --accent-teal: #2A9D8F;
-  --accent-teal-light: #40B4A6;
-  --accent-amber: #E9C46A;
-  --accent-coral: #F4845F;
-  --accent-blue: #457B9D;
+  --primary: #B11226;
+  --primary-light: #D31D35;
+  --primary-dark: #7F0D1A;
+  --accent-rose: #B11226;
+  --accent-rose-light: #D31D35;
+  --accent-teal: #1F6F64;
+  --accent-teal-light: #2E8A7A;
+  --accent-amber: #B97818;
+  --accent-coral: #B11226;
+  --accent-blue: #235A7C;
 
   --surface: #FFFFFF;
-  --surface-elevated: #F8F9FA;
-  --border-subtle: #E9ECEF;
-  --muted: #6C757D;
+  --surface-elevated: #F6F6F6;
+  --surface-newsprint: #FAFAFA;
+  --border-subtle: #D8D8D8;
+  --border-strong: #111111;
+  --muted: #5F5F5F;
 }
 
 .dark {
-  --background: #000000;
-  --foreground: #F1F1F1;
-  --tooltip-bg: #1a1a1a;
-  --tooltip-border: #333;
+  --background: #101010;
+  --foreground: #F4F4F4;
+  --tooltip-bg: #181818;
+  --tooltip-border: #333333;
 
-  --primary: #FF6B6B;
-  --primary-light: #FF8E8E;
-  --primary-dark: #E63946;
-  --accent-rose: #FF6B6B;
-  --accent-rose-light: #FF8E8E;
-  --accent-teal: #40B4A6;
-  --accent-teal-light: #5FCFBF;
-  --accent-amber: #E9C46A;
-  --accent-coral: #F4845F;
-  --accent-blue: #6BA3BE;
+  --primary: #E34859;
+  --primary-light: #F06675;
+  --primary-dark: #B11226;
+  --accent-rose: #E34859;
+  --accent-rose-light: #F06675;
+  --accent-teal: #5DB6A7;
+  --accent-teal-light: #81D0C4;
+  --accent-amber: #D6A23A;
+  --accent-coral: #E34859;
+  --accent-blue: #77A8C4;
 
-  --surface: #111111;
-  --surface-elevated: #1A1A1A;
-  --border-subtle: #2A2A2A;
-  --muted: #999;
+  --surface: #151515;
+  --surface-elevated: #1E1E1E;
+  --surface-newsprint: #141414;
+  --border-subtle: #333333;
+  --border-strong: #F4F4F4;
+  --muted: #A0A0A0;
 }
 
 @theme inline {
@@ -68,24 +71,40 @@
   --color-accent-blue: var(--accent-blue);
   --color-surface: var(--surface);
   --color-surface-elevated: var(--surface-elevated);
+  --color-surface-newsprint: var(--surface-newsprint);
   --color-border-subtle: var(--border-subtle);
+  --color-border-strong: var(--border-strong);
   --color-muted: var(--muted);
   --font-headline: var(--font-newsreader), Georgia, serif;
-  --font-body: var(--font-inter), system-ui, sans-serif;
-  --font-label: var(--font-work-sans), system-ui, sans-serif;
+  --font-body: var(--font-newsreader), Georgia, serif;
+  --font-label: var(--font-libre-franklin), Helvetica, sans-serif;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-body);
+  text-rendering: optimizeLegibility;
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: -1;
+  background:
+    linear-gradient(90deg, rgba(17, 17, 17, 0.025) 1px, transparent 1px),
+    linear-gradient(rgba(17, 17, 17, 0.018) 1px, transparent 1px);
+  background-size: 72px 72px, 72px 72px;
+  opacity: 0.45;
 }
 
 /* Prose dark mode */
 .dark .prose {
   --tw-prose-body: #d4d4d4;
   --tw-prose-headings: #F1F1F1;
-  --tw-prose-links: #FF6B6B;
+  --tw-prose-links: #E34859;
   --tw-prose-bold: #F1F1F1;
   --tw-prose-counters: #a3a3a3;
   --tw-prose-bullets: #a3a3a3;
@@ -106,6 +125,64 @@ html {
 ::selection {
   background: var(--primary);
   color: white;
+}
+
+.newspaper-shell {
+  width: min(100% - 2rem, 1280px);
+  margin-inline: auto;
+}
+
+.newspaper-rule {
+  border-top: 1px solid var(--border-strong);
+  border-bottom: 1px solid var(--border-strong);
+}
+
+.section-rule {
+  border-top: 2px solid var(--border-strong);
+}
+
+.page-kicker,
+.section-kicker {
+  font-family: var(--font-label);
+  font-size: 0.72rem;
+  line-height: 1;
+  font-weight: 800;
+  letter-spacing: 0;
+  text-transform: uppercase;
+  color: var(--primary);
+}
+
+.editorial-title {
+  font-family: var(--font-headline);
+  font-weight: 800;
+  line-height: 0.96;
+  letter-spacing: 0;
+}
+
+.editorial-deck {
+  color: var(--muted);
+  line-height: 1.45;
+}
+
+.ink-link {
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+  transition: color 180ms ease;
+}
+
+.ink-link:hover {
+  color: var(--primary);
+}
+
+.newsprint-panel {
+  background: var(--surface-newsprint);
+  border-top: 2px solid var(--border-strong);
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.column-rule {
+  border-color: var(--border-subtle);
 }
 
 /* ─── Animations ─── */
@@ -154,14 +231,13 @@ html {
 
 /* Article card hover */
 .article-card {
-  transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.4s cubic-bezier(0.22, 1, 0.36, 1), border-color 0.3s ease;
+  transition: color 0.2s ease, background 0.2s ease, border-color 0.2s ease;
 }
 .article-card:hover {
-  transform: translateY(-6px);
-  box-shadow: 0 20px 40px -12px rgba(0, 0, 0, 0.1), 0 4px 12px -4px rgba(0, 0, 0, 0.05);
+  box-shadow: none;
 }
 .dark .article-card:hover {
-  box-shadow: 0 20px 40px -12px rgba(0, 0, 0, 0.5), 0 4px 12px -4px rgba(0, 0, 0, 0.3);
+  box-shadow: none;
 }
 
 /* Clean underline effect */
@@ -187,10 +263,10 @@ html {
 
 /* Section divider */
 .section-divider {
-  height: 3px;
-  width: 48px;
-  background: linear-gradient(90deg, var(--primary), var(--accent-coral));
-  border-radius: 2px;
+  height: 2px;
+  width: 72px;
+  background: var(--foreground);
+  border-radius: 0;
 }
 
 /* Premium focus ring */
@@ -202,12 +278,12 @@ html {
 
 /* Glass overlay for hero */
 .glass-overlay {
-  background: rgba(255, 255, 255, 0.75);
-  backdrop-filter: blur(20px);
+  background: rgba(255, 255, 255, 0.94);
+  backdrop-filter: none;
 }
 .dark .glass-overlay {
-  background: rgba(0, 0, 0, 0.65);
-  backdrop-filter: blur(20px);
+  background: rgba(16, 16, 16, 0.94);
+  backdrop-filter: none;
 }
 
 /* Reading progress bar */

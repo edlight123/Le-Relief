@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from "react";
 import Badge from "@/components/ui/Badge";
-import Card from "@/components/ui/Card";
 import { format } from "date-fns";
 
 interface User {
@@ -48,37 +47,40 @@ export default function UsersPage() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-bold text-neutral-900 dark:text-white">
-        Users
-      </h1>
+      <header className="border-t-2 border-border-strong pt-4">
+        <p className="page-kicker mb-2">Accès</p>
+        <h1 className="font-headline text-5xl font-extrabold leading-none text-foreground">
+          Users
+        </h1>
+      </header>
 
-      <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-xl overflow-hidden">
+      <div className="overflow-hidden border border-border-subtle bg-surface">
         <table className="w-full text-sm">
           <thead>
-            <tr className="border-b border-neutral-200 dark:border-neutral-800 bg-neutral-50 dark:bg-neutral-900/50">
-              <th className="px-4 py-3 text-left font-medium text-neutral-500">
+            <tr className="border-b border-border-strong bg-surface-newsprint">
+              <th className="px-4 py-3 text-left font-label text-xs font-extrabold uppercase text-muted">
                 User
               </th>
-              <th className="px-4 py-3 text-left font-medium text-neutral-500 hidden md:table-cell">
+              <th className="hidden px-4 py-3 text-left font-label text-xs font-extrabold uppercase text-muted md:table-cell">
                 Email
               </th>
-              <th className="px-4 py-3 text-left font-medium text-neutral-500">
+              <th className="px-4 py-3 text-left font-label text-xs font-extrabold uppercase text-muted">
                 Role
               </th>
-              <th className="px-4 py-3 text-left font-medium text-neutral-500 hidden lg:table-cell">
+              <th className="hidden px-4 py-3 text-left font-label text-xs font-extrabold uppercase text-muted lg:table-cell">
                 Joined
               </th>
-              <th className="px-4 py-3 text-right font-medium text-neutral-500">
+              <th className="px-4 py-3 text-right font-label text-xs font-extrabold uppercase text-muted">
                 Actions
               </th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-neutral-100 dark:divide-neutral-800">
+          <tbody className="divide-y divide-border-subtle">
             {loading ? (
               <tr>
                 <td
                   colSpan={5}
-                  className="px-4 py-8 text-center text-neutral-400"
+                  className="px-4 py-8 text-center font-body text-muted"
                 >
                   Loading...
                 </td>
@@ -87,7 +89,7 @@ export default function UsersPage() {
               <tr>
                 <td
                   colSpan={5}
-                  className="px-4 py-8 text-center text-neutral-400"
+                  className="px-4 py-8 text-center font-body text-muted"
                 >
                   No users found
                 </td>
@@ -96,12 +98,12 @@ export default function UsersPage() {
               users.map((user) => (
                 <tr
                   key={user.id}
-                  className="hover:bg-neutral-50 dark:hover:bg-neutral-800/50"
+                  className="hover:bg-surface-newsprint"
                 >
-                  <td className="px-4 py-3 font-medium text-neutral-900 dark:text-white">
+                  <td className="px-4 py-3 font-headline text-lg font-bold text-foreground">
                     {user.name || "Unnamed"}
                   </td>
-                  <td className="px-4 py-3 hidden md:table-cell text-neutral-500">
+                  <td className="hidden px-4 py-3 font-label text-muted md:table-cell">
                     {user.email}
                   </td>
                   <td className="px-4 py-3">
@@ -109,7 +111,7 @@ export default function UsersPage() {
                       {user.role}
                     </Badge>
                   </td>
-                  <td className="px-4 py-3 hidden lg:table-cell text-neutral-500">
+                  <td className="hidden px-4 py-3 font-label text-muted lg:table-cell">
                     {format(new Date(user.createdAt), "MMM d, yyyy")}
                   </td>
                   <td className="px-4 py-3 text-right">
@@ -118,7 +120,7 @@ export default function UsersPage() {
                       onChange={(e) =>
                         handleRoleChange(user.id, e.target.value)
                       }
-                      className="text-sm border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-900 text-neutral-700 dark:text-neutral-300 rounded-lg px-2 py-1 focus:outline-none"
+                      className="border border-border-subtle bg-surface px-2 py-1 font-label text-sm text-foreground focus:outline-none"
                     >
                       <option value="reader">Reader</option>
                       <option value="publisher">Publisher</option>

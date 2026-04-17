@@ -7,7 +7,7 @@ import {
   LayoutDashboard,
   FileText,
   PenSquare,
-  Image,
+  Image as ImageIcon,
   BarChart3,
   Settings,
   Users,
@@ -21,7 +21,7 @@ const icons: Record<string, React.ReactNode> = {
   "/dashboard": <LayoutDashboard className="h-5 w-5" />,
   "/dashboard/articles": <FileText className="h-5 w-5" />,
   "/dashboard/articles/new": <PenSquare className="h-5 w-5" />,
-  "/dashboard/media": <Image className="h-5 w-5" />,
+  "/dashboard/media": <ImageIcon className="h-5 w-5" />,
   "/dashboard/analytics": <BarChart3 className="h-5 w-5" />,
   "/dashboard/settings": <Settings className="h-5 w-5" />,
   "/dashboard/users": <Users className="h-5 w-5" />,
@@ -47,26 +47,26 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
 
       <aside
         className={clsx(
-          "fixed top-0 left-0 z-50 h-full w-64 bg-white dark:bg-neutral-950 border-r border-neutral-200 dark:border-neutral-800 flex flex-col transition-transform lg:translate-x-0 lg:static lg:z-auto",
+          "fixed left-0 top-0 z-50 flex h-full w-72 flex-col border-r border-border-strong bg-surface transition-transform lg:static lg:z-auto lg:translate-x-0",
           open ? "translate-x-0" : "-translate-x-full"
         )}
       >
-        <div className="flex items-center justify-between px-6 h-16 border-b border-neutral-200 dark:border-neutral-800">
+        <div className="flex h-16 items-center justify-between border-b border-border-strong px-6">
           <Link
             href="/dashboard"
-            className="text-lg font-bold tracking-tight text-neutral-900 dark:text-white"
+            className="font-headline text-2xl font-extrabold text-foreground"
           >
             {siteConfig.name}
           </Link>
           <button
             onClick={onClose}
-            className="lg:hidden p-1 rounded-md hover:bg-neutral-100 dark:hover:bg-neutral-800"
+            className="border border-border-subtle p-1 transition-colors hover:bg-surface-elevated lg:hidden"
           >
-            <X className="h-5 w-5 text-neutral-500" />
+            <X className="h-5 w-5 text-muted" />
           </button>
         </div>
 
-        <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
+        <nav className="flex-1 overflow-y-auto px-4 py-5">
           {siteConfig.nav.dashboard.map((item) => {
             const active = pathname === item.href;
             return (
@@ -75,10 +75,10 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
                 href={item.href}
                 onClick={onClose}
                 className={clsx(
-                  "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors",
+                  "flex items-center gap-3 border-b border-border-subtle px-1 py-3 font-label text-sm font-bold transition-colors",
                   active
-                    ? "bg-neutral-100 dark:bg-neutral-800 text-neutral-900 dark:text-white"
-                    : "text-neutral-600 dark:text-neutral-400 hover:bg-neutral-50 dark:hover:bg-neutral-900 hover:text-neutral-900 dark:hover:text-white"
+                    ? "text-primary"
+                    : "text-muted hover:text-foreground"
                 )}
               >
                 {icons[item.href]}
@@ -88,10 +88,10 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
           })}
         </nav>
 
-        <div className="px-3 py-4 border-t border-neutral-200 dark:border-neutral-800">
+        <div className="border-t border-border-strong px-4 py-4">
           <button
             onClick={() => signOut({ callbackUrl: "/" })}
-            className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-neutral-600 dark:text-neutral-400 hover:bg-neutral-50 dark:hover:bg-neutral-900 hover:text-neutral-900 dark:hover:text-white transition-colors w-full"
+            className="flex w-full items-center gap-3 px-1 py-2.5 font-label text-sm font-bold text-muted transition-colors hover:text-foreground"
           >
             <LogOut className="h-5 w-5" />
             Déconnexion

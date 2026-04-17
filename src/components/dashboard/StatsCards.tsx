@@ -15,26 +15,26 @@ interface StatsCardsProps {
 
 export default function StatsCards({ stats }: StatsCardsProps) {
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
       {stats.map((stat) => (
-        <Card key={stat.label}>
+        <Card key={stat.label} className="border-t-2 border-t-border-strong">
           <CardContent className="flex items-start justify-between">
             <div>
-              <p className="text-sm text-neutral-500 dark:text-neutral-400">
+              <p className="font-label text-xs font-extrabold uppercase text-muted">
                 {stat.label}
               </p>
-              <p className="mt-1 text-2xl font-bold text-neutral-900 dark:text-white">
+              <p className="mt-2 font-headline text-4xl font-extrabold leading-none text-foreground">
                 {stat.value}
               </p>
               {stat.change && (
                 <p
                   className={clsx(
-                    "mt-1 text-xs font-medium",
+                    "mt-2 font-label text-xs font-bold",
                     stat.change.startsWith("+")
-                      ? "text-green-600 dark:text-green-400"
+                      ? "text-accent-teal"
                       : stat.change.startsWith("-")
-                      ? "text-red-600 dark:text-red-400"
-                      : "text-neutral-500"
+                      ? "text-primary"
+                      : "text-muted"
                   )}
                 >
                   {stat.change}
@@ -42,7 +42,7 @@ export default function StatsCards({ stats }: StatsCardsProps) {
               )}
             </div>
             {stat.icon && (
-              <stat.icon className="h-8 w-8 text-neutral-300 dark:text-neutral-700" />
+              <stat.icon className="h-8 w-8 text-muted/40" />
             )}
           </CardContent>
         </Card>

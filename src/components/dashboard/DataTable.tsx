@@ -23,7 +23,7 @@ export default function DataTable({ articles, onRowClick }: DataTableProps) {
       key: "title",
       label: "Title",
       render: (row: Article) => (
-        <span className="font-medium text-neutral-900 dark:text-white">
+        <span className="font-headline text-lg font-bold text-foreground">
           {row.title}
         </span>
       ),

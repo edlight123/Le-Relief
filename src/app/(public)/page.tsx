@@ -1,12 +1,9 @@
 import * as articlesRepo from "@/lib/repositories/articles";
 import * as usersRepo from "@/lib/repositories/users";
 import * as categoriesRepo from "@/lib/repositories/categories";
-import { getHaitiNews } from "@/services/news.service";
 import HeroSection from "@/components/public/HeroSection";
 import ArticleCard from "@/components/public/ArticleCard";
-import NewsCard from "@/components/public/NewsCard";
 import CategoryGrid from "@/components/public/CategoryGrid";
-import type { NewsArticle } from "@/types/news";
 import Link from "next/link";
 
 export const dynamic = "force-dynamic";
@@ -28,7 +25,7 @@ export default async function HomePage() {
   }
 
   try {
-    const rawLatest = await articlesRepo.getPublishedArticles(6);
+    const rawLatest = await articlesRepo.getPublishedArticles(12);
     latestArticles = await Promise.all(
       rawLatest.map(async (article) => {
         const author = article.authorId ? await usersRepo.getUser(article.authorId as string) : null;
@@ -46,17 +43,8 @@ export default async function HomePage() {
     // Fallback to empty
   }
 
-  // Fetch live Haiti/Caribbean news
-  let liveNews: NewsArticle[] = [];
-  try {
-    liveNews = await getHaitiNews(6);
-  } catch {
-    // Fallback to empty
-  }
-
-  // Split articles into headline (first 2) and recent (rest)
-  const headlineArticles = latestArticles.slice(0, 2);
-  const recentArticles = latestArticles.slice(2);
+  const headlineArticles = latestArticles.slice(0, 3);
+  const recentArticles = latestArticles.slice(3, 9);
 
   return (
     <>
@@ -68,6 +56,8 @@ export default async function HomePage() {
                 slug: featuredArticle.slug as string,
                 excerpt: featuredArticle.excerpt as string | null,
                 coverImage: featuredArticle.coverImage as string | null,
+                coverImageFirebaseUrl: featuredArticle.coverImageFirebaseUrl as string | null,
+                publishedAt: featuredArticle.publishedAt as string | null,
                 category: featuredArticle.category as { name: string; slug: string } | null,
                 author: featuredArticle.author as { name: string | null } | null,
               }
@@ -75,76 +65,56 @@ export default async function HomePage() {
         }
       />
 
-      {/* Main Content with Sidebar */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8">
-        <div className="flex flex-col lg:flex-row gap-8 lg:gap-12">
-          {/* Sidebar - Categories */}
-          {categories.length > 0 && (
-            <aside className="hidden lg:flex flex-col p-8 gap-6 h-fit w-72 bg-surface-elevated rounded-lg shrink-0">
-              <div className="mb-4">
-                <h3 className="text-lg font-bold text-foreground font-headline">Catégories</h3>
-                <p className="text-xs font-label text-muted uppercase tracking-widest">Parcourir</p>
-              </div>
-              <CategoryGrid categories={categories.map(c => ({
-                name: c.name as string,
-                slug: c.slug as string,
-                description: c.description as string | null,
-                _count: c._count as { articles: number },
-              }))} />
-
-              {/* Subscribe CTA */}
-              <div className="mt-8 bg-foreground p-6 rounded-lg text-background">
-                <h4 className="font-headline text-xl mb-4 italic">Édition Premium</h4>
-                <Link
-                  href="/signup"
-                  className="block w-full bg-primary text-white py-3 rounded text-center font-label text-sm uppercase tracking-widest font-bold hover:brightness-110 transition-all"
-                >
-                  S&apos;abonner
-                </Link>
-              </div>
-            </aside>
-          )}
-
-          {/* Main Content Area */}
-          <div className="flex-1 min-w-0">
-            {/* Today's Headlines - Bento Grid */}
+      <div className="newspaper-shell">
+        <div className="grid gap-10 lg:grid-cols-[1fr_280px] lg:gap-12">
+          <div className="min-w-0">
             {headlineArticles.length > 0 && (
-              <section className="mb-12 sm:mb-20">
-                <div className="flex items-center justify-between mb-6 sm:mb-10 border-b-2 border-foreground/10 pb-3 sm:pb-4">
-                  <h2 className="font-headline text-2xl sm:text-3xl font-extrabold tracking-tight">Derniers Articles</h2>
-                  <Link
-                    href="/categories"
-                    className="text-primary font-label text-xs sm:text-sm uppercase tracking-widest font-bold hover:underline underline-offset-4"
-                  >
-                    Voir Tout
+              <section className="mb-14 sm:mb-20">
+                <div className="mb-6 flex items-end justify-between border-t-2 border-border-strong pt-3">
+                  <div>
+                    <p className="section-kicker mb-2">Aujourd&apos;hui</p>
+                    <h2 className="font-headline text-3xl font-extrabold leading-none text-foreground sm:text-4xl">
+                      Derniers articles
+                    </h2>
+                  </div>
+                  <Link href="/categories" className="hidden font-label text-xs font-extrabold uppercase text-foreground transition-colors hover:text-primary sm:block">
+                    Voir tout
                   </Link>
                 </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 sm:gap-8">
-                  {headlineArticles.map((article) => (
-                    <ArticleCard
+
+                <div className="grid gap-7 md:grid-cols-3 md:gap-6">
+                  {headlineArticles.map((article, index) => (
+                    <div
                       key={String(article.id)}
-                      article={{
-                        title: article.title as string,
-                        slug: article.slug as string,
-                        excerpt: article.excerpt as string | null,
-                        coverImage: article.coverImage as string | null,
-                        publishedAt: article.publishedAt as string | null,
-                        author: article.author as { name: string | null } | null,
-                        category: article.category as { name: string; slug: string } | null,
-                      }}
-                    />
+                      className={index === 0 ? "md:col-span-2 md:border-r md:border-border-subtle md:pr-6" : ""}
+                    >
+                      <ArticleCard
+                        article={{
+                          title: article.title as string,
+                          slug: article.slug as string,
+                          excerpt: article.excerpt as string | null,
+                          coverImage: article.coverImage as string | null,
+                          coverImageFirebaseUrl: article.coverImageFirebaseUrl as string | null,
+                          publishedAt: article.publishedAt as string | null,
+                          author: article.author as { name: string | null } | null,
+                          category: article.category as { name: string; slug: string } | null,
+                        }}
+                      />
+                    </div>
                   ))}
                 </div>
               </section>
             )}
 
-            {/* Recent Analysis - List Layout */}
             {recentArticles.length > 0 && (
-              <section className="mb-12 sm:mb-20">
-                <div className="flex items-center justify-between mb-6 sm:mb-10 border-b-2 border-foreground/10 pb-3 sm:pb-4">
-                  <h2 className="font-headline text-2xl sm:text-3xl font-extrabold tracking-tight">Analyses Récentes</h2>
+              <section className="mb-14 sm:mb-20">
+                <div className="mb-2 border-t-2 border-border-strong pt-3">
+                  <p className="section-kicker mb-2">Analyse</p>
+                  <h2 className="font-headline text-3xl font-extrabold leading-none text-foreground sm:text-4xl">
+                    Le fil éditorial
+                  </h2>
                 </div>
-                <div className="space-y-0">
+                <div className="divide-y divide-border-subtle">
                   {recentArticles.map((article) => (
                     <ArticleCard
                       key={String(article.id)}
@@ -154,6 +124,7 @@ export default async function HomePage() {
                         slug: article.slug as string,
                         excerpt: article.excerpt as string | null,
                         coverImage: article.coverImage as string | null,
+                        coverImageFirebaseUrl: article.coverImageFirebaseUrl as string | null,
                         publishedAt: article.publishedAt as string | null,
                         author: article.author as { name: string | null } | null,
                         category: article.category as { name: string; slug: string } | null,
@@ -164,51 +135,50 @@ export default async function HomePage() {
               </section>
             )}
 
-            {/* No articles fallback */}
             {latestArticles.length === 0 && (
-              <div className="text-center py-16">
-                <p className="text-muted font-body">
+              <div className="border-t-2 border-border-strong py-16 text-center">
+                <p className="font-body text-lg text-muted">
                   Aucun article publié pour le moment. Revenez bientôt.
                 </p>
               </div>
             )}
           </div>
+
+          {categories.length > 0 && (
+            <aside className="hidden h-fit border-t-2 border-border-strong pt-4 lg:sticky lg:top-40 lg:block">
+              <div className="mb-5">
+                <p className="section-kicker mb-2">Rubriques</p>
+                <h3 className="font-headline text-2xl font-extrabold text-foreground">Parcourir</h3>
+              </div>
+              <CategoryGrid categories={categories.map(c => ({
+                name: c.name as string,
+                slug: c.slug as string,
+                description: c.description as string | null,
+                _count: c._count as { articles: number },
+              }))} />
+
+              <div className="mt-8 border border-border-strong p-5">
+                <p className="page-kicker mb-3">Édition</p>
+                <h4 className="mb-4 font-headline text-2xl font-extrabold leading-tight text-foreground">
+                  Recevez la lecture du jour.
+                </h4>
+                <Link
+                  href="/signup"
+                  className="block border border-border-strong bg-foreground py-3 text-center font-label text-xs font-extrabold uppercase text-background transition-colors hover:bg-primary hover:text-white"
+                >
+                  S&apos;abonner
+                </Link>
+              </div>
+            </aside>
+          )}
         </div>
       </div>
 
-      {/* Live News - Haiti & Caribbean (Full Width) */}
-      {liveNews.length > 0 && (
-        <section className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8 py-12 sm:py-20 border-t border-border-subtle mt-8 sm:mt-12">
-          <div className="flex items-center justify-between mb-6 sm:mb-10 border-b-2 border-foreground/10 pb-3 sm:pb-4">
-            <div>
-              <span className="text-xs font-semibold uppercase tracking-[0.2em] text-accent-coral flex items-center gap-2 font-label mb-2">
-                <span className="relative flex h-2 w-2">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-accent-coral opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-accent-coral"></span>
-                </span>
-                Fil en Direct
-              </span>
-              <h2 className="font-headline text-2xl sm:text-3xl font-extrabold tracking-tight">Actualités Haïti &amp; Caraïbes</h2>
-            </div>
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
-            {liveNews.map((article, index) => (
-              <NewsCard key={`${article.url}-${index}`} article={article} />
-            ))}
-          </div>
-          <div className="text-center mt-8">
-            <p className="text-xs text-muted font-label">
-              Propulsé par GNews · Mis à jour toutes les 30 minutes
-            </p>
-          </div>
-        </section>
-      )}
-
-      {/* Mobile Categories (visible on small screens) */}
       {categories.length > 0 && (
-        <section className="lg:hidden max-w-7xl mx-auto px-4 sm:px-6 md:px-8 pb-16 sm:pb-24">
-          <div className="flex items-center justify-between mb-6 sm:mb-10 border-b-2 border-foreground/10 pb-3 sm:pb-4">
-            <h2 className="font-headline text-2xl sm:text-3xl font-extrabold tracking-tight">Catégories</h2>
+        <section className="newspaper-shell pb-16 sm:pb-20 lg:hidden">
+          <div className="mb-6 border-t-2 border-border-strong pt-3">
+            <p className="section-kicker mb-2">Rubriques</p>
+            <h2 className="font-headline text-3xl font-extrabold leading-none text-foreground">Catégories</h2>
           </div>
           <CategoryGrid variant="grid" categories={categories.map(c => ({
             name: c.name as string,

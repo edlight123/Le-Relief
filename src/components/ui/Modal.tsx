@@ -47,20 +47,20 @@ export default function Modal({
       />
       <div
         className={clsx(
-          "relative bg-white dark:bg-neutral-900 rounded-xl shadow-2xl max-w-lg w-full mx-4 max-h-[90vh] overflow-y-auto",
+          "relative mx-4 max-h-[90vh] w-full max-w-lg overflow-y-auto border border-border-strong bg-surface shadow-2xl",
           className
         )}
       >
         {title && (
-          <div className="flex items-center justify-between px-6 py-4 border-b border-neutral-100 dark:border-neutral-800">
-            <h2 className="text-lg font-semibold text-neutral-900 dark:text-neutral-100">
+          <div className="flex items-center justify-between border-b border-border-subtle px-6 py-4">
+            <h2 className="font-headline text-2xl font-extrabold text-foreground">
               {title}
             </h2>
             <button
               onClick={onClose}
-              className="p-1 rounded-md hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors"
+              className="border border-border-subtle p-1 transition-colors hover:bg-surface-elevated"
             >
-              <X className="h-5 w-5 text-neutral-500" />
+              <X className="h-5 w-5 text-muted" />
             </button>
           </div>
         )}

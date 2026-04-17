@@ -31,7 +31,7 @@ export default function SocialLinks() {
           href={href}
           target="_blank"
           rel="noopener noreferrer"
-          className={`p-2 rounded-full bg-surface-elevated border border-border-subtle transition-colors duration-200 ${hoverColor}`}
+          className={`border border-border-subtle bg-surface px-2 py-2 transition-colors duration-200 hover:bg-surface-elevated ${hoverColor}`}
           aria-label={key}
         >
           <Icon className="h-4 w-4 text-muted" />

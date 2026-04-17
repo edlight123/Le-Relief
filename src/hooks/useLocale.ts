@@ -1,22 +1,35 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useCallback, useEffect, useSyncExternalStore } from "react";
 
 export type Locale = "fr" | "ht";
+const LOCALE_EVENT = "le-relief-locale-change";
+
+function getInitialLocale(): Locale {
+  if (typeof window === "undefined") return "fr";
+  const stored = localStorage.getItem("le-relief-locale") as Locale | null;
+  return stored === "fr" || stored === "ht" ? stored : "fr";
+}
+
+function subscribe(callback: () => void) {
+  window.addEventListener("storage", callback);
+  window.addEventListener(LOCALE_EVENT, callback);
+  return () => {
+    window.removeEventListener("storage", callback);
+    window.removeEventListener(LOCALE_EVENT, callback);
+  };
+}
 
 export function useLocale() {
-  const [locale, setLocaleState] = useState<Locale>("fr");
+  const locale = useSyncExternalStore(subscribe, getInitialLocale, () => "fr");
 
   useEffect(() => {
-    const stored = localStorage.getItem("le-relief-locale") as Locale | null;
-    if (stored && (stored === "fr" || stored === "ht")) {
-      setLocaleState(stored);
-    }
-  }, []);
+    localStorage.setItem("le-relief-locale", locale);
+  }, [locale]);
 
   const setLocale = useCallback((l: Locale) => {
-    setLocaleState(l);
     localStorage.setItem("le-relief-locale", l);
+    window.dispatchEvent(new Event(LOCALE_EVENT));
   }, []);
 
   const toggleLocale = useCallback(() => {

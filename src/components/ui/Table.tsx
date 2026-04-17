@@ -22,17 +22,17 @@ export default function Table<T extends Record<string, unknown>>({
   return (
     <div
       className={clsx(
-        "overflow-x-auto border border-neutral-200 dark:border-neutral-800 rounded-xl",
+        "overflow-x-auto border border-border-subtle",
         className
       )}
     >
       <table className="w-full text-sm">
         <thead>
-          <tr className="border-b border-neutral-200 dark:border-neutral-800 bg-neutral-50 dark:bg-neutral-900/50">
+          <tr className="border-b border-border-strong bg-surface-newsprint">
             {columns.map((col) => (
               <th
                 key={col.key}
-                className="px-4 py-3 text-left font-medium text-neutral-500 dark:text-neutral-400"
+                className="px-4 py-3 text-left font-label text-xs font-extrabold uppercase text-muted"
               >
                 {col.label}
               </th>
@@ -45,14 +45,14 @@ export default function Table<T extends Record<string, unknown>>({
               key={i}
               onClick={() => onRowClick?.(row)}
               className={clsx(
-                "border-b border-neutral-100 dark:border-neutral-800 last:border-0",
-                onRowClick && "cursor-pointer hover:bg-neutral-50 dark:hover:bg-neutral-800/50"
+                "border-b border-border-subtle last:border-0",
+                onRowClick && "cursor-pointer hover:bg-surface-newsprint"
               )}
             >
               {columns.map((col) => (
                 <td
                   key={col.key}
-                  className="px-4 py-3 text-neutral-700 dark:text-neutral-300"
+                  className="px-4 py-3 font-label text-sm text-foreground/80"
                 >
                   {col.render
                     ? col.render(row)
@@ -65,7 +65,7 @@ export default function Table<T extends Record<string, unknown>>({
             <tr>
               <td
                 colSpan={columns.length}
-                className="px-4 py-8 text-center text-neutral-400"
+                className="px-4 py-8 text-center font-body text-muted"
               >
                 No data found
               </td>

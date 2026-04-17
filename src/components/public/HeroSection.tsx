@@ -7,41 +7,37 @@ interface HeroSectionProps {
     slug: string;
     excerpt: string | null;
     coverImage: string | null;
+    coverImageFirebaseUrl?: string | null;
     category?: { name: string; slug: string } | null;
     author?: { name: string | null } | null;
+    publishedAt?: Date | string | null;
   };
 }
 
 export default function HeroSection({ article }: HeroSectionProps) {
   if (!article) {
     return (
-      <section className="relative overflow-hidden bg-gradient-to-br from-background via-background to-surface-elevated">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_50%,rgba(230,57,70,0.06),transparent_50%)]" />
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_80%,rgba(42,157,143,0.05),transparent_50%)]" />
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-24 md:py-36 text-center relative">
-          <div className="inline-flex items-center gap-2 px-3 sm:px-4 py-1.5 rounded-full border border-primary/20 bg-primary/5 text-primary text-[10px] sm:text-xs font-semibold uppercase tracking-[0.2em] mb-6 sm:mb-8 animate-fade-in font-label">
-            <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
-            Premium Journalism
-          </div>
-          <h1 className="text-3xl sm:text-5xl md:text-7xl font-extrabold tracking-tighter text-foreground animate-fade-in-up leading-[1.1] font-headline">
-            Le Relief <span className="text-primary">Haïti</span>
+      <section className="newspaper-shell py-10 sm:py-14">
+        <div className="newsprint-panel px-4 py-10 text-center sm:px-8 sm:py-14">
+          <p className="page-kicker mb-5">Journalisme indépendant</p>
+          <h1 className="editorial-title mx-auto max-w-4xl text-5xl text-foreground sm:text-7xl md:text-8xl">
+            Le Relief Haïti
           </h1>
-          <p className="mt-4 sm:mt-6 text-base sm:text-lg md:text-xl text-muted max-w-2xl mx-auto animate-fade-in-up animation-delay-200 leading-relaxed font-body">
+          <p className="editorial-deck mx-auto mt-6 max-w-2xl font-body text-xl sm:text-2xl">
             Votre source pour des nouvelles premium, des analyses approfondies et du contenu éditorial d&apos;Haïti et d&apos;ailleurs.
           </p>
-          <div className="mt-8 sm:mt-10 flex flex-col sm:flex-row justify-center gap-3 sm:gap-4 animate-fade-in-up animation-delay-300">
+          <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
             <Link
               href="/categories"
-              className="group px-6 sm:px-8 py-3 sm:py-3.5 bg-primary text-white rounded-sm font-label text-xs sm:text-sm uppercase tracking-widest font-bold hover:brightness-110 transition-all duration-300 shadow-lg shadow-primary/25 hover:shadow-primary/40 hover:-translate-y-0.5"
+              className="border border-border-strong bg-foreground px-6 py-3 font-label text-xs font-extrabold uppercase text-background transition-colors hover:bg-primary hover:text-white"
             >
-              Explorer les Articles
-              <span className="inline-block ml-1.5 transition-transform duration-300 group-hover:translate-x-1">&rarr;</span>
+              Explorer les articles
             </Link>
             <Link
               href="/about"
-              className="px-6 sm:px-8 py-3 sm:py-3.5 border border-border-subtle text-foreground rounded-sm font-label text-xs sm:text-sm uppercase tracking-widest font-bold hover:bg-surface-elevated hover:border-muted/30 transition-all duration-300"
+              className="border border-border-strong px-6 py-3 font-label text-xs font-extrabold uppercase text-foreground transition-colors hover:bg-surface-elevated"
             >
-              En Savoir Plus
+              En savoir plus
             </Link>
           </div>
         </div>
@@ -49,62 +45,63 @@ export default function HeroSection({ article }: HeroSectionProps) {
     );
   }
 
+  const imageSrc = article.coverImageFirebaseUrl || article.coverImage;
+  const date = article.publishedAt
+    ? new Intl.DateTimeFormat("fr-FR", {
+        day: "numeric",
+        month: "long",
+        year: "numeric",
+      }).format(new Date(article.publishedAt))
+    : null;
+
   return (
-    <section className="bg-background">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8 mt-4 sm:mt-8 mb-10 sm:mb-20">
-        <Link href={`/articles/${article.slug}`} className="group block">
-          <div className="relative overflow-hidden rounded-lg h-[320px] sm:h-[420px] md:h-[500px] lg:h-[600px]">
-            {article.coverImage ? (
-              <>
-                <Image
-                  src={article.coverImage}
-                  alt={article.title}
-                  fill
-                  className="object-cover transition-transform duration-700 group-hover:scale-105"
-                  priority
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-foreground/80 via-foreground/20 to-transparent" />
-              </>
-            ) : (
-              <div className="absolute inset-0 bg-gradient-to-br from-surface-elevated to-surface" />
-            )}
-
-            {/* Category Chip */}
+    <section className="newspaper-shell py-6 sm:py-10">
+      <Link href={`/articles/${article.slug}`} className="group block">
+        <div className="section-rule grid gap-6 pt-5 lg:grid-cols-[1.04fr_1.35fr] lg:gap-8">
+          <div className="order-2 flex flex-col justify-center border-t border-border-subtle pt-5 lg:order-1 lg:border-t-0 lg:border-r lg:pr-8">
             {article.category && (
-              <div className="absolute top-4 left-4 sm:bottom-64 sm:top-auto sm:left-10 z-10">
-                <span className="bg-primary text-white px-3 sm:px-4 py-1 font-label text-[10px] sm:text-xs tracking-widest uppercase">
-                  {article.category.name}
-                </span>
-              </div>
+              <p className="page-kicker mb-4">{article.category.name}</p>
             )}
-
-            {/* Glass overlay content */}
-            <div className="absolute bottom-4 sm:bottom-8 md:bottom-12 left-4 sm:left-6 md:left-10 right-4 sm:right-6 md:right-10 z-10 glass-overlay p-4 sm:p-6 md:p-10 lg:p-12 max-w-3xl rounded-sm">
-              <h1 className="font-headline text-xl sm:text-2xl md:text-4xl lg:text-5xl text-foreground font-extrabold leading-tight tracking-tighter mb-2 sm:mb-4 line-clamp-3 sm:line-clamp-none">
-                {article.title}
-              </h1>
-              {article.excerpt && (
-                <p className="hidden sm:block font-body text-muted text-sm sm:text-base md:text-lg max-w-2xl mb-4 sm:mb-6 line-clamp-2">
-                  {article.excerpt}
-                </p>
-              )}
-              <div className="flex items-center gap-3 sm:gap-4 flex-wrap">
-                {article.author?.name && (
-                  <div className="font-label text-[10px] sm:text-xs uppercase tracking-widest text-foreground/60">
-                    Par {article.author.name}
-                  </div>
-                )}
-                {article.author?.name && (
-                  <div className="w-1 h-1 rounded-full bg-primary" />
-                )}
-                <div className="font-label text-[10px] sm:text-xs uppercase tracking-widest text-foreground/60">
-                  {new Date().toLocaleDateString("fr-FR", { month: "short", day: "numeric", year: "numeric" })}
-                </div>
-              </div>
+            <h1 className="editorial-title text-4xl text-foreground transition-colors group-hover:text-primary sm:text-6xl lg:text-7xl">
+              {article.title}
+            </h1>
+            {article.excerpt && (
+              <p className="editorial-deck mt-5 max-w-2xl font-body text-xl sm:text-2xl">
+                {article.excerpt}
+              </p>
+            )}
+            <div className="mt-6 flex flex-wrap items-center gap-3 font-label text-[11px] font-bold uppercase text-muted">
+              {article.author?.name && <span>Par {article.author.name}</span>}
+              {article.author?.name && date && <span className="text-border-subtle">/</span>}
+              {date && <span>{date}</span>}
             </div>
           </div>
-        </Link>
-      </div>
+
+          <div className="order-1 lg:order-2">
+            <div className="relative aspect-[16/10] overflow-hidden bg-surface-elevated">
+              {imageSrc ? (
+                <Image
+                  src={imageSrc}
+                  alt={article.title}
+                  fill
+                  sizes="(min-width: 1024px) 55vw, 100vw"
+                  className="object-cover transition-transform duration-500 group-hover:scale-[1.02]"
+                  priority
+                />
+              ) : (
+                <div className="flex h-full items-center justify-center border border-border-subtle">
+                  <span className="font-label text-xs font-bold uppercase text-muted">
+                    Le Relief
+                  </span>
+                </div>
+              )}
+            </div>
+            <p className="mt-2 border-b border-border-subtle pb-3 font-label text-[10px] uppercase text-muted">
+              À la une
+            </p>
+          </div>
+        </div>
+      </Link>
     </section>
   );
 }

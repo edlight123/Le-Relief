@@ -1,26 +1,41 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useCallback, useEffect, useSyncExternalStore } from "react";
 
 type Theme = "light" | "dark";
+const THEME_EVENT = "le-relief-theme-change";
+
+function getInitialTheme(): Theme {
+  if (typeof window === "undefined") return "light";
+  const stored = localStorage.getItem("le-relief-theme") as Theme | null;
+  if (stored === "light" || stored === "dark") return stored;
+  return window.matchMedia("(prefers-color-scheme: dark)").matches
+    ? "dark"
+    : "light";
+}
+
+function subscribe(callback: () => void) {
+  window.addEventListener("storage", callback);
+  window.addEventListener(THEME_EVENT, callback);
+  return () => {
+    window.removeEventListener("storage", callback);
+    window.removeEventListener(THEME_EVENT, callback);
+  };
+}
 
 export function useTheme() {
-  const [theme, setThemeState] = useState<Theme>("light");
+  const theme = useSyncExternalStore(subscribe, getInitialTheme, () => "light");
 
   useEffect(() => {
-    const stored = localStorage.getItem("le-relief-theme") as Theme | null;
-    const prefersDark = window.matchMedia(
-      "(prefers-color-scheme: dark)"
-    ).matches;
-    const initial = stored || (prefersDark ? "dark" : "light");
-    setThemeState(initial);
-    document.documentElement.classList.toggle("dark", initial === "dark");
-  }, []);
+    document.documentElement.classList.toggle("dark", theme === "dark");
+  }, [theme]);
 
   const setTheme = useCallback((t: Theme) => {
-    setThemeState(t);
-    localStorage.setItem("le-relief-theme", t);
-    document.documentElement.classList.toggle("dark", t === "dark");
+    if (typeof window !== "undefined") {
+      localStorage.setItem("le-relief-theme", t);
+      document.documentElement.classList.toggle("dark", t === "dark");
+      window.dispatchEvent(new Event(THEME_EVENT));
+    }
   }, []);
 
   const toggleTheme = useCallback(() => {

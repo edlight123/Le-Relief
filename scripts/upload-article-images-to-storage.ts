@@ -531,7 +531,7 @@ async function main() {
   let completed = 0;
   const failures: UploadResult[] = [];
 
-  const stats = await runWithConcurrency(images, async (image, current) => {
+  const stats = await runWithConcurrency(images, async (image) => {
     const result = await uploadOne(db, bucket, mediaRefsByUrl, image);
     completed += 1;
 

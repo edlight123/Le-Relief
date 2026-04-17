@@ -9,6 +9,7 @@ interface ArticleCardProps {
     slug: string;
     excerpt: string | null;
     coverImage: string | null;
+    coverImageFirebaseUrl?: string | null;
     publishedAt: Date | string | null;
     author?: { name: string | null } | null;
     category?: { name: string; slug: string } | null;
@@ -23,27 +24,29 @@ export default function ArticleCard({
   const date = article.publishedAt
     ? format(new Date(article.publishedAt), "d MMM yyyy", { locale: fr })
     : null;
+  const imageSrc = article.coverImageFirebaseUrl || article.coverImage;
 
   if (variant === "compact") {
     return (
-      <Link href={`/articles/${article.slug}`}>
-        <div className="flex gap-4 p-4 bg-surface border border-border-subtle rounded-lg article-card group">
-          {article.coverImage && (
+      <Link href={`/articles/${article.slug}`} className="group block">
+        <div className="article-card flex gap-4 border-b border-border-subtle py-4">
+          {imageSrc && (
             <div className="relative w-20 h-20 flex-shrink-0 overflow-hidden">
               <Image
-                src={article.coverImage}
+                src={imageSrc}
                 alt={article.title}
                 fill
-                className="object-cover"
+                sizes="80px"
+                className="object-cover grayscale transition duration-300 group-hover:grayscale-0"
               />
             </div>
           )}
           <div className="min-w-0">
-            <h3 className="font-semibold text-sm text-foreground line-clamp-2 group-hover:text-primary transition-colors duration-200 font-headline">
+            <h3 className="font-headline text-base font-bold leading-snug text-foreground transition-colors group-hover:text-primary">
               {article.title}
             </h3>
             {date && (
-              <p className="text-xs text-muted mt-1.5 font-label">{date}</p>
+              <p className="mt-2 font-label text-[10px] font-bold uppercase text-muted">{date}</p>
             )}
           </div>
         </div>
@@ -54,36 +57,35 @@ export default function ArticleCard({
   /* List variant - horizontal card like "Recent Analysis" */
   if (variant === "list") {
     return (
-      <Link href={`/articles/${article.slug}`}>
-        <div className="group flex flex-col sm:flex-row gap-4 sm:gap-8 py-6 sm:py-8 border-b border-border-subtle last:border-b-0 hover:bg-surface-elevated transition-colors px-3 sm:px-4 -mx-3 sm:-mx-4 rounded">
-          {article.coverImage && (
-            <div className="w-full sm:w-48 h-40 sm:h-32 shrink-0 overflow-hidden rounded-sm sm:rounded-none">
+      <Link href={`/articles/${article.slug}`} className="group block">
+        <div className="article-card flex flex-col gap-4 border-b border-border-subtle py-6 transition-colors hover:bg-surface-newsprint sm:flex-row sm:gap-7">
+          {imageSrc && (
+            <div className="relative h-44 w-full shrink-0 overflow-hidden bg-surface-elevated sm:h-32 sm:w-48">
               <Image
-                src={article.coverImage}
+                src={imageSrc}
                 alt={article.title}
-                fill={false}
-                width={192}
-                height={128}
-                className="w-full h-full object-cover img-grayscale"
+                fill
+                sizes="(min-width: 640px) 192px, 100vw"
+                className="object-cover grayscale transition duration-300 group-hover:grayscale-0"
               />
             </div>
           )}
-          <div className="flex flex-col justify-center">
-            <div className="flex items-center gap-3 mb-2">
+          <div className="flex flex-col justify-center md:pr-4">
+            <div className="mb-2 flex items-center gap-3">
               {article.category && (
-                <span className="text-primary font-label text-[10px] font-bold uppercase tracking-[0.2em]">
+                <span className="page-kicker">
                   {article.category.name}
                 </span>
               )}
               {date && (
-                <span className="text-muted/50 font-label text-[10px] uppercase">{date}</span>
+                <span className="font-label text-[10px] font-bold uppercase text-muted">{date}</span>
               )}
             </div>
-            <h3 className="font-headline text-lg sm:text-xl font-bold leading-tight group-hover:text-primary transition-colors mb-2">
+            <h3 className="font-headline text-xl font-bold leading-tight text-foreground transition-colors group-hover:text-primary sm:text-2xl">
               {article.title}
             </h3>
             {article.excerpt && (
-              <p className="font-body text-sm text-muted line-clamp-2">
+              <p className="mt-2 line-clamp-2 font-body text-base leading-relaxed text-muted">
                 {article.excerpt}
               </p>
             )}
@@ -95,50 +97,47 @@ export default function ArticleCard({
 
   /* Default variant - bento grid card like "Today's Headlines" */
   return (
-    <Link href={`/articles/${article.slug}`}>
-      <div className="group cursor-pointer">
-        <div className="relative overflow-hidden aspect-[16/10] mb-6">
-          {article.coverImage ? (
+    <Link href={`/articles/${article.slug}`} className="group block h-full">
+      <div className="article-card flex h-full flex-col border-b border-border-subtle pb-6">
+        <div className="relative mb-4 aspect-[16/10] overflow-hidden bg-surface-elevated">
+          {imageSrc ? (
             <>
               <Image
-                src={article.coverImage}
+                src={imageSrc}
                 alt={article.title}
                 fill
-                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                sizes="(min-width: 1024px) 33vw, (min-width: 768px) 50vw, 100vw"
+                className="object-cover grayscale transition duration-300 group-hover:grayscale-0"
               />
               {article.category && (
-                <span className="absolute top-0 left-0 bg-primary text-white px-3 py-1 font-label text-[10px] uppercase tracking-widest">
+                <span className="absolute left-0 top-0 bg-foreground px-3 py-1 font-label text-[10px] font-bold uppercase text-background">
                   {article.category.name}
                 </span>
               )}
             </>
           ) : (
-            <div className="w-full h-full bg-gradient-to-br from-surface-elevated to-surface flex items-center justify-center">
+            <div className="flex h-full w-full items-center justify-center border border-border-subtle bg-surface-newsprint">
               {article.category && (
-                <span className="absolute top-0 left-0 bg-primary text-white px-3 py-1 font-label text-[10px] uppercase tracking-widest">
+                <span className="absolute left-0 top-0 bg-foreground px-3 py-1 font-label text-[10px] font-bold uppercase text-background">
                   {article.category.name}
                 </span>
               )}
-              <div className="w-12 h-12 rounded-xl bg-primary/8 flex items-center justify-center">
-                <svg className="w-6 h-6 text-primary/40" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
-                </svg>
-              </div>
+              <span className="font-label text-xs font-bold uppercase text-muted">Le Relief</span>
             </div>
           )}
         </div>
-        <h3 className="font-headline text-2xl font-bold leading-snug group-hover:text-primary transition-colors mb-3">
+        <h3 className="font-headline text-2xl font-bold leading-tight text-foreground transition-colors group-hover:text-primary">
           {article.title}
         </h3>
         {article.excerpt && (
-          <p className="font-body text-muted text-sm line-clamp-3 mb-4">
+          <p className="mt-3 line-clamp-3 font-body text-base leading-relaxed text-muted">
             {article.excerpt}
           </p>
         )}
-        <div className="flex items-center gap-4 font-label text-[10px] text-muted/70 uppercase tracking-widest">
+        <div className="mt-4 flex items-center gap-3 font-label text-[10px] font-bold uppercase text-muted">
           {article.author?.name && <span>{article.author.name}</span>}
           {article.author?.name && date && (
-            <span className="w-1 h-1 rounded-full bg-foreground/20" />
+            <span className="text-border-subtle">/</span>
           )}
           {date && <span>{date}</span>}
         </div>

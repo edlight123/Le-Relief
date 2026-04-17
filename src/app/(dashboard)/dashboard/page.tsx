@@ -42,16 +42,20 @@ export default async function DashboardPage() {
   const stats = [
     { label: "Total Articles", value: totalArticles, icon: FileText },
     { label: "Publiés", value: publishedCount, icon: FileText },
+    { label: "Brouillons", value: draftCount, icon: FileText },
     { label: "Total Vues", value: totalViews, icon: Eye },
     { label: "Utilisateurs", value: totalUsers, icon: Users },
   ];
 
   return (
     <div className="space-y-8">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-neutral-900 dark:text-white">
-          Tableau de Bord
-        </h1>
+      <div className="flex items-end justify-between border-t-2 border-border-strong pt-4">
+        <div>
+          <p className="page-kicker mb-2">Bureau</p>
+          <h1 className="font-headline text-5xl font-extrabold leading-none text-foreground">
+            Tableau de bord
+          </h1>
+        </div>
         <Link href="/dashboard/articles/new">
           <Button size="sm">
             <PenSquare className="h-4 w-4 mr-2" />
@@ -62,20 +66,19 @@ export default async function DashboardPage() {
 
       <StatsCards stats={stats} />
 
-      {/* Recent articles */}
-      <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-xl">
-        <div className="px-6 py-4 border-b border-neutral-100 dark:border-neutral-800">
-          <h2 className="text-sm font-semibold text-neutral-900 dark:text-white">
-            Articles Récents
+      <div className="border border-border-subtle bg-surface">
+        <div className="border-b border-border-strong px-6 py-4">
+          <h2 className="font-label text-xs font-extrabold uppercase text-foreground">
+            Articles récents
           </h2>
         </div>
-        <div className="divide-y divide-neutral-100 dark:divide-neutral-800">
+        <div className="divide-y divide-border-subtle">
           {recentArticles.length === 0 ? (
-            <div className="px-6 py-8 text-center text-neutral-400">
+            <div className="px-6 py-8 text-center font-body text-muted">
               Aucun article pour le moment.{" "}
               <Link
                 href="/dashboard/articles/new"
-                className="text-blue-600 hover:underline"
+                className="ink-link text-primary"
               >
                 Créez votre premier article
               </Link>
@@ -85,13 +88,13 @@ export default async function DashboardPage() {
               <Link
                 key={article.id as string}
                 href={`/dashboard/articles/${article.id}/edit`}
-                className="flex items-center justify-between px-6 py-4 hover:bg-neutral-50 dark:hover:bg-neutral-800/50 transition-colors"
+                className="flex items-center justify-between px-6 py-4 transition-colors hover:bg-surface-newsprint"
               >
                 <div className="min-w-0 flex-1">
-                  <p className="font-medium text-neutral-900 dark:text-white truncate">
+                  <p className="truncate font-headline text-xl font-bold text-foreground">
                     {String(article.title)}
                   </p>
-                  <p className="text-xs text-neutral-500 mt-1">
+                  <p className="mt-1 font-label text-xs uppercase text-muted">
                     {String((article.author as Record<string, unknown>)?.name || "Unknown")} &middot;{" "}
                     {article.updatedAt ? format(new Date((article.updatedAt as {toDate?: () => Date})?.toDate?.() ?? article.updatedAt as string), "d MMM yyyy", { locale: fr }) : ""}
                   </p>

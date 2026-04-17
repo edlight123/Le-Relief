@@ -38,9 +38,12 @@ export default function NewArticlePage() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-bold text-neutral-900 dark:text-white">
-        New Article
-      </h1>
+      <header>
+        <p className="page-kicker mb-2">Composer</p>
+        <h1 className="font-headline text-5xl font-extrabold leading-none text-foreground">
+          New Article
+        </h1>
+      </header>
       <ArticleEditor
         categories={categories}
         onSubmit={handleSubmit}

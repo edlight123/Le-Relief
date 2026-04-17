@@ -41,10 +41,13 @@ export default function ArticlesPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-neutral-900 dark:text-white">
-          Articles
-        </h1>
+      <div className="flex items-end justify-between border-t-2 border-border-strong pt-4">
+        <div>
+          <p className="page-kicker mb-2">Rédaction</p>
+          <h1 className="font-headline text-5xl font-extrabold leading-none text-foreground">
+            Articles
+          </h1>
+        </div>
         <Link href="/dashboard/articles/new">
           <Button size="sm">
             <PenSquare className="h-4 w-4 mr-2" />
@@ -54,15 +57,15 @@ export default function ArticlesPage() {
       </div>
 
       {/* Filter */}
-      <div className="flex gap-2">
+      <div className="flex gap-2 border-y border-border-subtle py-3">
         {["all", "draft", "published"].map((f) => (
           <button
             key={f}
             onClick={() => setFilter(f)}
-            className={`px-4 py-1.5 text-sm rounded-full transition-colors ${
+            className={`border px-4 py-1.5 font-label text-xs font-bold uppercase transition-colors ${
               filter === f
-                ? "bg-neutral-900 text-white dark:bg-white dark:text-neutral-900"
-                : "bg-neutral-100 text-neutral-600 dark:bg-neutral-800 dark:text-neutral-400 hover:bg-neutral-200 dark:hover:bg-neutral-700"
+                ? "border-border-strong bg-foreground text-background"
+                : "border-border-subtle bg-surface text-muted hover:text-foreground"
             }`}
           >
             {f.charAt(0).toUpperCase() + f.slice(1)}
@@ -71,40 +74,40 @@ export default function ArticlesPage() {
       </div>
 
       {/* Table */}
-      <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-xl overflow-hidden">
+      <div className="overflow-hidden border border-border-subtle bg-surface">
         <table className="w-full text-sm">
           <thead>
-            <tr className="border-b border-neutral-200 dark:border-neutral-800 bg-neutral-50 dark:bg-neutral-900/50">
-              <th className="px-4 py-3 text-left font-medium text-neutral-500">
+            <tr className="border-b border-border-strong bg-surface-newsprint">
+              <th className="px-4 py-3 text-left font-label text-xs font-extrabold uppercase text-muted">
                 Title
               </th>
-              <th className="px-4 py-3 text-left font-medium text-neutral-500 hidden md:table-cell">
+              <th className="hidden px-4 py-3 text-left font-label text-xs font-extrabold uppercase text-muted md:table-cell">
                 Category
               </th>
-              <th className="px-4 py-3 text-left font-medium text-neutral-500">
+              <th className="px-4 py-3 text-left font-label text-xs font-extrabold uppercase text-muted">
                 Status
               </th>
-              <th className="px-4 py-3 text-left font-medium text-neutral-500 hidden sm:table-cell">
+              <th className="hidden px-4 py-3 text-left font-label text-xs font-extrabold uppercase text-muted sm:table-cell">
                 Views
               </th>
-              <th className="px-4 py-3 text-left font-medium text-neutral-500 hidden lg:table-cell">
+              <th className="hidden px-4 py-3 text-left font-label text-xs font-extrabold uppercase text-muted lg:table-cell">
                 Date
               </th>
-              <th className="px-4 py-3 text-right font-medium text-neutral-500">
+              <th className="px-4 py-3 text-right font-label text-xs font-extrabold uppercase text-muted">
                 Actions
               </th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-neutral-100 dark:divide-neutral-800">
+          <tbody className="divide-y divide-border-subtle">
             {loading ? (
               <tr>
-                <td colSpan={6} className="px-4 py-8 text-center text-neutral-400">
+                <td colSpan={6} className="px-4 py-8 text-center font-body text-muted">
                   Loading...
                 </td>
               </tr>
             ) : articles.length === 0 ? (
               <tr>
-                <td colSpan={6} className="px-4 py-8 text-center text-neutral-400">
+                <td colSpan={6} className="px-4 py-8 text-center font-body text-muted">
                   No articles found
                 </td>
               </tr>
@@ -112,14 +115,14 @@ export default function ArticlesPage() {
               articles.map((article) => (
                 <tr
                   key={article.id}
-                  className="hover:bg-neutral-50 dark:hover:bg-neutral-800/50"
+                  className="hover:bg-surface-newsprint"
                 >
                   <td className="px-4 py-3">
-                    <span className="font-medium text-neutral-900 dark:text-white">
+                    <span className="font-headline text-lg font-bold text-foreground">
                       {article.title}
                     </span>
                   </td>
-                  <td className="px-4 py-3 hidden md:table-cell text-neutral-500">
+                  <td className="hidden px-4 py-3 font-label text-muted md:table-cell">
                     {article.category?.name || "—"}
                   </td>
                   <td className="px-4 py-3">
@@ -131,10 +134,10 @@ export default function ArticlesPage() {
                       {article.status}
                     </Badge>
                   </td>
-                  <td className="px-4 py-3 hidden sm:table-cell text-neutral-500">
+                  <td className="hidden px-4 py-3 font-label text-muted sm:table-cell">
                     {article.views}
                   </td>
-                  <td className="px-4 py-3 hidden lg:table-cell text-neutral-500">
+                  <td className="hidden px-4 py-3 font-label text-muted lg:table-cell">
                     {format(new Date(article.updatedAt), "MMM d, yyyy")}
                   </td>
                   <td className="px-4 py-3 text-right">
@@ -145,15 +148,15 @@ export default function ArticlesPage() {
                             `/dashboard/articles/${article.id}/edit`
                           )
                         }
-                        className="p-2 rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors"
+                        className="border border-transparent p-2 transition-colors hover:border-border-subtle"
                       >
-                        <PenSquare className="h-4 w-4 text-neutral-500" />
+                        <PenSquare className="h-4 w-4 text-muted" />
                       </button>
                       <button
                         onClick={() => handleDelete(article.id)}
-                        className="p-2 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
+                        className="border border-transparent p-2 transition-colors hover:border-primary"
                       >
-                        <Trash2 className="h-4 w-4 text-red-500" />
+                        <Trash2 className="h-4 w-4 text-primary" />
                       </button>
                     </div>
                   </td>

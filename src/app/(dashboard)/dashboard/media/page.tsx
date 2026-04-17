@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { Upload, Trash2 } from "lucide-react";
+import Image from "next/image";
 import Button from "@/components/ui/Button";
 import Card from "@/components/ui/Card";
 
@@ -51,10 +52,13 @@ export default function MediaPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-neutral-900 dark:text-white">
-          Media Library
-        </h1>
+      <div className="flex items-end justify-between border-t-2 border-border-strong pt-4">
+        <div>
+          <p className="page-kicker mb-2">Archives visuelles</p>
+          <h1 className="font-headline text-5xl font-extrabold leading-none text-foreground">
+            Media Library
+          </h1>
+        </div>
         <Button
           size="sm"
           onClick={() => inputRef.current?.click()}
@@ -73,32 +77,35 @@ export default function MediaPage() {
       </div>
 
       {loading ? (
-        <p className="text-neutral-400 text-center py-8">Loading...</p>
+        <p className="py-8 text-center font-body text-muted">Loading...</p>
       ) : media.length === 0 ? (
         <Card>
-          <div className="px-6 py-12 text-center text-neutral-400">
+          <div className="px-6 py-12 text-center font-body text-muted">
             No media uploaded yet. Click Upload to add files.
           </div>
         </Card>
       ) : (
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
           {media.map((item) => (
             <div
               key={item.id}
-              className="relative group rounded-xl overflow-hidden border border-neutral-200 dark:border-neutral-800"
+              className="group relative h-40 overflow-hidden border border-border-subtle"
             >
-              <img
+              <Image
                 src={item.url}
                 alt={item.filename}
-                className="w-full h-40 object-cover"
+                fill
+                sizes="(min-width: 1024px) 25vw, (min-width: 768px) 33vw, 50vw"
+                className="object-cover"
+                unoptimized
               />
-              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-colors flex items-end justify-between p-3 opacity-0 group-hover:opacity-100">
-                <p className="text-white text-xs truncate flex-1">
+              <div className="absolute inset-0 flex items-end justify-between bg-black/0 p-3 opacity-0 transition-colors group-hover:bg-black/50 group-hover:opacity-100">
+                <p className="flex-1 truncate font-label text-xs text-white">
                   {item.filename}
                 </p>
                 <button
                   onClick={() => handleDelete(item.id)}
-                  className="p-1.5 bg-red-600 rounded-lg hover:bg-red-700"
+                  className="bg-primary p-1.5 hover:bg-primary-dark"
                 >
                   <Trash2 className="h-3 w-3 text-white" />
                 </button>

@@ -11,7 +11,7 @@ export default function Card({ children, className, hover = false }: CardProps) 
   return (
     <div
       className={clsx(
-        "bg-surface border border-border-subtle rounded-xl overflow-hidden",
+        "overflow-hidden border border-border-subtle bg-surface",
         hover && "article-card",
         className
       )}
@@ -31,7 +31,7 @@ export function CardHeader({
   return (
     <div
       className={clsx(
-        "px-6 py-4 border-b border-border-subtle",
+        "border-b border-border-subtle px-6 py-4",
         className
       )}
     >

@@ -68,7 +68,7 @@ export default function ArticleEditor({
   }
 
   return (
-    <div className="max-w-4xl space-y-6">
+    <div className="max-w-4xl space-y-6 border-t-2 border-border-strong pt-5">
       <Input
         label="Titre"
         id="title"
@@ -86,7 +86,7 @@ export default function ArticleEditor({
       />
 
       <div>
-        <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1.5">
+        <label className="mb-2 block font-label text-xs font-extrabold uppercase text-foreground">
           Image de Couverture
         </label>
         <MediaUploader
@@ -97,13 +97,13 @@ export default function ArticleEditor({
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1.5">
+        <label className="mb-2 block font-label text-xs font-extrabold uppercase text-foreground">
           Catégorie
         </label>
         <select
           value={categoryId}
           onChange={(e) => setCategoryId(e.target.value)}
-          className="w-full rounded-lg border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-900 text-neutral-900 dark:text-neutral-100 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-neutral-400"
+          className="w-full border border-border-subtle bg-surface px-4 py-3 font-label text-sm text-foreground focus:border-primary focus:outline-none"
         >
           <option value="">Sélectionner une catégorie</option>
           {categories.map((cat) => (
@@ -117,7 +117,7 @@ export default function ArticleEditor({
       <div>
         <label
           htmlFor="excerpt"
-          className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1.5"
+          className="mb-2 block font-label text-xs font-extrabold uppercase text-foreground"
         >
           Extrait
         </label>
@@ -127,14 +127,14 @@ export default function ArticleEditor({
           placeholder="Courte description..."
           value={excerpt}
           onChange={(e) => setExcerpt(e.target.value)}
-          className="w-full rounded-lg border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-900 text-neutral-900 dark:text-neutral-100 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-neutral-400 resize-none"
+          className="w-full resize-none border border-border-subtle bg-surface px-4 py-3 font-label text-sm text-foreground focus:border-primary focus:outline-none"
         />
       </div>
 
       <div>
         <label
           htmlFor="body"
-          className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1.5"
+          className="mb-2 block font-label text-xs font-extrabold uppercase text-foreground"
         >
           Contenu
         </label>
@@ -144,7 +144,7 @@ export default function ArticleEditor({
           placeholder="Écrivez le contenu de votre article..."
           value={body}
           onChange={(e) => setBody(e.target.value)}
-          className="w-full rounded-lg border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-900 text-neutral-900 dark:text-neutral-100 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-neutral-400 font-mono leading-relaxed resize-none"
+          className="w-full resize-none border border-border-subtle bg-surface px-4 py-3 font-mono text-sm leading-relaxed text-foreground focus:border-primary focus:outline-none"
         />
       </div>
 

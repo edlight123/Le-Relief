@@ -34,13 +34,14 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-[80vh] flex items-center justify-center px-4">
-      <div className="w-full max-w-md">
-        <div className="text-center mb-8">
-          <h1 className="text-2xl font-bold text-foreground">
+    <div className="newspaper-shell flex min-h-[80vh] items-center justify-center py-10">
+      <div className="w-full max-w-md border-t-2 border-border-strong pt-6">
+        <div className="mb-8 text-center">
+          <p className="page-kicker mb-3">Espace rédaction</p>
+          <h1 className="font-headline text-4xl font-extrabold text-foreground">
             Bon retour
           </h1>
-          <p className="mt-2 text-sm text-neutral-500 dark:text-neutral-400">
+          <p className="mt-2 font-body text-lg text-muted">
             Connectez-vous pour accéder à votre tableau de bord
           </p>
         </div>
@@ -66,7 +67,7 @@ export default function LoginPage() {
           />
 
           {error && (
-            <p className="text-sm text-red-500 text-center">{error}</p>
+            <p className="text-center font-label text-sm text-primary">{error}</p>
           )}
 
           <Button type="submit" className="w-full" size="lg" disabled={loading}>
@@ -80,7 +81,7 @@ export default function LoginPage() {
               <div className="w-full border-t border-border-subtle" />
             </div>
             <div className="relative flex justify-center text-xs">
-              <span className="px-2 bg-surface text-neutral-400">
+              <span className="bg-surface px-2 text-muted">
                 ou continuer avec
               </span>
             </div>
@@ -89,18 +90,18 @@ export default function LoginPage() {
           <div className="mt-4">
             <button
               onClick={() => signIn("google", { callbackUrl: "/dashboard" })}
-              className="flex items-center justify-center w-full px-4 py-2.5 border border-border-subtle rounded-lg hover:bg-surface-elevated transition-colors text-sm font-medium text-neutral-700 dark:text-neutral-300"
+              className="flex w-full items-center justify-center border border-border-subtle px-4 py-3 font-label text-sm font-bold text-foreground transition-colors hover:bg-surface-elevated"
             >
               Google
             </button>
           </div>
         </div>
 
-        <p className="mt-8 text-center text-sm text-neutral-500 dark:text-neutral-400">
+        <p className="mt-8 text-center font-body text-base text-muted">
           Pas encore de compte ?{" "}
           <Link
             href="/signup"
-            className="font-medium text-primary hover:text-primary-light"
+            className="ink-link font-label font-bold text-primary"
           >
             S&apos;inscrire
           </Link>

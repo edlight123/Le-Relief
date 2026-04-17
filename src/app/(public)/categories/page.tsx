@@ -17,21 +17,26 @@ export default async function CategoriesIndexPage() {
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-      <h1 className="text-3xl md:text-4xl font-bold text-foreground tracking-tight animate-fade-in-up">
-        Catégories
-      </h1>
+    <div className="newspaper-shell py-10 sm:py-14">
+      <header className="mb-10 border-t-2 border-border-strong pt-5">
+        <p className="page-kicker mb-3">Rubriques</p>
+        <h1 className="editorial-title text-5xl text-foreground sm:text-7xl">
+          Catégories
+        </h1>
+        <p className="editorial-deck mt-4 max-w-2xl font-body text-xl">
+          Parcourez les dossiers, analyses et reportages publiés par la rédaction.
+        </p>
+      </header>
 
-      <div className="section-divider mt-3 mb-12" />
       {categories.length > 0 ? (
-        <CategoryGrid categories={categories.map(c => ({
+        <CategoryGrid variant="grid" categories={categories.map(c => ({
           name: c.name as string,
           slug: c.slug as string,
           description: c.description as string | null,
           _count: c._count as { articles: number },
         }))} />
       ) : (
-        <p className="text-neutral-500 dark:text-neutral-400">
+        <p className="border-t border-border-subtle py-8 font-body text-lg text-muted">
           Aucune catégorie pour le moment.
         </p>
       )}

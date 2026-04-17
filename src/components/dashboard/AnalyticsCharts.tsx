@@ -29,11 +29,11 @@ export default function AnalyticsCharts({
   publishedData,
 }: AnalyticsChartsProps) {
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
       {/* Views over time */}
       <Card>
         <CardHeader>
-          <h3 className="text-sm font-semibold text-neutral-900 dark:text-white">
+          <h3 className="font-label text-xs font-extrabold uppercase text-foreground">
             Views Over Time
           </h3>
         </CardHeader>
@@ -43,22 +43,22 @@ export default function AnalyticsCharts({
               <LineChart data={viewsData}>
                 <CartesianGrid
                   strokeDasharray="3 3"
-                  className="stroke-neutral-200 dark:stroke-neutral-800"
+                  className="stroke-border-subtle"
                 />
                 <XAxis
                   dataKey="label"
                   tick={{ fontSize: 12 }}
-                  className="text-neutral-500"
+                  className="text-muted"
                 />
                 <YAxis
                   tick={{ fontSize: 12 }}
-                  className="text-neutral-500"
+                  className="text-muted"
                 />
                 <Tooltip
                   contentStyle={{
                     backgroundColor: "var(--tooltip-bg, #fff)",
                     border: "1px solid var(--tooltip-border, #e5e7eb)",
-                    borderRadius: "8px",
+                    borderRadius: "2px",
                     fontSize: "13px",
                   }}
                 />
@@ -67,9 +67,9 @@ export default function AnalyticsCharts({
                   type="monotone"
                   dataKey="value"
                   name="Views"
-                  stroke="#3b82f6"
+                  stroke="var(--accent-blue)"
                   strokeWidth={2}
-                  dot={{ fill: "#3b82f6", r: 3 }}
+                  dot={{ fill: "var(--accent-blue)", r: 3 }}
                   activeDot={{ r: 5 }}
                 />
               </LineChart>
@@ -81,7 +81,7 @@ export default function AnalyticsCharts({
       {/* Articles published */}
       <Card>
         <CardHeader>
-          <h3 className="text-sm font-semibold text-neutral-900 dark:text-white">
+          <h3 className="font-label text-xs font-extrabold uppercase text-foreground">
             Articles Published
           </h3>
         </CardHeader>
@@ -91,22 +91,22 @@ export default function AnalyticsCharts({
               <BarChart data={publishedData}>
                 <CartesianGrid
                   strokeDasharray="3 3"
-                  className="stroke-neutral-200 dark:stroke-neutral-800"
+                  className="stroke-border-subtle"
                 />
                 <XAxis
                   dataKey="label"
                   tick={{ fontSize: 12 }}
-                  className="text-neutral-500"
+                  className="text-muted"
                 />
                 <YAxis
                   tick={{ fontSize: 12 }}
-                  className="text-neutral-500"
+                  className="text-muted"
                 />
                 <Tooltip
                   contentStyle={{
                     backgroundColor: "var(--tooltip-bg, #fff)",
                     border: "1px solid var(--tooltip-border, #e5e7eb)",
-                    borderRadius: "8px",
+                    borderRadius: "2px",
                     fontSize: "13px",
                   }}
                 />
@@ -114,8 +114,7 @@ export default function AnalyticsCharts({
                 <Bar
                   dataKey="value"
                   name="Published"
-                  fill="#10b981"
-                  radius={[4, 4, 0, 0]}
+                  fill="var(--accent-teal)"
                 />
               </BarChart>
             </ResponsiveContainer>

@@ -14,20 +14,6 @@ interface CategoryGridProps {
   variant?: "grid" | "sidebar";
 }
 
-const categoryIcons: Record<string, string> = {
-  world: "🌍",
-  technology: "⚡",
-  culture: "🎭",
-  business: "📊",
-  science: "🔬",
-  opinion: "💬",
-  politics: "🏛️",
-  environment: "🌿",
-  health: "🏥",
-  arts: "🎨",
-  sport: "⚽",
-};
-
 export default function CategoryGrid({
   categories,
   className,
@@ -36,17 +22,21 @@ export default function CategoryGrid({
   /* Sidebar variant - vertical list with icons */
   if (variant === "sidebar") {
     return (
-      <nav className={clsx("flex flex-col gap-1", className)}>
-        {categories.map((cat) => (
+      <nav className={clsx("flex flex-col", className)}>
+        {categories.map((cat, index) => (
           <Link
             key={cat.slug}
             href={`/categories/${cat.slug}`}
-            className="flex items-center gap-4 py-3 px-4 rounded-md transition-transform duration-200 hover:translate-x-1 text-muted group active:opacity-70"
+            className="group flex items-center gap-4 border-b border-border-subtle py-3 text-muted transition-colors hover:text-primary"
           >
-            <span className="text-lg">{categoryIcons[cat.slug] || "📰"}</span>
-            <span className="font-medium text-sm font-body">{cat.name}</span>
+            <span className="font-label text-[10px] font-extrabold uppercase text-muted/70">
+              {String(index + 1).padStart(2, "0")}
+            </span>
+            <span className="font-headline text-lg font-bold leading-none text-foreground group-hover:text-primary">
+              {cat.name}
+            </span>
             {cat._count && (
-              <span className="ml-auto text-[10px] text-muted/60 font-label">
+              <span className="ml-auto font-label text-[10px] font-bold uppercase text-muted">
                 {cat._count.articles}
               </span>
             )}
@@ -60,29 +50,35 @@ export default function CategoryGrid({
   return (
     <div
       className={clsx(
-        "grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3",
+        "grid grid-cols-1 gap-0 border-t border-border-strong sm:grid-cols-2 lg:grid-cols-3",
         className
       )}
     >
-      {categories.map((cat) => (
+      {categories.map((cat, index) => (
         <Link
           key={cat.slug}
           href={`/categories/${cat.slug}`}
-          className="group relative rounded-lg p-5 bg-surface border border-border-subtle hover:border-primary/30 transition-all duration-300 article-card overflow-hidden text-center"
+          className="group border-b border-border-subtle px-0 py-6 transition-colors hover:bg-surface-newsprint sm:px-5"
         >
-          <div className="absolute inset-0 bg-gradient-to-br from-primary/[0.03] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-          <div className="relative">
-            <div className="text-2xl mb-3">
-              {categoryIcons[cat.slug] || "📰"}
-            </div>
-            <h3 className="font-semibold text-sm text-foreground group-hover:text-primary transition-colors duration-300 font-headline">
+          <div className="flex items-start gap-4">
+            <span className="mt-1 font-label text-[10px] font-extrabold uppercase text-primary">
+              {String(index + 1).padStart(2, "0")}
+            </span>
+            <div>
+            <h3 className="font-headline text-2xl font-bold leading-tight text-foreground transition-colors group-hover:text-primary">
               {cat.name}
             </h3>
             {cat._count && (
-              <p className="text-[11px] text-muted mt-1.5 font-label font-medium">
+              <p className="mt-2 font-label text-[10px] font-bold uppercase text-muted">
                 {cat._count.articles} article{cat._count.articles !== 1 ? "s" : ""}
               </p>
             )}
+            {cat.description && (
+              <p className="mt-3 line-clamp-2 font-body text-base leading-relaxed text-muted">
+                {cat.description}
+              </p>
+            )}
+            </div>
           </div>
         </Link>
       ))}

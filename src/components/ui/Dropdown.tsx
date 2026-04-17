@@ -45,14 +45,14 @@ export default function Dropdown({
       ) : (
         <button
           onClick={() => setIsOpen(!isOpen)}
-          className="inline-flex items-center gap-2 px-4 py-2 text-sm border border-neutral-300 dark:border-neutral-700 rounded-lg bg-white dark:bg-neutral-900 text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-colors"
+          className="inline-flex items-center gap-2 border border-border-subtle bg-surface px-4 py-2 font-label text-sm text-foreground transition-colors hover:bg-surface-elevated"
         >
           {label}
           <ChevronDown className="h-4 w-4" />
         </button>
       )}
       {isOpen && (
-        <div className="absolute z-40 mt-1 min-w-[160px] bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-lg shadow-lg py-1">
+        <div className="absolute z-40 mt-1 min-w-[160px] border border-border-subtle bg-surface py-1 shadow-lg">
           {items.map((item) => (
             <button
               key={item.value}
@@ -61,7 +61,7 @@ export default function Dropdown({
                 onSelect?.(item.value);
                 setIsOpen(false);
               }}
-              className="w-full px-4 py-2 text-left text-sm text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors"
+              className="w-full px-4 py-2 text-left font-label text-sm text-foreground transition-colors hover:bg-surface-elevated"
             >
               {item.label}
             </button>

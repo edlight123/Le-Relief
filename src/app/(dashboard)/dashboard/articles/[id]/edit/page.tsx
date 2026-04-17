@@ -65,7 +65,7 @@ export default function EditArticlePage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-16">
-        <p className="text-neutral-400">Loading...</p>
+        <p className="font-body text-muted">Loading...</p>
       </div>
     );
   }
@@ -73,16 +73,19 @@ export default function EditArticlePage() {
   if (!article) {
     return (
       <div className="flex items-center justify-center py-16">
-        <p className="text-neutral-400">Article not found</p>
+        <p className="font-body text-muted">Article not found</p>
       </div>
     );
   }
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-bold text-neutral-900 dark:text-white">
-        Edit Article
-      </h1>
+      <header>
+        <p className="page-kicker mb-2">Révision</p>
+        <h1 className="font-headline text-5xl font-extrabold leading-none text-foreground">
+          Edit Article
+        </h1>
+      </header>
       <ArticleEditor
         initial={article}
         categories={categories}

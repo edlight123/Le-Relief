@@ -61,18 +61,21 @@ export default function SettingsPage() {
 
   return (
     <div className="space-y-8 max-w-2xl">
-      <h1 className="text-2xl font-bold text-neutral-900 dark:text-white">
-        Settings
-      </h1>
+      <header className="border-t-2 border-border-strong pt-4">
+        <p className="page-kicker mb-2">Configuration</p>
+        <h1 className="font-headline text-5xl font-extrabold leading-none text-foreground">
+          Settings
+        </h1>
+      </header>
 
       {message && (
-        <p className="text-sm text-green-600 dark:text-green-400">{message}</p>
+        <p className="font-label text-sm font-bold text-accent-teal">{message}</p>
       )}
 
       {/* Profile */}
       <Card>
         <CardHeader>
-          <h2 className="text-sm font-semibold text-neutral-900 dark:text-white">
+          <h2 className="font-label text-xs font-extrabold uppercase text-foreground">
             Profile
           </h2>
         </CardHeader>
@@ -100,7 +103,7 @@ export default function SettingsPage() {
       {/* Social Links */}
       <Card>
         <CardHeader>
-          <h2 className="text-sm font-semibold text-neutral-900 dark:text-white">
+          <h2 className="font-label text-xs font-extrabold uppercase text-foreground">
             Social Links
           </h2>
         </CardHeader>
