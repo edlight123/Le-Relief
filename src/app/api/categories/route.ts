@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import * as categoriesRepo from "@/lib/repositories/categories";
 import { auth } from "@/lib/auth";
 import { generateSlug } from "@/lib/slug";
+import { hasRole } from "@/lib/permissions";
 
 export async function GET() {
   const categories = await categoriesRepo.getCategoriesWithCounts();
@@ -10,7 +11,14 @@ export async function GET() {
 
 export async function POST(req: NextRequest) {
   const session = await auth();
-  if (!session?.user) {
+  const sessionRole = (session?.user as { role?: "reader" | "publisher" | "admin" } | undefined)?.role;
+  if (
+    !session?.user ||
+    !hasRole(
+      sessionRole || "reader",
+      "admin"
+    )
+  ) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 

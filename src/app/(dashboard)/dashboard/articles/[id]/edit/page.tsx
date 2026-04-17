@@ -16,6 +16,7 @@ export default function EditArticlePage() {
     excerpt: string;
     coverImage: string;
     categoryId: string;
+    tags: string[];
     status: string;
   } | null>(null);
   const [categories, setCategories] = useState<{ id: string; name: string }[]>(
@@ -35,6 +36,7 @@ export default function EditArticlePage() {
         excerpt: articleData.excerpt || "",
         coverImage: articleData.coverImage || "",
         categoryId: articleData.categoryId || "",
+        tags: Array.isArray(articleData.tags) ? articleData.tags : [],
         status: articleData.status || "draft",
       });
       setCategories(catData.categories || []);
@@ -49,6 +51,7 @@ export default function EditArticlePage() {
     excerpt: string;
     coverImage: string;
     categoryId: string;
+    tags: string[];
     status: string;
   }) {
     const res = await fetch(`/api/articles/${id}`, {

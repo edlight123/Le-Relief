@@ -23,6 +23,7 @@ export default function NewArticlePage() {
     excerpt: string;
     coverImage: string;
     categoryId: string;
+    tags: string[];
     status: string;
   }) {
     const res = await fetch("/api/articles", {

@@ -13,6 +13,7 @@ interface ArticleEditorProps {
     excerpt: string;
     coverImage: string;
     categoryId: string;
+    tags: string[];
     status: string;
   };
   categories: { id: string; name: string }[];
@@ -23,6 +24,7 @@ interface ArticleEditorProps {
     excerpt: string;
     coverImage: string;
     categoryId: string;
+    tags: string[];
     status: string;
   }) => Promise<void>;
   submitLabel?: string;
@@ -40,11 +42,17 @@ export default function ArticleEditor({
   const [excerpt, setExcerpt] = useState(initial?.excerpt || "");
   const [coverImage, setCoverImage] = useState(initial?.coverImage || "");
   const [categoryId, setCategoryId] = useState(initial?.categoryId || "");
+  const [tagsInput, setTagsInput] = useState((initial?.tags || []).join(", "));
   const [saving, setSaving] = useState(false);
 
   async function handleSubmit(status: string) {
     setSaving(true);
     try {
+      const tags = tagsInput
+        .split(",")
+        .map((tag) => tag.trim())
+        .filter(Boolean);
+
       await onSubmit({
         title,
         subtitle,
@@ -52,6 +60,7 @@ export default function ArticleEditor({
         excerpt,
         coverImage,
         categoryId,
+        tags,
         status,
       });
     } finally {
@@ -116,6 +125,23 @@ export default function ArticleEditor({
 
       <div>
         <label
+          htmlFor="tags"
+          className="mb-2 block font-label text-xs font-extrabold uppercase text-foreground"
+        >
+          Tags
+        </label>
+        <input
+          id="tags"
+          type="text"
+          placeholder="politique, économie, société"
+          value={tagsInput}
+          onChange={(e) => setTagsInput(e.target.value)}
+          className="w-full border border-border-subtle bg-surface px-4 py-3 font-label text-sm text-foreground focus:border-primary focus:outline-none"
+        />
+      </div>
+
+      <div>
+        <label
           htmlFor="excerpt"
           className="mb-2 block font-label text-xs font-extrabold uppercase text-foreground"
         >
@@ -154,6 +180,13 @@ export default function ArticleEditor({
           disabled={saving || !title || !body}
         >
           {saving ? "Enregistrement..." : submitLabel}
+        </Button>
+        <Button
+          variant="outline"
+          onClick={() => handleSubmit("pending_review")}
+          disabled={saving || !title || !body}
+        >
+          Soumettre en revue
         </Button>
         <Button
           variant="outline"

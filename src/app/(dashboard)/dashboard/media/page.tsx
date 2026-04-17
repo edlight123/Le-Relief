@@ -97,7 +97,6 @@ export default function MediaPage() {
                 fill
                 sizes="(min-width: 1024px) 25vw, (min-width: 768px) 33vw, 50vw"
                 className="object-cover"
-                unoptimized
               />
               <div className="absolute inset-0 flex items-end justify-between bg-black/0 p-3 opacity-0 transition-colors group-hover:bg-black/50 group-hover:opacity-100">
                 <p className="flex-1 truncate font-label text-xs text-white">
@@ -105,7 +104,7 @@ export default function MediaPage() {
                 </p>
                 <button
                   onClick={() => handleDelete(item.id)}
-                  className="bg-primary p-1.5 hover:bg-primary-dark"
+                  className="bg-primary p-1.5 hover:bg-foreground"
                 >
                   <Trash2 className="h-3 w-3 text-white" />
                 </button>

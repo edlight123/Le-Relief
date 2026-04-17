@@ -19,6 +19,17 @@ interface Article {
   category?: { name: string } | null;
 }
 
+function getStatusBadgeVariant(status: string) {
+  switch (status) {
+    case "published":
+      return "success" as const;
+    case "pending_review":
+      return "info" as const;
+    default:
+      return "warning" as const;
+  }
+}
+
 export default function ArticlesPage() {
   const router = useRouter();
   const [articles, setArticles] = useState<Article[]>([]);
@@ -58,7 +69,7 @@ export default function ArticlesPage() {
 
       {/* Filter */}
       <div className="flex gap-2 border-y border-border-subtle py-3">
-        {["all", "draft", "published"].map((f) => (
+        {["all", "draft", "pending_review", "published"].map((f) => (
           <button
             key={f}
             onClick={() => setFilter(f)}
@@ -68,7 +79,7 @@ export default function ArticlesPage() {
                 : "border-border-subtle bg-surface text-muted hover:text-foreground"
             }`}
           >
-            {f.charAt(0).toUpperCase() + f.slice(1)}
+            {f.replace("_", " ")}
           </button>
         ))}
       </div>
@@ -126,11 +137,7 @@ export default function ArticlesPage() {
                     {article.category?.name || "—"}
                   </td>
                   <td className="px-4 py-3">
-                    <Badge
-                      variant={
-                        article.status === "published" ? "success" : "warning"
-                      }
-                    >
+                    <Badge variant={getStatusBadgeVariant(article.status)}>
                       {article.status}
                     </Badge>
                   </td>

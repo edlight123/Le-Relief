@@ -53,7 +53,6 @@ export default function MediaUploader({
             fill
             sizes="(min-width: 768px) 672px, 100vw"
             className="object-cover"
-            unoptimized
           />
           <button
             onClick={() => {

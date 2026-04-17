@@ -52,7 +52,6 @@ export default function Navbar() {
               height={40}
               className="h-8 w-8 rounded-sm md:h-10 md:w-10"
               priority
-              unoptimized
             />
             <span className="font-headline text-3xl font-extrabold leading-none text-foreground sm:text-4xl md:text-6xl">
               {siteConfig.name}

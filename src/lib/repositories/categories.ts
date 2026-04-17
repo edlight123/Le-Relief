@@ -61,3 +61,22 @@ export async function getCategoriesWithCounts(publishedOnly = false) {
     return { ...cat, _count: { articles: count } } as Record<string, unknown> & { _count: { articles: number } };
   });
 }
+
+export async function updateCategory(
+  id: string,
+  data: { name?: string; slug?: string; description?: string | null }
+) {
+  const clean = Object.fromEntries(
+    Object.entries(data).filter(([, v]) => v !== undefined)
+  );
+
+  await collection()
+    .doc(id)
+    .update({ ...clean, updatedAt: FieldValue.serverTimestamp() });
+
+  return getCategory(id);
+}
+
+export async function deleteCategory(id: string) {
+  await collection().doc(id).delete();
+}

@@ -14,6 +14,7 @@ export async function createArticle(data: {
   body: string;
   excerpt?: string | null;
   coverImage?: string | null;
+  tags?: string[];
   status?: string;
   featured?: boolean;
   authorId: string;
@@ -27,6 +28,7 @@ export async function createArticle(data: {
     subtitle: data.subtitle || null,
     excerpt: data.excerpt || null,
     coverImage: data.coverImage || null,
+    tags: data.tags || [],
     status: data.status || "draft",
     featured: data.featured || false,
     categoryId: data.categoryId || null,

@@ -2,6 +2,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { siteConfig } from "@/config/site.config";
 import SocialLinks from "@/components/public/SocialLinks";
+import NewsletterSignup from "@/components/public/NewsletterSignup";
 
 export default function Footer() {
   return (
@@ -15,7 +16,6 @@ export default function Footer() {
               width={34}
               height={34}
               className="rounded-sm"
-              unoptimized
             />
             <span className="font-headline text-4xl font-extrabold leading-none text-foreground sm:text-5xl">
               {siteConfig.name}
@@ -85,18 +85,7 @@ export default function Footer() {
             <p className="font-body text-base leading-relaxed text-muted">
               Recevez les grands titres et analyses de la semaine.
             </p>
-            <div className="relative">
-              <input
-                className="w-full border-0 border-b-2 border-border-strong bg-transparent px-0 py-2 font-label text-sm text-foreground placeholder:text-muted focus:border-primary focus:outline-none"
-                placeholder="Adresse email"
-                type="email"
-              />
-              <button className="absolute right-0 top-1/2 -translate-y-1/2 text-primary transition-colors hover:text-foreground">
-                <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
-                </svg>
-              </button>
-            </div>
+            <NewsletterSignup />
           </div>
 
           <div className="col-span-full mt-8 border-t border-border-strong pt-6 text-center">

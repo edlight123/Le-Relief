@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
@@ -7,6 +8,7 @@ import * as articlesRepo from "@/lib/repositories/articles";
 import * as usersRepo from "@/lib/repositories/users";
 import * as categoriesRepo from "@/lib/repositories/categories";
 import RelatedArticles from "@/components/public/RelatedArticles";
+import { siteConfig } from "@/config/site.config";
 
 export const dynamic = "force-dynamic";
 
@@ -14,13 +16,42 @@ interface Props {
   params: Promise<{ slug: string }>;
 }
 
-export async function generateMetadata({ params }: Props) {
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   const article = await articlesRepo.findBySlug(slug);
   if (!article) return {};
+
+  const title = `${article.title} | Le Relief`;
+  const description =
+    (article.excerpt as string) ||
+    "Retrouvez cet article sur Le Relief.";
+  const coverImage =
+    (article.coverImageFirebaseUrl as string | null) ||
+    (article.coverImage as string | null) ||
+    "/logo.png";
+
   return {
-    title: `${article.title} | Le Relief Haïti`,
-    description: (article.excerpt as string) || "",
+    title,
+    description,
+    alternates: {
+      canonical: `/articles/${slug}`,
+    },
+    openGraph: {
+      type: "article",
+      locale: "fr_FR",
+      url: `${siteConfig.url}/articles/${slug}`,
+      siteName: siteConfig.name,
+      title,
+      description,
+      images: [{ url: coverImage, alt: article.title as string }],
+      publishedTime: (article.publishedAt as string | null) || undefined,
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: [coverImage],
+    },
   };
 }
 
@@ -82,9 +113,41 @@ export default async function ArticlePage({ params }: Props) {
     (article.coverImage as string | null);
   const body = String(article.body || "");
   const bodyHasHtml = /<\/?[a-z][\s\S]*>/i.test(body);
+  const tags = Array.isArray(article.tags)
+    ? (article.tags as string[])
+    : [];
+  const articleUrl = `${siteConfig.url}/articles/${slug}`;
+  const articleLd = {
+    "@context": "https://schema.org",
+    "@type": "NewsArticle",
+    headline: String(article.title),
+    description: String(article.excerpt || ""),
+    image: coverImage ? [coverImage] : undefined,
+    datePublished: (article.publishedAt as string | null) || undefined,
+    dateModified: (article.updatedAt as string | null) || undefined,
+    mainEntityOfPage: articleUrl,
+    author: auth?.name
+      ? {
+          "@type": "Person",
+          name: String(auth.name),
+        }
+      : undefined,
+    publisher: {
+      "@type": "Organization",
+      name: siteConfig.name,
+      logo: {
+        "@type": "ImageObject",
+        url: `${siteConfig.url}/logo.png`,
+      },
+    },
+  };
 
   return (
     <article className="newspaper-shell py-10 sm:py-14">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(articleLd) }}
+      />
       <header className="border-t-2 border-border-strong pt-5">
         {cat ? (
           <Link
@@ -121,6 +184,19 @@ export default async function ArticlePage({ params }: Props) {
           ) : null}
         </div>
       </header>
+
+      {tags.length > 0 ? (
+        <div className="mt-4 flex flex-wrap gap-2 border-b border-border-subtle pb-4">
+          {tags.map((tag) => (
+            <span
+              key={tag}
+              className="border border-border-subtle px-2 py-1 font-label text-[11px] font-bold uppercase text-muted"
+            >
+              {tag}
+            </span>
+          ))}
+        </div>
+      ) : null}
 
       {coverImage ? (
         <figure className="mt-8">

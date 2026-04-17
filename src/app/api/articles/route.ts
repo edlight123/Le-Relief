@@ -4,6 +4,7 @@ import * as usersRepo from "@/lib/repositories/users";
 import * as categoriesRepo from "@/lib/repositories/categories";
 import { auth } from "@/lib/auth";
 import { generateSlug } from "@/lib/slug";
+import { hasRole } from "@/lib/permissions";
 
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
@@ -44,6 +45,16 @@ export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
     const slug = generateSlug(body.title);
+    const sessionRole = (session.user as { role?: "reader" | "publisher" | "admin" }).role;
+    const requestedStatus = body.status || "draft";
+    const canPublish = hasRole(
+      sessionRole || "reader",
+      "publisher"
+    );
+    const status =
+      requestedStatus === "published" && !canPublish
+        ? "pending_review"
+        : requestedStatus;
 
     const article = await articlesRepo.createArticle({
       title: body.title,
@@ -52,11 +63,14 @@ export async function POST(req: NextRequest) {
       body: body.body,
       excerpt: body.excerpt || null,
       coverImage: body.coverImage || null,
-      status: body.status || "draft",
+      tags: Array.isArray(body.tags)
+        ? body.tags.map((tag: unknown) => String(tag).trim()).filter(Boolean)
+        : [],
+      status,
       featured: body.featured || false,
       authorId: session.user.id,
       categoryId: body.categoryId || null,
-      publishedAt: body.status === "published" ? new Date() : null,
+      publishedAt: status === "published" ? new Date() : null,
     });
 
     return NextResponse.json(article, { status: 201 });

@@ -3,6 +3,7 @@ import * as articlesRepo from "@/lib/repositories/articles";
 import * as usersRepo from "@/lib/repositories/users";
 import * as categoriesRepo from "@/lib/repositories/categories";
 import { auth } from "@/lib/auth";
+import { hasRole } from "@/lib/permissions";
 
 interface RouteParams {
   params: Promise<{ id: string }>;
@@ -33,6 +34,10 @@ export async function PATCH(req: NextRequest, { params }: RouteParams) {
   }
 
   const { id } = await params;
+  const existing = await articlesRepo.getArticle(id);
+  if (!existing) {
+    return NextResponse.json({ error: "Not found" }, { status: 404 });
+  }
   const body = await req.json();
 
   const data: Record<string, unknown> = {};
@@ -42,11 +47,27 @@ export async function PATCH(req: NextRequest, { params }: RouteParams) {
   if (body.excerpt !== undefined) data.excerpt = body.excerpt || null;
   if (body.coverImage !== undefined) data.coverImage = body.coverImage || null;
   if (body.categoryId !== undefined) data.categoryId = body.categoryId || null;
+  if (body.tags !== undefined) {
+    data.tags = Array.isArray(body.tags)
+      ? body.tags.map((tag: unknown) => String(tag).trim()).filter(Boolean)
+      : [];
+  }
   if (body.featured !== undefined) data.featured = body.featured;
   if (body.status !== undefined) {
-    data.status = body.status;
-    if (body.status === "published") {
+    const sessionRole = (session.user as { role?: "reader" | "publisher" | "admin" }).role;
+    const canPublish = hasRole(
+      sessionRole || "reader",
+      "publisher"
+    );
+    const nextStatus =
+      body.status === "published" && !canPublish
+        ? "pending_review"
+        : body.status;
+    data.status = nextStatus;
+    if (nextStatus === "published" && !existing.publishedAt) {
       data.publishedAt = new Date();
+    } else if (nextStatus !== "published") {
+      data.publishedAt = null;
     }
   }
 

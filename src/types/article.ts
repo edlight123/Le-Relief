@@ -1,4 +1,4 @@
-export type ArticleStatus = "draft" | "published";
+export type ArticleStatus = "draft" | "pending_review" | "published";
 
 export interface Article {
   id: string;
@@ -18,7 +18,7 @@ export interface Article {
   categoryId: string | null;
   author?: { id: string; name: string | null; image: string | null };
   category?: { id: string; name: string; slug: string } | null;
-  tags?: { tag: { id: string; name: string; slug: string } }[];
+  tags?: string[];
 }
 
 export interface CreateArticleInput {

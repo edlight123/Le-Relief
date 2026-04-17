@@ -1,7 +1,21 @@
+const DEFAULT_APP_URL = "http://localhost:3000";
+
+function getNormalizedAppUrl() {
+  const envUrl = process.env.NEXT_PUBLIC_APP_URL;
+  const firstToken = envUrl?.split(/\s+/)[0]?.replaceAll('"', "").trim();
+  const candidate = firstToken || DEFAULT_APP_URL;
+
+  try {
+    return new URL(candidate).origin;
+  } catch {
+    return DEFAULT_APP_URL;
+  }
+}
+
 export const siteConfig = {
   name: "Le Relief",
   description: "Plateforme de Nouvelles et d'Éditoriaux Premium",
-  url: process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000",
+  url: getNormalizedAppUrl(),
   locale: "fr-FR",
   socials: {
     instagram: "https://www.instagram.com/lereliefhaiti",
