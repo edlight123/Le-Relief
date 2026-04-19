@@ -1,11 +1,11 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Button from "@/components/ui/Button";
 import Badge from "@/components/ui/Badge";
-import { PenSquare, Trash2 } from "lucide-react";
+import { PenSquare, Trash2, Search, Eye } from "lucide-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 
@@ -20,37 +20,36 @@ interface Article {
   category?: { name: string } | null;
 }
 
-function getStatusBadgeVariant(status: string) {
-  switch (status) {
-    case "published":
-      return "success" as const;
-    case "pending_review":
-      return "info" as const;
-    default:
-      return "warning" as const;
-  }
+const STATUS_FILTERS = [
+  { value: "all", label: "Tous" },
+  { value: "published", label: "Publiés" },
+  { value: "draft", label: "Brouillons" },
+  { value: "pending_review", label: "En revue" },
+];
+
+function statusVariant(status: string) {
+  if (status === "published") return "success" as const;
+  if (status === "pending_review") return "info" as const;
+  return "warning" as const;
 }
 
-function getStatusLabel(status: string) {
-  switch (status) {
-    case "published":
-      return "Publié";
-    case "pending_review":
-      return "En revue";
-    case "draft":
-      return "Brouillon";
-    default:
-      return status;
-  }
+function statusLabel(status: string) {
+  if (status === "published") return "Publié";
+  if (status === "pending_review") return "En revue";
+  if (status === "draft") return "Brouillon";
+  return status;
 }
 
 export default function ArticlesPage() {
   const router = useRouter();
   const [articles, setArticles] = useState<Article[]>([]);
   const [filter, setFilter] = useState("all");
+  const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   useEffect(() => {
+    setLoading(true);
     const params = filter !== "all" ? `?status=${filter}` : "";
     fetch(`/api/articles${params}`)
       .then((r) => r.json())
@@ -58,132 +57,165 @@ export default function ArticlesPage() {
       .finally(() => setLoading(false));
   }, [filter]);
 
+  const filtered = useMemo(() => {
+    if (!search.trim()) return articles;
+    const term = search.toLowerCase();
+    return articles.filter(
+      (a) =>
+        a.title.toLowerCase().includes(term) ||
+        a.author?.name?.toLowerCase().includes(term) ||
+        a.category?.name?.toLowerCase().includes(term),
+    );
+  }, [articles, search]);
+
   async function handleDelete(id: string) {
-    if (!confirm("Supprimer cet article ?")) return;
+    if (!confirm("Supprimer cet article définitivement ?")) return;
+    setDeletingId(id);
     await fetch(`/api/articles/${id}`, { method: "DELETE" });
     setArticles((prev) => prev.filter((a) => a.id !== id));
+    setDeletingId(null);
   }
 
   return (
     <div className="space-y-6">
-      <div className="flex items-end justify-between border-t-2 border-border-strong pt-4">
-        <div>
-          <p className="page-kicker mb-2">Rédaction</p>
-          <h1 className="font-headline text-5xl font-extrabold leading-none text-foreground">
-            Articles
-          </h1>
-        </div>
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <h1 className="font-headline text-3xl font-extrabold leading-none text-foreground">
+          Articles
+        </h1>
         <Link href="/dashboard/articles/new">
           <Button size="sm">
-            <PenSquare className="h-4 w-4 mr-2" />
+            <PenSquare className="mr-1.5 h-3.5 w-3.5" />
             Nouvel article
           </Button>
         </Link>
       </div>
 
-      {/* Filter */}
-      <div className="flex gap-2 border-y border-border-subtle py-3">
-        {["all", "draft", "pending_review", "published"].map((f) => (
-          <button
-            key={f}
-            onClick={() => setFilter(f)}
-            className={`border px-4 py-1.5 font-label text-xs font-bold uppercase transition-colors ${
-              filter === f
-                ? "border-border-strong bg-foreground text-background"
-                : "border-border-subtle bg-surface text-muted hover:text-foreground"
-            }`}
-          >
-            {f === "all"
-              ? "Tous"
-              : f === "draft"
-                ? "Brouillon"
-                : f === "pending_review"
-                  ? "En revue"
-                  : "Publié"}
-          </button>
-        ))}
+      {/* Toolbar */}
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+        {/* Search */}
+        <div className="relative flex-1">
+          <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted" />
+          <input
+            type="search"
+            placeholder="Rechercher un article…"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="w-full rounded-sm border border-border-subtle bg-surface py-2 pl-9 pr-4 font-label text-sm text-foreground placeholder:text-muted focus:border-primary focus:outline-none"
+          />
+        </div>
+        {/* Status filters */}
+        <div className="flex gap-1.5">
+          {STATUS_FILTERS.map((f) => (
+            <button
+              key={f.value}
+              onClick={() => setFilter(f.value)}
+              className={`rounded-sm px-3 py-1.5 font-label text-xs font-extrabold uppercase transition-colors ${
+                filter === f.value
+                  ? "bg-foreground text-background"
+                  : "bg-surface-elevated text-muted hover:text-foreground"
+              }`}
+            >
+              {f.label}
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* Table */}
-      <div className="overflow-hidden border border-border-subtle bg-surface">
-        <table className="w-full text-sm">
+      <div className="overflow-hidden rounded-sm border border-border-subtle bg-surface">
+        <table className="w-full">
           <thead>
-            <tr className="border-b border-border-strong bg-surface-newsprint">
-              <th className="px-4 py-3 text-left font-label text-xs font-extrabold uppercase text-muted">
+            <tr className="border-b border-border-subtle bg-surface-newsprint">
+              <th className="px-5 py-3 text-left font-label text-[11px] font-extrabold uppercase tracking-wider text-muted">
                 Titre
               </th>
-              <th className="hidden px-4 py-3 text-left font-label text-xs font-extrabold uppercase text-muted md:table-cell">
+              <th className="hidden px-5 py-3 text-left font-label text-[11px] font-extrabold uppercase tracking-wider text-muted md:table-cell">
                 Rubrique
               </th>
-              <th className="px-4 py-3 text-left font-label text-xs font-extrabold uppercase text-muted">
+              <th className="px-5 py-3 text-left font-label text-[11px] font-extrabold uppercase tracking-wider text-muted">
                 Statut
               </th>
-              <th className="hidden px-4 py-3 text-left font-label text-xs font-extrabold uppercase text-muted sm:table-cell">
+              <th className="hidden px-5 py-3 text-right font-label text-[11px] font-extrabold uppercase tracking-wider text-muted sm:table-cell">
                 Vues
               </th>
-              <th className="hidden px-4 py-3 text-left font-label text-xs font-extrabold uppercase text-muted lg:table-cell">
-                Date
+              <th className="hidden px-5 py-3 text-left font-label text-[11px] font-extrabold uppercase tracking-wider text-muted lg:table-cell">
+                Modifié
               </th>
-              <th className="px-4 py-3 text-right font-label text-xs font-extrabold uppercase text-muted">
-                Actions
-              </th>
+              <th className="px-5 py-3" />
             </tr>
           </thead>
           <tbody className="divide-y divide-border-subtle">
             {loading ? (
+              Array.from({ length: 5 }).map((_, i) => (
+                <tr key={i}>
+                  <td colSpan={6} className="px-5 py-4">
+                    <div className="h-4 animate-pulse rounded bg-surface-elevated" />
+                  </td>
+                </tr>
+              ))
+            ) : filtered.length === 0 ? (
               <tr>
-                <td colSpan={6} className="px-4 py-8 text-center font-body text-muted">
-                  Chargement...
-                </td>
-              </tr>
-            ) : articles.length === 0 ? (
-              <tr>
-                <td colSpan={6} className="px-4 py-8 text-center font-body text-muted">
-                  Aucun article trouvé
+                <td colSpan={6} className="px-5 py-12 text-center font-body text-sm text-muted">
+                  {search ? `Aucun résultat pour « ${search} »` : "Aucun article trouvé."}
                 </td>
               </tr>
             ) : (
-              articles.map((article) => (
+              filtered.map((article) => (
                 <tr
                   key={article.id}
-                  className="hover:bg-surface-newsprint"
+                  className="group cursor-pointer transition-colors hover:bg-surface-newsprint"
+                  onClick={() => router.push(`/dashboard/articles/${article.id}/edit`)}
                 >
-                  <td className="max-w-xs px-4 py-3 lg:max-w-sm">
-                    <span className="block truncate font-headline text-base font-bold text-foreground">
+                  <td className="max-w-xs px-5 py-3.5 lg:max-w-sm">
+                    <p className="truncate font-body text-sm font-semibold text-foreground">
                       {article.title}
-                    </span>
+                    </p>
+                    {article.author?.name ? (
+                      <p className="mt-0.5 truncate font-label text-xs text-muted">
+                        {article.author.name}
+                      </p>
+                    ) : null}
                   </td>
-                  <td className="hidden px-4 py-3 font-label text-muted md:table-cell">
-                    {article.category?.name || "—"}
+                  <td className="hidden px-5 py-3.5 font-label text-xs text-muted md:table-cell">
+                    {article.category?.name ?? <span className="text-muted/40">—</span>}
                   </td>
-                  <td className="px-4 py-3">
-                    <Badge variant={getStatusBadgeVariant(article.status)}>
-                      {getStatusLabel(article.status)}
+                  <td className="px-5 py-3.5">
+                    <Badge variant={statusVariant(article.status)}>
+                      {statusLabel(article.status)}
                     </Badge>
                   </td>
-                  <td className="hidden px-4 py-3 font-label text-muted sm:table-cell">
-                    {article.views}
+                  <td className="hidden px-5 py-3.5 text-right sm:table-cell">
+                    <span className="flex items-center justify-end gap-1 font-label text-xs text-muted">
+                      <Eye className="h-3 w-3" />
+                      {article.views.toLocaleString("fr-FR")}
+                    </span>
                   </td>
-                  <td className="hidden px-4 py-3 font-label text-muted lg:table-cell">
+                  <td className="hidden px-5 py-3.5 font-label text-xs text-muted lg:table-cell">
                     {format(new Date(article.updatedAt), "d MMM yyyy", { locale: fr })}
                   </td>
-                  <td className="px-4 py-3 text-right">
-                    <div className="flex justify-end gap-1">
+                  <td className="px-5 py-3.5">
+                    <div className="flex items-center justify-end gap-1 opacity-0 transition-opacity group-hover:opacity-100">
                       <button
-                        onClick={() =>
-                          router.push(
-                            `/dashboard/articles/${article.id}/edit`
-                          )
-                        }
-                        className="border border-transparent p-2 transition-colors hover:border-border-subtle"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          router.push(`/dashboard/articles/${article.id}/edit`);
+                        }}
+                        className="rounded-sm p-1.5 text-muted transition-colors hover:bg-surface-elevated hover:text-foreground"
+                        title="Modifier"
                       >
-                        <PenSquare className="h-4 w-4 text-muted" />
+                        <PenSquare className="h-3.5 w-3.5" />
                       </button>
                       <button
-                        onClick={() => handleDelete(article.id)}
-                        className="border border-transparent p-2 transition-colors hover:border-primary"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDelete(article.id);
+                        }}
+                        disabled={deletingId === article.id}
+                        className="rounded-sm p-1.5 text-muted transition-colors hover:bg-primary/10 hover:text-primary disabled:opacity-40"
+                        title="Supprimer"
                       >
-                        <Trash2 className="h-4 w-4 text-primary" />
+                        <Trash2 className="h-3.5 w-3.5" />
                       </button>
                     </div>
                   </td>
@@ -192,6 +224,15 @@ export default function ArticlesPage() {
             )}
           </tbody>
         </table>
+
+        {!loading && filtered.length > 0 && (
+          <div className="border-t border-border-subtle px-5 py-3">
+            <p className="font-label text-xs text-muted">
+              {filtered.length} article{filtered.length > 1 ? "s" : ""}
+              {search ? ` pour « ${search} »` : ""}
+            </p>
+          </div>
+        )}
       </div>
     </div>
   );
