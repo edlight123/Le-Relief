@@ -44,7 +44,7 @@ export default function Navbar() {
             )}
           </button>
 
-          <Link href="/" className="flex items-center gap-3 md:justify-center">
+          <Link href="/" className="flex items-center justify-center gap-3">
             <Image
               src="/logo.png"
               alt="Le Relief"
@@ -100,7 +100,14 @@ export default function Navbar() {
         </nav>
 
         {mobileOpen && (
-          <nav className="space-y-1 border-t border-border-strong py-3 md:hidden">
+          <div
+            className="fixed inset-0 z-40 bg-black/20 md:hidden"
+            aria-hidden
+            onClick={() => setMobileOpen(false)}
+          />
+        )}
+        {mobileOpen && (
+          <nav className="relative z-50 space-y-1 border-t border-border-strong py-3 md:hidden">
             {siteConfig.nav.public.map((item) => {
               const isActive = pathname === item.href;
               return (

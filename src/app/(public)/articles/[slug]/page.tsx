@@ -7,6 +7,8 @@ import { fr } from "date-fns/locale";
 import RelatedArticles from "@/components/public/RelatedArticles";
 import NewsletterSignup from "@/components/public/NewsletterSignup";
 import Breadcrumb from "@/components/public/Breadcrumb";
+import ReadingProgress from "@/components/public/ReadingProgress";
+import CopyLinkButton from "@/components/public/CopyLinkButton";
 import { siteConfig } from "@/config/site.config";
 import {
   getPublicArticleBySlug,
@@ -112,6 +114,8 @@ export default async function ArticlePage({ params }: Props) {
   };
 
   return (
+    <>
+    <ReadingProgress />
     <article className="newspaper-shell py-10 sm:py-14" data-print-hide="false">
       <script
         type="application/ld+json"
@@ -326,6 +330,7 @@ export default async function ArticlePage({ params }: Props) {
               >
                 Envoyer par courriel
               </a>
+              <CopyLinkButton url={articleUrl} />
             </div>
           </section>
 
@@ -351,5 +356,6 @@ export default async function ArticlePage({ params }: Props) {
         </aside>
       </div>
     </article>
+    </>
   );
 }

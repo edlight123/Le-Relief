@@ -89,6 +89,13 @@ export default function Footer() {
             >
               Confidentialité
             </Link>
+            <a
+              href="/feed.xml"
+              className="ink-link text-muted"
+              type="application/rss+xml"
+            >
+              Flux RSS
+            </a>
             <Link
               href="/contact"
               className="ink-link text-muted"
