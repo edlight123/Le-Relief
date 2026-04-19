@@ -1,6 +1,7 @@
 import Link from "next/link";
 import HeroSection from "@/components/public/HeroSection";
 import ArticleCard from "@/components/public/ArticleCard";
+import LatestArticlesFeed from "@/components/public/LatestArticlesFeed";
 import CategoryGrid from "@/components/public/CategoryGrid";
 import NewsletterSignup from "@/components/public/NewsletterSignup";
 import { getHomepageContent } from "@/lib/public-content";
@@ -73,15 +74,7 @@ export default async function HomePage() {
                   title="Le fil de la rédaction"
                   href="/categories"
                 />
-                <div className="divide-y divide-border-subtle border-t border-border-subtle">
-                  {latest.map((article) => (
-                    <ArticleCard
-                      key={article.id}
-                      article={article}
-                      variant="list"
-                    />
-                  ))}
-                </div>
+                <LatestArticlesFeed initialArticles={latest} />
               </section>
             ) : null}
 

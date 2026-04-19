@@ -58,12 +58,10 @@ export default function HeroSection({ article }: HeroSectionProps) {
       }).format(new Date(article.publishedAt))
     : null;
 
-  const articleMeta = (
-    <div className="mt-6 flex flex-wrap items-center gap-3 font-label text-[11px] font-bold uppercase text-muted">
+  const meta = (
+    <div className="mt-5 flex flex-wrap items-center gap-3 border-t border-border-subtle pt-4 font-label text-[11px] font-bold uppercase text-muted">
       {article.author?.name && <span>Par {article.author.name}</span>}
-      {article.author?.name && date && (
-        <span className="text-border-subtle">/</span>
-      )}
+      {article.author?.name && date && <span className="text-border-subtle">/</span>}
       {date && <span>{date}</span>}
       {article.readingTime ? (
         <>
@@ -74,66 +72,91 @@ export default function HeroSection({ article }: HeroSectionProps) {
     </div>
   );
 
-  const articleText = (
-    <>
-      {article.category && (
-        <p className="page-kicker mb-4">{article.category.name}</p>
-      )}
-      {article.contentTypeLabel && (
-        <p className="mb-3 font-label text-xs font-extrabold uppercase text-muted">
-          {article.contentTypeLabel}
-          {article.language === "en" ? " / English" : ""}
-        </p>
-      )}
-      <h1 className="editorial-title text-4xl text-foreground transition-colors group-hover:text-primary sm:text-6xl lg:text-7xl">
-        {article.title}
-      </h1>
-      {article.excerpt && (
-        <p className="editorial-deck mt-5 max-w-2xl font-body text-xl sm:text-2xl">
-          {article.excerpt}
-        </p>
-      )}
-      {articleMeta}
-    </>
-  );
-
+  /* No cover image — full-width editorial layout */
   if (!imageSrc) {
     return (
       <section className="newspaper-shell py-6 sm:py-10">
         <Link href={`/articles/${article.slug}`} className="group block">
-          <div className="section-rule pt-5">
-            <p className="mb-4 border-b border-border-subtle pb-3 font-label text-[10px] uppercase text-muted">
-              À la une
-            </p>
-            <div className="max-w-5xl py-4 sm:py-8">{articleText}</div>
+          <div className="border-t-2 border-border-strong pt-5">
+            <div className="flex items-center justify-between border-b border-border-subtle pb-3">
+              <p className="font-label text-[11px] font-bold uppercase text-muted">À la une</p>
+              {article.category && (
+                <p className="page-kicker">{article.category.name}</p>
+              )}
+            </div>
+            <div className="py-8 sm:py-12">
+              {article.contentTypeLabel && (
+                <p className="mb-4 font-label text-xs font-extrabold uppercase text-muted">
+                  {article.contentTypeLabel}
+                  {article.language === "en" ? " / English" : ""}
+                </p>
+              )}
+              <h1 className="editorial-title max-w-5xl text-5xl text-foreground transition-colors group-hover:text-primary sm:text-6xl lg:text-8xl">
+                {article.title}
+              </h1>
+              {article.excerpt && (
+                <p className="editorial-deck mt-5 max-w-3xl font-body text-xl sm:text-2xl">
+                  {article.excerpt}
+                </p>
+              )}
+              {meta}
+            </div>
           </div>
         </Link>
       </section>
     );
   }
 
+  /* With cover image — 2-column, text bottom-aligned */
   return (
     <section className="newspaper-shell py-6 sm:py-10">
       <Link href={`/articles/${article.slug}`} className="group block">
-        <div className="section-rule grid gap-6 pt-5 lg:grid-cols-[1.04fr_1.35fr] lg:gap-8">
-          <div className="order-2 flex flex-col justify-center border-t border-border-subtle pt-5 lg:order-1 lg:border-t-0 lg:border-r lg:pr-8">
-            {articleText}
-          </div>
+        <div className="border-t-2 border-border-strong pt-5">
+          <div className="grid gap-0 lg:grid-cols-[1fr_1.4fr]">
 
-          <div className="order-1 lg:order-2">
-            <div className="relative aspect-[16/10] overflow-hidden bg-surface-elevated">
-              <Image
-                src={imageSrc}
-                alt={article.title}
-                fill
-                sizes="(min-width: 1024px) 55vw, 100vw"
-                className="object-cover transition-transform duration-500 group-hover:scale-[1.02]"
-                priority
-              />
+            {/* Text column — bottom-aligned */}
+            <div className="order-2 flex flex-col justify-end border-t border-border-subtle pb-1 pt-5 lg:order-1 lg:border-r lg:border-t-0 lg:pb-0 lg:pr-8 lg:pt-0">
+              <div>
+                <div className="mb-5 flex items-center gap-3">
+                  {article.category && (
+                    <p className="page-kicker">{article.category.name}</p>
+                  )}
+                  {article.contentTypeLabel && (
+                    <p className="font-label text-[11px] font-extrabold uppercase text-muted">
+                      {article.contentTypeLabel}
+                      {article.language === "en" ? " / English" : ""}
+                    </p>
+                  )}
+                </div>
+                <h1 className="editorial-title text-4xl text-foreground transition-colors group-hover:text-primary sm:text-5xl lg:text-6xl xl:text-7xl">
+                  {article.title}
+                </h1>
+                {article.excerpt && (
+                  <p className="editorial-deck mt-5 font-body text-lg sm:text-xl">
+                    {article.excerpt}
+                  </p>
+                )}
+                {meta}
+              </div>
             </div>
-            <p className="mt-2 border-b border-border-subtle pb-3 font-label text-[10px] uppercase text-muted">
-              À la une
-            </p>
+
+            {/* Image column */}
+            <div className="order-1 lg:order-2">
+              <div className="relative aspect-[16/10] overflow-hidden bg-surface-elevated">
+                <Image
+                  src={imageSrc}
+                  alt={article.title}
+                  fill
+                  sizes="(min-width: 1024px) 58vw, 100vw"
+                  className="object-cover transition-transform duration-500 group-hover:scale-[1.02]"
+                  priority
+                />
+              </div>
+              <p className="mt-2 border-b border-border-subtle pb-3 font-label text-[11px] uppercase text-muted">
+                À la une
+              </p>
+            </div>
+
           </div>
         </div>
       </Link>
