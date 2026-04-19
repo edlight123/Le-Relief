@@ -27,17 +27,24 @@ export async function GET(req: NextRequest) {
     before,
   });
 
-  // Hydrate author and category
-  const hydrated = await Promise.all(
-    articles.map(async (article) => {
-      const author = article.authorId
-        ? await usersRepo.getUser(article.authorId as string)
-        : null;
-      const category = article.categoryId
-        ? await categoriesRepo.getCategory(article.categoryId as string)
-        : null;
-      return normalizeArticle(article, author, category);
-    })
+  // Batch-fetch unique authors and categories to avoid N×2 Firestore reads
+  const authorIds = [...new Set(articles.map((a) => a.authorId as string).filter(Boolean))];
+  const categoryIds = [...new Set(articles.map((a) => a.categoryId as string).filter(Boolean))];
+
+  const [authorsArr, categoriesArr] = await Promise.all([
+    Promise.all(authorIds.map((id) => usersRepo.getUser(id))),
+    Promise.all(categoryIds.map((id) => categoriesRepo.getCategory(id))),
+  ]);
+
+  const authorMap = new Map(authorsArr.filter(Boolean).map((u) => [u!.id as string, u]));
+  const categoryMap = new Map(categoriesArr.filter(Boolean).map((c) => [c!.id as string, c]));
+
+  const hydrated = articles.map((article) =>
+    normalizeArticle(
+      article,
+      authorMap.get(article.authorId as string) ?? null,
+      categoryMap.get(article.categoryId as string) ?? null,
+    )
   );
 
   return NextResponse.json({ articles: hydrated, total });

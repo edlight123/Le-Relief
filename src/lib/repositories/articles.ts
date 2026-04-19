@@ -108,23 +108,27 @@ export async function getArticles(options?: {
     query = query.where(orderField, "<", options.before);
   }
 
-  // When there's no client-side filtering needed, use Firestore limit for efficiency
   const needsClientFilter = !!(options?.search || options?.excludeId);
-  if (!needsClientFilter && !options?.skip) {
-    query = query.limit(options?.take || 20);
+  if (!options?.skip) {
+    // For search/excludeId we fetch more than needed then filter down client-side,
+    // but always cap at 500 to avoid reading the whole collection.
+    const firestoreLimit = needsClientFilter
+      ? Math.min(500, (options?.take || 20) * 20)
+      : options?.take || 20;
+    query = query.limit(firestoreLimit);
   }
 
   const snap = await query.get();
   let docs = snap.docs.map((d) => serializeTimestamps({ id: d.id, ...d.data() } as Record<string, unknown>));
 
-  // Client-side filtering for search (Firestore doesn't do full-text search)
+  // Client-side filtering for search (Firestore doesn't support full-text search)
   if (options?.search) {
     const term = options.search.toLowerCase();
     docs = docs.filter(
       (d) =>
         (d.title as string)?.toLowerCase().includes(term) ||
-        (d.body as string)?.toLowerCase().includes(term) ||
-        (d.excerpt as string)?.toLowerCase().includes(term)
+        (d.excerpt as string)?.toLowerCase().includes(term) ||
+        (d.body as string)?.toLowerCase().includes(term)
     );
   }
 
