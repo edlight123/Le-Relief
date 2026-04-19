@@ -9,6 +9,7 @@ import NewsletterSignup from "@/components/public/NewsletterSignup";
 import Breadcrumb from "@/components/public/Breadcrumb";
 import ReadingProgress from "@/components/public/ReadingProgress";
 import CopyLinkButton from "@/components/public/CopyLinkButton";
+import TableOfContents from "@/components/public/TableOfContents";
 import { siteConfig } from "@/config/site.config";
 import {
   getPublicArticleBySlug,
@@ -233,9 +234,11 @@ export default async function ArticlePage({ params }: Props) {
               priority
             />
           </div>
-          <figcaption className="mt-2 border-b border-border-subtle pb-3 font-label text-[11px] uppercase text-muted">
-            Photo : Le Relief Haïti
-          </figcaption>
+          {article.coverImageCaption ? (
+            <figcaption className="mt-2 border-b border-border-subtle pb-3 font-label text-[11px] uppercase text-muted">
+              {article.coverImageCaption}
+            </figcaption>
+          ) : null}
         </figure>
       ) : null}
 
@@ -305,6 +308,10 @@ export default async function ArticlePage({ params }: Props) {
         </div>
 
         <aside className="space-y-8 border-t-2 border-border-strong pt-4 lg:border-l lg:border-t-0 lg:pl-8" data-print-hide>
+          {article.toc.length >= 3 ? (
+            <TableOfContents toc={article.toc} />
+          ) : null}
+
           <section>
             <p className="section-kicker mb-3">Partager</p>
             <div className="flex flex-col gap-3 font-label text-xs font-bold uppercase">

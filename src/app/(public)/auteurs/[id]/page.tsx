@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import Image from "next/image";
-import ArticleCard from "@/components/public/ArticleCard";
+import LatestArticlesFeed from "@/components/public/LatestArticlesFeed";
 import { getAuthorPageContent } from "@/lib/public-content";
 import { normalizeAuthor } from "@/lib/editorial";
 
@@ -76,11 +76,11 @@ export default async function AuthorPage({ params }: Props) {
         </div>
 
         {content.articles.length > 0 ? (
-          <div className="grid grid-cols-1 gap-7 md:grid-cols-2 lg:grid-cols-3">
-            {content.articles.map((article) => (
-              <ArticleCard key={article.id} article={article} />
-            ))}
-          </div>
+          <LatestArticlesFeed
+            initialArticles={content.articles}
+            authorId={id}
+            variant="grid"
+          />
         ) : (
           <p className="border-t border-border-subtle py-8 font-body text-lg text-muted">
             Aucun article publié pour cet auteur pour le moment.

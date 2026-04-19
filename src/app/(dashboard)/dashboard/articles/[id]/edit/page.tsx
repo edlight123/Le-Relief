@@ -15,6 +15,7 @@ export default function EditArticlePage() {
     body: string;
     excerpt: string;
     coverImage: string;
+    coverImageCaption: string;
     categoryId: string;
     tags: string[];
     status: string;
@@ -24,6 +25,7 @@ export default function EditArticlePage() {
     alternateLanguageSlug: string;
     allowTranslation: boolean;
     translationPriority: string;
+    scheduledAt: string;
   } | null>(null);
   const [categories, setCategories] = useState<{ id: string; name: string }[]>(
     []
@@ -41,6 +43,7 @@ export default function EditArticlePage() {
         body: articleData.body || "",
         excerpt: articleData.excerpt || "",
         coverImage: articleData.coverImage || "",
+        coverImageCaption: articleData.coverImageCaption || "",
         categoryId: articleData.categoryId || "",
         tags: Array.isArray(articleData.tags) ? articleData.tags : [],
         status: articleData.status || "draft",
@@ -50,6 +53,7 @@ export default function EditArticlePage() {
         alternateLanguageSlug: articleData.alternateLanguageSlug || "",
         allowTranslation: Boolean(articleData.allowTranslation),
         translationPriority: articleData.translationPriority || "",
+        scheduledAt: articleData.scheduledAt || "",
       });
       setCategories(catData.categories || []);
       setLoading(false);
@@ -62,6 +66,7 @@ export default function EditArticlePage() {
     body: string;
     excerpt: string;
     coverImage: string;
+    coverImageCaption: string;
     categoryId: string;
     tags: string[];
     status: string;
@@ -71,6 +76,7 @@ export default function EditArticlePage() {
     alternateLanguageSlug: string;
     allowTranslation: boolean;
     translationPriority: string;
+    scheduledAt: string;
   }) {
     const res = await fetch(`/api/articles/${id}`, {
       method: "PATCH",

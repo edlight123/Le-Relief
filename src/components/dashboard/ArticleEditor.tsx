@@ -12,6 +12,7 @@ interface ArticleEditorProps {
     body: string;
     excerpt: string;
     coverImage: string;
+    coverImageCaption?: string;
     categoryId: string;
     tags: string[];
     status: string;
@@ -21,6 +22,7 @@ interface ArticleEditorProps {
     alternateLanguageSlug?: string;
     allowTranslation?: boolean;
     translationPriority?: string;
+    scheduledAt?: string;
   };
   categories: { id: string; name: string }[];
   onSubmit: (data: {
@@ -29,6 +31,7 @@ interface ArticleEditorProps {
     body: string;
     excerpt: string;
     coverImage: string;
+    coverImageCaption: string;
     categoryId: string;
     tags: string[];
     status: string;
@@ -38,6 +41,7 @@ interface ArticleEditorProps {
     alternateLanguageSlug: string;
     allowTranslation: boolean;
     translationPriority: string;
+    scheduledAt: string;
   }) => Promise<void>;
   submitLabel?: string;
 }
@@ -53,6 +57,8 @@ export default function ArticleEditor({
   const [body, setBody] = useState(initial?.body || "");
   const [excerpt, setExcerpt] = useState(initial?.excerpt || "");
   const [coverImage, setCoverImage] = useState(initial?.coverImage || "");
+  const [coverImageCaption, setCoverImageCaption] = useState(initial?.coverImageCaption || "");
+  const [scheduledAt, setScheduledAt] = useState(initial?.scheduledAt || "");
   const [categoryId, setCategoryId] = useState(initial?.categoryId || "");
   const [contentType, setContentType] = useState(initial?.contentType || "actualite");
   const [language, setLanguage] = useState(initial?.language || "fr");
@@ -85,6 +91,7 @@ export default function ArticleEditor({
         body,
         excerpt,
         coverImage,
+        coverImageCaption,
         categoryId,
         tags,
         status,
@@ -94,6 +101,7 @@ export default function ArticleEditor({
         alternateLanguageSlug,
         allowTranslation,
         translationPriority,
+        scheduledAt,
       });
     } finally {
       setSaving(false);
@@ -136,6 +144,14 @@ export default function ArticleEditor({
           onChange={setCoverImage}
         />
       </div>
+
+      <Input
+        label="Crédit photo"
+        id="coverImageCaption"
+        placeholder="Photo : AFP / Le Relief Haïti"
+        value={coverImageCaption}
+        onChange={(e) => setCoverImageCaption(e.target.value)}
+      />
 
       <div>
         <label className="mb-2 block font-label text-xs font-extrabold uppercase text-foreground">
@@ -290,13 +306,37 @@ export default function ArticleEditor({
         />
       </div>
 
-      <div className="flex items-center gap-3 pt-4">
+      <div className="border-t border-border-subtle pt-6">
+        <label className="mb-2 block font-label text-xs font-extrabold uppercase text-foreground">
+          Publication programmée
+        </label>
+        <input
+          type="datetime-local"
+          value={scheduledAt}
+          onChange={(e) => setScheduledAt(e.target.value)}
+          className="border border-border-subtle bg-surface px-4 py-3 font-label text-sm text-foreground focus:border-primary focus:outline-none"
+        />
+        <p className="mt-1 font-label text-[11px] text-muted">
+          Laisser vide pour publier immédiatement.
+        </p>
+      </div>
+
+      <div className="flex flex-wrap items-center gap-3 pt-2">
         <Button
           onClick={() => handleSubmit("published")}
           disabled={saving || !title || !body}
         >
           {saving ? "Enregistrement..." : submitLabel}
         </Button>
+        {scheduledAt && (
+          <Button
+            variant="outline"
+            onClick={() => handleSubmit("scheduled")}
+            disabled={saving || !title || !body}
+          >
+            Programmer
+          </Button>
+        )}
         <Button
           variant="outline"
           onClick={() => handleSubmit("pending_review")}

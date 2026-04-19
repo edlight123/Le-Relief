@@ -14,6 +14,7 @@ export async function createArticle(data: {
   body: string;
   excerpt?: string | null;
   coverImage?: string | null;
+  coverImageCaption?: string | null;
   tags?: string[];
   status?: string;
   featured?: boolean;
@@ -28,6 +29,7 @@ export async function createArticle(data: {
   allowTranslation?: boolean;
   translationPriority?: string | null;
   publishedAt?: Date | null;
+  scheduledAt?: string | null;
 }) {
   const ref = collection().doc();
   const now = FieldValue.serverTimestamp();
@@ -36,6 +38,7 @@ export async function createArticle(data: {
     subtitle: data.subtitle || null,
     excerpt: data.excerpt || null,
     coverImage: data.coverImage || null,
+    coverImageCaption: data.coverImageCaption || null,
     tags: data.tags || [],
     status: data.status || "draft",
     featured: data.featured || false,
@@ -49,6 +52,7 @@ export async function createArticle(data: {
     allowTranslation: data.allowTranslation ?? false,
     translationPriority: data.translationPriority || null,
     publishedAt: data.publishedAt || null,
+    scheduledAt: data.scheduledAt || null,
     views: 0,
     createdAt: now,
     updatedAt: now,

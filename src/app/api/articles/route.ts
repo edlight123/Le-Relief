@@ -12,6 +12,7 @@ export async function GET(req: NextRequest) {
   const status = searchParams.get("status") || undefined;
   const search = searchParams.get("search") || undefined;
   const categoryId = searchParams.get("categoryId") || undefined;
+  const authorId = searchParams.get("authorId") || undefined;
   const language = searchParams.get("language") || undefined;
   const take = parseInt(searchParams.get("take") || "20");
   const skip = parseInt(searchParams.get("skip") || "0");
@@ -21,6 +22,7 @@ export async function GET(req: NextRequest) {
     status: status !== "all" ? status : undefined,
     search,
     categoryId,
+    authorId,
     language,
     take,
     skip: before ? 0 : skip,
@@ -70,6 +72,18 @@ export async function POST(req: NextRequest) {
         ? "pending_review"
         : requestedStatus;
 
+    const scheduledAt = body.scheduledAt || null;
+    const publishedAt =
+      status === "published"
+        ? new Date()
+        : status === "scheduled" && scheduledAt && new Date(scheduledAt) <= new Date()
+        ? new Date(scheduledAt)
+        : null;
+    const resolvedStatus =
+      status === "scheduled" && publishedAt
+        ? "published"
+        : status;
+
     const article = await articlesRepo.createArticle({
       title: body.title,
       subtitle: body.subtitle || null,
@@ -77,10 +91,11 @@ export async function POST(req: NextRequest) {
       body: body.body,
       excerpt: body.excerpt || null,
       coverImage: body.coverImage || null,
+      coverImageCaption: body.coverImageCaption || null,
       tags: Array.isArray(body.tags)
         ? body.tags.map((tag: unknown) => String(tag).trim()).filter(Boolean)
         : [],
-      status,
+      status: resolvedStatus,
       featured: body.featured || false,
       authorId: session.user.id,
       categoryId: body.categoryId || null,
@@ -92,7 +107,8 @@ export async function POST(req: NextRequest) {
       alternateLanguageSlug: body.alternateLanguageSlug || null,
       allowTranslation: body.allowTranslation || false,
       translationPriority: body.translationPriority || null,
-      publishedAt: status === "published" ? new Date() : null,
+      publishedAt,
+      scheduledAt,
     });
 
     return NextResponse.json(article, { status: 201 });

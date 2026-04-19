@@ -51,6 +51,8 @@ export async function PATCH(req: NextRequest, { params }: RouteParams) {
   if (body.body !== undefined) data.body = body.body;
   if (body.excerpt !== undefined) data.excerpt = body.excerpt || null;
   if (body.coverImage !== undefined) data.coverImage = body.coverImage || null;
+  if (body.coverImageCaption !== undefined) data.coverImageCaption = body.coverImageCaption || null;
+  if (body.scheduledAt !== undefined) data.scheduledAt = body.scheduledAt || null;
   if (body.categoryId !== undefined) data.categoryId = body.categoryId || null;
   if (body.contentType !== undefined) data.contentType = body.contentType || "actualite";
   if (body.language !== undefined) data.language = body.language || "fr";
@@ -84,13 +86,17 @@ export async function PATCH(req: NextRequest, { params }: RouteParams) {
       sessionRole || "reader",
       "publisher"
     );
+    const scheduledAt = (data.scheduledAt as string) ?? (existing.scheduledAt as string) ?? null;
+    const scheduledInPast = scheduledAt && new Date(scheduledAt) <= new Date();
+    const requestedStatus =
+      body.status === "scheduled" && scheduledInPast ? "published" : body.status;
     const nextStatus =
-      body.status === "published" && !canPublish
-        ? "pending_review"
-        : body.status;
+      requestedStatus === "published" && !canPublish ? "pending_review" : requestedStatus;
     data.status = nextStatus;
     if (nextStatus === "published" && !existing.publishedAt) {
-      data.publishedAt = new Date();
+      data.publishedAt = scheduledInPast ? new Date(scheduledAt!) : new Date();
+    } else if (nextStatus === "scheduled") {
+      data.publishedAt = null;
     } else if (nextStatus !== "published") {
       data.publishedAt = null;
     }

@@ -288,7 +288,7 @@ export async function getAuthorPageContent(id: string) {
     const result = await articlesRepo.getArticles({
       status: "published",
       authorId: id,
-      take: 30,
+      take: 12,
     });
     articles = await hydrateArticles(result.articles);
   } catch {

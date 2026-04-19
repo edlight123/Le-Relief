@@ -22,6 +22,7 @@ export default function NewArticlePage() {
     body: string;
     excerpt: string;
     coverImage: string;
+    coverImageCaption: string;
     categoryId: string;
     tags: string[];
     status: string;
@@ -31,6 +32,7 @@ export default function NewArticlePage() {
     alternateLanguageSlug: string;
     allowTranslation: boolean;
     translationPriority: string;
+    scheduledAt: string;
   }) {
     const res = await fetch("/api/articles", {
       method: "POST",

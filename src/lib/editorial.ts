@@ -36,6 +36,12 @@ export interface PublicCategory {
   priority: number;
 }
 
+export interface TocEntry {
+  id: string;
+  level: 2 | 3;
+  text: string;
+}
+
 export interface PublicArticle {
   id: string;
   title: string;
@@ -45,6 +51,7 @@ export interface PublicArticle {
   excerpt: string | null;
   coverImage: string | null;
   coverImageFirebaseUrl: string | null;
+  coverImageCaption: string | null;
   imageSrc: string | null;
   publishedAt: string | null;
   updatedAt: string | null;
@@ -62,6 +69,7 @@ export interface PublicArticle {
   isCanonicalSource: boolean;
   sourceArticleId: string | null;
   alternateLanguageSlug: string | null;
+  toc: TocEntry[];
 }
 
 const CONTENT_TYPE_LABELS: Record<ContentType, string> = {
@@ -304,6 +312,35 @@ export function normalizeContentType(
   return "actualite";
 }
 
+export function generateTocFromHtml(html: string): { body: string; toc: TocEntry[] } {
+  const toc: TocEntry[] = [];
+  const usedIds = new Set<string>();
+
+  const body = html.replace(
+    /<(h[23])([^>]*)>([\s\S]*?)<\/h[23]>/gi,
+    (_match, tag: string, attrs: string, inner: string) => {
+      const text = inner.replace(/<[^>]*>/g, "").trim();
+      const base = text
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/^-|-$/g, "")
+        || "section";
+
+      let id = base;
+      let n = 1;
+      while (usedIds.has(id)) id = `${base}-${n++}`;
+      usedIds.add(id);
+
+      toc.push({ id, level: parseInt(tag[1]) as 2 | 3, text });
+      return `<${tag}${attrs} id="${id}">${inner}</${tag}>`;
+    },
+  );
+
+  return { body, toc };
+}
+
 function normalizeForTagComparison(s: string): string {
   return s
     .normalize("NFD")
@@ -349,16 +386,21 @@ export function normalizeArticle(
   const publishedAt = asOptionalString(article.publishedAt);
   const updatedAt = asOptionalString(article.updatedAt);
   const rawTags = Array.isArray(article.tags) ? article.tags.map(String) : [];
+  const bodyHasHtml = /<\/?[a-z][\s\S]*>/i.test(body);
+  const { body: processedBody, toc } = bodyHasHtml
+    ? generateTocFromHtml(body)
+    : { body, toc: [] };
 
   return {
     id: asString(article.id),
     title: asString(article.title, "Sans titre"),
     subtitle: asOptionalString(article.subtitle),
     slug: asString(article.slug),
-    body,
+    body: processedBody,
     excerpt: asOptionalString(article.excerpt),
     coverImage,
     coverImageFirebaseUrl,
+    coverImageCaption: asOptionalString(article.coverImageCaption),
     imageSrc: coverImageFirebaseUrl || coverImage,
     publishedAt,
     updatedAt,
@@ -382,6 +424,7 @@ export function normalizeArticle(
         : language === "fr",
     sourceArticleId: asOptionalString(article.sourceArticleId),
     alternateLanguageSlug: asOptionalString(article.alternateLanguageSlug),
+    toc,
   };
 }
 

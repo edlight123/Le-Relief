@@ -21,6 +21,7 @@ interface Article {
 interface Props {
   initialArticles: Article[];
   categoryId?: string;
+  authorId?: string;
   variant?: "feed" | "grid";
   pageSize?: number;
 }
@@ -30,6 +31,7 @@ const PAGE_SIZE = 10;
 export default function LatestArticlesFeed({
   initialArticles,
   categoryId,
+  authorId,
   variant = "feed",
   pageSize = PAGE_SIZE,
 }: Props) {
@@ -52,6 +54,7 @@ export default function LatestArticlesFeed({
       });
       if (cursor) params.set("before", cursor);
       if (categoryId) params.set("categoryId", categoryId);
+      if (authorId) params.set("authorId", authorId);
 
       const res = await fetch(`/api/articles?${params.toString()}`);
       const data = await res.json();
