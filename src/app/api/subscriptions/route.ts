@@ -1,8 +1,18 @@
 import { NextRequest, NextResponse } from "next/server";
 import * as subscriptionsRepo from "@/lib/repositories/subscriptions";
-import { addContactToAudience, sendWelcomeEmail } from "@/lib/resend";
+import { addContactToAudience, sendWelcomeEmail as resendWelcome } from "@/lib/resend";
+import { sendWelcomeEmail as gmailWelcome } from "@/lib/mailer";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+async function sendWelcomeEmail(email: string) {
+  if (process.env.EMAIL_USER && process.env.EMAIL_APP_PASSWORD) {
+    await gmailWelcome(email);
+  } else if (process.env.RESEND_API_KEY) {
+    await resendWelcome(email);
+  }
+  // silently skip if neither is configured
+}
 
 export async function POST(req: NextRequest) {
   try {
@@ -17,7 +27,6 @@ export async function POST(req: NextRequest) {
     const subscription = await subscriptionsRepo.subscribeEmail(email);
 
     if (!existing) {
-      // Fire-and-forget — don't let Resend errors block the response
       Promise.all([
         addContactToAudience(email).catch(() => null),
         sendWelcomeEmail(email).catch(() => null),
