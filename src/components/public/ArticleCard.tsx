@@ -17,7 +17,7 @@ interface ArticleCardProps {
     readingTime?: number;
     language?: "fr" | "en";
   };
-  variant?: "default" | "compact" | "list";
+  variant?: "default" | "compact" | "list" | "text";
 }
 
 export default function ArticleCard({
@@ -110,6 +110,45 @@ export default function ArticleCard({
                 Par {article.author.name}
               </p>
             )}
+          </div>
+        </div>
+      </Link>
+    );
+  }
+
+  /* Text variant — no image, newspaper column style */
+  if (variant === "text") {
+    return (
+      <Link href={`/articles/${article.slug}`} className="group block h-full">
+        <div className="article-card flex h-full flex-col px-0 py-5 sm:px-5">
+          <div className="mb-3 flex flex-wrap items-center gap-2">
+            {article.category && (
+              <span className="page-kicker">{article.category.name}</span>
+            )}
+            {article.contentTypeLabel && (
+              <span className="font-label text-[11px] font-extrabold uppercase text-muted">
+                {article.contentTypeLabel}
+              </span>
+            )}
+          </div>
+          <h3 className="font-headline text-xl font-bold leading-snug text-foreground transition-colors group-hover:text-primary sm:text-2xl">
+            {article.title}
+          </h3>
+          {article.excerpt && (
+            <p className="mt-2 line-clamp-3 font-body text-sm leading-relaxed text-muted sm:text-base">
+              {article.excerpt}
+            </p>
+          )}
+          <div className="mt-auto flex flex-wrap items-center gap-2 pt-4 font-label text-[11px] font-bold uppercase text-muted">
+            {article.author?.name && <span>{article.author.name}</span>}
+            {article.author?.name && date && <span className="text-border-subtle">/</span>}
+            {date && <span>{date}</span>}
+            {article.readingTime ? (
+              <>
+                <span className="text-border-subtle">/</span>
+                <span>{article.readingTime} min</span>
+              </>
+            ) : null}
           </div>
         </div>
       </Link>

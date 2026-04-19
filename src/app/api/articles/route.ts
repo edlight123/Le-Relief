@@ -15,6 +15,7 @@ export async function GET(req: NextRequest) {
   const language = searchParams.get("language") || undefined;
   const take = parseInt(searchParams.get("take") || "20");
   const skip = parseInt(searchParams.get("skip") || "0");
+  const before = searchParams.get("before") || undefined;
 
   const { articles, total } = await articlesRepo.getArticles({
     status: status !== "all" ? status : undefined,
@@ -22,7 +23,8 @@ export async function GET(req: NextRequest) {
     categoryId,
     language,
     take,
-    skip,
+    skip: before ? 0 : skip,
+    before,
   });
 
   // Hydrate author and category

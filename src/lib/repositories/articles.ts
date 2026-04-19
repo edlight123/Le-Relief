@@ -75,6 +75,7 @@ export async function getArticles(options?: {
   search?: string;
   take?: number;
   skip?: number;
+  before?: string;
   featured?: boolean;
   categoryId?: string;
   authorId?: string;
@@ -102,6 +103,10 @@ export async function getArticles(options?: {
 
   const orderField = options?.orderBy || "publishedAt";
   query = query.orderBy(orderField, "desc");
+
+  if (options?.before) {
+    query = query.where(orderField, "<", options.before);
+  }
 
   // When there's no client-side filtering needed, use Firestore limit for efficiency
   const needsClientFilter = !!(options?.search || options?.excludeId);

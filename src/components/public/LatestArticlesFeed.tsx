@@ -23,7 +23,7 @@ interface Props {
   pageSize?: number;
 }
 
-const PAGE_SIZE = 8;
+const PAGE_SIZE = 10;
 
 export default function LatestArticlesFeed({
   initialArticles,
@@ -33,14 +33,21 @@ export default function LatestArticlesFeed({
   const [loading, setLoading] = useState(false);
   const [exhausted, setExhausted] = useState(false);
 
+  function getCursor(list: Article[]) {
+    const last = list[list.length - 1];
+    return last?.publishedAt ?? null;
+  }
+
   async function loadMore() {
     setLoading(true);
+    const cursor = getCursor(articles);
     try {
       const params = new URLSearchParams({
         status: "published",
         take: String(pageSize),
-        skip: String(articles.length),
       });
+      if (cursor) params.set("before", cursor);
+
       const res = await fetch(`/api/articles?${params.toString()}`);
       const data = await res.json();
       const next: Article[] = data.articles || [];
@@ -64,9 +71,17 @@ export default function LatestArticlesFeed({
 
   return (
     <div>
-      <div className="divide-y divide-border-subtle border-t border-border-subtle">
-        {articles.map((article) => (
-          <ArticleCard key={article.id} article={article} variant="list" />
+      <div className="grid grid-cols-1 gap-0 border-t border-border-subtle sm:grid-cols-2">
+        {articles.map((article, index) => (
+          <div
+            key={article.id}
+            className={`
+              border-b border-border-subtle
+              ${index % 2 === 0 ? "sm:border-r sm:border-border-subtle" : ""}
+            `}
+          >
+            <ArticleCard article={article} variant="text" />
+          </div>
         ))}
       </div>
 

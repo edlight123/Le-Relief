@@ -57,9 +57,20 @@ export default async function HomePage() {
         {secondary.length > 0 ? (
           <section className="mb-14 sm:mb-20">
             <SectionHeader kicker="À suivre" title="Les autres titres" />
-            <div className="grid gap-7 md:grid-cols-3 md:gap-6">
-              {secondary.map((article) => (
-                <ArticleCard key={article.id} article={article} />
+            <div className="grid gap-0 md:grid-cols-3">
+              {secondary.map((article, index) => (
+                <div
+                  key={article.id}
+                  className={index < secondary.length - 1 ? "md:border-r md:border-border-subtle" : ""}
+                >
+                  {index === 0 ? (
+                    <ArticleCard article={article} />
+                  ) : (
+                    <div className="md:pl-6">
+                      <ArticleCard article={article} variant="text" />
+                    </div>
+                  )}
+                </div>
               ))}
             </div>
           </section>
