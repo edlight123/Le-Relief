@@ -36,14 +36,15 @@ export default function StatsCards({ stats }: StatsCardsProps) {
         return (
           <div
             key={stat.label}
-            className="rounded-sm border border-border-subtle bg-surface p-5"
+            className="rounded-none border border-border-subtle bg-surface p-5 transition-shadow duration-200 hover:shadow-[var(--shadow-card-hover)]"
+            style={{ boxShadow: "var(--shadow-dashboard)" }}
           >
             <div className="flex items-start justify-between">
               <div className="min-w-0 flex-1">
                 <p className="font-label text-[11px] font-extrabold uppercase tracking-wider text-muted">
                   {stat.label}
                 </p>
-                <p className="mt-2 font-headline text-3xl font-extrabold leading-none text-foreground">
+                <p className="mt-2 font-headline text-4xl font-extrabold leading-none tabular-nums text-foreground">
                   {typeof stat.value === "number"
                     ? stat.value.toLocaleString("fr-FR")
                     : stat.value}
@@ -59,7 +60,7 @@ export default function StatsCards({ stats }: StatsCardsProps) {
                 ) : null}
               </div>
               {stat.icon ? (
-                <div className={clsx("flex h-9 w-9 shrink-0 items-center justify-center rounded-sm", colors.bg)}>
+                <div className={clsx("flex h-10 w-10 shrink-0 items-center justify-center rounded-sm", colors.bg)}>
                   <stat.icon className={clsx("h-4 w-4", colors.icon)} />
                 </div>
               ) : null}

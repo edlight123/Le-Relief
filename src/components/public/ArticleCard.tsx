@@ -18,11 +18,13 @@ interface ArticleCardProps {
     language?: "fr" | "en";
   };
   variant?: "default" | "compact" | "list" | "text";
+  rank?: number;
 }
 
 export default function ArticleCard({
   article,
   variant = "default",
+  rank,
 }: ArticleCardProps) {
   const date = article.publishedAt
     ? format(new Date(article.publishedAt), "d MMM yyyy", { locale: fr })
@@ -32,7 +34,10 @@ export default function ArticleCard({
   if (variant === "compact") {
     return (
       <Link href={`/articles/${article.slug}`} className="group block">
-        <div className="article-card flex gap-4 border-b border-border-subtle py-4">
+        <div className="article-card flex gap-3 items-center border-b border-border-subtle py-4">
+          {rank !== undefined && (
+            <div className="editorial-numeral shrink-0 w-8 text-center">{String(rank + 1).padStart(2, "0")}</div>
+          )}
           {imageSrc && (
             <div className="relative h-20 w-20 flex-shrink-0 overflow-hidden">
               <Image
@@ -54,7 +59,7 @@ export default function ArticleCard({
               {article.title}
             </h3>
             {date && (
-              <p className="mt-2 font-label text-[11px] font-bold uppercase text-muted">{date}</p>
+              <p className="mt-2 font-[family-name:var(--font-mono)] text-[11px] font-bold uppercase text-muted tracking-[1px]">{date}</p>
             )}
           </div>
         </div>
@@ -66,7 +71,7 @@ export default function ArticleCard({
   if (variant === "list") {
     return (
       <Link href={`/articles/${article.slug}`} className="group block">
-        <div className="article-card flex flex-col gap-4 border-b border-border-subtle py-6 transition-colors hover:bg-surface-newsprint sm:flex-row sm:gap-7">
+        <div className="article-card flex flex-col gap-4 border-b border-border-subtle py-6 transition-colors sm:flex-row sm:gap-7">
           {imageSrc && (
             <div className="relative h-44 w-full shrink-0 overflow-hidden bg-surface-elevated sm:h-32 sm:w-48">
               <Image
@@ -84,15 +89,15 @@ export default function ArticleCard({
                 <span className="page-kicker">{article.contentTypeLabel}</span>
               )}
               {article.category && (
-                <span className="font-label text-[11px] font-bold uppercase text-muted">
+                <span className="font-label text-[11px] font-bold uppercase text-muted tracking-[1px]">
                   {article.category.name}
                 </span>
               )}
               {date && (
-                <span className="font-label text-[11px] font-bold uppercase text-muted">{date}</span>
+                <span className="font-[family-name:var(--font-mono)] text-[11px] font-bold uppercase text-muted tracking-[1px]">{date}</span>
               )}
               {article.readingTime ? (
-                <span className="font-label text-[11px] font-bold uppercase text-muted">
+                <span className="font-[family-name:var(--font-mono)] text-[11px] font-bold uppercase text-muted tracking-[1px]">
                   {article.readingTime} min
                 </span>
               ) : null}
@@ -106,7 +111,7 @@ export default function ArticleCard({
               </p>
             )}
             {article.author?.name && (
-              <p className="mt-3 font-label text-[11px] font-bold uppercase text-muted">
+              <p className="mt-3 font-label text-[11px] font-bold uppercase text-muted tracking-[1px]">
                 Par {article.author.name}
               </p>
             )}
@@ -123,10 +128,10 @@ export default function ArticleCard({
         <div className="article-card flex h-full flex-col px-0 py-5 sm:px-5">
           <div className="mb-3 flex flex-wrap items-center gap-2">
             {article.category && (
-              <span className="page-kicker">{article.category.name}</span>
+              <span className="page-kicker tracking-[1px]">{article.category.name}</span>
             )}
             {article.contentTypeLabel && (
-              <span className="font-label text-[11px] font-extrabold uppercase text-muted">
+              <span className="font-label text-[11px] font-extrabold uppercase text-muted tracking-[1px]">
                 {article.contentTypeLabel}
               </span>
             )}
@@ -140,13 +145,13 @@ export default function ArticleCard({
             </p>
           )}
           <div className="mt-auto flex flex-wrap items-center gap-2 pt-4 font-label text-[11px] font-bold uppercase text-muted">
-            {article.author?.name && <span>{article.author.name}</span>}
+            {article.author?.name && <span className="tracking-[1px]">{article.author.name}</span>}
             {article.author?.name && date && <span className="text-border-subtle">/</span>}
-            {date && <span>{date}</span>}
+            {date && <span className="font-[family-name:var(--font-mono)] tracking-[1px]">{date}</span>}
             {article.readingTime ? (
               <>
                 <span className="text-border-subtle">/</span>
-                <span>{article.readingTime} min</span>
+                <span className="font-[family-name:var(--font-mono)] tracking-[1px]">{article.readingTime} min</span>
               </>
             ) : null}
           </div>
@@ -170,7 +175,7 @@ export default function ArticleCard({
                 className="object-cover grayscale transition duration-300 group-hover:grayscale-0"
               />
               {article.category && (
-                <span className="absolute left-0 top-0 bg-foreground px-3 py-1 font-label text-[11px] font-bold uppercase text-background">
+                <span className="absolute left-0 top-0 bg-foreground px-3 py-1 font-label text-[11px] font-bold uppercase text-background tracking-[1px]">
                   {article.category.name}
                 </span>
               )}
@@ -178,7 +183,7 @@ export default function ArticleCard({
           ) : (
             <div className="flex h-full w-full items-center justify-center border border-border-subtle bg-surface-newsprint">
               {article.category && (
-                <span className="absolute left-0 top-0 bg-foreground px-3 py-1 font-label text-[11px] font-bold uppercase text-background">
+                <span className="absolute left-0 top-0 bg-foreground px-3 py-1 font-label text-[11px] font-bold uppercase text-background tracking-[1px]">
                   {article.category.name}
                 </span>
               )}
@@ -195,19 +200,19 @@ export default function ArticleCard({
           </p>
         )}
         <div className="mt-4 flex flex-wrap items-center gap-2 font-label text-[11px] font-bold uppercase text-muted">
-          {article.contentTypeLabel && <span>{article.contentTypeLabel}</span>}
+          {article.contentTypeLabel && <span className="tracking-[1px]">{article.contentTypeLabel}</span>}
           {article.contentTypeLabel && (article.author?.name || date) && (
             <span className="text-border-subtle">/</span>
           )}
-          {article.author?.name && <span>{article.author.name}</span>}
+          {article.author?.name && <span className="tracking-[1px]">{article.author.name}</span>}
           {article.author?.name && date && (
             <span className="text-border-subtle">/</span>
           )}
-          {date && <span>{date}</span>}
+          {date && <span className="font-[family-name:var(--font-mono)] tracking-[1px]">{date}</span>}
           {article.readingTime ? (
             <>
               <span className="text-border-subtle">/</span>
-              <span>{article.readingTime} min</span>
+              <span className="font-[family-name:var(--font-mono)] tracking-[1px]">{article.readingTime} min</span>
             </>
           ) : null}
         </div>

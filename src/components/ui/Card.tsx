@@ -11,8 +11,8 @@ export default function Card({ children, className, hover = false }: CardProps) 
   return (
     <div
       className={clsx(
-        "overflow-hidden border border-border-subtle bg-surface",
-        hover && "article-card",
+        "overflow-hidden border border-[rgba(0,0,0,0.08)] dark:border-[rgba(255,255,255,0.08)] bg-surface",
+        hover && "article-card shadow-[var(--shadow-card)] hover:shadow-[var(--shadow-card-hover)] transition-shadow duration-200",
         className
       )}
     >
@@ -31,7 +31,7 @@ export function CardHeader({
   return (
     <div
       className={clsx(
-        "border-b border-border-subtle px-6 py-4",
+        "border-b border-[rgba(0,0,0,0.08)] dark:border-[rgba(255,255,255,0.08)] px-6 py-4",
         className
       )}
     >

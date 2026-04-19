@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Libre_Franklin, Newsreader } from "next/font/google";
+import { Libre_Franklin, Newsreader, IBM_Plex_Mono } from "next/font/google";
 import { siteConfig } from "@/config/site.config";
 import "./globals.css";
 
@@ -14,6 +14,12 @@ const newsreader = Newsreader({
   subsets: ["latin"],
   weight: ["400", "700", "800"],
   style: ["normal", "italic"],
+});
+
+const ibmPlexMono = IBM_Plex_Mono({
+  variable: "--font-ibm-plex-mono",
+  subsets: ["latin"],
+  weight: ["400", "500", "600"],
 });
 
 export const metadata: Metadata = {
@@ -76,7 +82,7 @@ export default function RootLayout({
   return (
     <html
       lang="fr"
-      className={`${libreFranklin.variable} ${newsreader.variable} h-full antialiased`}
+      className={`${libreFranklin.variable} ${newsreader.variable} ${ibmPlexMono.variable} h-full antialiased`}
       suppressHydrationWarning
     >
       <body className="min-h-full flex flex-col bg-background text-foreground font-body">

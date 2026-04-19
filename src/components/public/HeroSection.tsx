@@ -22,8 +22,8 @@ export default function HeroSection({ article }: HeroSectionProps) {
     return (
       <section className="newspaper-shell py-10 sm:py-14">
         <div className="border-t-2 border-border-strong py-10 text-center sm:py-14">
-          <p className="page-kicker mb-5">Journalisme indépendant</p>
-          <h1 className="editorial-title mx-auto max-w-4xl text-5xl text-foreground sm:text-7xl md:text-8xl">
+          <p className="page-kicker mb-5" style={{ letterSpacing: "1.2px" }}>Journalisme indépendant</p>
+          <h1 className="editorial-title mx-auto max-w-4xl text-5xl text-foreground sm:text-7xl md:text-8xl tracking-tight sm:tracking-[-0.5px] md:tracking-[-1px]">
             Le Relief Haïti
           </h1>
           <p className="editorial-deck mx-auto mt-6 max-w-2xl font-body text-xl sm:text-2xl">
@@ -59,7 +59,7 @@ export default function HeroSection({ article }: HeroSectionProps) {
     : null;
 
   const meta = (
-    <div className="mt-5 flex flex-wrap items-center gap-3 border-t border-border-subtle pt-4 font-label text-[11px] font-bold uppercase text-muted">
+    <div className="mt-5 flex flex-wrap items-center gap-3 border-t border-border-subtle pt-4 font-label text-[11px] font-bold uppercase text-muted tracking-[1px]">
       {article.author?.name && <span>Par {article.author.name}</span>}
       {article.author?.name && date && <span className="text-border-subtle">/</span>}
       {date && <span>{date}</span>}
@@ -81,7 +81,7 @@ export default function HeroSection({ article }: HeroSectionProps) {
             <div className="flex items-center justify-between border-b border-border-subtle pb-3">
               <p className="font-label text-[11px] font-bold uppercase text-muted">À la une</p>
               {article.category && (
-                <p className="page-kicker">{article.category.name}</p>
+                <p className="page-kicker" style={{ letterSpacing: "1.2px" }}>{article.category.name}</p>
               )}
             </div>
             <div className="py-8 sm:py-12">
@@ -91,7 +91,7 @@ export default function HeroSection({ article }: HeroSectionProps) {
                   {article.language === "en" ? " / English" : ""}
                 </p>
               )}
-              <h1 className="editorial-title max-w-5xl text-4xl text-foreground transition-colors group-hover:text-primary sm:text-5xl lg:text-7xl">
+              <h1 className="editorial-title max-w-5xl text-4xl text-foreground transition-colors group-hover:text-primary sm:text-5xl lg:text-7xl xl:text-8xl tracking-tight lg:tracking-[-1px]">
                 {article.title}
               </h1>
               {article.excerpt && (
@@ -119,7 +119,7 @@ export default function HeroSection({ article }: HeroSectionProps) {
               <div>
                 <div className="mb-5 flex items-center gap-3">
                   {article.category && (
-                    <p className="page-kicker">{article.category.name}</p>
+                    <p className="page-kicker" style={{ letterSpacing: "1.2px" }}>{article.category.name}</p>
                   )}
                   {article.contentTypeLabel && (
                     <p className="font-label text-[11px] font-extrabold uppercase text-muted">
@@ -128,7 +128,7 @@ export default function HeroSection({ article }: HeroSectionProps) {
                     </p>
                   )}
                 </div>
-                <h1 className="editorial-title text-3xl text-foreground transition-colors group-hover:text-primary sm:text-4xl lg:text-5xl">
+                <h1 className="editorial-title text-3xl text-foreground transition-colors group-hover:text-primary sm:text-4xl lg:text-6xl tracking-tight lg:tracking-[-0.5px]">
                   {article.title}
                 </h1>
                 {article.excerpt && (

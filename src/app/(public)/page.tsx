@@ -4,6 +4,7 @@ import ArticleCard from "@/components/public/ArticleCard";
 import LatestArticlesFeed from "@/components/public/LatestArticlesFeed";
 import CategoryGrid from "@/components/public/CategoryGrid";
 import NewsletterSignup from "@/components/public/NewsletterSignup";
+import SectionRibbon from "@/components/ui/SectionRibbon";
 import { getHomepageContent } from "@/lib/public-content";
 
 export const revalidate = 60;
@@ -20,7 +21,7 @@ function SectionHeader({
   return (
     <div className="mb-6 flex items-end justify-between border-t-2 border-border-strong pt-3">
       <div>
-        <p className="section-kicker mb-2">{kicker}</p>
+        <p className="section-kicker mb-2 tracking-[1px]">{kicker}</p>
         <h2 className="font-headline text-3xl font-extrabold leading-none text-foreground sm:text-4xl">
           {title}
         </h2>
@@ -56,6 +57,9 @@ export default async function HomePage() {
       <div className="newspaper-shell">
         {secondary.length > 0 ? (
           <section className="mb-14 sm:mb-20">
+            <div className="mb-4">
+              <SectionRibbon label="À la une" variant="dark" />
+            </div>
             <SectionHeader kicker="À suivre" title="Les autres titres" />
             <div className="grid gap-0 md:grid-cols-3">
               {secondary.map((article, index) => (
@@ -91,6 +95,9 @@ export default async function HomePage() {
 
             {editorial.length > 0 ? (
               <section className="mb-14 sm:mb-20">
+                <div className="mb-4">
+                  <SectionRibbon label="Contexte & analyse" />
+                </div>
                 <SectionHeader
                   kicker="Contexte"
                   title="Analyses, opinions et dossiers"
@@ -129,9 +136,9 @@ export default async function HomePage() {
                     <Link
                       key={article.id}
                       href={`/articles/${article.slug}`}
-                      className="group grid grid-cols-[2rem_1fr] gap-3 py-4"
+                      className="group grid grid-cols-[3rem_1fr] gap-3 py-4"
                     >
-                      <span className="font-label text-[10px] font-extrabold uppercase text-primary">
+                      <span className="editorial-numeral" style={{ fontSize: "1.75rem", color: "var(--border-subtle)" }}>
                         {String(index + 1).padStart(2, "0")}
                       </span>
                       <span className="font-headline text-lg font-bold leading-snug text-foreground transition-colors group-hover:text-primary">
@@ -195,6 +202,25 @@ export default async function HomePage() {
             {englishSelection.map((article) => (
               <ArticleCard key={article.id} article={article} />
             ))}
+          </div>
+        </section>
+      ) : null}
+
+      {showNewsletter ? (
+        <section className="mt-16 bg-foreground py-14 sm:mt-20 sm:py-20">
+          <div className="newspaper-shell text-center">
+            <p className="mb-4 font-label text-xs font-extrabold uppercase tracking-[1.2px] text-background/60">
+              Lettre d'information
+            </p>
+            <h2 className="font-headline text-3xl font-extrabold leading-tight text-background sm:text-4xl">
+              Recevez Le Relief directement.
+            </h2>
+            <p className="mx-auto mt-4 max-w-md font-body text-base leading-relaxed text-background/70">
+              Une sélection éditoriale de l'actualité haïtienne, sans bruit.
+            </p>
+            <div className="mx-auto mt-8 max-w-sm">
+              <NewsletterSignup />
+            </div>
           </div>
         </section>
       ) : null}

@@ -16,15 +16,15 @@ export default function Badge({
       className={clsx(
         "inline-flex items-center rounded-sm border px-2.5 py-0.5 font-label text-[11px] font-bold uppercase",
         {
-          "border-border-subtle bg-surface-elevated text-foreground/70":
+          "bg-[rgba(0,0,0,0.05)] text-muted border-[rgba(0,0,0,0.1)] dark:bg-[rgba(255,255,255,0.05)] dark:border-[rgba(255,255,255,0.1)]":
             variant === "default",
-          "border-accent-teal/30 bg-accent-teal/10 text-accent-teal":
+          "bg-[rgba(31,111,100,0.1)] text-accent-teal border-[rgba(31,111,100,0.25)]":
             variant === "success",
-          "border-accent-amber/30 bg-accent-amber/10 text-accent-amber":
+          "bg-[rgba(185,120,24,0.1)] text-accent-amber border-[rgba(185,120,24,0.25)]":
             variant === "warning",
-          "border-primary/30 bg-primary/10 text-primary":
+          "bg-[rgba(177,18,38,0.1)] text-primary border-[rgba(177,18,38,0.25)]":
             variant === "danger",
-          "border-accent-blue/30 bg-accent-blue/10 text-accent-blue":
+          "bg-[rgba(35,90,124,0.1)] text-accent-blue border-[rgba(35,90,124,0.25)]":
             variant === "info",
         },
         className

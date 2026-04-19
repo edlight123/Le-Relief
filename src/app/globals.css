@@ -25,10 +25,13 @@
 
   --surface: #FFFFFF;
   --surface-elevated: #F6F6F6;
-  --surface-newsprint: #FAFAFA;
+  --surface-newsprint: #F8F7F4;
   --border-subtle: #D8D8D8;
   --border-strong: #111111;
   --muted: #5F5F5F;
+  --shadow-card: rgba(0,0,0,0.04) 0px 4px 18px, rgba(0,0,0,0.027) 0px 2px 8px, rgba(0,0,0,0.02) 0px 1px 3px, rgba(0,0,0,0.01) 0px 0.2px 1px;
+  --shadow-card-hover: rgba(0,0,0,0.08) 0px 8px 28px, rgba(0,0,0,0.05) 0px 3px 10px, rgba(0,0,0,0.03) 0px 1px 4px;
+  --shadow-dashboard: rgba(50,50,93,0.1) 0px 20px 30px -20px, rgba(0,0,0,0.07) 0px 8px 16px -8px;
 }
 
 .dark {
@@ -78,6 +81,7 @@
   --font-headline: var(--font-newsreader), Georgia, serif;
   --font-body: var(--font-newsreader), Georgia, serif;
   --font-label: var(--font-libre-franklin), Helvetica, sans-serif;
+  --font-mono: var(--font-ibm-plex-mono), "Courier New", monospace;
 }
 
 body {
@@ -147,7 +151,7 @@ html {
   font-size: 0.72rem;
   line-height: 1;
   font-weight: 800;
-  letter-spacing: 0;
+  letter-spacing: 1.0px;
   text-transform: uppercase;
   color: var(--primary);
 }
@@ -231,13 +235,10 @@ html {
 
 /* Article card hover */
 .article-card {
-  transition: color 0.2s ease, background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+  transition: color 0.2s ease, background 0.2s ease, border-color 0.2s ease;
 }
 .article-card:hover {
-  box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.07);
-}
-.dark .article-card:hover {
-  box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.4);
+  /* editorial hover: text color only, no lift */
 }
 
 /* Clean underline effect */
@@ -296,6 +297,28 @@ html {
   left: 0;
   z-index: 100;
   transition: width 0.1s linear;
+}
+
+/* Editorial numbered list numerals */
+.editorial-numeral {
+  font-family: var(--font-headline);
+  font-size: 2.5rem;
+  line-height: 1;
+  font-weight: 800;
+  color: var(--border-subtle);
+  letter-spacing: -0.5px;
+}
+
+/* Section ribbon — full-width editorial bar */
+.section-ribbon {
+  background: var(--foreground);
+  color: var(--background);
+  padding: 0.5rem 0;
+  font-family: var(--font-label);
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
 }
 
 /* Grayscale hover for images */

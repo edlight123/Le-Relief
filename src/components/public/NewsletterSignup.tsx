@@ -62,7 +62,7 @@ export default function NewsletterSignup() {
     <form className="newsletter-signup" onSubmit={handleSubmit}>
       <div className="relative">
         <input
-          className="w-full border border-border-subtle bg-surface px-3 py-2 pr-10 font-label text-sm text-foreground placeholder:text-muted transition-colors focus:border-primary focus:outline-none"
+          className="w-full border-2 border-foreground bg-surface px-3 py-2.5 pr-12 font-label text-sm text-foreground placeholder:text-muted transition-colors focus:border-primary focus:outline-none"
           placeholder="Adresse courriel"
           type="email"
           value={email}
@@ -74,7 +74,7 @@ export default function NewsletterSignup() {
         <button
           type="submit"
           disabled={status === "saving"}
-          className="absolute right-0 top-0 flex h-full items-center px-3 text-primary transition-colors hover:text-foreground disabled:opacity-50"
+          className="absolute right-0 top-0 flex h-full items-center bg-foreground px-3 text-background transition-colors hover:bg-primary disabled:opacity-50"
           aria-label="S'inscrire à la lettre"
         >
           <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
