@@ -207,53 +207,61 @@ export default function ArticleEditor({
         </div>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2">
-        <div>
-          <label className="mb-2 block font-label text-xs font-extrabold uppercase text-foreground">
-            Statut de traduction
-          </label>
-          <select
-            value={translationStatus}
-            onChange={(e) => setTranslationStatus(e.target.value)}
-            className="w-full border border-border-subtle bg-surface px-4 py-3 font-label text-sm text-foreground focus:border-primary focus:outline-none"
-          >
-            <option value="not_applicable">Non concerné</option>
-            <option value="not_started">Non lancée</option>
-            <option value="generated_draft">Brouillon IA</option>
-            <option value="in_review">En revue</option>
-            <option value="approved">Approuvée</option>
-            <option value="published">Publiée</option>
-            <option value="rejected">Rejetée</option>
-          </select>
+      <details className="group border border-border-subtle">
+        <summary className="flex cursor-pointer select-none items-center justify-between px-4 py-3 font-label text-xs font-extrabold uppercase text-foreground hover:bg-surface-newsprint">
+          Traduction
+          <span className="text-muted transition-transform group-open:rotate-180">▾</span>
+        </summary>
+        <div className="space-y-4 border-t border-border-subtle px-4 py-4">
+          <div className="grid gap-4 md:grid-cols-2">
+            <div>
+              <label className="mb-2 block font-label text-xs font-extrabold uppercase text-foreground">
+                Statut de traduction
+              </label>
+              <select
+                value={translationStatus}
+                onChange={(e) => setTranslationStatus(e.target.value)}
+                className="w-full border border-border-subtle bg-surface px-4 py-3 font-label text-sm text-foreground focus:border-primary focus:outline-none"
+              >
+                <option value="not_applicable">Non concerné</option>
+                <option value="not_started">Non lancée</option>
+                <option value="generated_draft">Brouillon IA</option>
+                <option value="in_review">En revue</option>
+                <option value="approved">Approuvée</option>
+                <option value="published">Publiée</option>
+                <option value="rejected">Rejetée</option>
+              </select>
+            </div>
+
+            <Input
+              label="Slug langue liée"
+              id="alternateLanguageSlug"
+              placeholder="slug-de-la-version-liee"
+              value={alternateLanguageSlug}
+              onChange={(e) => setAlternateLanguageSlug(e.target.value)}
+            />
+          </div>
+
+          <div className="grid gap-4 md:grid-cols-[auto_1fr] md:items-end">
+            <label className="flex items-center gap-3 border border-border-subtle px-4 py-3 font-label text-xs font-extrabold uppercase text-foreground">
+              <input
+                type="checkbox"
+                checked={allowTranslation}
+                onChange={(e) => setAllowTranslation(e.target.checked)}
+                className="h-4 w-4 accent-primary"
+              />
+              Éligible traduction EN
+            </label>
+            <Input
+              label="Priorité de traduction"
+              id="translationPriority"
+              placeholder="élevée, moyenne, basse"
+              value={translationPriority}
+              onChange={(e) => setTranslationPriority(e.target.value)}
+            />
+          </div>
         </div>
-
-        <Input
-          label="Slug langue liée"
-          id="alternateLanguageSlug"
-          placeholder="slug-de-la-version-liee"
-          value={alternateLanguageSlug}
-          onChange={(e) => setAlternateLanguageSlug(e.target.value)}
-        />
-      </div>
-
-      <div className="grid gap-4 md:grid-cols-[auto_1fr] md:items-end">
-        <label className="flex items-center gap-3 border border-border-subtle px-4 py-3 font-label text-xs font-extrabold uppercase text-foreground">
-          <input
-            type="checkbox"
-            checked={allowTranslation}
-            onChange={(e) => setAllowTranslation(e.target.checked)}
-            className="h-4 w-4 accent-primary"
-          />
-          Éligible traduction EN
-        </label>
-        <Input
-          label="Priorité de traduction"
-          id="translationPriority"
-          placeholder="élevée, moyenne, basse"
-          value={translationPriority}
-          onChange={(e) => setTranslationPriority(e.target.value)}
-        />
-      </div>
+      </details>
 
       <div>
         <label
@@ -302,7 +310,7 @@ export default function ArticleEditor({
           placeholder="Écrivez le contenu de votre article..."
           value={body}
           onChange={(e) => setBody(e.target.value)}
-          className="w-full resize-none border border-border-subtle bg-surface px-4 py-3 font-mono text-sm leading-relaxed text-foreground focus:border-primary focus:outline-none"
+          className="w-full resize-y border border-border-subtle bg-surface px-4 py-3 font-mono text-sm leading-relaxed text-foreground focus:border-primary focus:outline-none"
         />
       </div>
 
@@ -349,7 +357,7 @@ export default function ArticleEditor({
           onClick={() => handleSubmit("draft")}
           disabled={saving || !title}
         >
-          Sauvegarder Brouillon
+          Sauvegarder brouillon
         </Button>
       </div>
     </div>

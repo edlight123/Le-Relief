@@ -15,7 +15,7 @@ interface StatsCardsProps {
 
 export default function StatsCards({ stats }: StatsCardsProps) {
   return (
-    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+    <div className={`grid grid-cols-2 gap-4 ${stats.length >= 5 ? "lg:grid-cols-5" : "sm:grid-cols-2 lg:grid-cols-4"}`}>
       {stats.map((stat) => (
         <Card key={stat.label} className="border-t-2 border-t-border-strong">
           <CardContent className="flex items-start justify-between">

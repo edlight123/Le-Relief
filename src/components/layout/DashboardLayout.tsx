@@ -23,7 +23,7 @@ export default function DashboardLayout({
           >
             <Menu className="h-5 w-5 text-foreground" />
           </button>
-          <div className="hidden flex-1 font-label text-xs font-bold uppercase text-muted lg:block">
+          <div className="flex-1 pl-4 font-label text-xs font-bold uppercase text-muted lg:pl-0">
             Salle de rédaction
           </div>
           <ThemeToggle />

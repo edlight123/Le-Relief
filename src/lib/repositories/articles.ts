@@ -109,7 +109,7 @@ export async function getArticles(options?: {
   query = query.orderBy(orderField, "desc");
 
   if (options?.before) {
-    query = query.where(orderField, "<", options.before);
+    query = query.where(orderField, "<", new Date(options.before));
   }
 
   const needsClientFilter = !!(options?.search || options?.excludeId);
@@ -211,4 +211,13 @@ export async function getPublishedArticles(take: number = 6) {
     .limit(take)
     .get();
   return snap.docs.map((d) => serializeTimestamps({ id: d.id, ...d.data() } as Record<string, unknown>));
+}
+
+export async function getTopArticlesByViews(take: number = 10) {
+  const snap = await collection()
+    .orderBy("views", "desc")
+    .limit(take * 3)
+    .get();
+  const docs = snap.docs.map((d) => serializeTimestamps({ id: d.id, ...d.data() } as Record<string, unknown>));
+  return docs.filter((d) => d.status === "published").slice(0, take);
 }

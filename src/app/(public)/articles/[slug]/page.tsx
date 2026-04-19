@@ -32,6 +32,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const description =
     article.excerpt || article.subtitle || "Retrouvez cet article sur Le Relief.";
   const coverImage = article.imageSrc || null;
+  const ogParams = new URLSearchParams({ title: article.title });
+  if (article.category) ogParams.set("category", article.category.name);
+  if (article.author) ogParams.set("author", article.author.name);
+  const generatedOgImage = `${siteConfig.url}/api/og?${ogParams.toString()}`;
+  const ogImage = coverImage || generatedOgImage;
 
   return {
     title,
@@ -52,7 +57,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       siteName: siteConfig.name,
       title,
       description,
-      ...(coverImage ? { images: [{ url: coverImage, alt: article.title }] } : {}),
+      images: [{ url: ogImage, alt: article.title, width: 1200, height: 630 }],
       publishedTime: article.publishedAt || undefined,
       modifiedTime: article.updatedAt || undefined,
       section: article.category?.name,
@@ -62,7 +67,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       card: "summary_large_image",
       title,
       description,
-      ...(coverImage ? { images: [coverImage] } : {}),
+      images: [ogImage],
     },
   };
 }

@@ -101,10 +101,18 @@ export default async function DashboardPage() {
                 </div>
                 <Badge
                   variant={
-                    article.status === "published" ? "success" : "warning"
+                    article.status === "published"
+                      ? "success"
+                      : article.status === "pending_review"
+                        ? "info"
+                        : "warning"
                   }
                 >
-                  {String(article.status)}
+                  {article.status === "published"
+                    ? "Publié"
+                    : article.status === "pending_review"
+                      ? "En revue"
+                      : "Brouillon"}
                 </Badge>
               </Link>
             ))

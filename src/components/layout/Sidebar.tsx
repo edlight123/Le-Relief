@@ -77,10 +77,10 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
                 href={item.href}
                 onClick={onClose}
                 className={clsx(
-                  "flex items-center gap-3 border-b border-border-subtle px-1 py-3 font-label text-sm font-bold transition-colors",
+                  "flex items-center gap-3 border-b border-border-subtle py-3 font-label text-sm font-bold transition-colors",
                   active
-                    ? "text-primary"
-                    : "text-muted hover:text-foreground"
+                    ? "border-l-2 border-l-primary bg-surface-elevated pl-2 text-primary"
+                    : "border-l-2 border-l-transparent pl-2 text-muted hover:bg-surface-newsprint hover:text-foreground"
                 )}
               >
                 {icons[item.href]}

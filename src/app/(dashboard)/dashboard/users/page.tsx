@@ -121,7 +121,7 @@ export default function UsersPage() {
                       onChange={(e) =>
                         handleRoleChange(user.id, e.target.value)
                       }
-                      className="border border-border-subtle bg-surface px-2 py-1 font-label text-sm text-foreground focus:outline-none"
+                      className="border border-border-subtle bg-surface px-3 py-2 font-label text-sm text-foreground focus:border-primary focus:outline-none"
                     >
                       <option value="reader">Lecteur</option>
                       <option value="publisher">Éditeur</option>

@@ -305,7 +305,7 @@ export default function SettingsPage() {
                       Modifier
                     </Button>
                     <Button
-                      variant="ghost"
+                      variant="danger"
                       size="sm"
                       onClick={() => handleDeleteCategory(category.id)}
                     >

@@ -148,8 +148,8 @@ export default function ArticlesPage() {
                   key={article.id}
                   className="hover:bg-surface-newsprint"
                 >
-                  <td className="px-4 py-3">
-                    <span className="font-headline text-lg font-bold text-foreground">
+                  <td className="max-w-xs px-4 py-3 lg:max-w-sm">
+                    <span className="block truncate font-headline text-base font-bold text-foreground">
                       {article.title}
                     </span>
                   </td>
