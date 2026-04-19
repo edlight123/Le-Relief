@@ -54,3 +54,11 @@ export const categorySchema = z.object({
   name: z.string().min(1, "Le nom est requis").max(100),
   description: z.string().max(500).optional(),
 });
+
+export const homepageSettingsSchema = z.object({
+  heroArticleId: z.string().nullable().optional(),
+  secondaryArticleIds: z.array(z.string()).max(3).optional(),
+  highlightedCategoryIds: z.array(z.string()).max(12).optional(),
+  showNewsletter: z.boolean().optional(),
+  showEnglishSelection: z.boolean().optional(),
+});

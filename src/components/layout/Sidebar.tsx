@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { clsx } from "clsx";
 import {
   LayoutDashboard,
+  Home,
   FileText,
   PenSquare,
   Image as ImageIcon,
@@ -19,6 +20,7 @@ import { signOut } from "next-auth/react";
 
 const icons: Record<string, React.ReactNode> = {
   "/dashboard": <LayoutDashboard className="h-5 w-5" />,
+  "/dashboard/homepage": <Home className="h-5 w-5" />,
   "/dashboard/articles": <FileText className="h-5 w-5" />,
   "/dashboard/articles/new": <PenSquare className="h-5 w-5" />,
   "/dashboard/media": <ImageIcon className="h-5 w-5" />,

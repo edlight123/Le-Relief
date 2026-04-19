@@ -1,5 +1,6 @@
 import * as articlesRepo from "@/lib/repositories/articles";
 import * as categoriesRepo from "@/lib/repositories/categories";
+import * as homepageRepo from "@/lib/repositories/homepage";
 import * as usersRepo from "@/lib/repositories/users";
 import {
   type EditorialLanguage,
@@ -9,6 +10,7 @@ import {
   normalizeCategory,
   sortCategories,
 } from "@/lib/editorial";
+import type { HomepageSettings } from "@/types/homepage";
 
 export interface HomepageContent {
   hero: PublicArticle | null;
@@ -18,6 +20,7 @@ export interface HomepageContent {
   mostRead: PublicArticle[];
   categories: PublicCategory[];
   englishSelection: PublicArticle[];
+  showNewsletter: boolean;
 }
 
 async function hydrateArticle(
@@ -37,6 +40,12 @@ async function hydrateArticles(articles: Record<string, unknown>[]) {
   return Promise.all(articles.map((article) => hydrateArticle(article)));
 }
 
+async function hydratePublishedArticleById(id: string) {
+  const article = await articlesRepo.getArticle(id);
+  if (!article || article.status !== "published") return null;
+  return hydrateArticle(article);
+}
+
 function uniqueById(articles: PublicArticle[]) {
   const seen = new Set<string>();
   return articles.filter((article) => {
@@ -50,14 +59,45 @@ function excludeIds(articles: PublicArticle[], ids: Set<string>) {
   return articles.filter((article) => !ids.has(article.id));
 }
 
-function selectEditorialArticles(articles: PublicArticle[]) {
-  const preferred = articles.filter((article) =>
-    ["analyse", "opinion", "editorial", "dossier", "fact_check"].includes(
-      article.contentType,
-    ),
-  );
+function orderByIds<T extends { id: string }>(items: T[], ids: string[]) {
+  const itemMap = new Map(items.map((item) => [item.id, item]));
+  return ids
+    .map((id) => itemMap.get(id))
+    .filter((item): item is T => Boolean(item));
+}
 
-  return uniqueById([...preferred, ...articles]).slice(0, 4);
+function hasHomepageImage(article: PublicArticle) {
+  return Boolean(
+    article.imageSrc || article.coverImageFirebaseUrl || article.coverImage,
+  );
+}
+
+function selectHeroArticle(
+  curated: PublicArticle | null,
+  featured: PublicArticle | null,
+  latest: PublicArticle[],
+) {
+  if (curated) return curated;
+  if (featured && hasHomepageImage(featured)) return featured;
+  return latest.find(hasHomepageImage) || featured || latest[0] || null;
+}
+
+function selectEditorialArticles(articles: PublicArticle[]) {
+  return articles
+    .filter((article) =>
+      ["analyse", "opinion", "editorial", "dossier", "fact_check"].includes(
+        article.contentType,
+      ),
+    )
+    .slice(0, 4);
+}
+
+function selectHomepageCategories(
+  categories: PublicCategory[],
+  settings: HomepageSettings,
+) {
+  if (settings.highlightedCategoryIds.length === 0) return categories;
+  return orderByIds(categories, settings.highlightedCategoryIds);
 }
 
 export async function getPublicCategories(onlyWithArticles = false) {
@@ -88,9 +128,37 @@ export async function getPublicCategories(onlyWithArticles = false) {
 }
 
 export async function getHomepageContent(): Promise<HomepageContent> {
+  let settings = homepageRepo.DEFAULT_HOMEPAGE_SETTINGS;
+  let curatedHero: PublicArticle | null = null;
+  let curatedSecondary: PublicArticle[] = [];
   let featured: PublicArticle | null = null;
   let latest: PublicArticle[] = [];
   let categories: PublicCategory[] = [];
+
+  try {
+    settings = await homepageRepo.getHomepageSettings();
+  } catch {
+    settings = homepageRepo.DEFAULT_HOMEPAGE_SETTINGS;
+  }
+
+  try {
+    if (settings.heroArticleId) {
+      curatedHero = await hydratePublishedArticleById(settings.heroArticleId);
+    }
+  } catch {
+    curatedHero = null;
+  }
+
+  try {
+    const selected = await Promise.all(
+      settings.secondaryArticleIds.map((id) => hydratePublishedArticleById(id)),
+    );
+    curatedSecondary = selected.filter(
+      (article): article is PublicArticle => Boolean(article),
+    );
+  } catch {
+    curatedSecondary = [];
+  }
 
   try {
     const rawFeatured = await articlesRepo.getFeaturedArticle();
@@ -112,23 +180,38 @@ export async function getHomepageContent(): Promise<HomepageContent> {
     categories = [];
   }
 
-  const allArticles = uniqueById(featured ? [featured, ...latest] : latest);
-  const hero = featured || allArticles[0] || null;
+  const hero = selectHeroArticle(curatedHero, featured, latest);
+  const homepageFeatured =
+    featured && hasHomepageImage(featured) ? [featured] : [];
+  const allArticles = uniqueById(
+    hero
+      ? [hero, ...curatedSecondary, ...homepageFeatured, ...latest]
+      : [...curatedSecondary, ...homepageFeatured, ...latest],
+  );
+  const homepageArticles = allArticles.some(hasHomepageImage)
+    ? allArticles.filter(hasHomepageImage)
+    : allArticles;
   const used = new Set(hero ? [hero.id] : []);
-  const remaining = excludeIds(allArticles, used);
-  const secondary = remaining.slice(0, 3);
+  const remaining = excludeIds(homepageArticles, used);
+  const secondary = uniqueById([
+    ...curatedSecondary.filter(
+      (article) => article.id !== hero?.id && hasHomepageImage(article),
+    ),
+    ...remaining,
+  ]).slice(0, 3);
   secondary.forEach((article) => used.add(article.id));
 
-  const latestList = excludeIds(allArticles, used).slice(0, 8);
+  const latestList = excludeIds(homepageArticles, used).slice(0, 8);
   latestList.forEach((article) => used.add(article.id));
-  const editorial = selectEditorialArticles(excludeIds(allArticles, used));
-  const mostRead = [...allArticles]
+  const editorial = selectEditorialArticles(excludeIds(homepageArticles, used));
+  const mostRead = [...homepageArticles]
     .sort((a, b) => b.views - a.views)
     .filter((article) => article.id !== hero?.id)
     .slice(0, 5);
   const englishSelection = allArticles
     .filter((article) => article.language === "en")
     .slice(0, 4);
+  const homepageCategories = selectHomepageCategories(categories, settings);
 
   return {
     hero,
@@ -136,8 +219,9 @@ export async function getHomepageContent(): Promise<HomepageContent> {
     latest: latestList,
     editorial,
     mostRead: mostRead.length > 0 ? mostRead : remaining.slice(0, 5),
-    categories,
-    englishSelection,
+    categories: homepageCategories.length > 0 ? homepageCategories : categories,
+    englishSelection: settings.showEnglishSelection ? englishSelection : [],
+    showNewsletter: settings.showNewsletter,
   };
 }
 

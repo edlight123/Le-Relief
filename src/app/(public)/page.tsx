@@ -45,6 +45,7 @@ export default async function HomePage() {
     mostRead,
     categories,
     englishSelection,
+    showNewsletter,
   } = await getHomepageContent();
 
   return (
@@ -150,18 +151,20 @@ export default async function HomePage() {
               </section>
             ) : null}
 
-            <section className="border-t-2 border-border-strong pt-4">
-              <p className="section-kicker mb-2">Lettre</p>
-              <h3 className="font-headline text-2xl font-extrabold leading-tight text-foreground">
-                Recevez les sujets qui comptent.
-              </h3>
-              <p className="mt-3 font-body text-base leading-relaxed text-muted">
-                Une sélection claire des nouvelles, analyses et dossiers à lire.
-              </p>
-              <div className="mt-5">
-                <NewsletterSignup />
-              </div>
-            </section>
+            {showNewsletter ? (
+              <section className="border-t-2 border-border-strong pt-4">
+                <p className="section-kicker mb-2">Lettre</p>
+                <h3 className="font-headline text-2xl font-extrabold leading-tight text-foreground">
+                  Recevez les sujets qui comptent.
+                </h3>
+                <p className="mt-3 font-body text-base leading-relaxed text-muted">
+                  Une sélection claire des nouvelles, analyses et dossiers à lire.
+                </p>
+                <div className="mt-5">
+                  <NewsletterSignup />
+                </div>
+              </section>
+            ) : null}
           </aside>
         </div>
       </div>

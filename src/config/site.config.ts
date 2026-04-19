@@ -32,6 +32,7 @@ export const siteConfig = {
     ],
     dashboard: [
       { label: "Tableau de Bord", href: "/dashboard" },
+      { label: "Une", href: "/dashboard/homepage" },
       { label: "Articles", href: "/dashboard/articles" },
       { label: "Nouvel Article", href: "/dashboard/articles/new" },
       { label: "Médias", href: "/dashboard/media" },

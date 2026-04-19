@@ -3,3 +3,4 @@ export * as articlesRepo from "./articles";
 export * as categoriesRepo from "./categories";
 export * as mediaRepo from "./media";
 export * as socialLinksRepo from "./social-links";
+export * as homepageRepo from "./homepage";
