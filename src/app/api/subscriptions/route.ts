@@ -5,13 +5,19 @@ import { sendWelcomeEmail as gmailWelcome } from "@/lib/mailer";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
+function emailConfigured() {
+  return (
+    (!!process.env.EMAIL_USER && !!process.env.EMAIL_APP_PASSWORD) ||
+    !!process.env.RESEND_API_KEY
+  );
+}
+
 async function sendWelcomeEmail(email: string) {
   if (process.env.EMAIL_USER && process.env.EMAIL_APP_PASSWORD) {
     await gmailWelcome(email);
   } else if (process.env.RESEND_API_KEY) {
     await resendWelcome(email);
   }
-  // silently skip if neither is configured
 }
 
 export async function POST(req: NextRequest) {
@@ -26,6 +32,8 @@ export async function POST(req: NextRequest) {
     const existing = await subscriptionsRepo.getSubscriptionByEmail(email);
     const subscription = await subscriptionsRepo.subscribeEmail(email);
 
+    const willSendEmail = !existing && emailConfigured();
+
     if (!existing) {
       Promise.all([
         addContactToAudience(email).catch(() => null),
@@ -36,7 +44,10 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({
       success: true,
       subscription,
-      message: "Inscription confirmée. Vérifiez votre boîte de réception.",
+      emailSent: willSendEmail,
+      message: willSendEmail
+        ? "Inscription confirmée. Vérifiez votre boîte de réception."
+        : "Inscription confirmée.",
     });
   } catch {
     return NextResponse.json(
