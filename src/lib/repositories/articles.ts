@@ -102,37 +102,20 @@ export async function getArticles(options?: {
   }
 
   const orderField = options?.orderBy || "publishedAt";
-  // Firestore requires a composite index for orderBy + equality filter (authorId/categoryId).
-  // Skip Firestore orderBy when those filters are present; sort + paginate client-side instead.
-  const hasEqualityFilter = !!(options?.authorId || options?.categoryId);
+  query = query.orderBy(orderField, "desc");
 
-  if (!hasEqualityFilter) {
-    query = query.orderBy(orderField, "desc");
-    if (options?.before) {
-      query = query.where(orderField, "<", options.before);
-    }
+  if (options?.before) {
+    query = query.where(orderField, "<", options.before);
   }
 
-  // Equality-filter queries fetch all matching docs (no Firestore limit) so we can
-  // sort and apply the before cursor client-side. All other queries limit in Firestore.
-  const needsClientFilter = !!(options?.search || options?.excludeId || hasEqualityFilter);
+  // When there's no client-side filtering needed, use Firestore limit for efficiency
+  const needsClientFilter = !!(options?.search || options?.excludeId);
   if (!needsClientFilter && !options?.skip) {
     query = query.limit(options?.take || 20);
   }
 
   const snap = await query.get();
   let docs = snap.docs.map((d) => serializeTimestamps({ id: d.id, ...d.data() } as Record<string, unknown>));
-
-  if (hasEqualityFilter) {
-    docs.sort((a, b) => {
-      const aVal = (a[orderField] as string) ?? "";
-      const bVal = (b[orderField] as string) ?? "";
-      return bVal < aVal ? -1 : bVal > aVal ? 1 : 0;
-    });
-    if (options?.before) {
-      docs = docs.filter((d) => ((d[orderField] as string) ?? "") < options.before!);
-    }
-  }
 
   // Client-side filtering for search (Firestore doesn't do full-text search)
   if (options?.search) {
