@@ -36,14 +36,9 @@ export default function CategoryGrid({
             <span className="font-headline text-lg font-bold leading-none text-foreground group-hover:text-primary">
               {cat.name}
             </span>
-            {cat._count && (
+            {(cat._count?.articles ?? cat.count) !== undefined && (
               <span className="ml-auto font-label text-[10px] font-bold uppercase text-muted">
-                {cat._count.articles}
-              </span>
-            )}
-            {cat.count !== undefined && (
-              <span className="ml-auto font-label text-[10px] font-bold uppercase text-muted">
-                {cat.count}
+                {cat._count?.articles ?? cat.count}
               </span>
             )}
           </Link>

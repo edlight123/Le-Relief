@@ -304,6 +304,37 @@ export function normalizeContentType(
   return "actualite";
 }
 
+function normalizeForTagComparison(s: string): string {
+  return s
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]/g, "");
+}
+
+function deduplicateTags(
+  rawTags: string[],
+  contentType: ContentType,
+  category: PublicCategory | null,
+): string[] {
+  const base = normalizeForTagComparison(contentType);
+  const redundant = new Set([
+    base,
+    base + "s",
+    normalizeForTagComparison(contentType.replace("_", "")),
+    normalizeForTagComparison(contentType.replace("_", "")) + "s",
+    ...(category
+      ? [
+          normalizeForTagComparison(category.slug),
+          normalizeForTagComparison(category.slug) + "s",
+          normalizeForTagComparison(category.name),
+          normalizeForTagComparison(category.name) + "s",
+        ]
+      : []),
+  ]);
+  return rawTags.filter((tag) => !redundant.has(normalizeForTagComparison(tag)));
+}
+
 export function normalizeArticle(
   article: Record<string, unknown>,
   author: Record<string, unknown> | null,
@@ -317,6 +348,7 @@ export function normalizeArticle(
   const coverImageFirebaseUrl = asOptionalString(article.coverImageFirebaseUrl);
   const publishedAt = asOptionalString(article.publishedAt);
   const updatedAt = asOptionalString(article.updatedAt);
+  const rawTags = Array.isArray(article.tags) ? article.tags.map(String) : [];
 
   return {
     id: asString(article.id),
@@ -332,13 +364,13 @@ export function normalizeArticle(
     updatedAt,
     author: normalizeAuthor(author),
     category: normalizedCategory,
-    tags: Array.isArray(article.tags) ? article.tags.map(String) : [],
+    tags: deduplicateTags(rawTags, contentType, normalizedCategory),
     status: asString(article.status, "draft"),
     featured: asBoolean(article.featured),
     views: asNumber(article.views),
     language,
     contentType,
-    contentTypeLabel: getContentTypeLabel(contentType),
+    contentTypeLabel: contentType !== "actualite" ? getContentTypeLabel(contentType) : "",
     readingTime: getReadingTime(body),
     translationStatus: normalizeTranslationStatus(
       article.translationStatus,

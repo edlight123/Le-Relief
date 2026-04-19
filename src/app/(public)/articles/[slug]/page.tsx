@@ -136,8 +136,12 @@ export default async function ArticlePage({ params }: Props) {
               {article.category.name}
             </Link>
           ) : null}
-          <span className="text-muted">{article.contentTypeLabel}</span>
-          <span className="text-muted">{article.language.toUpperCase()}</span>
+          {article.contentTypeLabel ? (
+            <span className="text-muted">{article.contentTypeLabel}</span>
+          ) : null}
+          {article.language === "en" ? (
+            <span className="text-muted">English</span>
+          ) : null}
         </div>
 
         <h1 className="editorial-title mt-4 max-w-5xl text-4xl text-foreground sm:text-5xl lg:text-6xl">

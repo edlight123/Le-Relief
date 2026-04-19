@@ -91,7 +91,7 @@ export default function HeroSection({ article }: HeroSectionProps) {
                   {article.language === "en" ? " / English" : ""}
                 </p>
               )}
-              <h1 className="editorial-title max-w-5xl text-5xl text-foreground transition-colors group-hover:text-primary sm:text-6xl lg:text-8xl">
+              <h1 className="editorial-title max-w-5xl text-4xl text-foreground transition-colors group-hover:text-primary sm:text-5xl lg:text-7xl">
                 {article.title}
               </h1>
               {article.excerpt && (
