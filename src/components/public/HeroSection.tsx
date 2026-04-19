@@ -128,7 +128,7 @@ export default function HeroSection({ article }: HeroSectionProps) {
                     </p>
                   )}
                 </div>
-                <h1 className="editorial-title text-4xl text-foreground transition-colors group-hover:text-primary sm:text-5xl lg:text-6xl xl:text-7xl">
+                <h1 className="editorial-title text-3xl text-foreground transition-colors group-hover:text-primary sm:text-4xl lg:text-5xl">
                   {article.title}
                 </h1>
                 {article.excerpt && (
