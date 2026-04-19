@@ -2,13 +2,13 @@
 
 import { useCallback, useEffect, useSyncExternalStore } from "react";
 
-export type Locale = "fr" | "ht";
+export type Locale = "fr" | "en";
 const LOCALE_EVENT = "le-relief-locale-change";
 
 function getInitialLocale(): Locale {
   if (typeof window === "undefined") return "fr";
   const stored = localStorage.getItem("le-relief-locale") as Locale | null;
-  return stored === "fr" || stored === "ht" ? stored : "fr";
+  return stored === "fr" || stored === "en" ? stored : "fr";
 }
 
 function subscribe(callback: () => void) {
@@ -33,7 +33,7 @@ export function useLocale() {
   }, []);
 
   const toggleLocale = useCallback(() => {
-    setLocale(locale === "fr" ? "ht" : "fr");
+    setLocale(locale === "fr" ? "en" : "fr");
   }, [locale, setLocale]);
 
   return { locale, setLocale, toggleLocale };

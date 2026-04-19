@@ -4,6 +4,7 @@ import { FileText, Eye, Users, FileCheck } from "lucide-react";
 import StatsCards from "@/components/dashboard/StatsCards";
 import AnalyticsCharts from "@/components/dashboard/AnalyticsCharts";
 import { format, subDays } from "date-fns";
+import { fr } from "date-fns/locale";
 
 export const dynamic = "force-dynamic";
 
@@ -18,11 +19,11 @@ export default async function AnalyticsPage() {
     ]);
 
   const stats = [
-    { label: "Total Articles", value: totalArticles, icon: FileText },
-    { label: "Published", value: publishedCount, icon: FileCheck },
-    { label: "Drafts", value: draftCount, icon: FileText },
-    { label: "Total Views", value: totalViews, icon: Eye },
-    { label: "Users", value: totalUsers, icon: Users },
+    { label: "Articles", value: totalArticles, icon: FileText },
+    { label: "Publiés", value: publishedCount, icon: FileCheck },
+    { label: "Brouillons", value: draftCount, icon: FileText },
+    { label: "Vues", value: totalViews, icon: Eye },
+    { label: "Utilisateurs", value: totalUsers, icon: Users },
   ];
 
   // Generate views data (last 7 days from analytics events or mock)
@@ -30,7 +31,7 @@ export default async function AnalyticsPage() {
   const viewsData = Array.from({ length: 7 }, (_, i) => {
     const date = subDays(new Date(), 6 - i);
     return {
-      label: format(date, "MMM d"),
+      label: format(date, "d MMM", { locale: fr }),
       value: viewsBase + i * Math.max(1, Math.ceil(viewsBase / 3)),
     };
   });
@@ -40,7 +41,7 @@ export default async function AnalyticsPage() {
   const publishedData = Array.from({ length: 6 }, (_, i) => {
     const date = subDays(new Date(), (5 - i) * 30);
     return {
-      label: format(date, "MMM"),
+      label: format(date, "MMM", { locale: fr }),
       value: Math.max(1, publishedBase - Math.abs(2 - i)),
     };
   });
@@ -50,7 +51,7 @@ export default async function AnalyticsPage() {
       <header className="border-t-2 border-border-strong pt-4">
         <p className="page-kicker mb-2">Mesure</p>
         <h1 className="font-headline text-5xl font-extrabold leading-none text-foreground">
-          Analytics
+          Analytiques
         </h1>
       </header>
 

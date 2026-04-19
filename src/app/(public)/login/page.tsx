@@ -71,7 +71,7 @@ export default function LoginPage() {
           )}
 
           <Button type="submit" className="w-full" size="lg" disabled={loading}>
-            {loading ? "Connexion en cours..." : "Se Connecter"}
+            {loading ? "Connexion en cours..." : "Se connecter"}
           </Button>
         </form>
 

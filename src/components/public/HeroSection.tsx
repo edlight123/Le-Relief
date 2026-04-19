@@ -11,6 +11,9 @@ interface HeroSectionProps {
     category?: { name: string; slug: string } | null;
     author?: { name: string | null } | null;
     publishedAt?: Date | string | null;
+    contentTypeLabel?: string;
+    readingTime?: number;
+    language?: "fr" | "en";
   };
 }
 
@@ -18,13 +21,14 @@ export default function HeroSection({ article }: HeroSectionProps) {
   if (!article) {
     return (
       <section className="newspaper-shell py-10 sm:py-14">
-        <div className="newsprint-panel px-4 py-10 text-center sm:px-8 sm:py-14">
+        <div className="border-t-2 border-border-strong py-10 text-center sm:py-14">
           <p className="page-kicker mb-5">Journalisme indépendant</p>
           <h1 className="editorial-title mx-auto max-w-4xl text-5xl text-foreground sm:text-7xl md:text-8xl">
             Le Relief Haïti
           </h1>
           <p className="editorial-deck mx-auto mt-6 max-w-2xl font-body text-xl sm:text-2xl">
-            Votre source pour des nouvelles premium, des analyses approfondies et du contenu éditorial d&apos;Haïti et d&apos;ailleurs.
+            Une publication numérique haïtienne pour lire l&apos;actualité avec contexte,
+            méthode et responsabilité éditoriale.
           </p>
           <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
             <Link
@@ -62,6 +66,12 @@ export default function HeroSection({ article }: HeroSectionProps) {
             {article.category && (
               <p className="page-kicker mb-4">{article.category.name}</p>
             )}
+            {article.contentTypeLabel && (
+              <p className="mb-3 font-label text-xs font-extrabold uppercase text-muted">
+                {article.contentTypeLabel}
+                {article.language === "en" ? " / English" : ""}
+              </p>
+            )}
             <h1 className="editorial-title text-4xl text-foreground transition-colors group-hover:text-primary sm:text-6xl lg:text-7xl">
               {article.title}
             </h1>
@@ -74,6 +84,12 @@ export default function HeroSection({ article }: HeroSectionProps) {
               {article.author?.name && <span>Par {article.author.name}</span>}
               {article.author?.name && date && <span className="text-border-subtle">/</span>}
               {date && <span>{date}</span>}
+              {article.readingTime ? (
+                <>
+                  <span className="text-border-subtle">/</span>
+                  <span>{article.readingTime} min de lecture</span>
+                </>
+              ) : null}
             </div>
           </div>
 

@@ -11,14 +11,14 @@ interface RouteParams {
 export async function DELETE(req: NextRequest, { params }: RouteParams) {
   const session = await auth();
   if (!session?.user) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
   }
 
   const { id } = await params;
   const media = await mediaRepo.getMediaItem(id);
 
   if (!media) {
-    return NextResponse.json({ error: "Not found" }, { status: 404 });
+    return NextResponse.json({ error: "Introuvable" }, { status: 404 });
   }
 
   try {

@@ -30,11 +30,11 @@ export default function AnalyticsCharts({
 }: AnalyticsChartsProps) {
   return (
     <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-      {/* Views over time */}
+      {/* Vues dans le temps */}
       <Card>
         <CardHeader>
           <h3 className="font-label text-xs font-extrabold uppercase text-foreground">
-            Views Over Time
+            Vues dans le temps
           </h3>
         </CardHeader>
         <CardContent>
@@ -66,7 +66,7 @@ export default function AnalyticsCharts({
                 <Line
                   type="monotone"
                   dataKey="value"
-                  name="Views"
+                  name="Vues"
                   stroke="var(--accent-blue)"
                   strokeWidth={2}
                   dot={{ fill: "var(--accent-blue)", r: 3 }}
@@ -78,11 +78,11 @@ export default function AnalyticsCharts({
         </CardContent>
       </Card>
 
-      {/* Articles published */}
+      {/* Articles publiés */}
       <Card>
         <CardHeader>
           <h3 className="font-label text-xs font-extrabold uppercase text-foreground">
-            Articles Published
+            Articles publiés
           </h3>
         </CardHeader>
         <CardContent>
@@ -113,7 +113,7 @@ export default function AnalyticsCharts({
                 <Legend />
                 <Bar
                   dataKey="value"
-                  name="Published"
+                  name="Publiés"
                   fill="var(--accent-teal)"
                 />
               </BarChart>

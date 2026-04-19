@@ -59,7 +59,7 @@ export default function SettingsPage() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ name: profile.name }),
     });
-    setMessage(res.ok ? "Profile updated" : "Unable to update profile");
+    setMessage(res.ok ? "Profil mis à jour" : "Impossible de mettre à jour le profil");
     setSaving(false);
   }
 
@@ -71,7 +71,7 @@ export default function SettingsPage() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(socials),
     });
-    setMessage(res.ok ? "Social links updated" : "Unable to update social links");
+    setMessage(res.ok ? "Liens sociaux mis à jour" : "Impossible de mettre à jour les liens sociaux");
     setSaving(false);
   }
 
@@ -101,34 +101,34 @@ export default function SettingsPage() {
         setCategories((prev) =>
           prev.map((c) => (c.id === editingCategoryId ? { ...c, ...updated } : c))
         );
-        setMessage("Category updated");
+        setMessage("Rubrique mise à jour");
       } else {
         setCategories((prev) => [...prev, updated]);
-        setMessage("Category created");
+        setMessage("Rubrique créée");
       }
       setCategoryForm({ name: "", description: "" });
       setEditingCategoryId(null);
     } else {
-      setMessage("Unable to save category (admin role required)");
+      setMessage("Impossible d'enregistrer la rubrique (rôle admin requis)");
     }
     setSaving(false);
   }
 
   async function handleDeleteCategory(id: string) {
-    if (!confirm("Delete this category?")) return;
+    if (!confirm("Supprimer cette rubrique ?")) return;
     setSaving(true);
     setMessage("");
 
     const res = await fetch(`/api/categories/${id}`, { method: "DELETE" });
     if (res.ok) {
       setCategories((prev) => prev.filter((c) => c.id !== id));
-      setMessage("Category deleted");
+      setMessage("Rubrique supprimée");
       if (editingCategoryId === id) {
         setEditingCategoryId(null);
         setCategoryForm({ name: "", description: "" });
       }
     } else {
-      setMessage("Unable to delete category (admin role required)");
+      setMessage("Impossible de supprimer la rubrique (rôle admin requis)");
     }
     setSaving(false);
   }
@@ -151,7 +151,7 @@ export default function SettingsPage() {
       <header className="border-t-2 border-border-strong pt-4">
         <p className="page-kicker mb-2">Configuration</p>
         <h1 className="font-headline text-5xl font-extrabold leading-none text-foreground">
-          Settings
+          Paramètres
         </h1>
       </header>
 
@@ -159,16 +159,16 @@ export default function SettingsPage() {
         <p className="font-label text-sm font-bold text-accent-teal">{message}</p>
       )}
 
-      {/* Profile */}
+      {/* Profil */}
       <Card>
         <CardHeader>
           <h2 className="font-label text-xs font-extrabold uppercase text-foreground">
-            Profile
+            Profil
           </h2>
         </CardHeader>
         <CardContent className="space-y-4">
           <Input
-            label="Name"
+            label="Nom"
             id="settings-name"
             value={profile.name}
             onChange={(e) =>
@@ -176,22 +176,22 @@ export default function SettingsPage() {
             }
           />
           <Input
-            label="Email"
+            label="Courriel"
             id="settings-email"
             value={profile.email}
             disabled
           />
           <Button onClick={handleSaveProfile} disabled={saving} size="sm">
-            Save Profile
+            Enregistrer le profil
           </Button>
         </CardContent>
       </Card>
 
-      {/* Social Links */}
+      {/* Liens sociaux */}
       <Card>
         <CardHeader>
           <h2 className="font-label text-xs font-extrabold uppercase text-foreground">
-            Social Links
+            Liens sociaux
           </h2>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -223,22 +223,22 @@ export default function SettingsPage() {
             }
           />
           <Button onClick={handleSaveSocials} disabled={saving} size="sm">
-            Save Social Links
+            Enregistrer les liens sociaux
           </Button>
         </CardContent>
       </Card>
 
-      {/* Category Management */}
+      {/* Gestion des rubriques */}
       <Card>
         <CardHeader>
           <h2 className="font-label text-xs font-extrabold uppercase text-foreground">
-            Categories
+            Rubriques
           </h2>
         </CardHeader>
         <CardContent className="space-y-5">
           <div className="grid gap-4 md:grid-cols-2">
             <Input
-              label="Category Name"
+              label="Nom de la rubrique"
               id="category-name"
               placeholder="Politique"
               value={categoryForm.name}
@@ -259,11 +259,11 @@ export default function SettingsPage() {
 
           <div className="flex flex-wrap gap-2">
             <Button onClick={handleSaveCategory} disabled={saving} size="sm">
-              {editingCategoryId ? "Update Category" : "Add Category"}
+              {editingCategoryId ? "Mettre à jour" : "Ajouter la rubrique"}
             </Button>
             {editingCategoryId ? (
               <Button variant="ghost" onClick={cancelEditCategory} size="sm">
-                Cancel
+                Annuler
               </Button>
             ) : null}
           </div>
@@ -271,7 +271,7 @@ export default function SettingsPage() {
           <div className="divide-y divide-border-subtle border border-border-subtle">
             {categories.length === 0 ? (
               <p className="px-4 py-6 font-body text-sm text-muted">
-                No categories found.
+                Aucune rubrique trouvée.
               </p>
             ) : (
               categories.map((category) => (
@@ -286,14 +286,14 @@ export default function SettingsPage() {
                   </div>
                   <div className="flex items-center gap-2">
                     <Button variant="outline" size="sm" onClick={() => startEditCategory(category)}>
-                      Edit
+                      Modifier
                     </Button>
                     <Button
                       variant="ghost"
                       size="sm"
                       onClick={() => handleDeleteCategory(category.id)}
                     >
-                      Delete
+                      Supprimer
                     </Button>
                   </div>
                 </div>

@@ -1,6 +1,7 @@
 import Badge from "@/components/ui/Badge";
 import Table, { type Column } from "@/components/ui/Table";
 import { format } from "date-fns";
+import { fr } from "date-fns/locale";
 
 interface Article {
   id: string;
@@ -21,7 +22,7 @@ export default function DataTable({ articles, onRowClick }: DataTableProps) {
   const columns = [
     {
       key: "title",
-      label: "Title",
+      label: "Titre",
       render: (row: Article) => (
         <span className="font-headline text-lg font-bold text-foreground">
           {row.title}
@@ -30,7 +31,7 @@ export default function DataTable({ articles, onRowClick }: DataTableProps) {
     },
     {
       key: "status",
-      label: "Status",
+      label: "Statut",
       render: (row: Article) => (
         <Badge variant={row.status === "published" ? "success" : "warning"}>
           {row.status}
@@ -39,19 +40,19 @@ export default function DataTable({ articles, onRowClick }: DataTableProps) {
     },
     {
       key: "category",
-      label: "Category",
+      label: "Rubrique",
       render: (row: Article) => row.category?.name || "—",
     },
     {
       key: "views",
-      label: "Views",
+      label: "Vues",
     },
     {
       key: "publishedAt",
       label: "Date",
       render: (row: Article) =>
         row.publishedAt
-          ? format(new Date(row.publishedAt), "MMM d, yyyy")
+          ? format(new Date(row.publishedAt), "d MMM yyyy", { locale: fr })
           : "—",
     },
   ];

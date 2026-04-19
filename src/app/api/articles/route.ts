@@ -5,17 +5,22 @@ import * as categoriesRepo from "@/lib/repositories/categories";
 import { auth } from "@/lib/auth";
 import { generateSlug } from "@/lib/slug";
 import { hasRole } from "@/lib/permissions";
+import { normalizeArticle } from "@/lib/editorial";
 
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
   const status = searchParams.get("status") || undefined;
   const search = searchParams.get("search") || undefined;
+  const categoryId = searchParams.get("categoryId") || undefined;
+  const language = searchParams.get("language") || undefined;
   const take = parseInt(searchParams.get("take") || "20");
   const skip = parseInt(searchParams.get("skip") || "0");
 
   const { articles, total } = await articlesRepo.getArticles({
     status: status !== "all" ? status : undefined,
     search,
+    categoryId,
+    language,
     take,
     skip,
   });
@@ -29,7 +34,7 @@ export async function GET(req: NextRequest) {
       const category = article.categoryId
         ? await categoriesRepo.getCategory(article.categoryId as string)
         : null;
-      return { ...article, author, category } as Record<string, unknown>;
+      return normalizeArticle(article, author, category);
     })
   );
 
@@ -39,7 +44,7 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   const session = await auth();
   if (!session?.user?.id) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
   }
 
   try {
@@ -70,13 +75,21 @@ export async function POST(req: NextRequest) {
       featured: body.featured || false,
       authorId: session.user.id,
       categoryId: body.categoryId || null,
+      contentType: body.contentType || "actualite",
+      language: body.language || "fr",
+      translationStatus: body.translationStatus || "not_started",
+      isCanonicalSource: body.isCanonicalSource ?? body.language !== "en",
+      sourceArticleId: body.sourceArticleId || null,
+      alternateLanguageSlug: body.alternateLanguageSlug || null,
+      allowTranslation: body.allowTranslation || false,
+      translationPriority: body.translationPriority || null,
       publishedAt: status === "published" ? new Date() : null,
     });
 
     return NextResponse.json(article, { status: 201 });
   } catch {
     return NextResponse.json(
-      { error: "Failed to create article" },
+      { error: "Impossible de créer l'article" },
       { status: 500 }
     );
   }

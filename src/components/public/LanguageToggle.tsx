@@ -1,24 +1,26 @@
 "use client";
 
-import { useLocale } from "@/hooks/useLocale";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 export default function LanguageToggle() {
-  const { locale, toggleLocale } = useLocale();
+  const pathname = usePathname();
+  const isEnglish = pathname === "/en" || pathname.startsWith("/en/");
 
   return (
-    <button
-      onClick={toggleLocale}
+    <Link
+      href={isEnglish ? "/" : "/en"}
       className="flex items-center gap-0.5 border border-border-subtle px-2 py-2 font-label text-[10px] font-bold uppercase transition-colors duration-200 hover:bg-surface-elevated sm:text-xs"
-      aria-label={locale === "fr" ? "Chanje lang an Kreyòl" : "Changer la langue en Français"}
-      title={locale === "fr" ? "Lire en Kreyòl Ayisyen" : "Li an Fransè"}
+      aria-label={isEnglish ? "Lire en français" : "Read the English selection"}
+      title={isEnglish ? "Lire en français" : "Read the English selection"}
     >
-      <span className={locale === "fr" ? "text-foreground" : "text-muted/50"}>
+      <span className={isEnglish ? "text-muted/50" : "text-foreground"}>
         FR
       </span>
-      <span className="text-muted/30 mx-0.5">/</span>
-      <span className={locale === "ht" ? "text-foreground" : "text-muted/50"}>
-        HT
+      <span className="mx-0.5 text-muted/30">/</span>
+      <span className={isEnglish ? "text-foreground" : "text-muted/50"}>
+        EN
       </span>
-    </button>
+    </Link>
   );
 }

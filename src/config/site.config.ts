@@ -14,7 +14,7 @@ function getNormalizedAppUrl() {
 
 export const siteConfig = {
   name: "Le Relief",
-  description: "Plateforme de Nouvelles et d'Éditoriaux Premium",
+  description: "Publication numérique haïtienne, française d'abord et ouverte au lectorat international",
   url: getNormalizedAppUrl(),
   locale: "fr-FR",
   socials: {
@@ -27,7 +27,7 @@ export const siteConfig = {
       { label: "Accueil", href: "/" },
       { label: "Catégories", href: "/categories" },
       { label: "Recherche", href: "/search" },
-      { label: "À Propos", href: "/about" },
+      { label: "À propos", href: "/about" },
       { label: "Contact", href: "/contact" },
     ],
     dashboard: [

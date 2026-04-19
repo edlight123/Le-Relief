@@ -19,11 +19,11 @@ const newsreader = Newsreader({
 export const metadata: Metadata = {
   metadataBase: new URL(siteConfig.url),
   title: {
-    default: "Le Relief — Nouvelles & Éditoriaux Premium",
+    default: "Le Relief — Média numérique haïtien",
     template: "%s | Le Relief",
   },
   description:
-    "Le Relief est une plateforme de nouvelles numériques premium offrant un journalisme de qualité et du contenu éditorial.",
+    "Le Relief est une publication numérique haïtienne, française d'abord, dédiée à l'actualité, l'analyse, l'opinion et aux dossiers d'intérêt public.",
   keywords: [
     "Le Relief",
     "actualité",
@@ -40,9 +40,9 @@ export const metadata: Metadata = {
     locale: "fr_FR",
     url: siteConfig.url,
     siteName: siteConfig.name,
-    title: "Le Relief — Nouvelles & Éditoriaux Premium",
+    title: "Le Relief — Média numérique haïtien",
     description:
-      "Le Relief est une plateforme de nouvelles numériques premium offrant un journalisme de qualité et du contenu éditorial.",
+      "Le Relief est une publication numérique haïtienne, française d'abord, dédiée à l'actualité, l'analyse, l'opinion et aux dossiers d'intérêt public.",
     images: [
       {
         url: "/logo.png",
@@ -54,9 +54,9 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Le Relief — Nouvelles & Éditoriaux Premium",
+    title: "Le Relief — Média numérique haïtien",
     description:
-      "Le Relief est une plateforme de nouvelles numériques premium offrant un journalisme de qualité et du contenu éditorial.",
+      "Le Relief est une publication numérique haïtienne, française d'abord, dédiée à l'actualité, l'analyse, l'opinion et aux dossiers d'intérêt public.",
     images: ["/logo.png"],
   },
   icons: {

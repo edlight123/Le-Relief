@@ -18,6 +18,12 @@ export default function EditArticlePage() {
     categoryId: string;
     tags: string[];
     status: string;
+    contentType: string;
+    language: string;
+    translationStatus: string;
+    alternateLanguageSlug: string;
+    allowTranslation: boolean;
+    translationPriority: string;
   } | null>(null);
   const [categories, setCategories] = useState<{ id: string; name: string }[]>(
     []
@@ -38,6 +44,12 @@ export default function EditArticlePage() {
         categoryId: articleData.categoryId || "",
         tags: Array.isArray(articleData.tags) ? articleData.tags : [],
         status: articleData.status || "draft",
+        contentType: articleData.contentType || "actualite",
+        language: articleData.language || "fr",
+        translationStatus: articleData.translationStatus || "not_started",
+        alternateLanguageSlug: articleData.alternateLanguageSlug || "",
+        allowTranslation: Boolean(articleData.allowTranslation),
+        translationPriority: articleData.translationPriority || "",
       });
       setCategories(catData.categories || []);
       setLoading(false);
@@ -53,6 +65,12 @@ export default function EditArticlePage() {
     categoryId: string;
     tags: string[];
     status: string;
+    contentType: string;
+    language: string;
+    translationStatus: string;
+    alternateLanguageSlug: string;
+    allowTranslation: boolean;
+    translationPriority: string;
   }) {
     const res = await fetch(`/api/articles/${id}`, {
       method: "PATCH",
@@ -68,7 +86,7 @@ export default function EditArticlePage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-16">
-        <p className="font-body text-muted">Loading...</p>
+        <p className="font-body text-muted">Chargement...</p>
       </div>
     );
   }
@@ -76,7 +94,7 @@ export default function EditArticlePage() {
   if (!article) {
     return (
       <div className="flex items-center justify-center py-16">
-        <p className="font-body text-muted">Article not found</p>
+        <p className="font-body text-muted">Article introuvable</p>
       </div>
     );
   }
@@ -86,14 +104,14 @@ export default function EditArticlePage() {
       <header>
         <p className="page-kicker mb-2">Révision</p>
         <h1 className="font-headline text-5xl font-extrabold leading-none text-foreground">
-          Edit Article
+          Modifier l&apos;article
         </h1>
       </header>
       <ArticleEditor
         initial={article}
         categories={categories}
         onSubmit={handleSubmit}
-        submitLabel="Update"
+        submitLabel="Mettre à jour"
       />
     </div>
   );

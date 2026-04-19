@@ -19,6 +19,14 @@ export async function createArticle(data: {
   featured?: boolean;
   authorId: string;
   categoryId?: string | null;
+  contentType?: string;
+  language?: string;
+  translationStatus?: string;
+  isCanonicalSource?: boolean;
+  sourceArticleId?: string | null;
+  alternateLanguageSlug?: string | null;
+  allowTranslation?: boolean;
+  translationPriority?: string | null;
   publishedAt?: Date | null;
 }) {
   const ref = collection().doc();
@@ -32,6 +40,14 @@ export async function createArticle(data: {
     status: data.status || "draft",
     featured: data.featured || false,
     categoryId: data.categoryId || null,
+    contentType: data.contentType || "actualite",
+    language: data.language || "fr",
+    translationStatus: data.translationStatus || "not_started",
+    isCanonicalSource: data.isCanonicalSource ?? data.language !== "en",
+    sourceArticleId: data.sourceArticleId || null,
+    alternateLanguageSlug: data.alternateLanguageSlug || null,
+    allowTranslation: data.allowTranslation ?? false,
+    translationPriority: data.translationPriority || null,
     publishedAt: data.publishedAt || null,
     views: 0,
     createdAt: now,
@@ -61,6 +77,8 @@ export async function getArticles(options?: {
   skip?: number;
   featured?: boolean;
   categoryId?: string;
+  authorId?: string;
+  language?: string;
   excludeId?: string;
   orderBy?: string;
 }) {
@@ -74,6 +92,12 @@ export async function getArticles(options?: {
   }
   if (options?.categoryId) {
     query = query.where("categoryId", "==", options.categoryId);
+  }
+  if (options?.authorId) {
+    query = query.where("authorId", "==", options.authorId);
+  }
+  if (options?.language) {
+    query = query.where("language", "==", options.language);
   }
 
   const orderField = options?.orderBy || "publishedAt";

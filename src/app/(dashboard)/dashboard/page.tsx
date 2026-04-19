@@ -40,7 +40,7 @@ export default async function DashboardPage() {
   }
 
   const stats = [
-    { label: "Total Articles", value: totalArticles, icon: FileText },
+    { label: "Articles", value: totalArticles, icon: FileText },
     { label: "Publiés", value: publishedCount, icon: FileText },
     { label: "Brouillons", value: draftCount, icon: FileText },
     { label: "Total Vues", value: totalViews, icon: Eye },
@@ -59,7 +59,7 @@ export default async function DashboardPage() {
         <Link href="/dashboard/articles/new">
           <Button size="sm">
             <PenSquare className="h-4 w-4 mr-2" />
-            Nouvel Article
+            Nouvel article
           </Button>
         </Link>
       </div>
@@ -95,7 +95,7 @@ export default async function DashboardPage() {
                     {String(article.title)}
                   </p>
                   <p className="mt-1 font-label text-xs uppercase text-muted">
-                    {String((article.author as Record<string, unknown>)?.name || "Unknown")} &middot;{" "}
+                    {String((article.author as Record<string, unknown>)?.name || "La rédaction")} &middot;{" "}
                     {article.updatedAt ? format(new Date((article.updatedAt as {toDate?: () => Date})?.toDate?.() ?? article.updatedAt as string), "d MMM yyyy", { locale: fr }) : ""}
                   </p>
                 </div>

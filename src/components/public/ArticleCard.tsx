@@ -13,6 +13,9 @@ interface ArticleCardProps {
     publishedAt: Date | string | null;
     author?: { name: string | null } | null;
     category?: { name: string; slug: string } | null;
+    contentTypeLabel?: string;
+    readingTime?: number;
+    language?: "fr" | "en";
   };
   variant?: "default" | "compact" | "list";
 }
@@ -42,6 +45,11 @@ export default function ArticleCard({
             </div>
           )}
           <div className="min-w-0">
+            {article.contentTypeLabel && (
+              <p className="mb-2 font-label text-[10px] font-extrabold uppercase text-primary">
+                {article.contentTypeLabel}
+              </p>
+            )}
             <h3 className="font-headline text-base font-bold leading-snug text-foreground transition-colors group-hover:text-primary">
               {article.title}
             </h3>
@@ -72,8 +80,13 @@ export default function ArticleCard({
           )}
           <div className="flex flex-col justify-center md:pr-4">
             <div className="mb-2 flex items-center gap-3">
-              {article.category && (
+              {article.contentTypeLabel && (
                 <span className="page-kicker">
+                  {article.contentTypeLabel}
+                </span>
+              )}
+              {article.category && (
+                <span className="font-label text-[10px] font-bold uppercase text-muted">
                   {article.category.name}
                 </span>
               )}
@@ -135,6 +148,10 @@ export default function ArticleCard({
           </p>
         )}
         <div className="mt-4 flex items-center gap-3 font-label text-[10px] font-bold uppercase text-muted">
+          {article.contentTypeLabel && <span>{article.contentTypeLabel}</span>}
+          {article.contentTypeLabel && (article.author?.name || date) && (
+            <span className="text-border-subtle">/</span>
+          )}
           {article.author?.name && <span>{article.author.name}</span>}
           {article.author?.name && date && (
             <span className="text-border-subtle">/</span>

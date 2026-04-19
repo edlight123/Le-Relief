@@ -4,6 +4,7 @@ import * as usersRepo from "@/lib/repositories/users";
 import * as categoriesRepo from "@/lib/repositories/categories";
 import { auth } from "@/lib/auth";
 import { hasRole } from "@/lib/permissions";
+import { normalizeAuthor, normalizeCategory } from "@/lib/editorial";
 
 interface RouteParams {
   params: Promise<{ id: string }>;
@@ -14,7 +15,7 @@ export async function GET(req: NextRequest, { params }: RouteParams) {
   const article = await articlesRepo.getArticle(id);
 
   if (!article) {
-    return NextResponse.json({ error: "Not found" }, { status: 404 });
+    return NextResponse.json({ error: "Introuvable" }, { status: 404 });
   }
 
   const author = article.authorId
@@ -24,19 +25,23 @@ export async function GET(req: NextRequest, { params }: RouteParams) {
     ? await categoriesRepo.getCategory(article.categoryId as string)
     : null;
 
-  return NextResponse.json({ ...article, author, category });
+  return NextResponse.json({
+    ...article,
+    author: normalizeAuthor(author),
+    category: normalizeCategory(category),
+  });
 }
 
 export async function PATCH(req: NextRequest, { params }: RouteParams) {
   const session = await auth();
   if (!session?.user?.id) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
   }
 
   const { id } = await params;
   const existing = await articlesRepo.getArticle(id);
   if (!existing) {
-    return NextResponse.json({ error: "Not found" }, { status: 404 });
+    return NextResponse.json({ error: "Introuvable" }, { status: 404 });
   }
   const body = await req.json();
 
@@ -47,6 +52,26 @@ export async function PATCH(req: NextRequest, { params }: RouteParams) {
   if (body.excerpt !== undefined) data.excerpt = body.excerpt || null;
   if (body.coverImage !== undefined) data.coverImage = body.coverImage || null;
   if (body.categoryId !== undefined) data.categoryId = body.categoryId || null;
+  if (body.contentType !== undefined) data.contentType = body.contentType || "actualite";
+  if (body.language !== undefined) data.language = body.language || "fr";
+  if (body.translationStatus !== undefined) {
+    data.translationStatus = body.translationStatus || "not_started";
+  }
+  if (body.isCanonicalSource !== undefined) {
+    data.isCanonicalSource = Boolean(body.isCanonicalSource);
+  }
+  if (body.sourceArticleId !== undefined) {
+    data.sourceArticleId = body.sourceArticleId || null;
+  }
+  if (body.alternateLanguageSlug !== undefined) {
+    data.alternateLanguageSlug = body.alternateLanguageSlug || null;
+  }
+  if (body.allowTranslation !== undefined) {
+    data.allowTranslation = Boolean(body.allowTranslation);
+  }
+  if (body.translationPriority !== undefined) {
+    data.translationPriority = body.translationPriority || null;
+  }
   if (body.tags !== undefined) {
     data.tags = Array.isArray(body.tags)
       ? body.tags.map((tag: unknown) => String(tag).trim()).filter(Boolean)
@@ -78,7 +103,7 @@ export async function PATCH(req: NextRequest, { params }: RouteParams) {
 export async function DELETE(req: NextRequest, { params }: RouteParams) {
   const session = await auth();
   if (!session?.user?.id) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
   }
 
   const { id } = await params;

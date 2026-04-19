@@ -20,7 +20,7 @@ export async function POST(req: NextRequest) {
     const existing = await usersRepo.findByEmail(email);
     if (existing) {
       return NextResponse.json(
-        { error: "Email already in use" },
+        { error: "Cette adresse courriel est déjà utilisée" },
         { status: 409 }
       );
     }
@@ -40,7 +40,7 @@ export async function POST(req: NextRequest) {
     );
   } catch {
     return NextResponse.json(
-      { error: "Internal server error" },
+      { error: "Erreur interne du serveur" },
       { status: 500 }
     );
   }

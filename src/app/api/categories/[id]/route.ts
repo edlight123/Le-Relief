@@ -16,7 +16,7 @@ export async function PATCH(req: NextRequest, { params }: RouteParams) {
   const session = await auth();
   const sessionRole = (session?.user as { role?: "reader" | "publisher" | "admin" } | undefined)?.role;
   if (!session?.user || !isAdmin(sessionRole)) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
   }
 
   const { id } = await params;
@@ -39,7 +39,7 @@ export async function DELETE(req: NextRequest, { params }: RouteParams) {
   const session = await auth();
   const sessionRole = (session?.user as { role?: "reader" | "publisher" | "admin" } | undefined)?.role;
   if (!session?.user || !isAdmin(sessionRole)) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
   }
 
   const { id } = await params;

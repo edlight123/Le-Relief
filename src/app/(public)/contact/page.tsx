@@ -18,11 +18,12 @@ export default function ContactPage() {
       <div className="grid gap-12 lg:grid-cols-[0.85fr_1.15fr]">
         <aside className="border-t border-border-strong pt-4">
           <h2 className="font-headline text-3xl font-extrabold text-foreground">
-            Entrer en contact
+            Écrire à la rédaction
           </h2>
           <p className="mt-4 font-body text-lg leading-relaxed text-muted">
-            Vous avez un sujet d&apos;article, une question éditoriale ou commerciale ? Nous
-            serions ravis de vous entendre.
+            Sujet à signaler, correction, partenariat, question éditoriale ou
+            demande institutionnelle: indiquez clairement le contexte de votre
+            message.
           </p>
 
           <div className="mt-8 border-t border-border-subtle pt-5">
@@ -35,6 +36,16 @@ export default function ContactPage() {
             >
               lereliefhaiti@gmail.com
             </a>
+          </div>
+
+          <div className="mt-8 border-t border-border-subtle pt-5">
+            <h3 className="mb-2 font-label text-xs font-extrabold uppercase text-foreground">
+              Partenariats
+            </h3>
+            <p className="font-body text-base leading-relaxed text-muted">
+              Pour les collaborations éditoriales ou institutionnelles, précisez
+              l&apos;organisation, l&apos;objet de la demande et le calendrier souhaité.
+            </p>
           </div>
 
           <div className="mt-8 border-t border-border-subtle pt-5">

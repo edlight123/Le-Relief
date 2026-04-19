@@ -25,7 +25,7 @@ export default function Navbar() {
       <div className="newspaper-shell">
         <div className="hidden items-center justify-between border-b border-border-subtle py-2 font-label text-[11px] font-semibold uppercase text-muted md:flex">
           <span>{editionDate}</span>
-          <span>Simple, claire et nette</span>
+          <span>Autorité calme, contexte et précision</span>
           <Link href="/login" className="ink-link text-foreground">
             Espace rédaction
           </Link>

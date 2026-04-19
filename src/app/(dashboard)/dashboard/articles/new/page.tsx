@@ -25,6 +25,12 @@ export default function NewArticlePage() {
     categoryId: string;
     tags: string[];
     status: string;
+    contentType: string;
+    language: string;
+    translationStatus: string;
+    alternateLanguageSlug: string;
+    allowTranslation: boolean;
+    translationPriority: string;
   }) {
     const res = await fetch("/api/articles", {
       method: "POST",
@@ -42,13 +48,13 @@ export default function NewArticlePage() {
       <header>
         <p className="page-kicker mb-2">Composer</p>
         <h1 className="font-headline text-5xl font-extrabold leading-none text-foreground">
-          New Article
+          Nouvel article
         </h1>
       </header>
       <ArticleEditor
         categories={categories}
         onSubmit={handleSubmit}
-        submitLabel="Publish"
+        submitLabel="Publier"
       />
     </div>
   );

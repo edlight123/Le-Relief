@@ -49,7 +49,7 @@ export default function MediaUploader({
         <div className="relative h-48 overflow-hidden border border-border-subtle">
           <Image
             src={preview}
-            alt="Upload preview"
+            alt="Aperçu du média"
             fill
             sizes="(min-width: 768px) 672px, 100vw"
             className="object-cover"
@@ -73,7 +73,7 @@ export default function MediaUploader({
         >
           <ImageIcon className="mx-auto mb-3 h-8 w-8 text-muted" />
           <p className="font-label text-sm text-muted">
-            {uploading ? "Uploading..." : "Drop an image or click to upload"}
+            {uploading ? "Téléversement..." : "Déposez une image ou cliquez pour téléverser"}
           </p>
         </div>
       )}

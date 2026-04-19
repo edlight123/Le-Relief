@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import Badge from "@/components/ui/Badge";
 import { format } from "date-fns";
+import { fr } from "date-fns/locale";
 
 interface User {
   id: string;
@@ -50,7 +51,7 @@ export default function UsersPage() {
       <header className="border-t-2 border-border-strong pt-4">
         <p className="page-kicker mb-2">Accès</p>
         <h1 className="font-headline text-5xl font-extrabold leading-none text-foreground">
-          Users
+          Utilisateurs
         </h1>
       </header>
 
@@ -59,16 +60,16 @@ export default function UsersPage() {
           <thead>
             <tr className="border-b border-border-strong bg-surface-newsprint">
               <th className="px-4 py-3 text-left font-label text-xs font-extrabold uppercase text-muted">
-                User
+                Utilisateur
               </th>
               <th className="hidden px-4 py-3 text-left font-label text-xs font-extrabold uppercase text-muted md:table-cell">
-                Email
+                Courriel
               </th>
               <th className="px-4 py-3 text-left font-label text-xs font-extrabold uppercase text-muted">
-                Role
+                Rôle
               </th>
               <th className="hidden px-4 py-3 text-left font-label text-xs font-extrabold uppercase text-muted lg:table-cell">
-                Joined
+                Création
               </th>
               <th className="px-4 py-3 text-right font-label text-xs font-extrabold uppercase text-muted">
                 Actions
@@ -82,7 +83,7 @@ export default function UsersPage() {
                   colSpan={5}
                   className="px-4 py-8 text-center font-body text-muted"
                 >
-                  Loading...
+                  Chargement...
                 </td>
               </tr>
             ) : users.length === 0 ? (
@@ -91,7 +92,7 @@ export default function UsersPage() {
                   colSpan={5}
                   className="px-4 py-8 text-center font-body text-muted"
                 >
-                  No users found
+                  Aucun utilisateur trouvé
                 </td>
               </tr>
             ) : (
@@ -101,7 +102,7 @@ export default function UsersPage() {
                   className="hover:bg-surface-newsprint"
                 >
                   <td className="px-4 py-3 font-headline text-lg font-bold text-foreground">
-                    {user.name || "Unnamed"}
+                    {user.name || "Sans nom"}
                   </td>
                   <td className="hidden px-4 py-3 font-label text-muted md:table-cell">
                     {user.email}
@@ -112,7 +113,7 @@ export default function UsersPage() {
                     </Badge>
                   </td>
                   <td className="hidden px-4 py-3 font-label text-muted lg:table-cell">
-                    {format(new Date(user.createdAt), "MMM d, yyyy")}
+                    {format(new Date(user.createdAt), "d MMM yyyy", { locale: fr })}
                   </td>
                   <td className="px-4 py-3 text-right">
                     <select
@@ -122,8 +123,8 @@ export default function UsersPage() {
                       }
                       className="border border-border-subtle bg-surface px-2 py-1 font-label text-sm text-foreground focus:outline-none"
                     >
-                      <option value="reader">Reader</option>
-                      <option value="publisher">Publisher</option>
+                      <option value="reader">Lecteur</option>
+                      <option value="publisher">Éditeur</option>
                       <option value="admin">Admin</option>
                     </select>
                   </td>

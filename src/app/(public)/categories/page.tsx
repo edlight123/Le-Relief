@@ -1,19 +1,21 @@
-import * as categoriesRepo from "@/lib/repositories/categories";
 import CategoryGrid from "@/components/public/CategoryGrid";
+import { getPublicCategories } from "@/lib/public-content";
+import type { PublicCategory } from "@/lib/editorial";
 
 export const dynamic = "force-dynamic";
 
 export const metadata = {
-  title: "Catégories | Le Relief Haïti",
-  description: "Parcourir toutes les catégories de contenu",
+  title: "Rubriques | Le Relief Haïti",
+  description:
+    "Parcourir les rubriques officielles de Le Relief: politique, économie, société, culture, international, opinion et dossiers.",
 };
 
 export default async function CategoriesIndexPage() {
-  let categories: (Record<string, unknown> & { _count: { articles: number } })[] = [];
+  let categories: PublicCategory[] = [];
   try {
-    categories = await categoriesRepo.getCategoriesWithCounts(true);
-  } catch (error) {
-    console.error("Error fetching categories:", error);
+    categories = await getPublicCategories(true);
+  } catch {
+    categories = [];
   }
 
   return (
@@ -24,20 +26,16 @@ export default async function CategoriesIndexPage() {
           Catégories
         </h1>
         <p className="editorial-deck mt-4 max-w-2xl font-body text-xl">
-          Parcourez les dossiers, analyses et reportages publiés par la rédaction.
+          Les rubriques publiques affichent uniquement les espaces éditoriaux où
+          des articles publiés sont disponibles.
         </p>
       </header>
 
       {categories.length > 0 ? (
-        <CategoryGrid variant="grid" categories={categories.map(c => ({
-          name: c.name as string,
-          slug: c.slug as string,
-          description: c.description as string | null,
-          _count: c._count as { articles: number },
-        }))} />
+        <CategoryGrid variant="grid" categories={categories} />
       ) : (
         <p className="border-t border-border-subtle py-8 font-body text-lg text-muted">
-          Aucune catégorie pour le moment.
+          Aucune rubrique publiée pour le moment.
         </p>
       )}
     </div>

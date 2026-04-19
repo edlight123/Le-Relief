@@ -45,7 +45,7 @@ export default function MediaPage() {
   }
 
   async function handleDelete(id: string) {
-    if (!confirm("Delete this media?")) return;
+    if (!confirm("Supprimer ce média ?")) return;
     await fetch(`/api/upload/${id}`, { method: "DELETE" });
     setMedia((prev) => prev.filter((m) => m.id !== id));
   }
@@ -56,7 +56,7 @@ export default function MediaPage() {
         <div>
           <p className="page-kicker mb-2">Archives visuelles</p>
           <h1 className="font-headline text-5xl font-extrabold leading-none text-foreground">
-            Media Library
+            Médiathèque
           </h1>
         </div>
         <Button
@@ -65,7 +65,7 @@ export default function MediaPage() {
           disabled={uploading}
         >
           <Upload className="h-4 w-4 mr-2" />
-          {uploading ? "Uploading..." : "Upload"}
+          {uploading ? "Téléversement..." : "Téléverser"}
         </Button>
         <input
           ref={inputRef}
@@ -77,11 +77,11 @@ export default function MediaPage() {
       </div>
 
       {loading ? (
-        <p className="py-8 text-center font-body text-muted">Loading...</p>
+        <p className="py-8 text-center font-body text-muted">Chargement...</p>
       ) : media.length === 0 ? (
         <Card>
           <div className="px-6 py-12 text-center font-body text-muted">
-            No media uploaded yet. Click Upload to add files.
+            Aucun média téléversé pour le moment.
           </div>
         </Card>
       ) : (

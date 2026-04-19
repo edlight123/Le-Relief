@@ -5,6 +5,7 @@ interface Category {
   name: string;
   slug: string;
   description?: string | null;
+  count?: number;
   _count?: { articles: number };
 }
 
@@ -40,6 +41,11 @@ export default function CategoryGrid({
                 {cat._count.articles}
               </span>
             )}
+            {cat.count !== undefined && (
+              <span className="ml-auto font-label text-[10px] font-bold uppercase text-muted">
+                {cat.count}
+              </span>
+            )}
           </Link>
         ))}
       </nav>
@@ -68,9 +74,10 @@ export default function CategoryGrid({
             <h3 className="font-headline text-2xl font-bold leading-tight text-foreground transition-colors group-hover:text-primary">
               {cat.name}
             </h3>
-            {cat._count && (
+            {(cat._count || cat.count !== undefined) && (
               <p className="mt-2 font-label text-[10px] font-bold uppercase text-muted">
-                {cat._count.articles} article{cat._count.articles !== 1 ? "s" : ""}
+                {cat._count?.articles ?? cat.count} article
+                {(cat._count?.articles ?? cat.count) !== 1 ? "s" : ""}
               </p>
             )}
             {cat.description && (

@@ -4,11 +4,15 @@ import Image from "next/image";
 import Link from "next/link";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
-import * as articlesRepo from "@/lib/repositories/articles";
-import * as usersRepo from "@/lib/repositories/users";
-import * as categoriesRepo from "@/lib/repositories/categories";
 import RelatedArticles from "@/components/public/RelatedArticles";
+import NewsletterSignup from "@/components/public/NewsletterSignup";
 import { siteConfig } from "@/config/site.config";
+import {
+  getPublicArticleBySlug,
+  getRelatedArticles,
+} from "@/lib/public-content";
+import * as articlesRepo from "@/lib/repositories/articles";
+import { getTranslationStatusLabel } from "@/lib/editorial";
 
 export const dynamic = "force-dynamic";
 
@@ -18,33 +22,38 @@ interface Props {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
-  const article = await articlesRepo.findBySlug(slug);
+  const article = await getPublicArticleBySlug(slug);
   if (!article) return {};
 
   const title = `${article.title} | Le Relief`;
   const description =
-    (article.excerpt as string) ||
-    "Retrouvez cet article sur Le Relief.";
-  const coverImage =
-    (article.coverImageFirebaseUrl as string | null) ||
-    (article.coverImage as string | null) ||
-    "/logo.png";
+    article.excerpt || article.subtitle || "Retrouvez cet article sur Le Relief.";
+  const coverImage = article.imageSrc || "/logo.png";
 
   return {
     title,
     description,
     alternates: {
       canonical: `/articles/${slug}`,
+      languages: article.alternateLanguageSlug
+        ? {
+            [article.language === "fr" ? "en" : "fr"]:
+              `/articles/${article.alternateLanguageSlug}`,
+          }
+        : undefined,
     },
     openGraph: {
       type: "article",
-      locale: "fr_FR",
+      locale: article.language === "fr" ? "fr_FR" : "en_US",
       url: `${siteConfig.url}/articles/${slug}`,
       siteName: siteConfig.name,
       title,
       description,
-      images: [{ url: coverImage, alt: article.title as string }],
-      publishedTime: (article.publishedAt as string | null) || undefined,
+      images: [{ url: coverImage, alt: article.title }],
+      publishedTime: article.publishedAt || undefined,
+      modifiedTime: article.updatedAt || undefined,
+      section: article.category?.name,
+      authors: article.author?.name ? [article.author.name] : undefined,
     },
     twitter: {
       card: "summary_large_image",
@@ -57,79 +66,33 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function ArticlePage({ params }: Props) {
   const { slug } = await params;
+  const article = await getPublicArticleBySlug(slug);
+  if (!article) notFound();
 
-  const rawArticle = await articlesRepo.findBySlug(slug);
-  if (!rawArticle || rawArticle.status !== "published") notFound();
-
-  const author = rawArticle.authorId ? await usersRepo.getUser(rawArticle.authorId as string) : null;
-  const category = rawArticle.categoryId ? await categoriesRepo.getCategory(rawArticle.categoryId as string) : null;
-  const article = { ...rawArticle, author, category } as Record<string, unknown>;
-
-  // Track view
-  await articlesRepo.incrementViews(article.id as string);
-
-  // Related articles
-  let related: {
-    title: string;
-    slug: string;
-    excerpt: string | null;
-    coverImage: string | null;
-    coverImageFirebaseUrl?: string | null;
-    publishedAt: string | null;
-    author: { name: string | null } | null;
-    category: { name: string; slug: string } | null;
-  }[] = [];
   try {
-    const { articles: rawRelated } = await articlesRepo.getArticles({
-      status: "published",
-      categoryId: (article.categoryId as string) || undefined,
-      excludeId: article.id as string,
-      take: 3,
-    });
-    related = await Promise.all(
-      rawRelated.map(async (a) => {
-        const rAuthor = a.authorId ? await usersRepo.getUser(a.authorId as string) : null;
-        const rCategory = a.categoryId ? await categoriesRepo.getCategory(a.categoryId as string) : null;
-        return {
-          title: a.title as string,
-          slug: a.slug as string,
-          excerpt: a.excerpt as string | null,
-          coverImage: a.coverImage as string | null,
-          coverImageFirebaseUrl: a.coverImageFirebaseUrl as string | null,
-          publishedAt: a.publishedAt as string | null,
-          author: rAuthor ? { name: rAuthor.name as string | null } : null,
-          category: rCategory ? { name: rCategory.name as string, slug: rCategory.slug as string } : null,
-        };
-      })
-    );
+    await articlesRepo.incrementViews(article.id);
   } catch {
-    // Firestore index may not be ready
+    // Reading must not fail if analytics storage is temporarily unavailable.
   }
-
-  const cat = article.category as Record<string, unknown> | null;
-  const auth = article.author as Record<string, unknown> | null;
-  const coverImage =
-    (article.coverImageFirebaseUrl as string | null) ||
-    (article.coverImage as string | null);
-  const body = String(article.body || "");
-  const bodyHasHtml = /<\/?[a-z][\s\S]*>/i.test(body);
-  const tags = Array.isArray(article.tags)
-    ? (article.tags as string[])
-    : [];
+  const related = await getRelatedArticles(article, 4);
+  const bodyHasHtml = /<\/?[a-z][\s\S]*>/i.test(article.body);
   const articleUrl = `${siteConfig.url}/articles/${slug}`;
+  const alternateLabel = article.language === "fr" ? "Read in English" : "Lire en français";
   const articleLd = {
     "@context": "https://schema.org",
     "@type": "NewsArticle",
-    headline: String(article.title),
-    description: String(article.excerpt || ""),
-    image: coverImage ? [coverImage] : undefined,
-    datePublished: (article.publishedAt as string | null) || undefined,
-    dateModified: (article.updatedAt as string | null) || undefined,
+    headline: article.title,
+    description: article.excerpt || article.subtitle || "",
+    image: article.imageSrc ? [article.imageSrc] : undefined,
+    datePublished: article.publishedAt || undefined,
+    dateModified: article.updatedAt || undefined,
+    articleSection: article.category?.name,
+    inLanguage: article.language === "fr" ? "fr-FR" : "en-US",
     mainEntityOfPage: articleUrl,
-    author: auth?.name
+    author: article.author
       ? {
           "@type": "Person",
-          name: String(auth.name),
+          name: article.author.name,
         }
       : undefined,
     publisher: {
@@ -149,45 +112,78 @@ export default async function ArticlePage({ params }: Props) {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(articleLd) }}
       />
       <header className="border-t-2 border-border-strong pt-5">
-        {cat ? (
-          <Link
-            href={`/categories/${cat.slug}`}
-            className="page-kicker transition-colors hover:text-foreground"
-          >
-            {String(cat.name)}
-          </Link>
-        ) : null}
+        <div className="flex flex-wrap items-center gap-3 font-label text-xs font-extrabold uppercase">
+          {article.category ? (
+            <Link
+              href={`/categories/${article.category.slug}`}
+              className="text-primary transition-colors hover:text-foreground"
+            >
+              {article.category.name}
+            </Link>
+          ) : null}
+          <span className="text-muted">{article.contentTypeLabel}</span>
+          <span className="text-muted">{article.language.toUpperCase()}</span>
+        </div>
 
         <h1 className="editorial-title mt-4 max-w-5xl text-5xl text-foreground sm:text-6xl lg:text-8xl">
-          {String(article.title)}
+          {article.title}
         </h1>
 
-        {article.subtitle ? (
+        {(article.subtitle || article.excerpt) ? (
           <p className="editorial-deck mt-5 max-w-3xl font-body text-2xl">
-            {String(article.subtitle)}
+            {article.subtitle || article.excerpt}
           </p>
         ) : null}
 
         <div className="mt-6 flex flex-wrap items-center gap-3 border-y border-border-subtle py-3 font-label text-xs font-bold uppercase text-muted">
-          {auth?.name ? (
-            <span>
-              Par <span className="text-foreground">{String(auth.name)}</span>
-            </span>
-          ) : null}
-          {auth?.name && article.publishedAt ? (
-            <span className="text-border-subtle">/</span>
-          ) : null}
+          {article.author ? (
+            <Link
+              href={`/auteurs/${article.author.id}`}
+              className="transition-colors hover:text-primary"
+            >
+              Par <span className="text-foreground">{article.author.name}</span>
+            </Link>
+          ) : (
+            <span>Par <span className="text-foreground">La rédaction</span></span>
+          )}
           {article.publishedAt ? (
-            <time>
-              {format(new Date(article.publishedAt as string), "d MMMM yyyy", { locale: fr })}
-            </time>
+            <>
+              <span className="text-border-subtle">/</span>
+              <time>
+                {format(new Date(article.publishedAt), "d MMMM yyyy", {
+                  locale: fr,
+                })}
+              </time>
+            </>
           ) : null}
+          <span className="text-border-subtle">/</span>
+          <span>{article.readingTime} min de lecture</span>
+          <span className="text-border-subtle">/</span>
+          <span>{getTranslationStatusLabel(article.translationStatus)}</span>
         </div>
+
+        {article.alternateLanguageSlug ? (
+          <div className="mt-4 border-l-2 border-primary pl-4 font-label text-xs font-bold uppercase text-muted">
+            <Link
+              href={`/articles/${article.alternateLanguageSlug}`}
+              className="text-foreground transition-colors hover:text-primary"
+            >
+              {alternateLabel}
+            </Link>
+          </div>
+        ) : null}
+
+        {article.language === "en" ? (
+          <p className="mt-4 max-w-3xl border-l-2 border-border-subtle pl-4 font-body text-base leading-relaxed text-muted">
+            This English article is an edited adaptation of reporting first
+            published by Le Relief in French.
+          </p>
+        ) : null}
       </header>
 
-      {tags.length > 0 ? (
+      {article.tags.length > 0 ? (
         <div className="mt-4 flex flex-wrap gap-2 border-b border-border-subtle pb-4">
-          {tags.map((tag) => (
+          {article.tags.map((tag) => (
             <span
               key={tag}
               className="border border-border-subtle px-2 py-1 font-label text-[11px] font-bold uppercase text-muted"
@@ -198,12 +194,12 @@ export default async function ArticlePage({ params }: Props) {
         </div>
       ) : null}
 
-      {coverImage ? (
+      {article.imageSrc ? (
         <figure className="mt-8">
           <div className="relative aspect-[16/9] overflow-hidden bg-surface-elevated">
             <Image
-              src={coverImage}
-              alt={String(article.title)}
+              src={article.imageSrc}
+              alt={article.title}
               fill
               sizes="(min-width: 1280px) 1280px, 100vw"
               className="object-cover"
@@ -221,20 +217,94 @@ export default async function ArticlePage({ params }: Props) {
           {bodyHasHtml ? (
             <div
               className="prose prose-lg max-w-none font-body leading-relaxed dark:prose-invert prose-headings:font-headline prose-a:text-primary"
-              dangerouslySetInnerHTML={{ __html: body }}
+              dangerouslySetInnerHTML={{ __html: article.body }}
             />
           ) : (
             <div className="prose prose-lg max-w-none font-body leading-relaxed dark:prose-invert prose-headings:font-headline prose-a:text-primary">
-              {body.split("\n").map((p: string, i: number) =>
-                p.trim() ? <p key={i}>{p}</p> : null
+              {article.body.split("\n").map((paragraph, index) =>
+                paragraph.trim() ? <p key={index}>{paragraph}</p> : null,
               )}
             </div>
           )}
+
+          {article.author ? (
+            <section className="mt-12 border-t-2 border-border-strong pt-5">
+              <p className="section-kicker mb-2">Auteur</p>
+              <div className="grid gap-4 sm:grid-cols-[72px_1fr]">
+                <div className="flex h-[72px] w-[72px] items-center justify-center border border-border-subtle bg-surface-newsprint font-headline text-2xl font-extrabold text-foreground">
+                  {article.author.image ? (
+                    <Image
+                      src={article.author.image}
+                      alt={article.author.name}
+                      width={72}
+                      height={72}
+                      className="h-full w-full object-cover"
+                    />
+                  ) : (
+                    article.author.name.slice(0, 1)
+                  )}
+                </div>
+                <div>
+                  <Link
+                    href={`/auteurs/${article.author.id}`}
+                    className="font-headline text-2xl font-extrabold text-foreground transition-colors hover:text-primary"
+                  >
+                    {article.author.name}
+                  </Link>
+                  <p className="mt-1 font-label text-xs font-bold uppercase text-muted">
+                    {article.author.role}
+                  </p>
+                  {article.author.bio ? (
+                    <p className="mt-3 font-body text-base leading-relaxed text-muted">
+                      {article.author.bio}
+                    </p>
+                  ) : null}
+                </div>
+              </div>
+            </section>
+          ) : null}
+
+          <RelatedArticles articles={related} />
         </div>
 
-        <aside className="border-t-2 border-border-strong pt-4 lg:border-l lg:border-t-0 lg:pl-8">
-          <p className="section-kicker mb-3">Plus à lire</p>
-          <RelatedArticles articles={related} compact />
+        <aside className="space-y-8 border-t-2 border-border-strong pt-4 lg:border-l lg:border-t-0 lg:pl-8">
+          <section>
+            <p className="section-kicker mb-3">Partager</p>
+            <div className="flex flex-col gap-3 font-label text-xs font-bold uppercase">
+              <a
+                href={`mailto:?subject=${encodeURIComponent(article.title)}&body=${encodeURIComponent(articleUrl)}`}
+                className="ink-link text-muted"
+              >
+                Envoyer par courriel
+              </a>
+              <a
+                href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(article.title)}&url=${encodeURIComponent(articleUrl)}`}
+                className="ink-link text-muted"
+              >
+                Partager sur X
+              </a>
+            </div>
+          </section>
+
+          <section className="border-t border-border-subtle pt-5">
+            <p className="section-kicker mb-3">Lettre</p>
+            <h2 className="font-headline text-2xl font-extrabold leading-tight text-foreground">
+              Recevez la prochaine édition.
+            </h2>
+            <p className="mt-3 font-body text-base leading-relaxed text-muted">
+              Les nouvelles importantes, les analyses et les dossiers à suivre.
+            </p>
+            <div className="mt-5">
+              <NewsletterSignup />
+            </div>
+          </section>
+
+          {related.length > 0 ? (
+            <section className="border-t border-border-subtle pt-5">
+              <p className="section-kicker mb-3">Plus à lire</p>
+              <RelatedArticles articles={related.slice(0, 3)} compact />
+            </section>
+          ) : null}
         </aside>
       </div>
     </article>

@@ -15,6 +15,12 @@ interface ArticleEditorProps {
     categoryId: string;
     tags: string[];
     status: string;
+    contentType?: string;
+    language?: string;
+    translationStatus?: string;
+    alternateLanguageSlug?: string;
+    allowTranslation?: boolean;
+    translationPriority?: string;
   };
   categories: { id: string; name: string }[];
   onSubmit: (data: {
@@ -26,6 +32,12 @@ interface ArticleEditorProps {
     categoryId: string;
     tags: string[];
     status: string;
+    contentType: string;
+    language: string;
+    translationStatus: string;
+    alternateLanguageSlug: string;
+    allowTranslation: boolean;
+    translationPriority: string;
   }) => Promise<void>;
   submitLabel?: string;
 }
@@ -42,6 +54,20 @@ export default function ArticleEditor({
   const [excerpt, setExcerpt] = useState(initial?.excerpt || "");
   const [coverImage, setCoverImage] = useState(initial?.coverImage || "");
   const [categoryId, setCategoryId] = useState(initial?.categoryId || "");
+  const [contentType, setContentType] = useState(initial?.contentType || "actualite");
+  const [language, setLanguage] = useState(initial?.language || "fr");
+  const [translationStatus, setTranslationStatus] = useState(
+    initial?.translationStatus || "not_started",
+  );
+  const [alternateLanguageSlug, setAlternateLanguageSlug] = useState(
+    initial?.alternateLanguageSlug || "",
+  );
+  const [allowTranslation, setAllowTranslation] = useState(
+    initial?.allowTranslation || false,
+  );
+  const [translationPriority, setTranslationPriority] = useState(
+    initial?.translationPriority || "",
+  );
   const [tagsInput, setTagsInput] = useState((initial?.tags || []).join(", "));
   const [saving, setSaving] = useState(false);
 
@@ -62,6 +88,12 @@ export default function ArticleEditor({
         categoryId,
         tags,
         status,
+        contentType,
+        language,
+        translationStatus,
+        alternateLanguageSlug,
+        allowTranslation,
+        translationPriority,
       });
     } finally {
       setSaving(false);
@@ -121,6 +153,90 @@ export default function ArticleEditor({
             </option>
           ))}
         </select>
+      </div>
+
+      <div className="grid gap-4 md:grid-cols-2">
+        <div>
+          <label className="mb-2 block font-label text-xs font-extrabold uppercase text-foreground">
+            Type de contenu
+          </label>
+          <select
+            value={contentType}
+            onChange={(e) => setContentType(e.target.value)}
+            className="w-full border border-border-subtle bg-surface px-4 py-3 font-label text-sm text-foreground focus:border-primary focus:outline-none"
+          >
+            <option value="actualite">Actualité</option>
+            <option value="analyse">Analyse</option>
+            <option value="opinion">Opinion</option>
+            <option value="editorial">Éditorial</option>
+            <option value="tribune">Tribune</option>
+            <option value="dossier">Dossier</option>
+            <option value="fact_check">Fact-checking</option>
+            <option value="emission_speciale">Émission spéciale</option>
+          </select>
+        </div>
+
+        <div>
+          <label className="mb-2 block font-label text-xs font-extrabold uppercase text-foreground">
+            Langue
+          </label>
+          <select
+            value={language}
+            onChange={(e) => setLanguage(e.target.value)}
+            className="w-full border border-border-subtle bg-surface px-4 py-3 font-label text-sm text-foreground focus:border-primary focus:outline-none"
+          >
+            <option value="fr">Français</option>
+            <option value="en">English</option>
+          </select>
+        </div>
+      </div>
+
+      <div className="grid gap-4 md:grid-cols-2">
+        <div>
+          <label className="mb-2 block font-label text-xs font-extrabold uppercase text-foreground">
+            Statut de traduction
+          </label>
+          <select
+            value={translationStatus}
+            onChange={(e) => setTranslationStatus(e.target.value)}
+            className="w-full border border-border-subtle bg-surface px-4 py-3 font-label text-sm text-foreground focus:border-primary focus:outline-none"
+          >
+            <option value="not_applicable">Non concerné</option>
+            <option value="not_started">Non lancée</option>
+            <option value="generated_draft">Brouillon IA</option>
+            <option value="in_review">En revue</option>
+            <option value="approved">Approuvée</option>
+            <option value="published">Publiée</option>
+            <option value="rejected">Rejetée</option>
+          </select>
+        </div>
+
+        <Input
+          label="Slug langue liée"
+          id="alternateLanguageSlug"
+          placeholder="slug-de-la-version-liee"
+          value={alternateLanguageSlug}
+          onChange={(e) => setAlternateLanguageSlug(e.target.value)}
+        />
+      </div>
+
+      <div className="grid gap-4 md:grid-cols-[auto_1fr] md:items-end">
+        <label className="flex items-center gap-3 border border-border-subtle px-4 py-3 font-label text-xs font-extrabold uppercase text-foreground">
+          <input
+            type="checkbox"
+            checked={allowTranslation}
+            onChange={(e) => setAllowTranslation(e.target.checked)}
+            className="h-4 w-4 accent-primary"
+          />
+          Éligible traduction EN
+        </label>
+        <Input
+          label="Priorité de traduction"
+          id="translationPriority"
+          placeholder="élevée, moyenne, basse"
+          value={translationPriority}
+          onChange={(e) => setTranslationPriority(e.target.value)}
+        />
       </div>
 
       <div>

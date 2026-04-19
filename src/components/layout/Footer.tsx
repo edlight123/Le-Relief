@@ -32,7 +32,8 @@ export default function Footer() {
               Édition
             </h4>
             <p className="font-body text-base leading-relaxed text-muted">
-              Une rédaction numérique pour lire Haïti avec précision, contexte et sang-froid.
+              Une rédaction numérique pour lire Haïti avec précision, contexte
+              et responsabilité éditoriale.
             </p>
             <div className="mt-6">
               <SocialLinks />
@@ -56,8 +57,32 @@ export default function Footer() {
 
           <div className="flex flex-col gap-4">
             <h4 className="border-b border-border-subtle pb-3 text-xs font-extrabold uppercase text-foreground">
-              Légal
+              Institutionnel
             </h4>
+            <Link
+              href="/about"
+              className="ink-link text-muted"
+            >
+              À propos
+            </Link>
+            <Link
+              href="/politique-editoriale"
+              className="ink-link text-muted"
+            >
+              Politique éditoriale
+            </Link>
+            <Link
+              href="/corrections"
+              className="ink-link text-muted"
+            >
+              Corrections
+            </Link>
+            <Link
+              href="/traduction-ia"
+              className="ink-link text-muted"
+            >
+              Traduction assistée par IA
+            </Link>
             <Link
               href="/privacy"
               className="ink-link text-muted"
@@ -69,12 +94,6 @@ export default function Footer() {
               className="ink-link text-muted"
             >
               Contact
-            </Link>
-            <Link
-              href="/about"
-              className="ink-link text-muted"
-            >
-              À Propos
             </Link>
           </div>
 

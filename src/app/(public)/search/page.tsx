@@ -10,10 +10,16 @@ function SearchPageContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const initialQ = searchParams.get("q") || "";
+  const initialCategory = searchParams.get("categoryId") || "";
+  const initialLanguage = searchParams.get("language") || "";
 
   const [query, setQuery] = useState(initialQ);
+  const [categoryId, setCategoryId] = useState(initialCategory);
+  const [language, setLanguage] = useState(initialLanguage);
+  const [categories, setCategories] = useState<{ id: string; name: string }[]>([]);
   const [results, setResults] = useState<
     {
+      id?: string;
       title: string;
       slug: string;
       excerpt: string | null;
@@ -22,36 +28,65 @@ function SearchPageContent() {
       publishedAt: string | null;
       author: { name: string | null } | null;
       category: { name: string; slug: string } | null;
+      contentTypeLabel?: string;
+      readingTime?: number;
+      language?: "fr" | "en";
     }[]
   >([]);
   const [resolvedQuery, setResolvedQuery] = useState("");
 
   const debouncedQuery = useDebounce(query, 400);
   const trimmedQuery = debouncedQuery.trim();
-  const isSearching = !!trimmedQuery && resolvedQuery !== trimmedQuery;
-  const visibleResults = resolvedQuery === trimmedQuery ? results : [];
+  const filterKey = `${trimmedQuery}|${categoryId}|${language}`;
+  const isSearching = !!trimmedQuery && resolvedQuery !== filterKey;
+  const visibleResults = resolvedQuery === filterKey ? results : [];
+
+  useEffect(() => {
+    let cancelled = false;
+    fetch("/api/categories?public=true")
+      .then((r) => r.json())
+      .then((data) => {
+        if (!cancelled) setCategories(data.categories || []);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   useEffect(() => {
     const term = debouncedQuery.trim();
+    const params = new URLSearchParams();
+    if (term) params.set("q", term);
+    if (categoryId) params.set("categoryId", categoryId);
+    if (language) params.set("language", language);
+
     if (!term) {
-      router.replace("/search");
+      router.replace(params.size ? `/search?${params.toString()}` : "/search");
       return;
     }
 
     let cancelled = false;
-    fetch(`/api/articles?search=${encodeURIComponent(term)}&status=published`)
+    const apiParams = new URLSearchParams({
+      search: term,
+      status: "published",
+      take: "30",
+    });
+    if (categoryId) apiParams.set("categoryId", categoryId);
+    if (language) apiParams.set("language", language);
+
+    fetch(`/api/articles?${apiParams.toString()}`)
       .then((r) => r.json())
       .then((data) => {
         if (cancelled) return;
         setResults(data.articles || []);
-        setResolvedQuery(term);
+        setResolvedQuery(filterKey);
       });
 
-    router.replace(`/search?q=${encodeURIComponent(term)}`);
+    router.replace(`/search?${params.toString()}`);
     return () => {
       cancelled = true;
     };
-  }, [debouncedQuery, router]);
+  }, [categoryId, debouncedQuery, filterKey, language, router]);
 
   return (
     <div className="newspaper-shell py-10 sm:py-14">
@@ -62,15 +97,46 @@ function SearchPageContent() {
         </h1>
       </header>
 
-      <div className="relative mb-12 max-w-3xl border-y border-border-strong py-4">
+      <div className="relative mb-6 max-w-3xl border-y border-border-strong py-4">
         <SearchIcon className="absolute left-0 top-1/2 h-5 w-5 -translate-y-1/2 text-muted" />
         <input
           type="text"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          placeholder="Rechercher des articles..."
+          placeholder="Rechercher des articles"
           className="w-full border-0 bg-transparent py-3 pl-10 pr-4 font-headline text-3xl font-bold text-foreground placeholder:text-muted focus:outline-none"
         />
+      </div>
+
+      <div className="mb-12 grid gap-3 border-b border-border-subtle pb-5 sm:grid-cols-2">
+        <label className="font-label text-xs font-extrabold uppercase text-foreground">
+          Rubrique
+          <select
+            value={categoryId}
+            onChange={(e) => setCategoryId(e.target.value)}
+            className="mt-2 w-full border border-border-subtle bg-surface px-3 py-2 font-label text-sm text-foreground focus:border-primary focus:outline-none"
+          >
+            <option value="">Toutes les rubriques</option>
+            {categories.map((category) => (
+              <option key={category.id} value={category.id}>
+                {category.name}
+              </option>
+            ))}
+          </select>
+        </label>
+
+        <label className="font-label text-xs font-extrabold uppercase text-foreground">
+          Langue
+          <select
+            value={language}
+            onChange={(e) => setLanguage(e.target.value)}
+            className="mt-2 w-full border border-border-subtle bg-surface px-3 py-2 font-label text-sm text-foreground focus:border-primary focus:outline-none"
+          >
+            <option value="">Toutes les langues</option>
+            <option value="fr">Français</option>
+            <option value="en">English</option>
+          </select>
+        </label>
       </div>
 
       {isSearching && (
@@ -86,7 +152,7 @@ function SearchPageContent() {
       {visibleResults.length > 0 && (
         <div className="divide-y divide-border-subtle border-t border-border-strong">
           {visibleResults.map((article) => (
-            <ArticleCard key={article.slug} article={article} variant="list" />
+          <ArticleCard key={article.id || article.slug} article={article} variant="list" />
           ))}
         </div>
       )}
