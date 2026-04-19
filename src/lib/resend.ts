@@ -1,6 +1,8 @@
 import { Resend } from "resend";
 
-export const resend = new Resend(process.env.RESEND_API_KEY);
+function getResend() {
+  return new Resend(process.env.RESEND_API_KEY);
+}
 
 export const FROM_EMAIL =
   process.env.RESEND_FROM_EMAIL || "Le Relief <newsletter@le-relief.ht>";
@@ -9,7 +11,7 @@ export const AUDIENCE_ID = process.env.RESEND_AUDIENCE_ID || "";
 
 export async function addContactToAudience(email: string) {
   if (!AUDIENCE_ID) return;
-  await resend.contacts.create({
+  await getResend().contacts.create({
     email,
     audienceId: AUDIENCE_ID,
     unsubscribed: false,
@@ -17,7 +19,7 @@ export async function addContactToAudience(email: string) {
 }
 
 export async function sendWelcomeEmail(email: string) {
-  await resend.emails.send({
+  await getResend().emails.send({
     from: FROM_EMAIL,
     to: email,
     subject: "Bienvenue dans la lettre de Le Relief",
