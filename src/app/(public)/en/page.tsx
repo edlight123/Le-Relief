@@ -2,7 +2,7 @@ import ArticleCard from "@/components/public/ArticleCard";
 import NewsletterSignup from "@/components/public/NewsletterSignup";
 import { getEnglishSelection } from "@/lib/public-content";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 120;
 
 export const metadata = {
   title: "English Selection | Le Relief",

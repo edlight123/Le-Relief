@@ -102,10 +102,15 @@ export async function getArticles(options?: {
   }
 
   const orderField = options?.orderBy || "publishedAt";
-  query = query.orderBy(orderField, "desc");
+  // Firestore requires a composite index for orderBy + equality filter (authorId/categoryId).
+  // Skip Firestore orderBy when those filters are present and sort client-side instead.
+  const hasEqualityFilter = !!(options?.authorId || options?.categoryId);
 
-  if (options?.before) {
-    query = query.where(orderField, "<", options.before);
+  if (!hasEqualityFilter) {
+    query = query.orderBy(orderField, "desc");
+    if (options?.before) {
+      query = query.where(orderField, "<", options.before);
+    }
   }
 
   // When there's no client-side filtering needed, use Firestore limit for efficiency
@@ -116,6 +121,14 @@ export async function getArticles(options?: {
 
   const snap = await query.get();
   let docs = snap.docs.map((d) => serializeTimestamps({ id: d.id, ...d.data() } as Record<string, unknown>));
+
+  if (hasEqualityFilter) {
+    docs.sort((a, b) => {
+      const aVal = (a[orderField] as string) ?? "";
+      const bVal = (b[orderField] as string) ?? "";
+      return bVal < aVal ? -1 : bVal > aVal ? 1 : 0;
+    });
+  }
 
   // Client-side filtering for search (Firestore doesn't do full-text search)
   if (options?.search) {

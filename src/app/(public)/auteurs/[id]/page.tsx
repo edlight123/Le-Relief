@@ -5,7 +5,7 @@ import ArticleCard from "@/components/public/ArticleCard";
 import { getAuthorPageContent } from "@/lib/public-content";
 import { normalizeAuthor } from "@/lib/editorial";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 300;
 
 interface Props {
   params: Promise<{ id: string }>;

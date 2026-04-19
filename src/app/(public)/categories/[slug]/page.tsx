@@ -4,7 +4,7 @@ import ArticleCard from "@/components/public/ArticleCard";
 import Breadcrumb from "@/components/public/Breadcrumb";
 import { getCategoryPageContent } from "@/lib/public-content";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 120;
 
 interface Props {
   params: Promise<{ slug: string }>;

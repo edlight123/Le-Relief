@@ -6,7 +6,7 @@ import CategoryGrid from "@/components/public/CategoryGrid";
 import NewsletterSignup from "@/components/public/NewsletterSignup";
 import { getHomepageContent } from "@/lib/public-content";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 60;
 
 function SectionHeader({
   kicker,

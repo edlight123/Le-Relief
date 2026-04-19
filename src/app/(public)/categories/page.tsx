@@ -2,7 +2,7 @@ import CategoryGrid from "@/components/public/CategoryGrid";
 import { getPublicCategories } from "@/lib/public-content";
 import type { PublicCategory } from "@/lib/editorial";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 120;
 
 export const metadata = {
   title: "Rubriques | Le Relief Haïti",

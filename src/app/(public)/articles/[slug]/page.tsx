@@ -14,7 +14,7 @@ import {
 } from "@/lib/public-content";
 import * as articlesRepo from "@/lib/repositories/articles";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 300;
 
 interface Props {
   params: Promise<{ slug: string }>;
