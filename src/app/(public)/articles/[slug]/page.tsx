@@ -140,7 +140,7 @@ export default async function ArticlePage({ params }: Props) {
           <span className="text-muted">{article.language.toUpperCase()}</span>
         </div>
 
-        <h1 className="editorial-title mt-4 max-w-5xl text-5xl text-foreground sm:text-6xl lg:text-8xl">
+        <h1 className="editorial-title mt-4 max-w-5xl text-4xl text-foreground sm:text-5xl lg:text-6xl">
           {article.title}
         </h1>
 

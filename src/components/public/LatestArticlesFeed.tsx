@@ -20,6 +20,8 @@ interface Article {
 
 interface Props {
   initialArticles: Article[];
+  categoryId?: string;
+  variant?: "feed" | "grid";
   pageSize?: number;
 }
 
@@ -27,6 +29,8 @@ const PAGE_SIZE = 10;
 
 export default function LatestArticlesFeed({
   initialArticles,
+  categoryId,
+  variant = "feed",
   pageSize = PAGE_SIZE,
 }: Props) {
   const [articles, setArticles] = useState<Article[]>(initialArticles);
@@ -47,6 +51,7 @@ export default function LatestArticlesFeed({
         take: String(pageSize),
       });
       if (cursor) params.set("before", cursor);
+      if (categoryId) params.set("categoryId", categoryId);
 
       const res = await fetch(`/api/articles?${params.toString()}`);
       const data = await res.json();
@@ -71,19 +76,27 @@ export default function LatestArticlesFeed({
 
   return (
     <div>
-      <div className="grid grid-cols-1 gap-0 border-t border-border-subtle sm:grid-cols-2">
-        {articles.map((article, index) => (
-          <div
-            key={article.id}
-            className={`
-              border-b border-border-subtle
-              ${index % 2 === 0 ? "sm:border-r sm:border-border-subtle" : ""}
-            `}
-          >
-            <ArticleCard article={article} variant="text" />
-          </div>
-        ))}
-      </div>
+      {variant === "grid" ? (
+        <div className="grid grid-cols-1 gap-7 md:grid-cols-2 lg:grid-cols-3">
+          {articles.map((article) => (
+            <ArticleCard key={article.id} article={article} />
+          ))}
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 gap-0 border-t border-border-subtle sm:grid-cols-2">
+          {articles.map((article, index) => (
+            <div
+              key={article.id}
+              className={`
+                border-b border-border-subtle
+                ${index % 2 === 0 ? "sm:border-r sm:border-border-subtle" : ""}
+              `}
+            >
+              <ArticleCard article={article} variant="text" />
+            </div>
+          ))}
+        </div>
+      )}
 
       {!exhausted && (
         <div className="mt-8 border-t border-border-subtle pt-6">

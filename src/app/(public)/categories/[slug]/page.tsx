@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import ArticleCard from "@/components/public/ArticleCard";
+import LatestArticlesFeed from "@/components/public/LatestArticlesFeed";
 import Breadcrumb from "@/components/public/Breadcrumb";
 import { getCategoryPageContent } from "@/lib/public-content";
 
@@ -77,11 +78,11 @@ export default async function CategoryPage({ params }: Props) {
               Tous les articles
             </h2>
           </div>
-          <div className="grid grid-cols-1 gap-7 md:grid-cols-2 lg:grid-cols-3">
-            {articles.map((article) => (
-              <ArticleCard key={article.id} article={article} />
-            ))}
-          </div>
+          <LatestArticlesFeed
+            initialArticles={articles}
+            categoryId={category.id}
+            variant="grid"
+          />
         </section>
       ) : null}
 

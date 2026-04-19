@@ -262,7 +262,7 @@ export async function getCategoryPageContent(slug: string) {
     const result = await articlesRepo.getArticles({
       status: "published",
       categoryId: category.id,
-      take: 30,
+      take: 11,
     });
     articles = await hydrateArticles(result.articles);
   } catch {
