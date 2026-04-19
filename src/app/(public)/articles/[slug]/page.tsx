@@ -2,17 +2,17 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
-import { format } from "date-fns";
+import { format, differenceInHours } from "date-fns";
 import { fr } from "date-fns/locale";
 import RelatedArticles from "@/components/public/RelatedArticles";
 import NewsletterSignup from "@/components/public/NewsletterSignup";
+import Breadcrumb from "@/components/public/Breadcrumb";
 import { siteConfig } from "@/config/site.config";
 import {
   getPublicArticleBySlug,
   getRelatedArticles,
 } from "@/lib/public-content";
 import * as articlesRepo from "@/lib/repositories/articles";
-import { getTranslationStatusLabel } from "@/lib/editorial";
 
 export const dynamic = "force-dynamic";
 
@@ -28,7 +28,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const title = `${article.title} | Le Relief`;
   const description =
     article.excerpt || article.subtitle || "Retrouvez cet article sur Le Relief.";
-  const coverImage = article.imageSrc || "/logo.png";
+  const coverImage = article.imageSrc || null;
 
   return {
     title,
@@ -49,7 +49,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       siteName: siteConfig.name,
       title,
       description,
-      images: [{ url: coverImage, alt: article.title }],
+      ...(coverImage ? { images: [{ url: coverImage, alt: article.title }] } : {}),
       publishedTime: article.publishedAt || undefined,
       modifiedTime: article.updatedAt || undefined,
       section: article.category?.name,
@@ -59,7 +59,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       card: "summary_large_image",
       title,
       description,
-      images: [coverImage],
+      ...(coverImage ? { images: [coverImage] } : {}),
     },
   };
 }
@@ -77,7 +77,13 @@ export default async function ArticlePage({ params }: Props) {
   const related = await getRelatedArticles(article, 4);
   const bodyHasHtml = /<\/?[a-z][\s\S]*>/i.test(article.body);
   const articleUrl = `${siteConfig.url}/articles/${slug}`;
-  const alternateLabel = article.language === "fr" ? "Read in English" : "Lire en français";
+  const alternateLabel = article.language === "fr" ? "Lire en anglais" : "Lire en français";
+
+  const wasUpdated =
+    article.updatedAt &&
+    article.publishedAt &&
+    differenceInHours(new Date(article.updatedAt), new Date(article.publishedAt)) > 1;
+
   const articleLd = {
     "@context": "https://schema.org",
     "@type": "NewsArticle",
@@ -106,10 +112,19 @@ export default async function ArticlePage({ params }: Props) {
   };
 
   return (
-    <article className="newspaper-shell py-10 sm:py-14">
+    <article className="newspaper-shell py-10 sm:py-14" data-print-hide="false">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(articleLd) }}
+      />
+      <Breadcrumb
+        crumbs={[
+          { label: "Accueil", href: "/" },
+          ...(article.category
+            ? [{ label: article.category.name, href: `/categories/${article.category.slug}` }]
+            : [{ label: "Articles", href: "/categories" }]),
+          { label: article.title },
+        ]}
       />
       <header className="border-t-2 border-border-strong pt-5">
         <div className="flex flex-wrap items-center gap-3 font-label text-xs font-extrabold uppercase">
@@ -149,17 +164,22 @@ export default async function ArticlePage({ params }: Props) {
           {article.publishedAt ? (
             <>
               <span className="text-border-subtle">/</span>
-              <time>
-                {format(new Date(article.publishedAt), "d MMMM yyyy", {
-                  locale: fr,
-                })}
+              <time dateTime={article.publishedAt}>
+                {format(new Date(article.publishedAt), "d MMMM yyyy", { locale: fr })}
               </time>
+            </>
+          ) : null}
+          {wasUpdated && article.updatedAt ? (
+            <>
+              <span className="text-border-subtle">/</span>
+              <span className="text-accent-teal">
+                Mis à jour le{" "}
+                {format(new Date(article.updatedAt), "d MMMM yyyy", { locale: fr })}
+              </span>
             </>
           ) : null}
           <span className="text-border-subtle">/</span>
           <span>{article.readingTime} min de lecture</span>
-          <span className="text-border-subtle">/</span>
-          <span>{getTranslationStatusLabel(article.translationStatus)}</span>
         </div>
 
         {article.alternateLanguageSlug ? (
@@ -175,8 +195,7 @@ export default async function ArticlePage({ params }: Props) {
 
         {article.language === "en" ? (
           <p className="mt-4 max-w-3xl border-l-2 border-border-subtle pl-4 font-body text-base leading-relaxed text-muted">
-            This English article is an edited adaptation of reporting first
-            published by Le Relief in French.
+            Cet article est une adaptation en anglais d&apos;un reportage initialement publié par Le Relief en français.
           </p>
         ) : null}
       </header>
@@ -207,7 +226,7 @@ export default async function ArticlePage({ params }: Props) {
             />
           </div>
           <figcaption className="mt-2 border-b border-border-subtle pb-3 font-label text-[11px] uppercase text-muted">
-            Le Relief Haïti
+            Photo : Le Relief Haïti
           </figcaption>
         </figure>
       ) : null}
@@ -226,6 +245,16 @@ export default async function ArticlePage({ params }: Props) {
               )}
             </div>
           )}
+
+          {/* Corrections link */}
+          <div className="mt-10 border-t border-border-subtle pt-4">
+            <Link
+              href="/corrections"
+              className="font-label text-[11px] font-bold uppercase text-muted transition-colors hover:text-primary"
+            >
+              Signaler une erreur dans cet article
+            </Link>
+          </div>
 
           {article.author ? (
             <section className="mt-12 border-t-2 border-border-strong pt-5">
@@ -267,21 +296,31 @@ export default async function ArticlePage({ params }: Props) {
           <RelatedArticles articles={related} />
         </div>
 
-        <aside className="space-y-8 border-t-2 border-border-strong pt-4 lg:border-l lg:border-t-0 lg:pl-8">
+        <aside className="space-y-8 border-t-2 border-border-strong pt-4 lg:border-l lg:border-t-0 lg:pl-8" data-print-hide>
           <section>
             <p className="section-kicker mb-3">Partager</p>
             <div className="flex flex-col gap-3 font-label text-xs font-bold uppercase">
+              <a
+                href={`https://wa.me/?text=${encodeURIComponent(article.title + " — " + articleUrl)}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="ink-link text-muted"
+              >
+                Partager sur WhatsApp
+              </a>
+              <a
+                href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(article.title)}&url=${encodeURIComponent(articleUrl)}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="ink-link text-muted"
+              >
+                Partager sur X
+              </a>
               <a
                 href={`mailto:?subject=${encodeURIComponent(article.title)}&body=${encodeURIComponent(articleUrl)}`}
                 className="ink-link text-muted"
               >
                 Envoyer par courriel
-              </a>
-              <a
-                href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(article.title)}&url=${encodeURIComponent(articleUrl)}`}
-                className="ink-link text-muted"
-              >
-                Partager sur X
               </a>
             </div>
           </section>

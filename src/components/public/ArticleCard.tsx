@@ -11,7 +11,7 @@ interface ArticleCardProps {
     coverImage: string | null;
     coverImageFirebaseUrl?: string | null;
     publishedAt: Date | string | null;
-    author?: { name: string | null } | null;
+    author?: { id?: string | null; name: string | null } | null;
     category?: { name: string; slug: string } | null;
     contentTypeLabel?: string;
     readingTime?: number;
@@ -34,7 +34,7 @@ export default function ArticleCard({
       <Link href={`/articles/${article.slug}`} className="group block">
         <div className="article-card flex gap-4 border-b border-border-subtle py-4">
           {imageSrc && (
-            <div className="relative w-20 h-20 flex-shrink-0 overflow-hidden">
+            <div className="relative h-20 w-20 flex-shrink-0 overflow-hidden">
               <Image
                 src={imageSrc}
                 alt={article.title}
@@ -46,7 +46,7 @@ export default function ArticleCard({
           )}
           <div className="min-w-0">
             {article.contentTypeLabel && (
-              <p className="mb-2 font-label text-[10px] font-extrabold uppercase text-primary">
+              <p className="mb-2 font-label text-[11px] font-extrabold uppercase text-primary">
                 {article.contentTypeLabel}
               </p>
             )}
@@ -54,7 +54,7 @@ export default function ArticleCard({
               {article.title}
             </h3>
             {date && (
-              <p className="mt-2 font-label text-[10px] font-bold uppercase text-muted">{date}</p>
+              <p className="mt-2 font-label text-[11px] font-bold uppercase text-muted">{date}</p>
             )}
           </div>
         </div>
@@ -62,7 +62,7 @@ export default function ArticleCard({
     );
   }
 
-  /* List variant - horizontal card like "Recent Analysis" */
+  /* List variant */
   if (variant === "list") {
     return (
       <Link href={`/articles/${article.slug}`} className="group block">
@@ -79,20 +79,23 @@ export default function ArticleCard({
             </div>
           )}
           <div className="flex flex-col justify-center md:pr-4">
-            <div className="mb-2 flex items-center gap-3">
+            <div className="mb-2 flex flex-wrap items-center gap-2">
               {article.contentTypeLabel && (
-                <span className="page-kicker">
-                  {article.contentTypeLabel}
-                </span>
+                <span className="page-kicker">{article.contentTypeLabel}</span>
               )}
               {article.category && (
-                <span className="font-label text-[10px] font-bold uppercase text-muted">
+                <span className="font-label text-[11px] font-bold uppercase text-muted">
                   {article.category.name}
                 </span>
               )}
               {date && (
-                <span className="font-label text-[10px] font-bold uppercase text-muted">{date}</span>
+                <span className="font-label text-[11px] font-bold uppercase text-muted">{date}</span>
               )}
+              {article.readingTime ? (
+                <span className="font-label text-[11px] font-bold uppercase text-muted">
+                  {article.readingTime} min
+                </span>
+              ) : null}
             </div>
             <h3 className="font-headline text-xl font-bold leading-tight text-foreground transition-colors group-hover:text-primary sm:text-2xl">
               {article.title}
@@ -102,13 +105,18 @@ export default function ArticleCard({
                 {article.excerpt}
               </p>
             )}
+            {article.author?.name && (
+              <p className="mt-3 font-label text-[11px] font-bold uppercase text-muted">
+                Par {article.author.name}
+              </p>
+            )}
           </div>
         </div>
       </Link>
     );
   }
 
-  /* Default variant - bento grid card like "Today's Headlines" */
+  /* Default variant */
   return (
     <Link href={`/articles/${article.slug}`} className="group block h-full">
       <div className="article-card flex h-full flex-col border-b border-border-subtle pb-6">
@@ -123,7 +131,7 @@ export default function ArticleCard({
                 className="object-cover grayscale transition duration-300 group-hover:grayscale-0"
               />
               {article.category && (
-                <span className="absolute left-0 top-0 bg-foreground px-3 py-1 font-label text-[10px] font-bold uppercase text-background">
+                <span className="absolute left-0 top-0 bg-foreground px-3 py-1 font-label text-[11px] font-bold uppercase text-background">
                   {article.category.name}
                 </span>
               )}
@@ -131,7 +139,7 @@ export default function ArticleCard({
           ) : (
             <div className="flex h-full w-full items-center justify-center border border-border-subtle bg-surface-newsprint">
               {article.category && (
-                <span className="absolute left-0 top-0 bg-foreground px-3 py-1 font-label text-[10px] font-bold uppercase text-background">
+                <span className="absolute left-0 top-0 bg-foreground px-3 py-1 font-label text-[11px] font-bold uppercase text-background">
                   {article.category.name}
                 </span>
               )}
@@ -147,7 +155,7 @@ export default function ArticleCard({
             {article.excerpt}
           </p>
         )}
-        <div className="mt-4 flex items-center gap-3 font-label text-[10px] font-bold uppercase text-muted">
+        <div className="mt-4 flex flex-wrap items-center gap-2 font-label text-[11px] font-bold uppercase text-muted">
           {article.contentTypeLabel && <span>{article.contentTypeLabel}</span>}
           {article.contentTypeLabel && (article.author?.name || date) && (
             <span className="text-border-subtle">/</span>
@@ -157,6 +165,12 @@ export default function ArticleCard({
             <span className="text-border-subtle">/</span>
           )}
           {date && <span>{date}</span>}
+          {article.readingTime ? (
+            <>
+              <span className="text-border-subtle">/</span>
+              <span>{article.readingTime} min</span>
+            </>
+          ) : null}
         </div>
       </div>
     </Link>

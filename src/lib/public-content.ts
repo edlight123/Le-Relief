@@ -204,7 +204,12 @@ export async function getHomepageContent(): Promise<HomepageContent> {
   const latestList = excludeIds(homepageArticles, used).slice(0, 8);
   latestList.forEach((article) => used.add(article.id));
   const editorial = selectEditorialArticles(excludeIds(homepageArticles, used));
-  const mostRead = [...homepageArticles]
+  const ninetyDaysAgo = new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString();
+  const recentArticles = allArticles.filter(
+    (article) => !article.publishedAt || article.publishedAt >= ninetyDaysAgo,
+  );
+  const mostReadPool = recentArticles.length >= 3 ? recentArticles : allArticles;
+  const mostRead = [...mostReadPool]
     .sort((a, b) => b.views - a.views)
     .filter((article) => article.id !== hero?.id)
     .slice(0, 5);

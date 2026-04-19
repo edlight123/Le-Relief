@@ -110,7 +110,7 @@ body::before {
   --tw-prose-bullets: #a3a3a3;
   --tw-prose-hr: #333;
   --tw-prose-quotes: #d4d4d4;
-  --tw-prose-quote-borders: #E63946;
+  --tw-prose-quote-borders: var(--primary);
   --tw-prose-code: #F1F1F1;
   --tw-prose-pre-code: #d4d4d4;
   --tw-prose-pre-bg: #1a1a1a;
@@ -161,7 +161,7 @@ html {
 
 .editorial-deck {
   color: var(--muted);
-  line-height: 1.45;
+  line-height: 1.625;
 }
 
 .ink-link {
@@ -231,13 +231,13 @@ html {
 
 /* Article card hover */
 .article-card {
-  transition: color 0.2s ease, background 0.2s ease, border-color 0.2s ease;
+  transition: color 0.2s ease, background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
 }
 .article-card:hover {
-  box-shadow: none;
+  box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.07);
 }
 .dark .article-card:hover {
-  box-shadow: none;
+  box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.4);
 }
 
 /* Clean underline effect */
@@ -305,4 +305,20 @@ html {
 }
 .group:hover .img-grayscale {
   filter: grayscale(0%);
+}
+
+/* ─── Print ─── */
+@media print {
+  body::before { display: none; }
+  nav, aside, footer, .newsletter-signup, [data-print-hide] { display: none !important; }
+  body { background: #fff; color: #000; font-size: 12pt; }
+  .newspaper-shell { width: 100%; max-width: 100%; margin: 0; padding: 0; }
+  article { max-width: 100%; }
+  .prose { max-width: 100%; }
+  a[href]::after { content: " (" attr(href) ")"; font-size: 9pt; color: #555; }
+  a[href^="#"]::after, a[href^="mailto"]::after { content: ""; }
+  h1, h2, h3 { page-break-after: avoid; }
+  img { max-width: 100%; page-break-inside: avoid; }
+  .editorial-title { font-size: 24pt; line-height: 1.1; }
+  .editorial-deck { font-size: 13pt; line-height: 1.5; color: #333; }
 }

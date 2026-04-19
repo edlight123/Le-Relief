@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import ArticleCard from "@/components/public/ArticleCard";
+import Breadcrumb from "@/components/public/Breadcrumb";
 import { getCategoryPageContent } from "@/lib/public-content";
 
 export const dynamic = "force-dynamic";
@@ -34,6 +35,13 @@ export default async function CategoryPage({ params }: Props) {
 
   return (
     <div className="newspaper-shell py-10 sm:py-14">
+      <Breadcrumb
+        crumbs={[
+          { label: "Accueil", href: "/" },
+          { label: "Rubriques", href: "/categories" },
+          { label: category.name },
+        ]}
+      />
       <header className="mb-10 border-t-2 border-border-strong pt-5">
         <p className="page-kicker mb-3">Rubrique</p>
         <h1 className="editorial-title text-5xl text-foreground sm:text-7xl">

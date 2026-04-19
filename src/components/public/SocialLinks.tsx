@@ -17,24 +17,33 @@ function XIcon({ className }: { className?: string }) {
 }
 
 const platforms = [
-  { key: "instagram", icon: InstagramIcon, href: "https://www.instagram.com/lereliefhaiti", hoverColor: "hover:text-pink-500" },
-  { key: "facebook", icon: Globe, href: "#", hoverColor: "hover:text-blue-500" },
-  { key: "x", icon: XIcon, href: "https://x.com/lereliefhaiti", hoverColor: "hover:text-foreground" },
-];
+  {
+    key: "instagram",
+    label: "Suivre Le Relief sur Instagram",
+    icon: InstagramIcon,
+    href: "https://www.instagram.com/lereliefhaiti",
+  },
+  {
+    key: "x",
+    label: "Suivre Le Relief sur X",
+    icon: XIcon,
+    href: "https://x.com/lereliefhaiti",
+  },
+] as const;
 
 export default function SocialLinks() {
   return (
     <div className="flex items-center gap-3">
-      {platforms.map(({ key, icon: Icon, href, hoverColor }) => (
+      {platforms.map(({ key, label, icon: Icon, href }) => (
         <a
           key={key}
           href={href}
           target="_blank"
           rel="noopener noreferrer"
-          className={`border border-border-subtle bg-surface px-2 py-2 transition-colors duration-200 hover:bg-surface-elevated ${hoverColor}`}
-          aria-label={key}
+          className="border border-border-subtle bg-surface px-2 py-2 text-muted transition-colors duration-200 hover:bg-surface-elevated hover:text-foreground"
+          aria-label={label}
         >
-          <Icon className="h-4 w-4 text-muted" />
+          <Icon className="h-4 w-4" />
         </a>
       ))}
     </div>

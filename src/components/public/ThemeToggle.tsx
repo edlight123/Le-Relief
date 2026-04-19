@@ -10,7 +10,7 @@ export default function ThemeToggle() {
     <button
       onClick={toggleTheme}
       className="border border-border-subtle p-2 transition-colors duration-200 hover:bg-surface-elevated"
-      aria-label="Toggle theme"
+      aria-label={theme === "dark" ? "Passer en mode clair" : "Passer en mode sombre"}
     >
       {theme === "dark" ? (
         <Sun className="h-4 w-4 text-muted" />

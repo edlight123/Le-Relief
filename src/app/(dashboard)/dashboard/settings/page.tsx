@@ -13,7 +13,7 @@ interface Category {
 }
 
 export default function SettingsPage() {
-  const [profile, setProfile] = useState({ name: "", email: "" });
+  const [profile, setProfile] = useState({ name: "", email: "", bio: "" });
   const [socials, setSocials] = useState({
     instagram: "",
     facebook: "",
@@ -29,7 +29,7 @@ export default function SettingsPage() {
     fetch("/api/users/me")
       .then((r) => r.json())
       .then((data) => {
-        if (data.name) setProfile({ name: data.name, email: data.email });
+        if (data.name) setProfile({ name: data.name, email: data.email, bio: data.bio || "" });
       });
 
     fetch("/api/social-links")
@@ -57,7 +57,7 @@ export default function SettingsPage() {
     const res = await fetch("/api/users/me", {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name: profile.name }),
+      body: JSON.stringify({ name: profile.name, bio: profile.bio }),
     });
     setMessage(res.ok ? "Profil mis à jour" : "Impossible de mettre à jour le profil");
     setSaving(false);
@@ -181,6 +181,22 @@ export default function SettingsPage() {
             value={profile.email}
             disabled
           />
+          <div className="w-full">
+            <label
+              htmlFor="settings-bio"
+              className="mb-2 block font-label text-xs font-extrabold uppercase text-foreground"
+            >
+              Biographie
+            </label>
+            <textarea
+              id="settings-bio"
+              rows={4}
+              placeholder="Quelques lignes sur votre parcours et votre rôle éditorial..."
+              value={profile.bio}
+              onChange={(e) => setProfile((p) => ({ ...p, bio: e.target.value }))}
+              className="w-full border border-border-subtle bg-surface px-4 py-3 font-label text-sm text-foreground placeholder:text-muted transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary/30 hover:border-primary/30 resize-none"
+            />
+          </div>
           <Button onClick={handleSaveProfile} disabled={saving} size="sm">
             Enregistrer le profil
           </Button>

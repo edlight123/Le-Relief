@@ -67,7 +67,7 @@ export default function Table<T extends Record<string, unknown>>({
                 colSpan={columns.length}
                 className="px-4 py-8 text-center font-body text-muted"
               >
-                No data found
+                Aucune donnée trouvée
               </td>
             </tr>
           )}

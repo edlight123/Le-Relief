@@ -2,9 +2,13 @@
 
 import { useState } from "react";
 
+const STORAGE_KEY = "lerelief_subscribed";
+
 export default function NewsletterSignup() {
   const [email, setEmail] = useState("");
-  const [status, setStatus] = useState<"idle" | "saving" | "success" | "error">("idle");
+  const [status, setStatus] = useState<"idle" | "saving" | "success" | "error" | "already">(
+    () => (typeof window !== "undefined" && localStorage.getItem(STORAGE_KEY) ? "already" : "idle"),
+  );
   const [message, setMessage] = useState("");
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
@@ -28,6 +32,7 @@ export default function NewsletterSignup() {
         return;
       }
 
+      localStorage.setItem(STORAGE_KEY, "1");
       setStatus("success");
       setMessage(data.message || "Inscription confirmée.");
       setEmail("");
@@ -37,33 +42,48 @@ export default function NewsletterSignup() {
     }
   }
 
+  if (status === "already") {
+    return (
+      <p className="font-label text-[11px] font-bold uppercase text-accent-teal">
+        Vous êtes déjà inscrit à la lettre.
+      </p>
+    );
+  }
+
+  if (status === "success") {
+    return (
+      <p className="font-label text-[11px] font-bold uppercase text-accent-teal">
+        {message}
+      </p>
+    );
+  }
+
   return (
-    <form className="relative" onSubmit={handleSubmit}>
-      <input
-        className="w-full border-0 border-b-2 border-border-strong bg-transparent px-0 py-2 pr-9 font-label text-sm text-foreground placeholder:text-muted focus:border-primary focus:outline-none"
-        placeholder="Adresse email"
-        type="email"
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
-        required
-        aria-label="Adresse email"
-      />
-      <button
-        type="submit"
-        disabled={status === "saving"}
-        className="absolute right-0 top-1/2 -translate-y-1/2 text-primary transition-colors hover:text-foreground disabled:opacity-50"
-        aria-label="S'inscrire à la newsletter"
-      >
-        <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-          <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
-        </svg>
-      </button>
-      {message ? (
-        <p
-          className={`mt-2 font-label text-[11px] font-semibold uppercase ${
-            status === "success" ? "text-accent-teal" : "text-primary"
-          }`}
+    <form className="newsletter-signup" onSubmit={handleSubmit}>
+      <div className="relative">
+        <input
+          className="w-full border border-border-subtle bg-surface px-3 py-2 pr-10 font-label text-sm text-foreground placeholder:text-muted transition-colors focus:border-primary focus:outline-none"
+          placeholder="Adresse courriel"
+          type="email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          required
+          aria-label="Adresse courriel"
+          disabled={status === "saving"}
+        />
+        <button
+          type="submit"
+          disabled={status === "saving"}
+          className="absolute right-0 top-0 flex h-full items-center px-3 text-primary transition-colors hover:text-foreground disabled:opacity-50"
+          aria-label="S'inscrire à la lettre"
         >
+          <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+          </svg>
+        </button>
+      </div>
+      {message ? (
+        <p className="mt-2 font-label text-[11px] font-bold uppercase text-primary">
           {message}
         </p>
       ) : null}

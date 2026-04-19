@@ -118,21 +118,27 @@ export default function Navbar() {
                 </Link>
               );
             })}
-            <div className="flex items-center gap-4 px-1 pt-3 font-label text-xs uppercase">
-              <Link
-                href="/login"
-                onClick={() => setMobileOpen(false)}
-                className="ink-link text-muted"
-              >
-                Connexion
-              </Link>
-              <Link
-                href="/signup"
-                onClick={() => setMobileOpen(false)}
-                className="border border-border-strong px-3 py-2 font-bold text-foreground transition-colors hover:bg-foreground hover:text-background"
-              >
-                S&apos;inscrire
-              </Link>
+            <div className="flex items-center justify-between px-1 pt-3">
+              <div className="flex items-center gap-3">
+                <LanguageToggle />
+                <ThemeToggle />
+              </div>
+              <div className="flex items-center gap-3 font-label text-xs uppercase">
+                <Link
+                  href="/login"
+                  onClick={() => setMobileOpen(false)}
+                  className="ink-link text-muted"
+                >
+                  Connexion
+                </Link>
+                <Link
+                  href="/signup"
+                  onClick={() => setMobileOpen(false)}
+                  className="border border-border-strong px-3 py-2 font-bold text-foreground transition-colors hover:bg-foreground hover:text-background"
+                >
+                  S&apos;inscrire
+                </Link>
+              </div>
             </div>
           </nav>
         )}

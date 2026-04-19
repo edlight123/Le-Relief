@@ -35,7 +35,7 @@ function SearchPageContent() {
   >([]);
   const [resolvedQuery, setResolvedQuery] = useState("");
 
-  const debouncedQuery = useDebounce(query, 400);
+  const debouncedQuery = useDebounce(query, 300);
   const trimmedQuery = debouncedQuery.trim();
   const filterKey = `${trimmedQuery}|${categoryId}|${language}`;
   const isSearching = !!trimmedQuery && resolvedQuery !== filterKey;
@@ -104,7 +104,7 @@ function SearchPageContent() {
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder="Rechercher des articles"
-          className="w-full border-0 bg-transparent py-3 pl-10 pr-4 font-headline text-3xl font-bold text-foreground placeholder:text-muted focus:outline-none"
+          className="w-full border-0 bg-transparent py-3 pl-10 pr-4 font-body text-xl font-bold text-foreground placeholder:text-muted focus:outline-none sm:text-2xl"
         />
       </div>
 
@@ -150,11 +150,16 @@ function SearchPageContent() {
       )}
 
       {visibleResults.length > 0 && (
-        <div className="divide-y divide-border-subtle border-t border-border-strong">
-          {visibleResults.map((article) => (
-          <ArticleCard key={article.id || article.slug} article={article} variant="list" />
-          ))}
-        </div>
+        <>
+          <p className="mb-5 font-label text-xs font-bold uppercase text-muted">
+            {visibleResults.length} résultat{visibleResults.length > 1 ? "s" : ""} pour &ldquo;{trimmedQuery}&rdquo;
+          </p>
+          <div className="divide-y divide-border-subtle border-t border-border-strong">
+            {visibleResults.map((article) => (
+              <ArticleCard key={article.id || article.slug} article={article} variant="list" />
+            ))}
+          </div>
+        </>
       )}
     </div>
   );

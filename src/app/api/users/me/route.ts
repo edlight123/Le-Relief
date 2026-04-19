@@ -21,6 +21,7 @@ export async function PATCH(req: NextRequest) {
   const body = await req.json();
   const data: Record<string, unknown> = {};
   if (body.name !== undefined) data.name = body.name;
+  if (body.bio !== undefined) data.bio = body.bio || null;
 
   const user = await usersRepo.updateUser(session.user.id, data);
   return NextResponse.json(user);
