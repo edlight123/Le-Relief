@@ -66,6 +66,7 @@ export default function Navbar() {
               alt="Le Relief"
               width={40}
               height={40}
+              sizes="40px"
               className="h-8 w-8 rounded-sm md:h-10 md:w-10"
               priority
             />

@@ -5,6 +5,13 @@ import LatestArticlesFeed from "@/components/public/LatestArticlesFeed";
 import Breadcrumb from "@/components/public/Breadcrumb";
 import { getCategoryPageContent } from "@/lib/editorial";
 import { validateLocale } from "@/lib/locale";
+import {
+  buildBreadcrumbJsonLd,
+  buildCanonicalAlternates,
+  buildMetaDescription,
+  buildOgImage,
+  serializeJsonLd,
+} from "@/lib/seo";
 
 export const revalidate = 120;
 
@@ -18,20 +25,37 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const content = await getCategoryPageContent(slug, locale);
   if (!content) return {};
 
-  return {
-    title: `${content.category.name} | Le Relief`,
-    description:
+  const title = `${content.category.name} | Le Relief`;
+  const description = buildMetaDescription({
+    title,
+    excerpt:
       content.category.description ||
       (locale === "fr"
-        ? `Articles, analyses et dossiers dans la rubrique ${content.category.name}.`
-        : `Articles and analysis in ${content.category.name}.`),
-    alternates: {
-      canonical: `/${locale}/categories/${slug}`,
-      languages: {
-        fr: `/fr/categories/${slug}`,
-        en: `/en/categories/${slug}`,
-        "x-default": `/fr/categories/${slug}`,
-      },
+        ? `Articles, analyses, dossiers et décryptages dans la rubrique ${content.category.name}.`
+        : `Articles, analysis and explainers in ${content.category.name}.`),
+    locale,
+    keyword: content.category.name,
+    cta:
+      locale === "fr"
+        ? "Explorez les derniers articles de cette rubrique."
+        : "Explore the latest stories from this section.",
+  });
+
+  return {
+    title,
+    description,
+    alternates: buildCanonicalAlternates(`/${locale}/categories/${slug}`, {
+      fr: `/fr/categories/${slug}`,
+      en: `/en/categories/${slug}`,
+      "x-default": `/fr/categories/${slug}`,
+    }),
+    openGraph: {
+      title,
+      description,
+      type: "website",
+      locale: locale === "fr" ? "fr_FR" : "en_US",
+      url: `/${locale}/categories/${slug}`,
+      images: buildOgImage("/logo.png", content.category.name),
     },
   };
 }
@@ -44,9 +68,19 @@ export default async function LocalizedCategoryPage({ params }: Props) {
   if (!content) notFound();
 
   const { category, featured, articles } = content;
+  const breadcrumbJsonLd = buildBreadcrumbJsonLd([
+    { name: locale === "fr" ? "Accueil" : "Home", item: `/${locale}` },
+    { name: locale === "fr" ? "Rubriques" : "Categories", item: `/${locale}/categories` },
+    { name: category.name, item: `/${locale}/categories/${slug}` },
+  ]);
 
   return (
-    <div className="newspaper-shell py-10 sm:py-14">
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: serializeJsonLd(breadcrumbJsonLd) }}
+      />
+      <div className="newspaper-shell py-10 sm:py-14">
       <Breadcrumb
         locale={locale}
         crumbs={[
@@ -63,6 +97,12 @@ export default async function LocalizedCategoryPage({ params }: Props) {
         <h1 className="editorial-title text-5xl text-foreground sm:text-7xl">
           {category.name}
         </h1>
+        <p className="mt-4 max-w-3xl font-body text-base leading-relaxed text-muted sm:text-lg">
+          {category.description ||
+            (locale === "fr"
+              ? `Retrouvez les dernières actualités, analyses et reportages de la rubrique ${category.name}.`
+              : `Browse the latest news, analysis and reporting from ${category.name}.`)}
+        </p>
       </header>
 
       {featured ? (
@@ -97,6 +137,7 @@ export default async function LocalizedCategoryPage({ params }: Props) {
           />
         </section>
       ) : null}
-    </div>
+      </div>
+    </>
   );
 }

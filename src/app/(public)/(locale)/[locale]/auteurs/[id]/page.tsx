@@ -4,6 +4,13 @@ import Image from "next/image";
 import LatestArticlesFeed from "@/components/public/LatestArticlesFeed";
 import { getAuthorPageContent, normalizeAuthor } from "@/lib/editorial";
 import { validateLocale } from "@/lib/locale";
+import {
+  buildBreadcrumbJsonLd,
+  buildCanonicalAlternates,
+  buildMetaDescription,
+  buildRobotsDirective,
+  serializeJsonLd,
+} from "@/lib/seo";
 
 export const revalidate = 300;
 
@@ -21,19 +28,26 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   return {
     title: `${author.name} | Le Relief`,
-    description:
-      author.bio ||
-      (locale === "fr"
-        ? `Articles récents de ${author.name}.`
-        : `Latest pieces by ${author.name}.`),
-    alternates: {
-      canonical: `/${locale}/auteurs/${id}`,
-      languages: {
-        fr: `/fr/auteurs/${id}`,
-        en: `/en/auteurs/${id}`,
-        "x-default": `/fr/auteurs/${id}`,
-      },
-    },
+    description: buildMetaDescription({
+      title: `${author.name} | Le Relief`,
+      excerpt:
+        author.bio ||
+        (locale === "fr"
+          ? `Articles récents, analyses et commentaires signés par ${author.name}.`
+          : `Latest reporting, analysis and commentary by ${author.name}.`),
+      locale,
+      keyword: author.name,
+      cta:
+        locale === "fr"
+          ? "Découvrez les publications de cet auteur sur Le Relief."
+          : "Explore this author's latest work on Le Relief.",
+    }),
+    alternates: buildCanonicalAlternates(`/${locale}/auteurs/${id}`, {
+      fr: `/fr/auteurs/${id}`,
+      en: `/en/auteurs/${id}`,
+      "x-default": `/fr/auteurs/${id}`,
+    }),
+    robots: buildRobotsDirective(content?.articles.length ? "published" : "draft"),
   };
 }
 
@@ -45,8 +59,18 @@ export default async function LocalizedAuthorPage({ params }: Props) {
   const author = content ? normalizeAuthor(content.author) : null;
   if (!content || !author) notFound();
 
+  const breadcrumbJsonLd = buildBreadcrumbJsonLd([
+    { name: locale === "fr" ? "Accueil" : "Home", item: `/${locale}` },
+    { name: author.name, item: `/${locale}/auteurs/${id}` },
+  ]);
+
   return (
-    <div className="newspaper-shell py-10 sm:py-14">
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: serializeJsonLd(breadcrumbJsonLd) }}
+      />
+      <div className="newspaper-shell py-10 sm:py-14">
       <header className="mb-10 grid gap-6 border-t-2 border-border-strong pt-5 sm:grid-cols-[120px_1fr]">
         <div className="flex h-[120px] w-[120px] items-center justify-center border border-border-subtle bg-surface-newsprint font-headline text-5xl font-extrabold text-foreground">
           {author.image ? (
@@ -55,6 +79,7 @@ export default async function LocalizedAuthorPage({ params }: Props) {
               alt={author.name}
               width={120}
               height={120}
+                            sizes="120px"
               className="h-full w-full object-cover"
               priority
             />
@@ -70,6 +95,11 @@ export default async function LocalizedAuthorPage({ params }: Props) {
           <p className="mt-3 font-label text-xs font-bold uppercase text-muted">
             {author.role}
           </p>
+          {author.bio ? (
+            <p className="mt-4 max-w-3xl font-body text-base leading-relaxed text-muted sm:text-lg">
+              {author.bio}
+            </p>
+          ) : null}
         </div>
       </header>
 
@@ -98,6 +128,7 @@ export default async function LocalizedAuthorPage({ params }: Props) {
           </p>
         )}
       </section>
-    </div>
+      </div>
+    </>
   );
 }

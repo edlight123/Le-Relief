@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Libre_Franklin, Newsreader, IBM_Plex_Mono } from "next/font/google";
 import { siteConfig } from "@/config/site.config";
+import { buildOgImage } from "@/lib/seo";
 import "./globals.css";
 
 const libreFranklin = Libre_Franklin({
@@ -39,7 +40,6 @@ export const metadata: Metadata = {
     "analyse",
   ],
   alternates: {
-    canonical: "/",
     types: {
       "application/rss+xml": `${siteConfig.url}/feed.xml`,
     },
@@ -47,19 +47,12 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     locale: "fr_FR",
-    url: siteConfig.url,
+    url: `${siteConfig.url}/fr`,
     siteName: siteConfig.name,
     title: "Le Relief — Média numérique haïtien",
     description:
       "Le Relief est une publication numérique haïtienne, française d'abord, dédiée à l'actualité, l'analyse, l'opinion et aux dossiers d'intérêt public.",
-    images: [
-      {
-        url: "/logo.png",
-        width: 1200,
-        height: 630,
-        alt: "Le Relief",
-      },
-    ],
+    images: buildOgImage("/logo.png", "Le Relief"),
   },
   twitter: {
     card: "summary_large_image",
@@ -67,6 +60,10 @@ export const metadata: Metadata = {
     description:
       "Le Relief est une publication numérique haïtienne, française d'abord, dédiée à l'actualité, l'analyse, l'opinion et aux dossiers d'intérêt public.",
     images: ["/logo.png"],
+  },
+  robots: {
+    index: true,
+    follow: true,
   },
   icons: {
     icon: "/favicon.ico",

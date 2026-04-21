@@ -22,6 +22,7 @@ export default function Footer() {
               alt="Le Relief"
               width={34}
               height={34}
+                            sizes="34px"
               className="rounded-sm"
             />
             <span className="font-headline text-4xl font-extrabold leading-none text-foreground sm:text-5xl">

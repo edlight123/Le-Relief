@@ -14,6 +14,8 @@ const sectionLabels: Record<string, string> = {
   "/dashboard/articles/new": "Nouvel article",
   "/dashboard/media": "Médiathèque",
   "/dashboard/analytics": "Analytiques",
+  "/dashboard/editorial": "Rapport éditorial",
+  "/dashboard/product": "Métriques produit",
   "/dashboard/settings": "Paramètres",
   "/dashboard/users": "Utilisateurs",
 };

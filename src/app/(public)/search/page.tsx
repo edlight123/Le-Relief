@@ -1,14 +1,16 @@
 "use client";
 
 import { useState, useEffect, Suspense } from "react";
-import { useSearchParams, useRouter } from "next/navigation";
+import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import { Search as SearchIcon } from "lucide-react";
 import ArticleCard from "@/components/public/ArticleCard";
 import { useDebounce } from "@/hooks/useDebounce";
+import { analyticsClient } from "@/lib/analytics-client";
 
 function SearchPageContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
+  const pathname = usePathname();
   const initialQ = searchParams.get("q") || "";
   const initialCategory = searchParams.get("categoryId") || "";
   const initialLanguage = searchParams.get("language") || "";
@@ -40,6 +42,10 @@ function SearchPageContent() {
   const filterKey = `${trimmedQuery}|${categoryId}|${language}`;
   const isSearching = !!trimmedQuery && resolvedQuery !== filterKey;
   const visibleResults = resolvedQuery === filterKey ? results : [];
+
+  // Determine current locale from pathname
+  const isEnglish = pathname.startsWith("/en");
+  const currentLocale: "fr" | "en" = isEnglish ? "en" : "fr";
 
   useEffect(() => {
     let cancelled = false;
@@ -78,8 +84,22 @@ function SearchPageContent() {
       .then((r) => r.json())
       .then((data) => {
         if (cancelled) return;
-        setResults(data.articles || []);
+        const articles = data.articles || [];
+        setResults(articles);
         setResolvedQuery(filterKey);
+
+        // Track search event
+        try {
+          analyticsClient.trackSearchQuery({
+            query: term,
+            language: language as "fr" | "en" | undefined,
+            categoryFilter: categoryId || undefined,
+            resultCount: articles.length,
+            zeroResults: articles.length === 0,
+          });
+        } catch (error) {
+          console.error("[analytics] Failed to track search:", error);
+        }
       });
 
     router.replace(`/search?${params.toString()}`);
@@ -104,17 +124,18 @@ function SearchPageContent() {
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder="Rechercher des articles"
-          className="w-full border-0 bg-transparent py-3 pl-10 pr-4 font-body text-xl font-bold text-foreground placeholder:text-muted focus:outline-none sm:text-2xl"
+          className="w-full border-0 bg-transparent py-3 pl-10 pr-4 font-body text-base sm:text-lg sm:text-2xl text-foreground placeholder:text-muted focus:outline-none"
         />
       </div>
 
       <div className="mb-12 grid gap-3 border-b border-border-subtle pb-5 sm:grid-cols-2">
+          {/* Mobile: stack selects vertically (grid-cols-1), Tablet/Desktop: 2 columns */}
         <label className="font-label text-xs font-extrabold uppercase text-foreground">
           Rubrique
           <select
             value={categoryId}
             onChange={(e) => setCategoryId(e.target.value)}
-            className="mt-2 w-full border border-border-subtle bg-surface px-3 py-2 font-label text-sm text-foreground focus:border-primary focus:outline-none"
+            className="mt-2 w-full border border-border-subtle bg-surface px-3 py-3 font-label text-base text-foreground focus:border-primary focus:outline-none"
           >
             <option value="">Toutes les rubriques</option>
             {categories.map((category) => (
@@ -130,7 +151,7 @@ function SearchPageContent() {
           <select
             value={language}
             onChange={(e) => setLanguage(e.target.value)}
-            className="mt-2 w-full border border-border-subtle bg-surface px-3 py-2 font-label text-sm text-foreground focus:border-primary focus:outline-none"
+            className="mt-2 w-full border border-border-subtle bg-surface px-3 py-3 font-label text-base text-foreground focus:border-primary focus:outline-none"
           >
             <option value="">Toutes les langues</option>
             <option value="fr">Français</option>

@@ -39,6 +39,8 @@ const navGroups = [
     label: "Analyse",
     items: [
       { label: "Analytiques", href: "/dashboard/analytics", icon: BarChart3 },
+      { label: "Rapport éditorial", href: "/dashboard/editorial", icon: BarChart3 },
+      { label: "Métriques produit", href: "/dashboard/product", icon: BarChart3 },
     ],
   },
   {
@@ -88,6 +90,7 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
               alt="Le Relief"
               width={28}
               height={28}
+                            sizes="28px"
               className="h-7 w-7 rounded-sm"
             />
             <span className="font-headline text-base font-extrabold tracking-tight text-foreground">

@@ -10,10 +10,21 @@ import Breadcrumb from "@/components/public/Breadcrumb";
 import ReadingProgress from "@/components/public/ReadingProgress";
 import CopyLinkButton from "@/components/public/CopyLinkButton";
 import TableOfContents from "@/components/public/TableOfContents";
+import ArticleViewTracker from "@/components/public/ArticleViewTracker";
 import { siteConfig } from "@/config/site.config";
 import { getPublicArticleBySlug, getRelatedArticles } from "@/lib/editorial";
 import * as articlesRepo from "@/lib/repositories/articles";
 import { validateLocale } from "@/lib/locale";
+import {
+  buildArticleImageAlt,
+  buildBreadcrumbJsonLd,
+  buildCanonicalAlternates,
+  buildMetaDescription,
+  buildNewsArticleJsonLd,
+  buildOgImage,
+  buildRobotsDirective,
+  serializeJsonLd,
+} from "@/lib/seo";
 
 export const revalidate = 300;
 
@@ -29,34 +40,37 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   if (!article) return {};
 
   const title = `${article.title} | Le Relief`;
-  const description =
-    article.excerpt || article.subtitle || "Read this article on Le Relief.";
-  const coverImage = article.imageSrc || null;
-  const ogParams = new URLSearchParams({ title: article.title });
-  if (article.category) ogParams.set("category", article.category.name);
-  if (article.author) ogParams.set("author", article.author.name);
-  const generatedOgImage = `${siteConfig.url}/api/og?${ogParams.toString()}`;
-  const ogImage = coverImage || generatedOgImage;
-
+  const description = buildMetaDescription({
+    title,
+    excerpt: article.excerpt || article.subtitle,
+    body: article.body,
+    locale,
+    keyword: article.category?.name || article.title,
+    cta:
+      locale === "fr"
+        ? "Consultez l'article complet sur Le Relief."
+        : "Read the full story on Le Relief.",
+  });
   const alternateLocale = locale === "fr" ? "en" : "fr";
-  const alternates = {
-    canonical: `/${locale}/articles/${slug}`,
-    languages: article.alternateLanguageSlug
-      ? {
-          [locale]: `/${locale}/articles/${slug}`,
-          [alternateLocale]: `/${alternateLocale}/articles/${article.alternateLanguageSlug}`,
-          "x-default": `/fr/articles/${locale === "fr" ? slug : article.alternateLanguageSlug}`,
-        }
-      : {
-          [locale]: `/${locale}/articles/${slug}`,
-          "x-default": locale === "fr" ? `/fr/articles/${slug}` : `/en/articles/${slug}`,
-        },
-  };
+  const alternatePath = article.alternateLanguageSlug
+    ? `/${alternateLocale}/articles/${article.alternateLanguageSlug}`
+    : undefined;
+  const defaultPath =
+    locale === "fr"
+      ? `/${locale}/articles/${slug}`
+      : article.alternateLanguageSlug
+        ? `/fr/articles/${article.alternateLanguageSlug}`
+        : `/${locale}/articles/${slug}`;
 
   return {
     title,
     description,
-    alternates,
+    alternates: buildCanonicalAlternates(`/${locale}/articles/${slug}`, {
+      [locale]: `/${locale}/articles/${slug}`,
+      [alternateLocale]: alternatePath,
+      "x-default": defaultPath,
+    }),
+    robots: buildRobotsDirective(article.status),
     openGraph: {
       type: "article",
       locale: locale === "fr" ? "fr_FR" : "en_US",
@@ -64,7 +78,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       siteName: siteConfig.name,
       title,
       description,
-      images: [{ url: ogImage, alt: article.title, width: 1200, height: 630 }],
+      images: buildOgImage(article.imageSrc, article.title, article.title),
       publishedTime: article.publishedAt || undefined,
       modifiedTime: article.updatedAt || undefined,
       section: article.category?.name,
@@ -74,7 +88,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       card: "summary_large_image",
       title,
       description,
-      images: [ogImage],
+      images: article.imageSrc ? [article.imageSrc] : ["/logo.png"],
     },
   };
 }
@@ -96,6 +110,24 @@ export default async function LocalizedArticlePage({ params }: Props) {
   const bodyHasHtml = /<\/?[a-z][\s\S]*>/i.test(article.body);
   const articleUrl = `${siteConfig.url}/${locale}/articles/${slug}`;
   const alternateLabel = locale === "fr" ? "Lire en anglais" : "Read in French";
+  const articleJsonLd = buildNewsArticleJsonLd({
+    headline: article.title,
+    description: article.excerpt || article.subtitle || article.title,
+    url: `/${locale}/articles/${slug}`,
+    image: article.imageSrc,
+    datePublished: article.publishedAt,
+    dateModified: article.updatedAt,
+    locale,
+    section: article.category?.name,
+    authorName: article.author?.name,
+  });
+  const breadcrumbJsonLd = buildBreadcrumbJsonLd([
+    { name: locale === "fr" ? "Accueil" : "Home", item: `/${locale}` },
+    article.category
+      ? { name: article.category.name, item: `/${locale}/categories/${article.category.slug}` }
+      : { name: locale === "fr" ? "Articles" : "Articles", item: `/${locale}/categories` },
+    { name: article.title, item: `/${locale}/articles/${slug}` },
+  ]);
 
   const wasUpdated =
     article.updatedAt &&
@@ -104,6 +136,24 @@ export default async function LocalizedArticlePage({ params }: Props) {
 
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: serializeJsonLd(articleJsonLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: serializeJsonLd(breadcrumbJsonLd) }}
+      />
+      <ArticleViewTracker
+        articleId={article.id}
+        title={article.title}
+        slug={slug}
+        language={locale as "fr" | "en"}
+        locale={locale as "fr" | "en"}
+        category={article.category?.name}
+        categoryId={article.category?.id}
+        readingTime={article.readingTime}
+      />
       <ReadingProgress />
       <article className="newspaper-shell py-10 sm:py-14" data-print-hide="false">
         <Breadcrumb
@@ -213,7 +263,12 @@ export default async function LocalizedArticlePage({ params }: Props) {
             <div className="relative aspect-[16/9] overflow-hidden bg-surface-elevated">
               <Image
                 src={article.imageSrc}
-                alt={article.title}
+                alt={buildArticleImageAlt({
+                  title: article.title,
+                  categoryName: article.category?.name,
+                  caption: article.coverImageCaption,
+                  locale,
+                })}
                 fill
                 sizes="(min-width: 1280px) 1280px, 100vw"
                 className="object-cover"

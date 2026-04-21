@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import * as subscriptionsRepo from "@/lib/repositories/subscriptions";
+import * as analyticsRepo from "@/lib/repositories/analytics";
 import { addContactToAudience, sendWelcomeEmail as resendWelcome } from "@/lib/resend";
 import { sendWelcomeEmail as gmailWelcome } from "@/lib/mailer";
 import {
@@ -112,6 +113,19 @@ export async function POST(req: NextRequest) {
         emailDomain: getEmailDomain(email),
         source,
       });
+      analyticsRepo.recordNewsletterSignup({
+        emailDomain: getEmailDomain(email) || "unknown",
+        status: "failure",
+        reason: "invalid_email",
+        locale,
+        source: {
+          path: source?.path,
+          context: source?.context,
+          referrer: source?.referrer,
+        },
+        timestamp: new Date(),
+        sessionId: `srv-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`,
+      }).catch(() => null);
       return NextResponse.json({ error: messages.invalidEmail }, { status: 400 });
     }
 
@@ -132,6 +146,18 @@ export async function POST(req: NextRequest) {
       source,
       alreadySubscribed: !!existing,
     });
+    analyticsRepo.recordNewsletterSignup({
+      emailDomain: getEmailDomain(email) || "unknown",
+      status: "success",
+      locale,
+      source: {
+        path: source?.path,
+        context: source?.context,
+        referrer: source?.referrer,
+      },
+      timestamp: new Date(),
+      sessionId: `srv-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`,
+    }).catch(() => null);
 
     return NextResponse.json({
       success: true,
@@ -147,6 +173,14 @@ export async function POST(req: NextRequest) {
       statusCode: 500,
       reason: "server_error",
     });
+    analyticsRepo.recordNewsletterSignup({
+      emailDomain: "unknown",
+      status: "failure",
+      reason: "server_error",
+      locale: "fr",
+      timestamp: new Date(),
+      sessionId: `srv-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`,
+    }).catch(() => null);
     return NextResponse.json(
       { error: "Impossible de traiter votre inscription" },
       { status: 500 },

@@ -35,3 +35,4 @@ export function trackNewsletterEvent(name: NewsletterEventName, payload: Newslet
 
   console.info("[newsletter]", name, details);
 }
+

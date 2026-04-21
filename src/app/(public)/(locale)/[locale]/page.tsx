@@ -8,6 +8,15 @@ import NewsletterSignup from "@/components/public/NewsletterSignup";
 import SectionRibbon from "@/components/ui/SectionRibbon";
 import { getHomepageContent } from "@/lib/editorial";
 import { validateLocale } from "@/lib/locale";
+import {
+  buildBreadcrumbJsonLd,
+  buildCanonicalAlternates,
+  buildMetaDescription,
+  buildOgImage,
+  buildOrganizationJsonLd,
+  buildWebSiteJsonLd,
+  serializeJsonLd,
+} from "@/lib/seo";
 
 export const revalidate = 60;
 
@@ -19,14 +28,42 @@ export async function generateMetadata({
   const { locale } = await params;
   if (!validateLocale(locale)) return {};
 
+  const title = locale === "fr" ? "Le Relief — Média numérique haïtien" : "Le Relief — Haitian digital publication";
+  const description = buildMetaDescription({
+    title,
+    excerpt:
+      locale === "fr"
+        ? "Actualité, analyse, opinion et dossiers d'intérêt public en Haïti et dans la diaspora."
+        : "News, analysis, opinion and public-interest reporting on Haiti and its diaspora.",
+    locale,
+    keyword: locale === "fr" ? "actualité Haïti" : "Haiti news",
+    cta:
+      locale === "fr"
+        ? "Suivez la couverture complète sur Le Relief."
+        : "Explore the latest coverage on Le Relief.",
+  });
+
   return {
-    alternates: {
-      canonical: `/${locale}`,
-      languages: {
-        fr: "/fr",
-        en: "/en",
-        "x-default": "/fr",
-      },
+    title,
+    description,
+    alternates: buildCanonicalAlternates(`/${locale}`, {
+      fr: "/fr",
+      en: "/en",
+      "x-default": "/fr",
+    }),
+    openGraph: {
+      type: "website",
+      locale: locale === "fr" ? "fr_FR" : "en_US",
+      url: `/${locale}`,
+      title,
+      description,
+      images: buildOgImage("/logo.png", "Le Relief"),
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: ["/logo.png"],
     },
   };
 }
@@ -79,8 +116,26 @@ export default async function LocalizedHomePage({
     showNewsletter,
   } = await getHomepageContent(locale);
 
+  const organizationJsonLd = buildOrganizationJsonLd(locale);
+  const websiteJsonLd = buildWebSiteJsonLd(locale);
+  const breadcrumbJsonLd = buildBreadcrumbJsonLd([
+    { name: locale === "fr" ? "Accueil" : "Home", item: `/${locale}` },
+  ]);
+
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: serializeJsonLd(organizationJsonLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: serializeJsonLd(websiteJsonLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: serializeJsonLd(breadcrumbJsonLd) }}
+      />
       <HeroSection article={hero || undefined} locale={locale} />
 
       <div className="newspaper-shell">
