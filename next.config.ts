@@ -41,6 +41,15 @@ const nextConfig: NextConfig = {
       },
     ];
   },
+  async redirects() {
+    return [
+      {
+        source: "/politique-editoriale",
+        destination: "/fr/politique-editoriale",
+        permanent: true,
+      },
+    ];
+  },
 };
 
 export default nextConfig;
