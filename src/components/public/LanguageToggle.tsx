@@ -4,9 +4,9 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { analyticsClient } from "@/lib/analytics-client";
 
-const LOCALE_LABELS: Record<string, { flag: string; label: string }> = {
-  fr: { flag: "🇫🇷", label: "FR" },
-  en: { flag: "🇬🇧", label: "EN" },
+const LOCALE_LABELS: Record<string, { label: string }> = {
+  fr: { label: "FR" },
+  en: { label: "EN" },
 };
 
 export default function LanguageToggle() {
@@ -47,9 +47,9 @@ export default function LanguageToggle() {
       aria-label={isEnglish ? "Lire en français" : "Read the English selection"}
       title={isEnglish ? "Lire en français" : "Read the English selection"}
     >
-      <span className="text-muted/50">{current.flag} {current.label}</span>
+      <span className="text-muted/50">{current.label}</span>
       <span className="mx-0.5 text-muted/30">·</span>
-      <span className="text-foreground">{target.flag} {target.label}</span>
+      <span className="text-foreground">{target.label}</span>
     </Link>
   );
 }
