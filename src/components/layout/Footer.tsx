@@ -130,7 +130,7 @@ export default function Footer() {
                 ? "Recevez les grands titres et analyses de la semaine."
                 : "Get major headlines and analysis of the week."}
             </p>
-            <NewsletterSignup />
+            <NewsletterSignup context="footer" />
           </div>
 
           <div className="col-span-full mt-8 border-t border-border-strong pt-6 text-center">

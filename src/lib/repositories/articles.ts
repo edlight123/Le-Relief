@@ -125,6 +125,11 @@ export async function getArticles(options?: {
   orderBy?: string;
 }) {
   let query = collection() as FirebaseFirestore.Query;
+  const normalizedSearch = options?.search?.trim();
+  const normalizedLanguage =
+    options?.language === "fr" || options?.language === "en"
+      ? options.language
+      : undefined;
 
   if (options?.status) {
     query = query.where("status", "==", options.status);
@@ -138,8 +143,8 @@ export async function getArticles(options?: {
   if (options?.authorId) {
     query = query.where("authorId", "==", options.authorId);
   }
-  if (options?.language) {
-    query = query.where("language", "==", options.language);
+  if (normalizedLanguage) {
+    query = query.where("language", "==", normalizedLanguage);
   }
   if (options?.sourceArticleId) {
     query = query.where("sourceArticleId", "==", options.sourceArticleId);
@@ -152,7 +157,7 @@ export async function getArticles(options?: {
     query = query.where(orderField, "<", new Date(options.before));
   }
 
-  const needsClientFilter = !!(options?.search || options?.excludeId);
+  const needsClientFilter = !!(normalizedSearch || options?.excludeId);
   if (!options?.skip) {
     // For search/excludeId we fetch more than needed then filter down client-side,
     // but always cap at 500 to avoid reading the whole collection.
@@ -166,8 +171,8 @@ export async function getArticles(options?: {
   let docs = snap.docs.map((d) => serializeTimestamps({ id: d.id, ...d.data() } as Record<string, unknown>));
 
   // Client-side filtering for search (Firestore doesn't support full-text search)
-  if (options?.search) {
-    const term = options.search.toLowerCase();
+  if (normalizedSearch) {
+    const term = normalizedSearch.toLowerCase();
     docs = docs.filter(
       (d) =>
         (d.title as string)?.toLowerCase().includes(term) ||

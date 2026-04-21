@@ -41,14 +41,19 @@ export default function LatestArticlesFeed({
 }: Props) {
   const [articles, setArticles] = useState<Article[]>(initialArticles);
   const [loading, setLoading] = useState(false);
-  const [exhausted, setExhausted] = useState(false);
+  const [exhausted, setExhausted] = useState(initialArticles.length < pageSize);
 
   function getCursor(list: Article[]) {
-    const last = list[list.length - 1];
-    return last?.publishedAt ?? null;
+    for (let index = list.length - 1; index >= 0; index -= 1) {
+      const publishedAt = list[index]?.publishedAt;
+      if (publishedAt) return publishedAt;
+    }
+    return null;
   }
 
   async function loadMore() {
+    if (loading || exhausted) return;
+
     setLoading(true);
     const cursor = getCursor(articles);
     try {
@@ -72,9 +77,13 @@ export default function LatestArticlesFeed({
 
       const existingIds = new Set(articles.map((a) => a.id));
       const fresh = next.filter((a) => !existingIds.has(a.id));
-      setArticles((prev) => [...prev, ...fresh]);
+      if (fresh.length > 0) {
+        setArticles((prev) => [...prev, ...fresh]);
+      }
 
-      if (next.length < pageSize) setExhausted(true);
+      if (next.length < pageSize || fresh.length === 0) {
+        setExhausted(true);
+      }
     } catch {
       // silently fail — the existing list stays intact
     } finally {

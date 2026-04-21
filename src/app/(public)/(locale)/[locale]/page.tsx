@@ -194,7 +194,7 @@ export default async function LocalizedHomePage({
                   {locale === "fr" ? "Recevez les sujets qui comptent." : "Get stories that matter."}
                 </h3>
                 <div className="mt-5">
-                  <NewsletterSignup />
+                  <NewsletterSignup context="home-sidebar" />
                 </div>
               </section>
             ) : null}

@@ -270,7 +270,7 @@ export default async function LocalizedArticlePage({ params }: Props) {
                 {locale === "fr" ? "Recevez la prochaine édition." : "Get the next edition."}
               </h2>
               <div className="mt-5">
-                <NewsletterSignup />
+                <NewsletterSignup context="article-sidebar" />
               </div>
             </section>
           </aside>

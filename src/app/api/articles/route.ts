@@ -8,17 +8,33 @@ import { hasRole } from "@/lib/permissions";
 import { normalizeArticle } from "@/lib/editorial";
 import { validateSourceArticleReference } from "@/lib/validation";
 
+function parseBoundedInt(value: string | null, fallback: number, min: number, max: number) {
+  const parsed = Number.parseInt(value || "", 10);
+  if (!Number.isFinite(parsed)) return fallback;
+  return Math.min(max, Math.max(min, parsed));
+}
+
+function normalizeLanguageFilter(value: string | null): "fr" | "en" | undefined {
+  if (value === "fr" || value === "en") return value;
+  return undefined;
+}
+
+function normalizeOptionalFilter(value: string | null): string | undefined {
+  const trimmed = value?.trim();
+  return trimmed ? trimmed : undefined;
+}
+
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
-  const status = searchParams.get("status") || undefined;
-  const search = searchParams.get("search") || undefined;
-  const categoryId = searchParams.get("categoryId") || undefined;
-  const authorId = searchParams.get("authorId") || undefined;
-  const language = searchParams.get("language") || undefined;
-  const sourceArticleId = searchParams.get("sourceArticleId") || undefined;
-  const take = parseInt(searchParams.get("take") || "20");
-  const skip = parseInt(searchParams.get("skip") || "0");
-  const before = searchParams.get("before") || undefined;
+  const status = normalizeOptionalFilter(searchParams.get("status"));
+  const search = normalizeOptionalFilter(searchParams.get("search"));
+  const categoryId = normalizeOptionalFilter(searchParams.get("categoryId"));
+  const authorId = normalizeOptionalFilter(searchParams.get("authorId"));
+  const language = normalizeLanguageFilter(searchParams.get("language"));
+  const sourceArticleId = normalizeOptionalFilter(searchParams.get("sourceArticleId"));
+  const take = parseBoundedInt(searchParams.get("take"), 20, 1, 100);
+  const skip = parseBoundedInt(searchParams.get("skip"), 0, 0, 5000);
+  const before = normalizeOptionalFilter(searchParams.get("before"));
 
   const { articles, total } = await articlesRepo.getArticles({
     status: status !== "all" ? status : undefined,
@@ -52,7 +68,10 @@ export async function GET(req: NextRequest) {
     )
   );
 
-  return NextResponse.json({ articles: hydrated, total });
+  return NextResponse.json({
+    articles: hydrated,
+    total,
+  });
 }
 
 export async function POST(req: NextRequest) {

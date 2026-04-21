@@ -237,14 +237,42 @@ export async function getPublicArticleBySlug(slug: string) {
 }
 
 export async function getRelatedArticles(article: PublicArticle, take = 3) {
+  const poolSize = Math.min(Math.max(take * 4, 8), 24);
+  const unique = new Map<string, PublicArticle>();
+
+  function collect(items: PublicArticle[]) {
+    for (const item of items) {
+      if (item.id === article.id) continue;
+      if (!unique.has(item.id)) {
+        unique.set(item.id, item);
+      }
+      if (unique.size >= take) break;
+    }
+  }
+
   try {
-    const { articles } = await articlesRepo.getArticles({
-      status: "published",
-      categoryId: article.category?.id,
-      excludeId: article.id,
-      take,
-    });
-    return hydrateArticles(articles);
+    if (article.category?.id) {
+      const { articles } = await articlesRepo.getArticles({
+        status: "published",
+        categoryId: article.category.id,
+        excludeId: article.id,
+        language: article.language,
+        take: poolSize,
+      });
+      collect(await hydrateArticles(articles));
+    }
+
+    if (unique.size < take) {
+      const { articles } = await articlesRepo.getArticles({
+        status: "published",
+        excludeId: article.id,
+        language: article.language,
+        take: poolSize,
+      });
+      collect(await hydrateArticles(articles));
+    }
+
+    return Array.from(unique.values()).slice(0, take);
   } catch {
     return [];
   }

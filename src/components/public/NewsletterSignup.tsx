@@ -1,15 +1,79 @@
 "use client";
 
 import { useState } from "react";
+import { usePathname } from "next/navigation";
 import { useLocaleContext } from "@/hooks/useLocaleContext";
 import { t } from "@/lib/i18n";
+import {
+  getEmailDomain,
+  trackNewsletterEvent,
+  type NewsletterSourceMetadata,
+} from "@/lib/newsletter-analytics";
 
 const STORAGE_KEY = "lerelief_subscribed";
 
-export default function NewsletterSignup() {
+type NewsletterSignupStatus = "idle" | "saving" | "success" | "error" | "already";
+
+interface NewsletterSignupProps {
+  context?: string;
+  sourcePath?: string;
+}
+
+function getContextualMessage(
+  locale: "fr" | "en",
+  context: string | undefined,
+  type: "success" | "error",
+  fallback: string,
+) {
+  if (!context) return fallback;
+
+  const bucket = context.startsWith("footer")
+    ? "footer"
+    : context.startsWith("article")
+      ? "article"
+      : context.startsWith("home")
+        ? "home"
+        : "default";
+
+  const messages = {
+    fr: {
+      success: {
+        footer: "Merci — votre inscription à la lettre est confirmée.",
+        article: "Merci, vous recevrez nos prochaines éditions.",
+        home: "Parfait. Vous êtes inscrit à la lettre du Relief.",
+        default: fallback,
+      },
+      error: {
+        footer: "Inscription impossible pour le moment. Réessayez dans un instant.",
+        article: "Impossible de finaliser l'inscription depuis cet article. Réessayez.",
+        home: "Impossible de finaliser l'inscription pour le moment. Réessayez.",
+        default: fallback,
+      },
+    },
+    en: {
+      success: {
+        footer: "Thanks — your newsletter subscription is confirmed.",
+        article: "Thanks, you'll receive our next editions.",
+        home: "Great. You're now subscribed to Le Relief newsletter.",
+        default: fallback,
+      },
+      error: {
+        footer: "We couldn't subscribe you right now. Please try again.",
+        article: "We couldn't complete signup from this article. Please try again.",
+        home: "We couldn't complete your signup right now. Please try again.",
+        default: fallback,
+      },
+    },
+  } as const;
+
+  return messages[locale][type][bucket];
+}
+
+export default function NewsletterSignup({ context, sourcePath }: NewsletterSignupProps) {
   const locale = useLocaleContext();
+  const pathname = usePathname();
   const [email, setEmail] = useState("");
-  const [status, setStatus] = useState<"idle" | "saving" | "success" | "error" | "already">(
+  const [status, setStatus] = useState<NewsletterSignupStatus>(
     () => (typeof window !== "undefined" && localStorage.getItem(STORAGE_KEY) ? "already" : "idle"),
   );
   const [message, setMessage] = useState("");
@@ -22,33 +86,77 @@ export default function NewsletterSignup() {
     setMessage("");
 
     try {
+      const source: NewsletterSourceMetadata = {
+        path: sourcePath || pathname || undefined,
+        locale,
+        context,
+        referrer: typeof document !== "undefined" ? document.referrer || undefined : undefined,
+      };
+
       const res = await fetch("/api/subscriptions", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email }),
+        body: JSON.stringify({ email, source }),
       });
-      const data = await res.json();
+      const data = (await res.json()) as {
+        error?: string;
+        message?: string;
+        alreadySubscribed?: boolean;
+      };
 
       if (!res.ok) {
+        const fallback = getContextualMessage(locale, context, "error", t(locale, "subscribeFailed"));
         setStatus("error");
-        setMessage(data.error || t(locale, "subscribeFailed"));
+        setMessage(data.error || fallback);
+        trackNewsletterEvent("newsletter_signup_failure", {
+          statusCode: res.status,
+          reason: data.error || "request_failed",
+          emailDomain: getEmailDomain(email),
+          source,
+        });
+        return;
+      }
+
+      if (data.alreadySubscribed) {
+        setStatus("already");
+        setMessage(t(locale, "alreadySubscribed"));
+        trackNewsletterEvent("newsletter_signup_success", {
+          emailDomain: getEmailDomain(email),
+          source,
+          alreadySubscribed: true,
+        });
         return;
       }
 
       localStorage.setItem(STORAGE_KEY, "1");
       setStatus("success");
-      setMessage(data.message || t(locale, "newsletterConfirmed"));
+      const fallback = getContextualMessage(locale, context, "success", t(locale, "newsletterConfirmed"));
+      setMessage(data.message || fallback);
       setEmail("");
+      trackNewsletterEvent("newsletter_signup_success", {
+        emailDomain: getEmailDomain(email),
+        source,
+        alreadySubscribed: false,
+      });
     } catch {
       setStatus("error");
-      setMessage(t(locale, "networkError"));
+      setMessage(getContextualMessage(locale, context, "error", t(locale, "networkError")));
+      trackNewsletterEvent("newsletter_signup_failure", {
+        reason: "network_error",
+        emailDomain: getEmailDomain(email),
+        source: {
+          path: sourcePath || pathname || undefined,
+          locale,
+          context,
+        },
+      });
     }
   }
 
   if (status === "already") {
     return (
       <p className="font-label text-[11px] font-bold uppercase text-accent-teal">
-        {t(locale, "alreadySubscribed")}
+        {message || t(locale, "alreadySubscribed")}
       </p>
     );
   }

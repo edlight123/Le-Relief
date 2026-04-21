@@ -20,9 +20,15 @@ interface RelatedArticlesProps {
 export default function RelatedArticles({ articles, compact = false, locale = "fr" }: RelatedArticlesProps) {
   if (articles.length === 0) return null;
 
+  const regionTitle = compact ? t(locale, "relatedKicker") : t(locale, "relatedTitle");
+  const sectionId = compact ? "related-articles-compact" : "related-articles";
+
   if (compact) {
     return (
-      <section>
+      <section aria-labelledby={sectionId}>
+        <h3 id={sectionId} className="mb-3 font-label text-[11px] font-bold uppercase tracking-[0.12em] text-muted">
+          {regionTitle}
+        </h3>
         <div className="divide-y divide-border-subtle">
           {articles.map((article) => (
             <ArticleCard key={article.slug} article={article} variant="compact" locale={locale} />
@@ -33,12 +39,12 @@ export default function RelatedArticles({ articles, compact = false, locale = "f
   }
 
   return (
-    <section className="mt-16 border-t-2 border-border-strong pt-8">
+    <section className="mt-16 border-t-2 border-border-strong pt-8" aria-labelledby={sectionId}>
       <div className="mb-8">
         <p className="section-kicker mb-2">{t(locale, "relatedKicker")}</p>
-        <h2 className="font-headline text-3xl font-extrabold text-foreground">{t(locale, "relatedTitle")}</h2>
+        <h2 id={sectionId} className="font-headline text-3xl font-extrabold text-foreground">{regionTitle}</h2>
       </div>
-      <div className="grid grid-cols-1 gap-7 md:grid-cols-3">
+      <div className="grid grid-cols-1 gap-7 md:grid-cols-2 xl:grid-cols-4">
         {articles.map((article) => (
           <ArticleCard key={article.slug} article={article} locale={locale} />
         ))}

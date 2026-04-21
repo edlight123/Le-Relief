@@ -172,7 +172,7 @@ export default async function HomePage() {
                   Une sélection claire des nouvelles, analyses et dossiers à lire.
                 </p>
                 <div className="mt-5">
-                  <NewsletterSignup />
+                  <NewsletterSignup context="home-sidebar" />
                 </div>
               </section>
             ) : null}
@@ -219,7 +219,7 @@ export default async function HomePage() {
               Une sélection éditoriale de l'actualité haïtienne, sans bruit.
             </p>
             <div className="mx-auto mt-8 max-w-sm">
-              <NewsletterSignup />
+              <NewsletterSignup context="home-hero" />
             </div>
           </div>
         </section>

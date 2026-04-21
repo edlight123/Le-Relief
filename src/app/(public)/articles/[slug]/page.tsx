@@ -355,7 +355,7 @@ export default async function ArticlePage({ params }: Props) {
               Les nouvelles importantes, les analyses et les dossiers à suivre.
             </p>
             <div className="mt-5">
-              <NewsletterSignup />
+              <NewsletterSignup context="article-sidebar" />
             </div>
           </section>
 
