@@ -2,14 +2,18 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { validateLocale } from "@/lib/locale";
 
-const LOCALE_COOKIE = "NEXT_LOCALE";
+export const LOCALE_COOKIE = "NEXT_LOCALE";
+const DEFAULT_LOCALE = "fr";
 
-function getPreferredLocale(request: NextRequest) {
+function getPreferredLocale(request: NextRequest): "fr" | "en" {
   const cookieLocale = request.cookies.get(LOCALE_COOKIE)?.value;
   if (cookieLocale && validateLocale(cookieLocale)) {
-    return cookieLocale;
+    return cookieLocale as "fr" | "en";
   }
-  return "fr";
+  // Respect browser Accept-Language as fallback
+  const acceptLang = request.headers.get("accept-language") || "";
+  if (acceptLang.toLowerCase().startsWith("en")) return "en";
+  return DEFAULT_LOCALE;
 }
 
 function withLocaleCookie(response: NextResponse, locale: "fr" | "en") {
@@ -23,29 +27,26 @@ function withLocaleCookie(response: NextResponse, locale: "fr" | "en") {
 
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
-
-  if (pathname === "/") {
-    const locale = getPreferredLocale(request);
-    const url = request.nextUrl.clone();
-    url.pathname = `/${locale}`;
-    return withLocaleCookie(NextResponse.redirect(url, 301), locale);
-  }
-
   const segments = pathname.split("/").filter(Boolean);
   const firstSegment = segments[0];
 
+  // If someone visits /fr/... or /en/... directly, redirect to the clean URL
+  // and persist that locale in the cookie.
   if (firstSegment && validateLocale(firstSegment)) {
-    return withLocaleCookie(NextResponse.next(), firstSegment);
+    const locale = firstSegment as "fr" | "en";
+    const cleanPath = "/" + segments.slice(1).join("/");
+    const url = request.nextUrl.clone();
+    url.pathname = cleanPath || "/";
+    return withLocaleCookie(NextResponse.redirect(url, 302), locale);
   }
 
-  // Locale-like prefixes such as /es, /de should 404 instead of being auto-prefixed.
-  if (firstSegment && /^[a-z]{2}$/i.test(firstSegment)) {
-    return NextResponse.next();
-  }
-
-  const redirectUrl = request.nextUrl.clone();
-  redirectUrl.pathname = `/fr${pathname}`;
-  return withLocaleCookie(NextResponse.redirect(redirectUrl, 301), "fr");
+  // For every other public path, rewrite internally to /[locale]/... so the
+  // [locale] segment is available to page components, but the browser URL
+  // remains clean (no /fr/ or /en/ prefix).
+  const locale = getPreferredLocale(request);
+  const url = request.nextUrl.clone();
+  url.pathname = `/${locale}${pathname === "/" ? "" : pathname}`;
+  return withLocaleCookie(NextResponse.rewrite(url), locale);
 }
 
 export const config = {

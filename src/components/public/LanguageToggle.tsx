@@ -1,55 +1,55 @@
 "use client";
 
-import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 import { analyticsClient } from "@/lib/analytics-client";
 
-const LOCALE_LABELS: Record<string, { label: string }> = {
-  fr: { label: "FR" },
-  en: { label: "EN" },
-};
+const LOCALE_COOKIE = "NEXT_LOCALE";
+
+function readLocaleCookie(): "fr" | "en" {
+  if (typeof document === "undefined") return "fr";
+  const match = document.cookie.match(/(?:^|;\s*)NEXT_LOCALE=([^;]*)/);
+  const val = match?.[1];
+  return val === "en" ? "en" : "fr";
+}
 
 export default function LanguageToggle() {
-  const pathname = usePathname();
-  const isEnglish = pathname === "/en" || pathname.startsWith("/en/");
-  const targetLocale = isEnglish ? "fr" : "en";
+  const router = useRouter();
+  const [locale, setLocaleState] = useState<"fr" | "en">("fr");
 
-  const targetPath = (() => {
-    if (!pathname || pathname === "/") return `/${targetLocale}`;
-    const segments = pathname.split("/").filter(Boolean);
-    if (segments[0] === "fr" || segments[0] === "en") {
-      return `/${targetLocale}/${segments.slice(1).join("/")}`.replace(/\/$/, "") || `/${targetLocale}`;
-    }
-    if (pathname === "/en") return "/fr";
-    return `/${targetLocale}${pathname}`;
-  })();
+  useEffect(() => {
+    setLocaleState(readLocaleCookie());
+  }, []);
 
-  const handleLanguageSwitch = () => {
+  const targetLocale = locale === "fr" ? "en" : "fr";
+
+  function handleSwitch() {
+    // Persist in cookie (1 year)
+    document.cookie = `${LOCALE_COOKIE}=${targetLocale};path=/;max-age=${60 * 60 * 24 * 365};samesite=lax`;
+    setLocaleState(targetLocale);
     try {
       analyticsClient.trackLanguageSwitch({
-        fromLocale: isEnglish ? "en" : "fr",
-        toLocale: isEnglish ? "fr" : "en",
+        fromLocale: locale,
+        toLocale: targetLocale,
         url: window.location.href,
       });
-    } catch (error) {
-      console.error("[analytics] Failed to track language switch:", error);
+    } catch {
+      // non-fatal
     }
-  };
-
-  const current = LOCALE_LABELS[isEnglish ? "en" : "fr"];
-  const target = LOCALE_LABELS[targetLocale];
+    router.refresh();
+  }
 
   return (
-    <Link
-      href={targetPath}
-      onClick={handleLanguageSwitch}
+    <button
+      type="button"
+      onClick={handleSwitch}
       className="flex items-center gap-1 border border-border-subtle px-2 py-1.5 font-label text-[10px] font-bold uppercase transition-colors duration-200 hover:bg-surface-elevated sm:text-xs"
-      aria-label={isEnglish ? "Lire en français" : "Read the English selection"}
-      title={isEnglish ? "Lire en français" : "Read the English selection"}
+      aria-label={locale === "fr" ? "Read the English selection" : "Lire en français"}
+      title={locale === "fr" ? "Read the English selection" : "Lire en français"}
     >
-      <span className="text-muted/50">{current.label}</span>
+      <span className="text-muted/50">{locale.toUpperCase()}</span>
       <span className="mx-0.5 text-muted/30">·</span>
-      <span className="text-foreground">{target.label}</span>
-    </Link>
+      <span className="text-foreground">{targetLocale.toUpperCase()}</span>
+    </button>
   );
 }
