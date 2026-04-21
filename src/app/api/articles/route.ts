@@ -6,6 +6,7 @@ import { auth } from "@/lib/auth";
 import { generateSlug } from "@/lib/slug";
 import { hasRole } from "@/lib/permissions";
 import { normalizeArticle } from "@/lib/editorial";
+import { validateSourceArticleReference } from "@/lib/validation";
 
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
@@ -14,6 +15,7 @@ export async function GET(req: NextRequest) {
   const categoryId = searchParams.get("categoryId") || undefined;
   const authorId = searchParams.get("authorId") || undefined;
   const language = searchParams.get("language") || undefined;
+  const sourceArticleId = searchParams.get("sourceArticleId") || undefined;
   const take = parseInt(searchParams.get("take") || "20");
   const skip = parseInt(searchParams.get("skip") || "0");
   const before = searchParams.get("before") || undefined;
@@ -24,6 +26,7 @@ export async function GET(req: NextRequest) {
     categoryId,
     authorId,
     language,
+    sourceArticleId,
     take,
     skip: before ? 0 : skip,
     before,
@@ -60,6 +63,16 @@ export async function POST(req: NextRequest) {
 
   try {
     const body = await req.json();
+    const language = body.language || "fr";
+    const sourceArticleId = body.sourceArticleId || null;
+    const sourceValidation = await validateSourceArticleReference(language, sourceArticleId);
+    if (!sourceValidation.valid) {
+      return NextResponse.json(
+        { error: sourceValidation.error || "Référence source invalide" },
+        { status: 400 },
+      );
+    }
+
     const slug = generateSlug(body.title);
     const sessionRole = (session.user as { role?: "reader" | "publisher" | "admin" }).role;
     const requestedStatus = body.status || "draft";
@@ -100,21 +113,22 @@ export async function POST(req: NextRequest) {
       authorId: session.user.id,
       categoryId: body.categoryId || null,
       contentType: body.contentType || "actualite",
-      language: body.language || "fr",
-      translationStatus: body.translationStatus || "not_started",
-      isCanonicalSource: body.isCanonicalSource ?? body.language !== "en",
-      sourceArticleId: body.sourceArticleId || null,
+      language,
+      translationStatus: language === "fr" ? "not_applicable" : body.translationStatus || "not_started",
+      isCanonicalSource: language === "fr",
+      sourceArticleId,
       alternateLanguageSlug: body.alternateLanguageSlug || null,
-      allowTranslation: body.allowTranslation || false,
+      allowTranslation: language === "fr" ? Boolean(body.allowTranslation) : false,
       translationPriority: body.translationPriority || null,
       publishedAt,
       scheduledAt,
     });
 
     return NextResponse.json(article, { status: 201 });
-  } catch {
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Impossible de créer l'article";
     return NextResponse.json(
-      { error: "Impossible de créer l'article" },
+      { error: message },
       { status: 500 }
     );
   }

@@ -58,7 +58,7 @@ export default function ContactPage() {
 
         <form
           action="/api/contact"
-          method="POST"
+          method="post"
           className="space-y-5 border-t-2 border-border-strong pt-5"
         >
           <div>

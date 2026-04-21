@@ -5,9 +5,13 @@ export default function robots(): MetadataRoute.Robots {
   return {
     rules: {
       userAgent: "*",
-      allow: "/",
+      allow: ["/fr/", "/en/"],
       disallow: ["/dashboard", "/api/"],
     },
-    sitemap: `${siteConfig.url}/sitemap.xml`,
+    sitemap: [
+      `${siteConfig.url}/sitemap.xml`,
+      `${siteConfig.url}/sitemap-fr.xml`,
+      `${siteConfig.url}/sitemap-en.xml`,
+    ],
   };
 }

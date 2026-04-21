@@ -1,7 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
-import { format } from "date-fns";
-import { fr } from "date-fns/locale";
+import { formatArticleDate, type Locale, t } from "@/lib/i18n";
 
 interface ArticleCardProps {
   article: {
@@ -19,21 +18,24 @@ interface ArticleCardProps {
   };
   variant?: "default" | "compact" | "list" | "text";
   rank?: number;
+  locale?: Locale;
 }
 
 export default function ArticleCard({
   article,
   variant = "default",
   rank,
+  locale,
 }: ArticleCardProps) {
+  const resolvedLocale = locale || article.language || "fr";
   const date = article.publishedAt
-    ? format(new Date(article.publishedAt), "d MMM yyyy", { locale: fr })
+    ? formatArticleDate(article.publishedAt, resolvedLocale)
     : null;
   const imageSrc = article.coverImageFirebaseUrl || article.coverImage;
 
   if (variant === "compact") {
     return (
-      <Link href={`/articles/${article.slug}`} className="group block">
+      <Link href={`/${resolvedLocale}/articles/${article.slug}`} className="group block">
         <div className="article-card flex gap-3 items-center border-b border-border-subtle py-4">
           {rank !== undefined && (
             <div className="editorial-numeral shrink-0 w-8 text-center">{String(rank + 1).padStart(2, "0")}</div>
@@ -70,7 +72,7 @@ export default function ArticleCard({
   /* List variant */
   if (variant === "list") {
     return (
-      <Link href={`/articles/${article.slug}`} className="group block">
+      <Link href={`/${resolvedLocale}/articles/${article.slug}`} className="group block">
         <div className="article-card flex flex-col gap-4 border-b border-border-subtle py-6 transition-colors sm:flex-row sm:gap-7">
           {imageSrc && (
             <div className="relative h-44 w-full shrink-0 overflow-hidden bg-surface-elevated sm:h-32 sm:w-48">
@@ -93,6 +95,11 @@ export default function ArticleCard({
                   {article.category.name}
                 </span>
               )}
+              {article.language === "en" && (
+                <span className="font-label text-[11px] font-bold uppercase text-primary tracking-[1px]">
+                  English
+                </span>
+              )}
               {date && (
                 <span className="font-[family-name:var(--font-mono)] text-[11px] font-bold uppercase text-muted tracking-[1px]">{date}</span>
               )}
@@ -112,7 +119,7 @@ export default function ArticleCard({
             )}
             {article.author?.name && (
               <p className="mt-3 font-label text-[11px] font-bold uppercase text-muted tracking-[1px]">
-                Par {article.author.name}
+                {t(resolvedLocale, "by")} {article.author.name}
               </p>
             )}
           </div>
@@ -124,7 +131,7 @@ export default function ArticleCard({
   /* Text variant — no image, newspaper column style */
   if (variant === "text") {
     return (
-      <Link href={`/articles/${article.slug}`} className="group block h-full">
+      <Link href={`/${resolvedLocale}/articles/${article.slug}`} className="group block h-full">
         <div className="article-card flex h-full flex-col px-0 py-5 sm:px-5">
           <div className="mb-3 flex flex-wrap items-center gap-2">
             {article.category && (
@@ -162,7 +169,7 @@ export default function ArticleCard({
 
   /* Default variant */
   return (
-    <Link href={`/articles/${article.slug}`} className="group block h-full">
+    <Link href={`/${resolvedLocale}/articles/${article.slug}`} className="group block h-full">
       <div className="article-card flex h-full flex-col border-b border-border-subtle pb-6">
         <div className="relative mb-4 aspect-[16/10] overflow-hidden bg-surface-elevated">
           {imageSrc ? (

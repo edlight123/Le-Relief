@@ -4,9 +4,24 @@ import { useState } from "react";
 import Input from "@/components/ui/Input";
 import Button from "@/components/ui/Button";
 import MediaUploader from "@/components/dashboard/MediaUploader";
+import SourceArticlePicker from "@/components/dashboard/SourceArticlePicker";
+import Badge from "@/components/ui/Badge";
+
+type TranslationLink = {
+  id: string;
+  title: string;
+  slug?: string;
+};
+
+type SourceArticleLink = {
+  id: string;
+  title: string;
+  slug?: string;
+};
 
 interface ArticleEditorProps {
   initial?: {
+    id?: string;
     title: string;
     subtitle: string;
     body: string;
@@ -19,6 +34,9 @@ interface ArticleEditorProps {
     contentType?: string;
     language?: string;
     translationStatus?: string;
+    sourceArticleId?: string;
+    sourceArticle?: SourceArticleLink | null;
+    translations?: TranslationLink[];
     alternateLanguageSlug?: string;
     allowTranslation?: boolean;
     translationPriority?: string;
@@ -38,6 +56,7 @@ interface ArticleEditorProps {
     contentType: string;
     language: string;
     translationStatus: string;
+    sourceArticleId: string;
     alternateLanguageSlug: string;
     allowTranslation: boolean;
     translationPriority: string;
@@ -63,7 +82,11 @@ export default function ArticleEditor({
   const [contentType, setContentType] = useState(initial?.contentType || "actualite");
   const [language, setLanguage] = useState(initial?.language || "fr");
   const [translationStatus, setTranslationStatus] = useState(
-    initial?.translationStatus || "not_started",
+    initial?.translationStatus || (initial?.language === "en" ? "not_started" : "not_applicable"),
+  );
+  const [sourceArticleId, setSourceArticleId] = useState(initial?.sourceArticleId || "");
+  const [sourceArticlePreview, setSourceArticlePreview] = useState<SourceArticleLink | null>(
+    initial?.sourceArticle || null,
   );
   const [alternateLanguageSlug, setAlternateLanguageSlug] = useState(
     initial?.alternateLanguageSlug || "",
@@ -74,10 +97,24 @@ export default function ArticleEditor({
   const [translationPriority, setTranslationPriority] = useState(
     initial?.translationPriority || "",
   );
+  const [sourceError, setSourceError] = useState("");
+  const [submitError, setSubmitError] = useState("");
   const [tagsInput, setTagsInput] = useState((initial?.tags || []).join(", "));
   const [saving, setSaving] = useState(false);
 
   async function handleSubmit(status: string) {
+    setSubmitError("");
+    setSourceError("");
+
+    if (language === "en" && !sourceArticleId) {
+      const message = "Veuillez sélectionner un article source FR pour une version EN.";
+      setSourceError(message);
+      if (typeof window !== "undefined") {
+        window.alert(message);
+      }
+      return;
+    }
+
     setSaving(true);
     try {
       const tags = tagsInput
@@ -98,15 +135,30 @@ export default function ArticleEditor({
         contentType,
         language,
         translationStatus,
+        sourceArticleId,
         alternateLanguageSlug,
         allowTranslation,
         translationPriority,
         scheduledAt,
       });
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Échec de la validation de traduction.";
+      setSubmitError(message);
+      setSourceError(message.toLowerCase().includes("source") ? message : sourceError);
     } finally {
       setSaving(false);
     }
   }
+
+  const translations = initial?.translations || [];
+  const statusVariant: "default" | "success" | "warning" | "danger" | "info" =
+    translationStatus === "published" || translationStatus === "approved"
+      ? "success"
+      : translationStatus === "in_review" || translationStatus === "generated_draft"
+      ? "warning"
+      : translationStatus === "rejected"
+      ? "danger"
+      : "default";
 
   async function uploadFile(file: File): Promise<string> {
     const form = new FormData();
@@ -198,7 +250,19 @@ export default function ArticleEditor({
           </label>
           <select
             value={language}
-            onChange={(e) => setLanguage(e.target.value)}
+            onChange={(e) => {
+              const nextLanguage = e.target.value;
+              setLanguage(nextLanguage);
+              setSubmitError("");
+              setSourceError("");
+              if (nextLanguage === "fr") {
+                setSourceArticleId("");
+                setSourceArticlePreview(null);
+                setTranslationStatus("not_applicable");
+              } else if (translationStatus === "not_applicable") {
+                setTranslationStatus("not_started");
+              }
+            }}
             className="w-full border border-border-subtle bg-surface px-4 py-3 font-label text-sm text-foreground focus:border-primary focus:outline-none"
           >
             <option value="fr">Français</option>
@@ -207,61 +271,84 @@ export default function ArticleEditor({
         </div>
       </div>
 
-      <details className="group border border-border-subtle">
-        <summary className="flex cursor-pointer select-none items-center justify-between px-4 py-3 font-label text-xs font-extrabold uppercase text-foreground hover:bg-surface-newsprint">
-          Traduction
-          <span className="text-muted transition-transform group-open:rotate-180">▾</span>
-        </summary>
-        <div className="space-y-4 border-t border-border-subtle px-4 py-4">
-          <div className="grid gap-4 md:grid-cols-2">
-            <div>
-              <label className="mb-2 block font-label text-xs font-extrabold uppercase text-foreground">
-                Statut de traduction
-              </label>
-              <select
-                value={translationStatus}
-                onChange={(e) => setTranslationStatus(e.target.value)}
-                className="w-full border border-border-subtle bg-surface px-4 py-3 font-label text-sm text-foreground focus:border-primary focus:outline-none"
-              >
-                <option value="not_applicable">Non concerné</option>
-                <option value="not_started">Non lancée</option>
-                <option value="generated_draft">Brouillon IA</option>
-                <option value="in_review">En revue</option>
-                <option value="approved">Approuvée</option>
-                <option value="published">Publiée</option>
-                <option value="rejected">Rejetée</option>
-              </select>
-            </div>
-
-            <Input
-              label="Slug langue liée"
-              id="alternateLanguageSlug"
-              placeholder="slug-de-la-version-liee"
-              value={alternateLanguageSlug}
-              onChange={(e) => setAlternateLanguageSlug(e.target.value)}
-            />
-          </div>
-
-          <div className="grid gap-4 md:grid-cols-[auto_1fr] md:items-end">
-            <label className="flex items-center gap-3 border border-border-subtle px-4 py-3 font-label text-xs font-extrabold uppercase text-foreground">
-              <input
-                type="checkbox"
-                checked={allowTranslation}
-                onChange={(e) => setAllowTranslation(e.target.checked)}
-                className="h-4 w-4 accent-primary"
-              />
-              Éligible traduction EN
+      <div className="space-y-4 border border-border-subtle p-4">
+        <div className="grid gap-4 md:grid-cols-2">
+          <div>
+            <label className="mb-2 block font-label text-xs font-extrabold uppercase text-foreground">
+              Statut de traduction
             </label>
-            <Input
-              label="Priorité de traduction"
-              id="translationPriority"
-              placeholder="élevée, moyenne, basse"
-              value={translationPriority}
-              onChange={(e) => setTranslationPriority(e.target.value)}
-            />
+            <select
+              value={translationStatus}
+              onChange={(e) => setTranslationStatus(e.target.value)}
+              className="w-full border border-border-subtle bg-surface px-4 py-3 font-label text-sm text-foreground focus:border-primary focus:outline-none"
+            >
+              {language === "fr" && <option value="not_applicable">Non concerné</option>}
+              {language === "en" && <option value="not_started">Non lancée</option>}
+              {language === "en" && <option value="generated_draft">Brouillon IA</option>}
+              {language === "en" && <option value="in_review">En revue</option>}
+              {language === "en" && <option value="approved">Approuvée</option>}
+              {language === "en" && <option value="published">Publiée</option>}
+              {language === "en" && <option value="rejected">Rejetée</option>}
+            </select>
           </div>
+
+          <Input
+            label="Slug langue liée"
+            id="alternateLanguageSlug"
+            placeholder="slug-de-la-version-liee"
+            value={alternateLanguageSlug}
+            onChange={(e) => setAlternateLanguageSlug(e.target.value)}
+          />
         </div>
-      </details>
+
+        {language === "fr" ? (
+          <div className="space-y-4 border border-border-subtle p-4">
+            <p className="font-label text-xs font-extrabold uppercase text-foreground">
+              Translation metadata
+            </p>
+            <div className="grid gap-4 md:grid-cols-[auto_1fr] md:items-end">
+              <label className="flex items-center gap-3 border border-border-subtle px-4 py-3 font-label text-xs font-extrabold uppercase text-foreground">
+                <input
+                  type="checkbox"
+                  checked={allowTranslation}
+                  onChange={(e) => setAllowTranslation(e.target.checked)}
+                  className="h-4 w-4 accent-primary"
+                />
+                Éligible traduction EN
+              </label>
+              <Input
+                label="Priorité de traduction"
+                id="translationPriority"
+                placeholder="élevée, moyenne, basse"
+                value={translationPriority}
+                onChange={(e) => setTranslationPriority(e.target.value)}
+              />
+            </div>
+          </div>
+        ) : (
+          <SourceArticlePicker
+            value={sourceArticleId}
+            currentArticleId={initial?.id}
+            error={sourceError}
+            onChange={(articleId) => {
+              setSourceArticleId(articleId);
+              if (sourceError) setSourceError("");
+            }}
+            onArticleSelected={(source) => {
+              setSourceArticlePreview(source);
+              if (source?.slug) {
+                setAlternateLanguageSlug(source.slug);
+              }
+            }}
+          />
+        )}
+      </div>
+
+      {submitError && (
+        <div className="border border-primary/30 bg-primary/5 px-4 py-3 font-label text-sm text-primary">
+          {submitError}
+        </div>
+      )}
 
       <div>
         <label
@@ -327,6 +414,59 @@ export default function ArticleEditor({
         <p className="mt-1 font-label text-[11px] text-muted">
           Laisser vide pour publier immédiatement.
         </p>
+      </div>
+
+      <div className="space-y-3 border border-border-subtle p-4">
+        <div className="flex items-center gap-2">
+          <span className="font-label text-xs font-extrabold uppercase text-foreground">
+            Translation status:
+          </span>
+          <Badge variant={statusVariant}>{translationStatus}</Badge>
+        </div>
+
+        {language === "fr" ? (
+          <div>
+            <p className="mb-2 font-label text-xs font-extrabold uppercase text-foreground">
+              Existing EN translations
+            </p>
+            {translations.length === 0 ? (
+              <p className="font-label text-xs text-muted">Aucune traduction EN liée.</p>
+            ) : (
+              <ul className="space-y-1">
+                {translations.map((translation) => (
+                  <li key={translation.id}>
+                    <a
+                      href={`/dashboard/articles/${translation.id}/edit`}
+                      className="font-label text-xs text-accent-blue underline"
+                    >
+                      {translation.title}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+        ) : (
+          <div>
+            <p className="mb-2 font-label text-xs font-extrabold uppercase text-foreground">
+              FR source article
+            </p>
+            {sourceArticlePreview ? (
+              <a
+                href={
+                  sourceArticlePreview.id
+                    ? `/dashboard/articles/${sourceArticlePreview.id}/edit`
+                    : "#"
+                }
+                className="font-label text-xs text-accent-blue underline"
+              >
+                {sourceArticlePreview.title}
+              </a>
+            ) : (
+              <p className="font-label text-xs text-muted">Aucune source FR sélectionnée.</p>
+            )}
+          </div>
+        )}
       </div>
 
       <div className="flex flex-wrap items-center gap-3 pt-2">

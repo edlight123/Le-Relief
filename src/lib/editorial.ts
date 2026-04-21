@@ -1,3 +1,9 @@
+import * as articlesRepo from "@/lib/repositories/articles";
+import * as categoriesRepo from "@/lib/repositories/categories";
+import * as homepageRepo from "@/lib/repositories/homepage";
+import * as usersRepo from "@/lib/repositories/users";
+import type { HomepageSettings } from "@/types/homepage";
+
 export type EditorialLanguage = "fr" | "en";
 
 export type ContentType =
@@ -236,7 +242,9 @@ export function normalizeTranslationStatus(
     return value as TranslationStatus;
   }
 
-  return language === "en" ? "published" : "not_started";
+  // FR articles default to not_started (no translation);
+  // EN articles must have explicit status (no auto-publish assumption)
+  return language === "fr" ? "not_applicable" : "not_started";
 }
 
 export function normalizeCategory(
@@ -433,4 +441,345 @@ export function sortCategories(categories: PublicCategory[]) {
     if (a.priority !== b.priority) return a.priority - b.priority;
     return a.name.localeCompare(b.name, "fr");
   });
+}
+
+export interface HomepageContent {
+  hero: PublicArticle | null;
+  secondary: PublicArticle[];
+  latest: PublicArticle[];
+  editorial: PublicArticle[];
+  mostRead: PublicArticle[];
+  categories: PublicCategory[];
+  englishSelection: PublicArticle[];
+  showNewsletter: boolean;
+}
+
+async function hydrateArticle(
+  article: Record<string, unknown>,
+): Promise<PublicArticle> {
+  const [author, category] = await Promise.all([
+    article.authorId ? usersRepo.getUser(article.authorId as string) : null,
+    article.categoryId
+      ? categoriesRepo.getCategory(article.categoryId as string)
+      : null,
+  ]);
+
+  return normalizeArticle(article, author, category);
+}
+
+async function hydrateArticles(articles: Record<string, unknown>[]) {
+  return Promise.all(articles.map((article) => hydrateArticle(article)));
+}
+
+async function hydratePublishedArticleById(id: string) {
+  const article = await articlesRepo.getArticle(id);
+  if (!article || article.status !== "published") return null;
+  return hydrateArticle(article);
+}
+
+function uniqueById(articles: PublicArticle[]) {
+  const seen = new Set<string>();
+  return articles.filter((article) => {
+    if (seen.has(article.id)) return false;
+    seen.add(article.id);
+    return true;
+  });
+}
+
+function excludeIds(articles: PublicArticle[], ids: Set<string>) {
+  return articles.filter((article) => !ids.has(article.id));
+}
+
+function orderByIds<T extends { id: string }>(items: T[], ids: string[]) {
+  const itemMap = new Map(items.map((item) => [item.id, item]));
+  return ids
+    .map((id) => itemMap.get(id))
+    .filter((item): item is T => Boolean(item));
+}
+
+function hasHomepageImage(article: PublicArticle) {
+  return Boolean(
+    article.imageSrc || article.coverImageFirebaseUrl || article.coverImage,
+  );
+}
+
+function selectHeroArticle(
+  curated: PublicArticle | null,
+  featured: PublicArticle | null,
+  latest: PublicArticle[],
+) {
+  if (curated) return curated;
+  if (featured && hasHomepageImage(featured)) return featured;
+  return latest.find(hasHomepageImage) || featured || latest[0] || null;
+}
+
+function selectEditorialArticles(articles: PublicArticle[]) {
+  return articles
+    .filter((article) =>
+      ["analyse", "opinion", "editorial", "dossier", "fact_check"].includes(
+        article.contentType,
+      ),
+    )
+    .slice(0, 4);
+}
+
+function selectHomepageCategories(
+  categories: PublicCategory[],
+  settings: HomepageSettings,
+) {
+  if (settings.highlightedCategoryIds.length === 0) return categories;
+  return orderByIds(categories, settings.highlightedCategoryIds);
+}
+
+export async function getPublicCategories(
+  onlyWithArticles = false,
+  locale?: EditorialLanguage,
+) {
+  const rawCategories = await categoriesRepo.getCategoriesWithCounts(true);
+  const categories = rawCategories
+    .map((category) =>
+      normalizeCategory(
+        category,
+        (category._count as { articles: number } | undefined)?.articles,
+      ),
+    )
+    .filter((category): category is PublicCategory => {
+      if (!category) return false;
+      if (!onlyWithArticles) return true;
+      return (category.count || 0) > 0;
+    });
+
+  if (!locale) {
+    return sortCategories(categories);
+  }
+
+  const withLanguageCount = await Promise.all(
+    categories.map(async (category) => {
+      const { total } = await articlesRepo.getArticles({
+        status: "published",
+        categoryId: category.id,
+        language: locale,
+        take: 1,
+      });
+      return { ...category, count: total };
+    }),
+  );
+
+  return sortCategories(
+    withLanguageCount.filter((category) =>
+      onlyWithArticles ? (category.count || 0) > 0 : true,
+    ),
+  );
+}
+
+export async function getHomepageContent(
+  locale: EditorialLanguage = "fr",
+): Promise<HomepageContent> {
+  let settings = homepageRepo.DEFAULT_HOMEPAGE_SETTINGS;
+  let curatedHero: PublicArticle | null = null;
+  let curatedSecondary: PublicArticle[] = [];
+  let featured: PublicArticle | null = null;
+  let latest: PublicArticle[] = [];
+  let categories: PublicCategory[] = [];
+
+  try {
+    settings = await homepageRepo.getHomepageSettings();
+  } catch {
+    settings = homepageRepo.DEFAULT_HOMEPAGE_SETTINGS;
+  }
+
+  try {
+    if (settings.heroArticleId) {
+      curatedHero = await hydratePublishedArticleById(settings.heroArticleId);
+      if (curatedHero?.language !== locale) curatedHero = null;
+    }
+  } catch {
+    curatedHero = null;
+  }
+
+  try {
+    const selected = await Promise.all(
+      settings.secondaryArticleIds.map((id) => hydratePublishedArticleById(id)),
+    );
+    curatedSecondary = selected.filter(
+      (article): article is PublicArticle => article?.language === locale,
+    );
+  } catch {
+    curatedSecondary = [];
+  }
+
+  try {
+    const rawFeatured = await articlesRepo.getFeaturedArticle();
+    featured = rawFeatured ? await hydrateArticle(rawFeatured) : null;
+    if (featured?.language !== locale) featured = null;
+  } catch {
+    featured = null;
+  }
+
+  try {
+    const rawLatest = await articlesRepo.getPublishedArticles(24, locale);
+    latest = await hydrateArticles(rawLatest);
+  } catch {
+    latest = [];
+  }
+
+  try {
+    categories = await getPublicCategories(true, locale);
+  } catch {
+    categories = [];
+  }
+
+  const hero = selectHeroArticle(curatedHero, featured, latest);
+  const homepageFeatured =
+    featured && hasHomepageImage(featured) ? [featured] : [];
+  const allArticles = uniqueById(
+    hero
+      ? [hero, ...curatedSecondary, ...homepageFeatured, ...latest]
+      : [...curatedSecondary, ...homepageFeatured, ...latest],
+  );
+  const homepageArticles = allArticles.some(hasHomepageImage)
+    ? allArticles.filter(hasHomepageImage)
+    : allArticles;
+  const used = new Set(hero ? [hero.id] : []);
+  const remaining = excludeIds(homepageArticles, used);
+  const secondary = uniqueById([
+    ...curatedSecondary.filter(
+      (article) => article.id !== hero?.id && hasHomepageImage(article),
+    ),
+    ...remaining,
+  ]).slice(0, 3);
+  secondary.forEach((article) => used.add(article.id));
+
+  const latestList = excludeIds(homepageArticles, used).slice(0, 8);
+  latestList.forEach((article) => used.add(article.id));
+  const editorial = selectEditorialArticles(excludeIds(homepageArticles, used));
+  const ninetyDaysAgo = new Date(
+    Date.now() - 90 * 24 * 60 * 60 * 1000,
+  ).toISOString();
+  const recentArticles = allArticles.filter(
+    (article) => !article.publishedAt || article.publishedAt >= ninetyDaysAgo,
+  );
+  const mostReadPool = recentArticles.length >= 3 ? recentArticles : allArticles;
+  const mostRead = [...mostReadPool]
+    .sort((a, b) => b.views - a.views)
+    .filter((article) => article.id !== hero?.id)
+    .slice(0, 5);
+  const homepageCategories = selectHomepageCategories(categories, settings);
+
+  const englishSelection =
+    locale === "fr"
+      ? await getEnglishSelection()
+      : allArticles.filter((article) => article.language === "en").slice(0, 4);
+
+  return {
+    hero,
+    secondary,
+    latest: latestList,
+    editorial,
+    mostRead: mostRead.length > 0 ? mostRead : remaining.slice(0, 5),
+    categories: homepageCategories.length > 0 ? homepageCategories : categories,
+    englishSelection: settings.showEnglishSelection ? englishSelection : [],
+    showNewsletter: settings.showNewsletter,
+  };
+}
+
+export async function getPublicArticleBySlug(
+  slug: string,
+  locale?: EditorialLanguage,
+) {
+  const rawArticle = await articlesRepo.findBySlug(slug, locale);
+  if (!rawArticle || rawArticle.status !== "published") return null;
+  if (locale && rawArticle.language !== locale) return null;
+  return hydrateArticle(rawArticle);
+}
+
+export async function getRelatedArticles(
+  article: PublicArticle,
+  take = 3,
+  locale?: EditorialLanguage,
+) {
+  try {
+    const { articles } = await articlesRepo.getArticles({
+      status: "published",
+      categoryId: article.category?.id,
+      excludeId: article.id,
+      language: locale || article.language,
+      take,
+    });
+    return hydrateArticles(articles);
+  } catch {
+    return [];
+  }
+}
+
+export async function getCategoryPageContent(
+  slug: string,
+  locale: EditorialLanguage,
+) {
+  const rawCategory = await categoriesRepo.findBySlug(slug);
+  if (!rawCategory) return null;
+
+  const category = normalizeCategory(rawCategory);
+  if (!category) return null;
+
+  let articles: PublicArticle[] = [];
+  try {
+    const result = await articlesRepo.getArticles({
+      status: "published",
+      categoryId: category.id,
+      language: locale,
+      take: 11,
+    });
+    articles = await hydrateArticles(result.articles);
+  } catch {
+    articles = [];
+  }
+
+  return {
+    category: {
+      ...category,
+      count: articles.length,
+    },
+    featured: articles[0] || null,
+    articles: articles.slice(1),
+  };
+}
+
+export async function getAuthorPageContent(
+  id: string,
+  locale: EditorialLanguage,
+) {
+  const rawAuthor = await usersRepo.getUser(id);
+  if (!rawAuthor) return null;
+
+  let articles: PublicArticle[] = [];
+  try {
+    const result = await articlesRepo.getArticles({
+      status: "published",
+      authorId: id,
+      language: locale,
+      take: 12,
+    });
+    articles = await hydrateArticles(result.articles);
+  } catch {
+    articles = [];
+  }
+
+  return {
+    author: rawAuthor,
+    articles,
+  };
+}
+
+export async function getEnglishSelection() {
+  try {
+    const { articles } = await articlesRepo.getArticles({
+      status: "published",
+      language: "en" satisfies EditorialLanguage,
+      take: 24,
+    });
+    return hydrateArticles(articles);
+  } catch {
+    return [];
+  }
 }

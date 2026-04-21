@@ -10,6 +10,7 @@ export default function EditArticlePage() {
   const id = params.id as string;
 
   const [article, setArticle] = useState<{
+    id?: string;
     title: string;
     subtitle: string;
     body: string;
@@ -22,6 +23,9 @@ export default function EditArticlePage() {
     contentType: string;
     language: string;
     translationStatus: string;
+    sourceArticleId?: string;
+    sourceArticle?: { id: string; title: string; slug?: string } | null;
+    translations?: { id: string; title: string; slug?: string }[];
     alternateLanguageSlug: string;
     allowTranslation: boolean;
     translationPriority: string;
@@ -33,11 +37,43 @@ export default function EditArticlePage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    Promise.all([
-      fetch(`/api/articles/${id}`).then((r) => r.json()),
-      fetch("/api/categories").then((r) => r.json()),
-    ]).then(([articleData, catData]) => {
+    async function load() {
+      const [articleData, catData] = await Promise.all([
+        fetch(`/api/articles/${id}`).then((r) => r.json()),
+        fetch("/api/categories").then((r) => r.json()),
+      ]);
+
+      let sourceArticle: { id: string; title: string; slug?: string } | null = null;
+      let translations: { id: string; title: string; slug?: string }[] = [];
+
+      if (articleData.language === "fr") {
+        const enData = await fetch(
+          `/api/articles?language=en&sourceArticleId=${encodeURIComponent(id)}&take=100`,
+        ).then((r) => r.json());
+        translations = Array.isArray(enData.articles)
+          ? enData.articles.map((item: { id: string; title: string; slug?: string }) => ({
+              id: item.id,
+              title: item.title,
+              slug: item.slug,
+            }))
+          : [];
+      }
+
+      if (articleData.language === "en" && articleData.sourceArticleId) {
+        const sourceData = await fetch(`/api/articles/${articleData.sourceArticleId}`).then((r) =>
+          r.json(),
+        );
+        if (sourceData?.id) {
+          sourceArticle = {
+            id: sourceData.id,
+            title: sourceData.title,
+            slug: sourceData.slug,
+          };
+        }
+      }
+
       setArticle({
+        id: articleData.id,
         title: articleData.title || "",
         subtitle: articleData.subtitle || "",
         body: articleData.body || "",
@@ -49,7 +85,11 @@ export default function EditArticlePage() {
         status: articleData.status || "draft",
         contentType: articleData.contentType || "actualite",
         language: articleData.language || "fr",
-        translationStatus: articleData.translationStatus || "not_started",
+        translationStatus:
+          articleData.translationStatus || (articleData.language === "en" ? "not_started" : "not_applicable"),
+        sourceArticleId: articleData.sourceArticleId || "",
+        sourceArticle,
+        translations,
         alternateLanguageSlug: articleData.alternateLanguageSlug || "",
         allowTranslation: Boolean(articleData.allowTranslation),
         translationPriority: articleData.translationPriority || "",
@@ -57,7 +97,9 @@ export default function EditArticlePage() {
       });
       setCategories(catData.categories || []);
       setLoading(false);
-    });
+    }
+
+    load();
   }, [id]);
 
   async function handleSubmit(data: {
@@ -73,6 +115,7 @@ export default function EditArticlePage() {
     contentType: string;
     language: string;
     translationStatus: string;
+    sourceArticleId: string;
     alternateLanguageSlug: string;
     allowTranslation: boolean;
     translationPriority: string;
@@ -84,9 +127,12 @@ export default function EditArticlePage() {
       body: JSON.stringify(data),
     });
 
-    if (res.ok) {
-      router.push("/dashboard/articles");
+    if (!res.ok) {
+      const payload = await res.json().catch(() => ({ error: "Erreur inconnue" }));
+      throw new Error(payload.error || "Échec de mise à jour de l'article");
     }
+
+    router.push("/dashboard/articles");
   }
 
   if (loading) {

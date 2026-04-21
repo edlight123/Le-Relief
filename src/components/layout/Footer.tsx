@@ -1,15 +1,22 @@
+"use client";
+
 import Link from "next/link";
 import Image from "next/image";
+import { usePathname } from "next/navigation";
 import { siteConfig } from "@/config/site.config";
 import SocialLinks from "@/components/public/SocialLinks";
 import NewsletterSignup from "@/components/public/NewsletterSignup";
 
 export default function Footer() {
+  const pathname = usePathname();
+  const locale = pathname === "/en" || pathname.startsWith("/en/") ? "en" : "fr";
+  const withLocale = (href: string) => (href === "/" ? `/${locale}` : `/${locale}${href}`);
+
   return (
     <footer className="mt-16 border-t-4 border-border-strong bg-surface-newsprint pb-10 pt-8 sm:mt-24 sm:pt-12">
       <div className="newspaper-shell">
         <div className="mb-8 border-b border-border-strong pb-6 text-center">
-          <Link href="/" className="inline-flex items-center justify-center gap-3">
+          <Link href={`/${locale}`} className="inline-flex items-center justify-center gap-3">
             <Image
               src="/logo.png"
               alt="Le Relief"
@@ -30,10 +37,12 @@ export default function Footer() {
           <div className="md:border-r md:border-border-subtle md:pr-8">
             <h4 className="mb-4 border-b border-border-subtle pb-3 text-xs font-extrabold uppercase text-foreground">
               Édition
+              {locale === "en" ? " / Newsroom" : ""}
             </h4>
             <p className="font-body text-base leading-relaxed text-muted">
-              Une rédaction numérique pour lire Haïti avec précision, contexte
-              et responsabilité éditoriale.
+              {locale === "fr"
+                ? "Une rédaction numérique pour lire Haïti avec précision, contexte et responsabilité éditoriale."
+                : "A digital newsroom to read Haiti with precision, context and editorial responsibility."}
             </p>
             <div className="mt-6">
               <SocialLinks />
@@ -42,12 +51,20 @@ export default function Footer() {
 
           <div className="flex flex-col gap-4">
             <h4 className="border-b border-border-subtle pb-3 text-xs font-extrabold uppercase text-foreground">
-              Navigation
+              {locale === "fr" ? "Navigation" : "Navigation"}
             </h4>
-            {siteConfig.nav.public.map((item) => (
+            {(locale === "fr"
+              ? siteConfig.nav.public
+              : [
+                  { label: "Home", href: "/" },
+                  { label: "Categories", href: "/categories" },
+                  { label: "Search", href: "/search" },
+                  { label: "About", href: "/about" },
+                  { label: "Contact", href: "/contact" },
+                ]).map((item) => (
               <Link
                 key={item.href}
-                href={item.href}
+                href={withLocale(item.href)}
                 className="ink-link text-muted"
               >
                 {item.label}
@@ -57,37 +74,37 @@ export default function Footer() {
 
           <div className="flex flex-col gap-4">
             <h4 className="border-b border-border-subtle pb-3 text-xs font-extrabold uppercase text-foreground">
-              Institutionnel
+              {locale === "fr" ? "Institutionnel" : "Institutional"}
             </h4>
             <Link
-              href="/about"
+              href={withLocale("/about")}
               className="ink-link text-muted"
             >
-              À propos
+              {locale === "fr" ? "À propos" : "About"}
             </Link>
             <Link
-              href="/politique-editoriale"
+              href={withLocale("/politique-editoriale")}
               className="ink-link text-muted"
             >
-              Politique éditoriale
+              {locale === "fr" ? "Politique éditoriale" : "Editorial policy"}
             </Link>
             <Link
-              href="/corrections"
+              href={withLocale("/corrections")}
               className="ink-link text-muted"
             >
               Corrections
             </Link>
             <Link
-              href="/traduction-ia"
+              href={withLocale("/traduction-ia")}
               className="ink-link text-muted"
             >
-              Traduction assistée par IA
+              {locale === "fr" ? "Traduction assistée par IA" : "AI-assisted translation"}
             </Link>
             <Link
-              href="/privacy"
+              href={withLocale("/privacy")}
               className="ink-link text-muted"
             >
-              Confidentialité
+              {locale === "fr" ? "Confidentialité" : "Privacy"}
             </Link>
             <a
               href="/feed.xml"
@@ -97,7 +114,7 @@ export default function Footer() {
               Flux RSS
             </a>
             <Link
-              href="/contact"
+              href={withLocale("/contact")}
               className="ink-link text-muted"
             >
               Contact
@@ -106,17 +123,19 @@ export default function Footer() {
 
           <div className="flex flex-col gap-6">
             <h4 className="border-b border-border-subtle pb-3 text-xs font-extrabold uppercase text-foreground">
-              Lettre
+              {locale === "fr" ? "Lettre" : "Newsletter"}
             </h4>
             <p className="font-body text-base leading-relaxed text-muted">
-              Recevez les grands titres et analyses de la semaine.
+              {locale === "fr"
+                ? "Recevez les grands titres et analyses de la semaine."
+                : "Get major headlines and analysis of the week."}
             </p>
             <NewsletterSignup />
           </div>
 
           <div className="col-span-full mt-8 border-t border-border-strong pt-6 text-center">
             <p className="font-label text-[10px] font-semibold uppercase text-muted">
-              &copy; {new Date().getFullYear()} {siteConfig.name}. Tous droits réservés.
+              &copy; {new Date().getFullYear()} {siteConfig.name}. {locale === "fr" ? "Tous droits réservés." : "All rights reserved."}
             </p>
           </div>
         </div>

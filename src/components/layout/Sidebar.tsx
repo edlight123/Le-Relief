@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { clsx } from "clsx";
 import {
@@ -82,9 +83,13 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
         {/* Logo */}
         <div className="flex h-14 items-center justify-between px-4">
           <Link href="/dashboard" className="flex items-center gap-2.5">
-            <span className="flex h-7 w-7 items-center justify-center bg-primary font-headline text-xs font-extrabold text-white">
-              LR
-            </span>
+            <Image
+              src="/logo.png"
+              alt="Le Relief"
+              width={28}
+              height={28}
+              className="h-7 w-7 rounded-sm"
+            />
             <span className="font-headline text-base font-extrabold tracking-tight text-foreground">
               Le Relief
             </span>

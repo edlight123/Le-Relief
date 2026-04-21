@@ -1,6 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import type { Locale } from "@/lib/i18n";
+import { t } from "@/lib/i18n";
 
 interface TocEntry {
   id: string;
@@ -10,9 +12,10 @@ interface TocEntry {
 
 interface Props {
   toc: TocEntry[];
+  locale?: Locale;
 }
 
-export default function TableOfContents({ toc }: Props) {
+export default function TableOfContents({ toc, locale = "fr" }: Props) {
   const [activeId, setActiveId] = useState<string>("");
 
   useEffect(() => {
@@ -38,7 +41,7 @@ export default function TableOfContents({ toc }: Props) {
 
   return (
     <section className="border-t border-border-subtle pt-5">
-      <p className="section-kicker mb-3">Dans cet article</p>
+      <p className="section-kicker mb-3">{t(locale, "inThisArticle")}</p>
       <nav>
         <ol className="space-y-2">
           {toc.map(({ id, level, text }) => (

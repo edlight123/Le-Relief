@@ -1,9 +1,12 @@
 "use client";
 
 import { useState } from "react";
+import { useLocaleContext } from "@/hooks/useLocaleContext";
+import { t } from "@/lib/i18n";
 
 export default function CopyLinkButton({ url }: { url: string }) {
   const [copied, setCopied] = useState(false);
+  const locale = useLocaleContext();
 
   async function handleCopy() {
     try {
@@ -28,7 +31,7 @@ export default function CopyLinkButton({ url }: { url: string }) {
       onClick={handleCopy}
       className="ink-link text-left font-label text-xs font-bold uppercase text-muted transition-colors hover:text-primary"
     >
-      {copied ? "Lien copié !" : "Copier le lien"}
+      {copied ? t(locale, "copied") : t(locale, "copyLink")}
     </button>
   );
 }

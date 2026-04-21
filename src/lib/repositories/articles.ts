@@ -1,5 +1,7 @@
 import { FieldValue } from "firebase-admin/firestore";
 import { getDb, serializeTimestamps } from "@/lib/firebase";
+import { validateSourceArticleReference } from "@/lib/validation";
+import type { CreateArticleInput, UpdateArticleInput } from "@/types/article";
 
 const COLLECTION = "articles";
 
@@ -7,52 +9,82 @@ function collection() {
   return getDb().collection(COLLECTION);
 }
 
-export async function createArticle(data: {
-  title: string;
-  subtitle?: string | null;
+type ArticleDoc = Record<string, unknown> & {
+  id?: string;
+  language?: string;
+  status?: string;
+  sourceArticleId?: string | null;
+  isCanonicalSource?: boolean;
+  allowTranslation?: boolean;
+};
+
+type CreateArticleRepoInput = CreateArticleInput & {
   slug: string;
-  body: string;
+  authorId: string;
+  subtitle?: string | null;
   excerpt?: string | null;
   coverImage?: string | null;
   coverImageCaption?: string | null;
-  tags?: string[];
-  status?: string;
-  featured?: boolean;
-  authorId: string;
   categoryId?: string | null;
-  contentType?: string;
-  language?: string;
-  translationStatus?: string;
-  isCanonicalSource?: boolean;
-  sourceArticleId?: string | null;
-  alternateLanguageSlug?: string | null;
-  allowTranslation?: boolean;
-  translationPriority?: string | null;
   publishedAt?: Date | null;
   scheduledAt?: string | null;
-}) {
+};
+
+function normalizeLanguageFields<T extends object>(data: T): T & Record<string, unknown> {
+  const normalized = data as T & Record<string, unknown>;
+  const language = (normalized.language as string | undefined) || "fr";
+
+  if (language === "en") {
+    return {
+      ...normalized,
+      language: "en",
+      isCanonicalSource: false,
+      translationStatus: (normalized.translationStatus as string | undefined) || "not_started",
+      sourceArticleId: (normalized.sourceArticleId as string | null | undefined) || null,
+    };
+  }
+
+  return {
+    ...normalized,
+    language: "fr",
+    isCanonicalSource: true,
+    translationStatus: "not_applicable",
+    sourceArticleId: null,
+  };
+}
+
+export async function createArticle(data: CreateArticleRepoInput) {
+  const normalizedInput = normalizeLanguageFields(data);
+  const sourceValidation = await validateSourceArticleReference(
+    (normalizedInput.language as string) || "fr",
+    (normalizedInput.sourceArticleId as string | null | undefined) ?? null,
+  );
+  if (!sourceValidation.valid) {
+    throw new Error(sourceValidation.error || "Référence source invalide");
+  }
+
   const ref = collection().doc();
   const now = FieldValue.serverTimestamp();
   await ref.set({
-    ...data,
-    subtitle: data.subtitle || null,
-    excerpt: data.excerpt || null,
-    coverImage: data.coverImage || null,
-    coverImageCaption: data.coverImageCaption || null,
-    tags: data.tags || [],
-    status: data.status || "draft",
-    featured: data.featured || false,
-    categoryId: data.categoryId || null,
-    contentType: data.contentType || "actualite",
-    language: data.language || "fr",
-    translationStatus: data.translationStatus || "not_started",
-    isCanonicalSource: data.isCanonicalSource ?? data.language !== "en",
-    sourceArticleId: data.sourceArticleId || null,
-    alternateLanguageSlug: data.alternateLanguageSlug || null,
-    allowTranslation: data.allowTranslation ?? false,
-    translationPriority: data.translationPriority || null,
-    publishedAt: data.publishedAt || null,
-    scheduledAt: data.scheduledAt || null,
+    ...normalizedInput,
+    subtitle: normalizedInput.subtitle || null,
+    excerpt: normalizedInput.excerpt || null,
+    coverImage: normalizedInput.coverImage || null,
+    coverImageCaption: normalizedInput.coverImageCaption || null,
+    tags: (normalizedInput.tags as string[] | undefined) || [],
+    status: (normalizedInput.status as string | undefined) || "draft",
+    featured: Boolean(normalizedInput.featured),
+    categoryId: (normalizedInput.categoryId as string | null | undefined) || null,
+    contentType: (normalizedInput.contentType as string | undefined) || "actualite",
+    language: normalizedInput.language || "fr",
+    translationStatus: normalizedInput.translationStatus || "not_applicable",
+    isCanonicalSource: normalizedInput.isCanonicalSource,
+    sourceArticleId: (normalizedInput.sourceArticleId as string | null | undefined) || null,
+    alternateLanguageSlug: (normalizedInput.alternateLanguageSlug as string | null | undefined) || null,
+    allowTranslation: normalizedInput.language === "fr" ? Boolean(normalizedInput.allowTranslation) : false,
+    translationPriority: (normalizedInput.translationPriority as string | null | undefined) || null,
+    publishedAt: (normalizedInput.publishedAt as Date | null | undefined) || null,
+    scheduledAt: (normalizedInput.scheduledAt as string | null | undefined) || null,
     views: 0,
     createdAt: now,
     updatedAt: now,
@@ -67,8 +99,12 @@ export async function getArticle(id: string) {
   return serializeTimestamps({ id: snap.id, ...snap.data() } as Record<string, unknown>);
 }
 
-export async function findBySlug(slug: string) {
-  const snap = await collection().where("slug", "==", slug).limit(1).get();
+export async function findBySlug(slug: string, language?: string) {
+  let query = collection().where("slug", "==", slug) as FirebaseFirestore.Query;
+  if (language) {
+    query = query.where("language", "==", language);
+  }
+  const snap = await query.limit(1).get();
   if (snap.empty) return null;
   const doc = snap.docs[0]!;
   return serializeTimestamps({ id: doc.id, ...doc.data() } as Record<string, unknown>);
@@ -84,6 +120,7 @@ export async function getArticles(options?: {
   categoryId?: string;
   authorId?: string;
   language?: string;
+  sourceArticleId?: string;
   excludeId?: string;
   orderBy?: string;
 }) {
@@ -103,6 +140,9 @@ export async function getArticles(options?: {
   }
   if (options?.language) {
     query = query.where("language", "==", options.language);
+  }
+  if (options?.sourceArticleId) {
+    query = query.where("sourceArticleId", "==", options.sourceArticleId);
   }
 
   const orderField = options?.orderBy || "publishedAt";
@@ -150,9 +190,36 @@ export async function getArticles(options?: {
   return { articles: docs, total };
 }
 
-export async function updateArticle(id: string, data: Record<string, unknown>) {
+export async function updateArticle(
+  id: string,
+  data: Partial<Omit<UpdateArticleInput, "id">> & Record<string, unknown>,
+) {
+  const existing = await getArticle(id);
+  if (!existing) return null;
+
+  const nextLanguage = (data.language as string | undefined) ?? (existing.language as string) ?? "fr";
+  const proposedSource =
+    data.sourceArticleId !== undefined
+      ? (data.sourceArticleId as string | null | undefined)
+      : (existing.sourceArticleId as string | null | undefined);
+
+  const normalized = normalizeLanguageFields({
+    ...data,
+    language: nextLanguage,
+    sourceArticleId: nextLanguage === "fr" ? null : proposedSource,
+    isCanonicalSource: nextLanguage === "fr",
+  });
+
+  const sourceValidation = await validateSourceArticleReference(
+    (normalized.language as string) || "fr",
+    (normalized.sourceArticleId as string | null | undefined) ?? null,
+  );
+  if (!sourceValidation.valid) {
+    throw new Error(sourceValidation.error || "Référence source invalide");
+  }
+
   const clean = Object.fromEntries(
-    Object.entries(data).filter(([, v]) => v !== undefined),
+    Object.entries(normalized).filter(([, v]) => v !== undefined),
   );
   await collection()
     .doc(id)
@@ -161,7 +228,56 @@ export async function updateArticle(id: string, data: Record<string, unknown>) {
 }
 
 export async function deleteArticle(id: string) {
+  const article = await getArticle(id);
+  if (article?.language === "fr") {
+    const dependents = await getArticlesBySourceId(id);
+    if (dependents.length > 0) {
+      throw new Error("Remove EN translations first");
+    }
+  }
+
   await collection().doc(id).delete();
+}
+
+export async function getArticlesBySourceId(sourceArticleId: string) {
+  const snap = await collection()
+    .where("language", "==", "en")
+    .where("sourceArticleId", "==", sourceArticleId)
+    .get();
+
+  return snap.docs.map((d) =>
+    serializeTimestamps({ id: d.id, ...d.data() } as Record<string, unknown>),
+  );
+}
+
+export async function getOrphanedEnArticles() {
+  const enSnap = await collection().where("language", "==", "en").get();
+  const orphaned = enSnap.docs
+    .map((d) => serializeTimestamps({ id: d.id, ...d.data() } as Record<string, unknown>))
+    .filter((article) => !article.sourceArticleId);
+
+  return orphaned;
+}
+
+export async function getInvalidSourceReferences() {
+  const enSnap = await collection().where("language", "==", "en").get();
+  const enArticles = enSnap.docs.map((d) =>
+    serializeTimestamps({ id: d.id, ...d.data() } as Record<string, unknown>) as ArticleDoc,
+  );
+
+  const invalid: Array<{ article: Record<string, unknown>; error: string }> = [];
+
+  for (const article of enArticles) {
+    const result = await validateSourceArticleReference("en", (article.sourceArticleId as string | null | undefined) ?? null);
+    if (!result.valid) {
+      invalid.push({
+        article: article as Record<string, unknown>,
+        error: result.error || "Référence source invalide",
+      });
+    }
+  }
+
+  return invalid;
 }
 
 export async function incrementViews(id: string) {
@@ -204,9 +320,12 @@ export async function getFeaturedArticle() {
   return serializeTimestamps({ id: doc.id, ...doc.data() } as Record<string, unknown>);
 }
 
-export async function getPublishedArticles(take: number = 6) {
-  const snap = await collection()
-    .where("status", "==", "published")
+export async function getPublishedArticles(take: number = 6, language?: string) {
+  let query = collection().where("status", "==", "published") as FirebaseFirestore.Query;
+  if (language) {
+    query = query.where("language", "==", language);
+  }
+  const snap = await query
     .orderBy("publishedAt", "desc")
     .limit(take)
     .get();

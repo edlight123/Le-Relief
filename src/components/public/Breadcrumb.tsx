@@ -1,13 +1,15 @@
 import Link from "next/link";
+import type { Locale } from "@/lib/i18n";
+import { t } from "@/lib/i18n";
 
 interface Crumb {
   label: string;
   href?: string;
 }
 
-export default function Breadcrumb({ crumbs }: { crumbs: Crumb[] }) {
+export default function Breadcrumb({ crumbs, locale = "fr" }: { crumbs: Crumb[]; locale?: Locale }) {
   return (
-    <nav aria-label="Fil d'Ariane" className="mb-5">
+    <nav aria-label={t(locale, "breadcrumb")} className="mb-5">
       <ol className="flex flex-wrap items-center gap-1 font-label text-[11px] font-bold uppercase text-muted">
         {crumbs.map((crumb, index) => {
           const isLast = index === crumbs.length - 1;

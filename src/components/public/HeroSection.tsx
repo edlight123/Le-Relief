@@ -1,5 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
+import { type Locale, t } from "@/lib/i18n";
 
 interface HeroSectionProps {
   article?: {
@@ -15,9 +16,11 @@ interface HeroSectionProps {
     readingTime?: number;
     language?: "fr" | "en";
   };
+  locale?: Locale;
 }
 
-export default function HeroSection({ article }: HeroSectionProps) {
+export default function HeroSection({ article, locale }: HeroSectionProps) {
+  const resolvedLocale = locale || article?.language || "fr";
   if (!article) {
     return (
       <section className="newspaper-shell py-10 sm:py-14">
@@ -32,16 +35,16 @@ export default function HeroSection({ article }: HeroSectionProps) {
           </p>
           <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
             <Link
-              href="/categories"
+              href={`/${resolvedLocale}/categories`}
               className="border border-border-strong bg-foreground px-6 py-3 font-label text-xs font-extrabold uppercase text-background transition-colors hover:bg-primary hover:text-white"
             >
-              Explorer les articles
+              {resolvedLocale === "fr" ? "Explorer les articles" : "Explore articles"}
             </Link>
             <Link
-              href="/about"
+              href={`/${resolvedLocale}/about`}
               className="border border-border-strong px-6 py-3 font-label text-xs font-extrabold uppercase text-foreground transition-colors hover:bg-surface-elevated"
             >
-              En savoir plus
+              {resolvedLocale === "fr" ? "En savoir plus" : "Learn more"}
             </Link>
           </div>
         </div>
@@ -51,7 +54,7 @@ export default function HeroSection({ article }: HeroSectionProps) {
 
   const imageSrc = article.coverImageFirebaseUrl || article.coverImage;
   const date = article.publishedAt
-    ? new Intl.DateTimeFormat("fr-FR", {
+    ? new Intl.DateTimeFormat(resolvedLocale === "fr" ? "fr-FR" : "en-US", {
         day: "numeric",
         month: "long",
         year: "numeric",
@@ -60,13 +63,13 @@ export default function HeroSection({ article }: HeroSectionProps) {
 
   const meta = (
     <div className="mt-5 flex flex-wrap items-center gap-3 border-t border-border-subtle pt-4 font-label text-[11px] font-bold uppercase text-muted tracking-[1px]">
-      {article.author?.name && <span>Par {article.author.name}</span>}
+      {article.author?.name && <span>{t(resolvedLocale, "by")} {article.author.name}</span>}
       {article.author?.name && date && <span className="text-border-subtle">/</span>}
       {date && <span>{date}</span>}
       {article.readingTime ? (
         <>
           <span className="text-border-subtle">/</span>
-          <span>{article.readingTime} min de lecture</span>
+          <span>{article.readingTime} {t(resolvedLocale, "minRead")}</span>
         </>
       ) : null}
     </div>
@@ -76,7 +79,7 @@ export default function HeroSection({ article }: HeroSectionProps) {
   if (!imageSrc) {
     return (
       <section className="newspaper-shell py-6 sm:py-10">
-        <Link href={`/articles/${article.slug}`} className="group block">
+        <Link href={`/${resolvedLocale}/articles/${article.slug}`} className="group block">
           <div className="border-t-2 border-border-strong pt-5">
             <div className="flex items-center justify-between border-b border-border-subtle pb-3">
               <p className="font-label text-[11px] font-bold uppercase text-muted">À la une</p>
@@ -110,7 +113,7 @@ export default function HeroSection({ article }: HeroSectionProps) {
   /* With cover image — 2-column, text bottom-aligned */
   return (
     <section className="newspaper-shell py-6 sm:py-10">
-      <Link href={`/articles/${article.slug}`} className="group block">
+      <Link href={`/${resolvedLocale}/articles/${article.slug}`} className="group block">
         <div className="border-t-2 border-border-strong pt-5">
           <div className="grid gap-0 lg:grid-cols-[1fr_1.4fr]">
 

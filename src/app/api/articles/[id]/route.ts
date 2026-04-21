@@ -5,6 +5,7 @@ import * as categoriesRepo from "@/lib/repositories/categories";
 import { auth } from "@/lib/auth";
 import { hasRole } from "@/lib/permissions";
 import { normalizeAuthor, normalizeCategory } from "@/lib/editorial";
+import { validateSourceArticleReference } from "@/lib/validation";
 
 interface RouteParams {
   params: Promise<{ id: string }>;
@@ -102,8 +103,36 @@ export async function PATCH(req: NextRequest, { params }: RouteParams) {
     }
   }
 
-  const article = await articlesRepo.updateArticle(id, data);
-  return NextResponse.json(article);
+  const nextLanguage = (data.language as string | undefined) ?? (existing.language as string) ?? "fr";
+  const nextSourceArticleId =
+    data.sourceArticleId !== undefined
+      ? (data.sourceArticleId as string | null)
+      : (existing.sourceArticleId as string | null | undefined) ?? null;
+
+  if (existing.language === "fr" && nextLanguage === "en" && !nextSourceArticleId) {
+    return NextResponse.json(
+      { error: "Un article EN requiert sourceArticleId (FR → EN refusé sans source)." },
+      { status: 409 },
+    );
+  }
+
+  if (body.language !== undefined || body.sourceArticleId !== undefined) {
+    const sourceValidation = await validateSourceArticleReference(nextLanguage, nextSourceArticleId);
+    if (!sourceValidation.valid) {
+      return NextResponse.json(
+        { error: sourceValidation.error || "Référence source invalide" },
+        { status: 400 },
+      );
+    }
+  }
+
+  try {
+    const article = await articlesRepo.updateArticle(id, data);
+    return NextResponse.json(article);
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Impossible de mettre à jour l'article";
+    return NextResponse.json({ error: message }, { status: 400 });
+  }
 }
 
 export async function DELETE(req: NextRequest, { params }: RouteParams) {
@@ -113,6 +142,29 @@ export async function DELETE(req: NextRequest, { params }: RouteParams) {
   }
 
   const { id } = await params;
+  const article = await articlesRepo.getArticle(id);
+  if (!article) {
+    return NextResponse.json({ error: "Introuvable" }, { status: 404 });
+  }
+
+  if (article.language === "fr") {
+    const dependents = await articlesRepo.getArticlesBySourceId(id);
+    if (dependents.length > 0) {
+      return NextResponse.json(
+        {
+          error: "Remove EN translations first",
+          dependentTranslations: dependents.map((dep) => ({
+            id: dep.id,
+            title: dep.title,
+            slug: dep.slug,
+            status: dep.status,
+          })),
+        },
+        { status: 409 },
+      );
+    }
+  }
+
   await articlesRepo.deleteArticle(id);
   return NextResponse.json({ success: true });
 }

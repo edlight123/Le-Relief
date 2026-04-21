@@ -19,7 +19,7 @@ export type ArticleTranslationStatus =
   | "published"
   | "rejected";
 
-export interface Article {
+interface ArticleBase {
   id: string;
   title: string;
   subtitle: string | null;
@@ -36,10 +36,6 @@ export interface Article {
   authorId: string;
   categoryId: string | null;
   contentType: ArticleContentType;
-  language: ArticleLanguage;
-  translationStatus: ArticleTranslationStatus;
-  isCanonicalSource: boolean;
-  sourceArticleId: string | null;
   alternateLanguageSlug: string | null;
   allowTranslation: boolean;
   translationPriority: string | null;
@@ -48,26 +44,78 @@ export interface Article {
   tags?: string[];
 }
 
-export interface CreateArticleInput {
+export interface FrenchArticle extends ArticleBase {
+  language: "fr";
+  isCanonicalSource: true;
+  sourceArticleId: null;
+  translationStatus: "not_applicable";
+}
+
+export interface EnglishArticle extends ArticleBase {
+  language: "en";
+  isCanonicalSource: false;
+  sourceArticleId: string;
+  translationStatus:
+    | "not_started"
+    | "generated_draft"
+    | "in_review"
+    | "approved"
+    | "published"
+    | "rejected";
+}
+
+export type Article = FrenchArticle | EnglishArticle;
+
+interface CreateArticleInputBase {
   title: string;
-  subtitle?: string;
+  subtitle?: string | null;
   body: string;
-  excerpt?: string;
-  coverImage?: string;
-  categoryId?: string;
+  excerpt?: string | null;
+  coverImage?: string | null;
+  categoryId?: string | null;
   tags?: string[];
   status?: ArticleStatus;
   featured?: boolean;
   contentType?: ArticleContentType;
-  language?: ArticleLanguage;
-  translationStatus?: ArticleTranslationStatus;
-  isCanonicalSource?: boolean;
-  sourceArticleId?: string | null;
   alternateLanguageSlug?: string | null;
   allowTranslation?: boolean;
   translationPriority?: string | null;
 }
 
-export interface UpdateArticleInput extends Partial<CreateArticleInput> {
+export type CreateFrenchArticleInput = CreateArticleInputBase & {
+  language?: "fr";
+  isCanonicalSource?: true;
+  sourceArticleId?: null;
+  translationStatus?: "not_applicable";
+};
+
+export type CreateEnglishArticleInput = CreateArticleInputBase & {
+  language: "en";
+  isCanonicalSource?: false;
+  sourceArticleId: string;
+  translationStatus?:
+    | "not_started"
+    | "generated_draft"
+    | "in_review"
+    | "approved"
+    | "published"
+    | "rejected";
+};
+
+export type CreateArticleInput =
+  | CreateFrenchArticleInput
+  | CreateEnglishArticleInput;
+
+type UpdateFrenchArticleInput = Partial<CreateFrenchArticleInput> & {
+  language?: "fr";
+  sourceArticleId?: null;
+};
+
+type UpdateEnglishArticleInput = Partial<CreateEnglishArticleInput> & {
+  language: "en";
+  sourceArticleId: string;
+};
+
+export type UpdateArticleInput = (UpdateFrenchArticleInput | UpdateEnglishArticleInput) & {
   id: string;
-}
+};

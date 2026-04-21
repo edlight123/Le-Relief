@@ -1,4 +1,6 @@
 import ArticleCard from "@/components/public/ArticleCard";
+import type { Locale } from "@/lib/i18n";
+import { t } from "@/lib/i18n";
 
 interface RelatedArticlesProps {
   articles: {
@@ -12,9 +14,10 @@ interface RelatedArticlesProps {
     category?: { name: string; slug: string } | null;
   }[];
   compact?: boolean;
+  locale?: Locale;
 }
 
-export default function RelatedArticles({ articles, compact = false }: RelatedArticlesProps) {
+export default function RelatedArticles({ articles, compact = false, locale = "fr" }: RelatedArticlesProps) {
   if (articles.length === 0) return null;
 
   if (compact) {
@@ -22,7 +25,7 @@ export default function RelatedArticles({ articles, compact = false }: RelatedAr
       <section>
         <div className="divide-y divide-border-subtle">
           {articles.map((article) => (
-            <ArticleCard key={article.slug} article={article} variant="compact" />
+            <ArticleCard key={article.slug} article={article} variant="compact" locale={locale} />
           ))}
         </div>
       </section>
@@ -32,12 +35,12 @@ export default function RelatedArticles({ articles, compact = false }: RelatedAr
   return (
     <section className="mt-16 border-t-2 border-border-strong pt-8">
       <div className="mb-8">
-        <p className="section-kicker mb-2">Lecture suivante</p>
-        <h2 className="font-headline text-3xl font-extrabold text-foreground">Articles connexes</h2>
+        <p className="section-kicker mb-2">{t(locale, "relatedKicker")}</p>
+        <h2 className="font-headline text-3xl font-extrabold text-foreground">{t(locale, "relatedTitle")}</h2>
       </div>
       <div className="grid grid-cols-1 gap-7 md:grid-cols-3">
         {articles.map((article) => (
-          <ArticleCard key={article.slug} article={article} />
+          <ArticleCard key={article.slug} article={article} locale={locale} />
         ))}
       </div>
     </section>

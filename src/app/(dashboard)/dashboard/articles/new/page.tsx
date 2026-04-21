@@ -29,6 +29,7 @@ export default function NewArticlePage() {
     contentType: string;
     language: string;
     translationStatus: string;
+    sourceArticleId: string;
     alternateLanguageSlug: string;
     allowTranslation: boolean;
     translationPriority: string;
@@ -40,9 +41,12 @@ export default function NewArticlePage() {
       body: JSON.stringify(data),
     });
 
-    if (res.ok) {
-      router.push("/dashboard/articles");
+    if (!res.ok) {
+      const payload = await res.json().catch(() => ({ error: "Erreur inconnue" }));
+      throw new Error(payload.error || "Échec de création de l'article");
     }
+
+    router.push("/dashboard/articles");
   }
 
   return (

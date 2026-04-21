@@ -1,5 +1,6 @@
 import * as articlesRepo from "@/lib/repositories/articles";
 import { generateSlug } from "@/lib/slug";
+import type { ArticleStatus } from "@/types/article";
 
 export async function getArticles(options?: {
   status?: string;
@@ -43,7 +44,7 @@ export async function createArticle(data: {
   excerpt?: string;
   coverImage?: string;
   categoryId?: string;
-  status?: string;
+  status?: ArticleStatus;
   featured?: boolean;
   authorId: string;
 }) {

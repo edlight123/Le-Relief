@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 import ArticleCard from "@/components/public/ArticleCard";
+import type { Locale } from "@/lib/i18n";
+import { t } from "@/lib/i18n";
 
 interface Article {
   id: string;
@@ -24,6 +26,7 @@ interface Props {
   authorId?: string;
   variant?: "feed" | "grid";
   pageSize?: number;
+  locale?: Locale;
 }
 
 const PAGE_SIZE = 10;
@@ -34,6 +37,7 @@ export default function LatestArticlesFeed({
   authorId,
   variant = "feed",
   pageSize = PAGE_SIZE,
+  locale = "fr",
 }: Props) {
   const [articles, setArticles] = useState<Article[]>(initialArticles);
   const [loading, setLoading] = useState(false);
@@ -55,6 +59,7 @@ export default function LatestArticlesFeed({
       if (cursor) params.set("before", cursor);
       if (categoryId) params.set("categoryId", categoryId);
       if (authorId) params.set("authorId", authorId);
+      params.set("language", locale);
 
       const res = await fetch(`/api/articles?${params.toString()}`);
       const data = await res.json();
@@ -82,7 +87,7 @@ export default function LatestArticlesFeed({
       {variant === "grid" ? (
         <div className="grid grid-cols-1 gap-7 md:grid-cols-2 lg:grid-cols-3">
           {articles.map((article) => (
-            <ArticleCard key={article.id} article={article} />
+            <ArticleCard key={article.id} article={article} locale={locale} />
           ))}
         </div>
       ) : (
@@ -95,7 +100,7 @@ export default function LatestArticlesFeed({
                 ${index % 2 === 0 ? "sm:border-r sm:border-border-subtle" : ""}
               `}
             >
-              <ArticleCard article={article} variant="text" />
+              <ArticleCard article={article} variant="text" locale={locale} />
             </div>
           ))}
         </div>
@@ -109,14 +114,14 @@ export default function LatestArticlesFeed({
             className="group flex items-center gap-3 font-label text-xs font-extrabold uppercase text-foreground transition-colors hover:text-primary disabled:opacity-50"
           >
             <span className="h-px w-8 bg-border-strong transition-all group-hover:w-12 group-hover:bg-primary" />
-            {loading ? "Chargement…" : "Charger plus d'articles"}
+            {loading ? t(locale, "loading") : t(locale, "loadMore")}
           </button>
         </div>
       )}
 
       {exhausted && articles.length > initialArticles.length && (
         <p className="mt-8 border-t border-border-subtle pt-6 font-label text-[11px] font-bold uppercase text-muted">
-          Tous les articles sont affichés.
+          {t(locale, "allShown")}
         </p>
       )}
     </div>

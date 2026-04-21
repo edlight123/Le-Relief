@@ -6,10 +6,21 @@ import { usePathname } from "next/navigation";
 export default function LanguageToggle() {
   const pathname = usePathname();
   const isEnglish = pathname === "/en" || pathname.startsWith("/en/");
+  const targetLocale = isEnglish ? "fr" : "en";
+
+  const targetPath = (() => {
+    if (!pathname || pathname === "/") return `/${targetLocale}`;
+    const segments = pathname.split("/").filter(Boolean);
+    if (segments[0] === "fr" || segments[0] === "en") {
+      return `/${targetLocale}/${segments.slice(1).join("/")}`.replace(/\/$/, "") || `/${targetLocale}`;
+    }
+    if (pathname === "/en") return "/fr";
+    return `/${targetLocale}${pathname}`;
+  })();
 
   return (
     <Link
-      href={isEnglish ? "/" : "/en"}
+      href={targetPath}
       className="flex items-center gap-0.5 border border-border-subtle px-2 py-2 font-label text-[10px] font-bold uppercase transition-colors duration-200 hover:bg-surface-elevated sm:text-xs"
       aria-label={isEnglish ? "Lire en français" : "Read the English selection"}
       title={isEnglish ? "Lire en français" : "Read the English selection"}
