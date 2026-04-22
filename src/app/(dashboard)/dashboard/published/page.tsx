@@ -4,7 +4,9 @@ import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import Badge from "@/components/ui/Badge";
 import Button from "@/components/ui/Button";
-import Card, { CardContent } from "@/components/ui/Card";
+import Card from "@/components/ui/Card";
+import PageHeader from "@/components/ui/PageHeader";
+import EmptyState from "@/components/ui/EmptyState";
 import { formatDistanceToNow } from "date-fns";
 import { fr } from "date-fns/locale";
 import { Eye, ExternalLink, Copy, CheckCircle2, TrendingUp } from "lucide-react";
@@ -126,11 +128,11 @@ export default function PublishedPage() {
 
   return (
     <div className="space-y-6">
-      <header className="border-t-2 border-border-strong pt-4">
-        <p className="page-kicker mb-2">Suivi post-publication</p>
-        <h1 className="font-headline text-5xl font-extrabold leading-none text-foreground">Articles publiés</h1>
-        <p className="mt-3 max-w-2xl font-body text-sm text-muted">Vue opérationnelle des contenus live. Triés par date de publication décroissante.</p>
-      </header>
+      <PageHeader
+        kicker="Suivi post-publication"
+        title="Articles publiés"
+        description="Vue opérationnelle des contenus live. Triés par date de publication décroissante."
+      />
       <div className="flex flex-wrap items-center gap-3">
         <span className="font-label text-sm font-bold text-foreground">{loading ? "—" : filtered.length} article{filtered.length !== 1 ? "s" : ""}</span>
         {(["all", "fr", "en"] as const).map((l) => (
@@ -147,7 +149,13 @@ export default function PublishedPage() {
       {loading ? (
         <div className="space-y-3">{Array.from({ length: 4 }).map((_, i) => (<div key={i} className="h-24 animate-pulse border border-border-subtle bg-surface" />))}</div>
       ) : filtered.length === 0 ? (
-        <Card><CardContent className="py-14 text-center"><CheckCircle2 className="mx-auto mb-3 h-8 w-8 text-accent-teal" /><p className="font-label text-sm font-bold text-foreground">Aucun article publié</p></CardContent></Card>
+        <EmptyState
+          icon={CheckCircle2}
+          title="Aucun article publié"
+          description="Aucun contenu live à superviser pour le moment."
+          actionHref="/dashboard/approved"
+          actionLabel="Voir les approuvés"
+        />
       ) : (
         <div className="space-y-3">{filtered.map((article) => (<ArticleCard key={article.id} article={article} onUnpublish={handleUnpublish} />))}</div>
       )}

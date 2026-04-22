@@ -2,7 +2,11 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import Badge from "@/components/ui/Badge";
+import { CalendarDays, Clock3, List } from "lucide-react";
+import PageHeader from "@/components/ui/PageHeader";
+import FilterBar, { FilterBarSection } from "@/components/ui/FilterBar";
+import EmptyState from "@/components/ui/EmptyState";
+import CalendarPublicationCard from "@/components/dashboard/CalendarPublicationCard";
 
 interface ScheduledArticle {
   id: string;
@@ -10,6 +14,7 @@ interface ScheduledArticle {
   scheduledAt?: string | null;
   language?: string;
   category?: { name?: string } | null;
+  isBreaking?: boolean;
 }
 
 export default function ScheduledPage() {
@@ -51,15 +56,14 @@ export default function ScheduledPage() {
 
   return (
     <div className="space-y-6">
-      <header>
-        <p className="page-kicker mb-2">Publishing Ops</p>
-        <h1 className="font-headline text-5xl font-extrabold leading-none text-foreground">Programmés</h1>
-        <p className="mt-3 font-body text-sm text-muted">
-          Vue calendrier et liste opérationnelle des publications futures.
-        </p>
-      </header>
+      <PageHeader
+        kicker="Publishing Ops"
+        title="Programmés"
+        description="Vue calendrier et liste opérationnelle des publications futures, pensée pour un pilotage newsroom plus calme et plus lisible."
+      />
 
-      <div className="flex items-center gap-2">
+      <FilterBar>
+        <FilterBarSection>
         <button
           type="button"
           onClick={() => setView("calendar")}
@@ -67,7 +71,7 @@ export default function ScheduledPage() {
             view === "calendar" ? "bg-foreground text-background" : "border border-border-subtle text-muted"
           }`}
         >
-          Calendar view
+          <CalendarDays className="mr-1 inline h-3.5 w-3.5" /> Calendar view
         </button>
         <button
           type="button"
@@ -76,14 +80,18 @@ export default function ScheduledPage() {
             view === "list" ? "bg-foreground text-background" : "border border-border-subtle text-muted"
           }`}
         >
-          List view
+          <List className="mr-1 inline h-3.5 w-3.5" /> List view
         </button>
-      </div>
+        </FilterBarSection>
+        <FilterBarSection>
+          <span className="font-label text-xs uppercase text-muted">{articles.length} publication{articles.length > 1 ? "s" : ""}</span>
+        </FilterBarSection>
+      </FilterBar>
 
       {loading ? (
         <p className="font-label text-xs text-muted">Chargement...</p>
       ) : grouped.length === 0 ? (
-        <p className="font-label text-sm text-muted">Aucune publication programmée pour le moment.</p>
+        <EmptyState icon={Clock3} title="Aucune publication programmée" description="La file de publication est vide pour le moment." />
       ) : view === "list" ? (
         <div className="divide-y divide-border-subtle border border-border-subtle bg-surface">
           {articles.map((article) => (
@@ -94,9 +102,9 @@ export default function ScheduledPage() {
                   {article.category?.name || "Sans rubrique"} · {article.language || "fr"}
                 </p>
               </div>
-              <Badge variant="info">
+              <span className="font-label text-xs text-muted">
                 {article.scheduledAt ? new Date(article.scheduledAt).toLocaleString("fr-FR") : "Sans date"}
-              </Badge>
+              </span>
             </Link>
           ))}
         </div>
@@ -109,15 +117,10 @@ export default function ScheduledPage() {
                   {group.date === "sans-date" ? "Sans date" : new Date(group.date).toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long" })}
                 </p>
               </header>
-              <ul className="divide-y divide-border-subtle">
+              <ul className="grid gap-3 p-3 md:grid-cols-2 xl:grid-cols-3">
                 {group.items.map((article) => (
                   <li key={article.id}>
-                    <Link href={`/dashboard/articles/${article.id}/edit`} className="flex items-center justify-between px-4 py-3 hover:bg-surface-newsprint">
-                      <span className="font-body text-sm text-foreground">{article.title}</span>
-                      <span className="font-label text-xs text-muted">
-                        {article.scheduledAt ? new Date(article.scheduledAt).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" }) : "--:--"}
-                      </span>
-                    </Link>
+                    <CalendarPublicationCard id={article.id} title={article.title} scheduledAt={article.scheduledAt} category={article.category?.name} language={article.language} isBreaking={article.isBreaking} />
                   </li>
                 ))}
               </ul>

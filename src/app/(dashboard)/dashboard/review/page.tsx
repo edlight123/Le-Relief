@@ -4,7 +4,9 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import Badge from "@/components/ui/Badge";
 import Button from "@/components/ui/Button";
-import Card, { CardContent } from "@/components/ui/Card";
+import Card from "@/components/ui/Card";
+import PageHeader from "@/components/ui/PageHeader";
+import EmptyState from "@/components/ui/EmptyState";
 import { formatDistanceToNow, differenceInHours } from "date-fns";
 import { fr } from "date-fns/locale";
 import {
@@ -486,16 +488,11 @@ export default function ReviewQueuePage() {
 
   return (
     <div className="space-y-6">
-      <header className="border-t-2 border-border-strong pt-4">
-        <p className="page-kicker mb-2">Validation</p>
-        <h1 className="font-headline text-5xl font-extrabold leading-none text-foreground">
-          Review Queue
-        </h1>
-        <p className="mt-3 max-w-2xl font-body text-sm text-muted">
-          Contenus soumis à validation éditoriale. Approuvez, demandez des révisions ou
-          rejetez directement depuis cette vue.
-        </p>
-      </header>
+      <PageHeader
+        kicker="Validation"
+        title="Review Queue"
+        description="Contenus soumis à validation éditoriale. Approuvez, demandez des révisions ou rejetez directement depuis cette vue."
+      />
 
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-3">
@@ -542,17 +539,13 @@ export default function ReviewQueuePage() {
           ))}
         </div>
       ) : filtered.length === 0 ? (
-        <Card>
-          <CardContent className="py-14 text-center">
-            <CheckCircle2 className="mx-auto mb-3 h-8 w-8 text-accent-teal" />
-            <p className="font-label text-sm font-bold text-foreground">
-              Review queue vide
-            </p>
-            <p className="mt-1 font-body text-xs text-muted">
-              Tous les articles soumis ont été traités.
-            </p>
-          </CardContent>
-        </Card>
+        <EmptyState
+          icon={CheckCircle2}
+          title="Review queue vide"
+          description="Tous les articles soumis ont été traités."
+          actionHref="/dashboard/articles"
+          actionLabel="Voir les articles"
+        />
       ) : (
         <div className="space-y-3">
           {filtered.map((article) => (

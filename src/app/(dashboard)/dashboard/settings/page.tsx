@@ -1,9 +1,11 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Link from "next/link";
 import Input from "@/components/ui/Input";
 import Button from "@/components/ui/Button";
 import Card, { CardHeader, CardContent } from "@/components/ui/Card";
+import PageHeader from "@/components/ui/PageHeader";
 
 interface Category {
   id: string;
@@ -148,16 +150,35 @@ export default function SettingsPage() {
 
   return (
     <div className="space-y-8 max-w-2xl">
-      <header className="border-t-2 border-border-strong pt-4">
-        <p className="page-kicker mb-2">Configuration</p>
-        <h1 className="font-headline text-5xl font-extrabold leading-none text-foreground">
-          Paramètres
-        </h1>
-      </header>
+      <PageHeader
+        kicker="Configuration"
+        title="Paramètres"
+        description="Profil, réseaux, taxonomie et points d’entrée vers les autres règles institutionnelles du backoffice."
+      />
 
       {message && (
         <p className="font-label text-sm font-bold text-accent-teal">{message}</p>
       )}
+
+      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+        {[
+          { label: "Workflow rules", href: "/dashboard/review", desc: "Review queue, transitions et validations." },
+          { label: "Publication rules", href: "/dashboard/approved", desc: "Scheduling, publication et supervision live." },
+          { label: "Homepage rules", href: "/dashboard/homepage", desc: "Curation, slots et exposition éditoriale." },
+          { label: "Language settings", href: "/dashboard/articles", desc: "FR/EN, traduction et liaisons entre versions." },
+          { label: "SEO defaults", href: "/dashboard/articles", desc: "Slug, SEO title, meta description et qualité." },
+          { label: "Permissions policies", href: "/dashboard/users", desc: "Rôles, accès équipe et gouvernance." },
+        ].map((item) => (
+          <Link
+            key={item.label}
+            href={item.href}
+            className="border border-border-subtle bg-surface px-4 py-4 transition-colors hover:bg-surface-newsprint"
+          >
+            <p className="font-label text-xs font-extrabold uppercase tracking-wider text-foreground">{item.label}</p>
+            <p className="mt-2 font-body text-sm text-muted">{item.desc}</p>
+          </Link>
+        ))}
+      </div>
 
       {/* Profil */}
       <Card>

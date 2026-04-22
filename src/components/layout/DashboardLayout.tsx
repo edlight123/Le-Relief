@@ -12,6 +12,7 @@ const sectionLabels: Record<string, string> = {
   "/dashboard": "Tableau de bord",
   "/dashboard/homepage": "Une",
   "/dashboard/articles": "Articles",
+  "/dashboard/categories": "Rubriques",
   "/dashboard/my-drafts": "Mes brouillons",
   "/dashboard/articles/new": "Nouvel article",
   "/dashboard/review": "Review Queue",

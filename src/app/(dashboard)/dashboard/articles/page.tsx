@@ -4,15 +4,14 @@ import { useState, useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Button from "@/components/ui/Button";
-import Badge from "@/components/ui/Badge";
+import PageHeader from "@/components/ui/PageHeader";
+import FilterBar, { FilterBarSection } from "@/components/ui/FilterBar";
+import EmptyState from "@/components/ui/EmptyState";
+import StatusChip from "@/components/ui/StatusChip";
 import { PenSquare, Trash2, Search, Eye } from "lucide-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
-import {
-  getEditorialStatusLabel,
-  getEditorialStatusVariant,
-  normalizeEditorialStatus,
-} from "@/lib/editorial-workflow";
+import { normalizeEditorialStatus } from "@/lib/editorial-workflow";
 
 interface Article {
   id: string;
@@ -90,23 +89,23 @@ export default function ArticlesPage() {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <h1 className="font-headline text-3xl font-extrabold leading-none text-foreground">
-          Articles
-        </h1>
-        <Link href="/dashboard/articles/new">
-          <Button size="sm">
-            <PenSquare className="mr-1.5 h-3.5 w-3.5" />
-            Nouvel article
-          </Button>
-        </Link>
-      </div>
+      <PageHeader
+        kicker="Production"
+        title="Articles"
+        description="Vue de gestion dense et newsroom-friendly avec recherche rapide, suivi des statuts et actions directes sur chaque contenu."
+        actions={
+          <Link href="/dashboard/articles/new">
+            <Button size="sm">
+              <PenSquare className="mr-1.5 h-3.5 w-3.5" />
+              Nouvel article
+            </Button>
+          </Link>
+        }
+      />
 
-      {/* Toolbar */}
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-        {/* Search */}
-        <div className="relative flex-1">
+      <FilterBar>
+        <FilterBarSection className="min-w-0 flex-1">
+          <div className="relative w-full">
           <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted" />
           <input
             type="search"
@@ -115,9 +114,9 @@ export default function ArticlesPage() {
             onChange={(e) => setSearch(e.target.value)}
             className="w-full rounded-sm border border-border-subtle bg-surface py-2 pl-9 pr-4 font-label text-sm text-foreground placeholder:text-muted focus:border-primary focus:outline-none"
           />
-        </div>
-        {/* Status filters */}
-        <div className="flex gap-1.5">
+          </div>
+        </FilterBarSection>
+        <FilterBarSection>
           {STATUS_FILTERS.map((f) => (
             <button
               key={f.value}
@@ -136,8 +135,8 @@ export default function ArticlesPage() {
               {f.label}
             </button>
           ))}
-        </div>
-      </div>
+        </FilterBarSection>
+      </FilterBar>
 
       {/* Table */}
       <div className="overflow-hidden rounded-sm border border-border-subtle bg-surface">
@@ -173,8 +172,14 @@ export default function ArticlesPage() {
               ))
             ) : filtered.length === 0 ? (
               <tr>
-                <td colSpan={6} className="px-5 py-12 text-center font-body text-sm text-muted">
-                  {search ? `Aucun résultat pour « ${search} »` : "Aucun article trouvé."}
+                <td colSpan={6} className="px-5 py-8">
+                  <EmptyState
+                    icon={Search}
+                    title={search ? `Aucun résultat pour « ${search} »` : "Aucun article trouvé"}
+                    description="Ajustez les filtres ou créez un nouveau contenu pour démarrer la production."
+                    actionHref="/dashboard/articles/new"
+                    actionLabel="Créer un article"
+                  />
                 </td>
               </tr>
             ) : (
@@ -198,9 +203,7 @@ export default function ArticlesPage() {
                     {article.category?.name ?? <span className="text-muted/40">—</span>}
                   </td>
                   <td className="px-5 py-3.5">
-                    <Badge variant={getEditorialStatusVariant(article.status)}>
-                      {getEditorialStatusLabel(article.status)}
-                    </Badge>
+                    <StatusChip status={article.status} />
                   </td>
                   <td className="hidden px-5 py-3.5 text-right sm:table-cell">
                     <span className="flex items-center justify-end gap-1 font-label text-xs text-muted">

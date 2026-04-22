@@ -1,7 +1,11 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import Badge from "@/components/ui/Badge";
+import { Search, Users } from "lucide-react";
+import PageHeader from "@/components/ui/PageHeader";
+import FilterBar, { FilterBarSection } from "@/components/ui/FilterBar";
+import EmptyState from "@/components/ui/EmptyState";
+import UserRoleBadge from "@/components/ui/UserRoleBadge";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 
@@ -16,6 +20,7 @@ interface User {
 export default function UsersPage() {
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState("");
 
   useEffect(() => {
     fetch("/api/users")
@@ -35,27 +40,39 @@ export default function UsersPage() {
     );
   }
 
-  const roleBadgeVariant = (role: string) => {
-    switch (role) {
-      case "admin":
-        return "danger" as const;
-      case "editor":
-        return "warning" as const;
-      case "publisher":
-        return "info" as const;
-      default:
-        return "default" as const;
-    }
-  };
+  const filteredUsers = users.filter((user) => {
+    if (!search.trim()) return true;
+    const term = search.toLowerCase();
+    return (user.name || "").toLowerCase().includes(term) || user.email.toLowerCase().includes(term);
+  });
 
   return (
     <div className="space-y-6">
-      <header className="border-t-2 border-border-strong pt-4">
-        <p className="page-kicker mb-2">Accès</p>
-        <h1 className="font-headline text-5xl font-extrabold leading-none text-foreground">
-          Utilisateurs
-        </h1>
-      </header>
+      <PageHeader
+        kicker="Accès"
+        title="Utilisateurs"
+        description="Gestion simple des rôles, accès newsroom et administration des profils backoffice."
+      />
+
+      <FilterBar>
+        <FilterBarSection className="min-w-0 flex-1 max-w-sm">
+          <div className="relative w-full">
+            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted" />
+            <input
+              type="search"
+              placeholder="Rechercher un utilisateur…"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="w-full rounded-sm border border-border-subtle bg-surface py-2 pl-9 pr-4 font-label text-sm text-foreground placeholder:text-muted focus:border-primary focus:outline-none"
+            />
+          </div>
+        </FilterBarSection>
+        <FilterBarSection>
+          <span className="font-label text-xs uppercase text-muted">
+            {loading ? "—" : filteredUsers.length} utilisateur{filteredUsers.length > 1 ? "s" : ""}
+          </span>
+        </FilterBarSection>
+      </FilterBar>
 
       <div className="overflow-hidden border border-border-subtle bg-surface">
         <table className="w-full text-sm">
@@ -88,17 +105,18 @@ export default function UsersPage() {
                   Chargement...
                 </td>
               </tr>
-            ) : users.length === 0 ? (
+            ) : filteredUsers.length === 0 ? (
               <tr>
-                <td
-                  colSpan={5}
-                  className="px-4 py-8 text-center font-body text-muted"
-                >
-                  Aucun utilisateur trouvé
+                <td colSpan={5} className="px-4 py-8">
+                  <EmptyState
+                    icon={Users}
+                    title="Aucun utilisateur trouvé"
+                    description="Essayez une autre recherche ou ajoutez un membre via votre flux d’authentification."
+                  />
                 </td>
               </tr>
             ) : (
-              users.map((user) => (
+              filteredUsers.map((user) => (
                 <tr
                   key={user.id}
                   className="hover:bg-surface-newsprint"
@@ -110,9 +128,7 @@ export default function UsersPage() {
                     {user.email}
                   </td>
                   <td className="px-4 py-3">
-                    <Badge variant={roleBadgeVariant(user.role)}>
-                      {user.role}
-                    </Badge>
+                    <UserRoleBadge role={user.role} />
                   </td>
                   <td className="hidden px-4 py-3 font-label text-muted lg:table-cell">
                     {format(new Date(user.createdAt), "d MMM yyyy", { locale: fr })}

@@ -8,6 +8,7 @@ import {
   LayoutDashboard,
   Home,
   FileText,
+  FolderTree,
   PenSquare,
   ClipboardCheck,
   RotateCcw,
@@ -33,6 +34,7 @@ const navGroups = [
       { label: "Tableau de bord", href: "/dashboard", icon: LayoutDashboard, exact: true },
       { label: "Une", href: "/dashboard/homepage", icon: Home },
       { label: "Articles", href: "/dashboard/articles", icon: FileText },
+      { label: "Rubriques", href: "/dashboard/categories", icon: FolderTree },
       { label: "Mes brouillons", href: "/dashboard/my-drafts", icon: PenSquare },
       { label: "Nouvel article", href: "/dashboard/articles/new", icon: PenSquare },
       { label: "Review Queue", href: "/dashboard/review", icon: ClipboardCheck },
@@ -75,6 +77,15 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
   const pathname = usePathname();
   const { data: session } = useSession();
   const role = normalizeWorkflowRole((session?.user as { role?: string } | undefined)?.role || "writer");
+  const userName = (session?.user as { name?: string } | undefined)?.name || "Rédaction";
+  const roleLabel =
+    role === "admin"
+      ? "Administration"
+      : role === "publisher"
+      ? "Publication"
+      : role === "editor"
+      ? "Édition"
+      : "Rédaction";
 
   function isActive(href: string, exact = false) {
     if (exact) return pathname === href;
@@ -154,7 +165,14 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
         </nav>
 
         {/* Footer */}
-        <div className="border-t border-border-subtle px-3 py-3 space-y-0.5">
+        <div className="border-t border-border-subtle px-3 py-3 space-y-2">
+          <div className="rounded-sm border border-border-subtle bg-surface-newsprint px-3 py-2">
+            <p className="font-label text-[10px] font-extrabold uppercase tracking-widest text-muted/70">
+              Session
+            </p>
+            <p className="mt-1 truncate font-label text-sm font-bold text-foreground">{userName}</p>
+            <p className="font-label text-[11px] uppercase text-muted">{roleLabel}</p>
+          </div>
           <Link
             href="/"
             target="_blank"

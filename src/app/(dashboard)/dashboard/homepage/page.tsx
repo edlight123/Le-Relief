@@ -3,6 +3,9 @@
 import { useEffect, useMemo, useState } from "react";
 import Button from "@/components/ui/Button";
 import Card, { CardContent, CardHeader } from "@/components/ui/Card";
+import PageHeader from "@/components/ui/PageHeader";
+import AlertBanner from "@/components/ui/AlertBanner";
+import CurationSlotCard from "@/components/dashboard/CurationSlotCard";
 import type { HomepageSettings } from "@/types/homepage";
 
 interface ArticleOption {
@@ -178,16 +181,16 @@ export default function HomepageDashboardPage() {
 
   return (
     <div className="max-w-6xl space-y-8">
-      <header className="border-t-2 border-border-strong pt-4">
-        <p className="page-kicker mb-2">Curation</p>
-        <h1 className="font-headline text-5xl font-extrabold leading-none text-foreground">
-          Une de la homepage
-        </h1>
-        <p className="mt-4 max-w-3xl font-body text-lg leading-relaxed text-muted">
-          Choisissez les histoires qui structurent l&apos;édition publique sans
-          dépendre uniquement du dernier article publié.
-        </p>
-      </header>
+      <PageHeader
+        kicker="Curation"
+        title="Une de la homepage"
+        description="Choisissez les histoires qui structurent l’édition publique sans dépendre uniquement du dernier article publié."
+        actions={
+          <Button onClick={handleSave} disabled={saving || loading}>
+            Enregistrer la une
+          </Button>
+        }
+      />
 
       {message ? (
         <p className="font-label text-sm font-bold text-accent-teal">
@@ -196,8 +199,7 @@ export default function HomepageDashboardPage() {
       ) : null}
 
       {curationWarnings.length > 0 ? (
-        <div className="border border-primary/20 bg-primary/5 px-4 py-3">
-          <p className="font-label text-xs font-extrabold uppercase text-primary">Alertes curation</p>
+        <AlertBanner variant="warning" title="Alertes curation">
           <ul className="mt-2 space-y-1">
             {curationWarnings.map((warning) => (
               <li key={warning} className="font-label text-xs text-primary">
@@ -205,18 +207,12 @@ export default function HomepageDashboardPage() {
               </li>
             ))}
           </ul>
-        </div>
+        </AlertBanner>
       ) : null}
 
       <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
         <div className="space-y-6">
-          <Card>
-            <CardHeader>
-              <h2 className="font-label text-xs font-extrabold uppercase text-foreground">
-                Article principal
-              </h2>
-            </CardHeader>
-            <CardContent className="space-y-4">
+          <CurationSlotCard title="Article principal" description="Sélection éditoriale du hero de homepage.">
               <label
                 htmlFor="homepage-hero"
                 className="block font-label text-xs font-extrabold uppercase text-foreground"
@@ -242,16 +238,9 @@ export default function HomepageDashboardPage() {
                 La liste privilégie les articles publiés avec image afin
                 d&apos;éviter un bloc hero vide.
               </p>
-            </CardContent>
-          </Card>
+          </CurationSlotCard>
 
-          <Card>
-            <CardHeader>
-              <h2 className="font-label text-xs font-extrabold uppercase text-foreground">
-                Titres secondaires
-              </h2>
-            </CardHeader>
-            <CardContent className="space-y-4">
+          <CurationSlotCard title="Titres secondaires" description="Slots secondaires pour rythmer la hiérarchie éditoriale de la page d’accueil.">
               {[0, 1, 2].map((slot) => (
                 <div key={slot}>
                   <label
@@ -283,8 +272,7 @@ export default function HomepageDashboardPage() {
                   </select>
                 </div>
               ))}
-            </CardContent>
-          </Card>
+          </CurationSlotCard>
 
           <Card>
             <CardHeader>

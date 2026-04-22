@@ -4,7 +4,9 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import Badge from "@/components/ui/Badge";
 import Button from "@/components/ui/Button";
-import Card, { CardContent } from "@/components/ui/Card";
+import Card from "@/components/ui/Card";
+import PageHeader from "@/components/ui/PageHeader";
+import EmptyState from "@/components/ui/EmptyState";
 import { formatDistanceToNow, differenceInHours } from "date-fns";
 import { fr } from "date-fns/locale";
 import { Clock, AlertTriangle, MessageSquare, Send, CheckCircle2, Pencil } from "lucide-react";
@@ -163,11 +165,11 @@ export default function RevisionsRequestedPage() {
 
   return (
     <div className="space-y-6">
-      <header className="border-t-2 border-border-strong pt-4">
-        <p className="page-kicker mb-2">Workflow</p>
-        <h1 className="font-headline text-5xl font-extrabold leading-none text-foreground">Révisions demandées</h1>
-        <p className="mt-3 max-w-2xl font-body text-sm text-muted">Articles renvoyés aux rédacteurs pour corrections. Triés du plus ancien au plus récent.</p>
-      </header>
+      <PageHeader
+        kicker="Workflow"
+        title="Révisions demandées"
+        description="Articles renvoyés aux rédacteurs pour corrections. Triés du plus ancien au plus récent."
+      />
       <div className="flex flex-wrap items-center gap-3">
         <span className="font-label text-sm font-bold text-foreground">{loading ? "—" : articles.length} article{articles.length !== 1 ? "s" : ""}</span>
         {overdueCount > 0 && (
@@ -180,7 +182,13 @@ export default function RevisionsRequestedPage() {
       {loading ? (
         <div className="space-y-3">{Array.from({ length: 3 }).map((_, i) => (<div key={i} className="h-24 animate-pulse border border-border-subtle bg-surface" />))}</div>
       ) : articles.length === 0 ? (
-        <Card><CardContent className="py-14 text-center"><CheckCircle2 className="mx-auto mb-3 h-8 w-8 text-accent-teal" /><p className="font-label text-sm font-bold text-foreground">Aucune révision en attente</p><p className="mt-1 font-body text-xs text-muted">Tous les articles sont à jour.</p></CardContent></Card>
+        <EmptyState
+          icon={CheckCircle2}
+          title="Aucune révision en attente"
+          description="Tous les articles sont à jour."
+          actionHref="/dashboard/articles"
+          actionLabel="Revenir aux articles"
+        />
       ) : (
         <div className="space-y-3">{articles.map((article) => (<ArticleCard key={article.id} article={article} onResubmit={handleResubmit} />))}</div>
       )}

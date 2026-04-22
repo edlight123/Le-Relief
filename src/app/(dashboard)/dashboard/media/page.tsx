@@ -1,10 +1,13 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { Upload, Trash2 } from "lucide-react";
+import { Upload, Trash2, Search, LayoutGrid, Rows2 } from "lucide-react";
 import Image from "next/image";
 import Button from "@/components/ui/Button";
 import Card from "@/components/ui/Card";
+import PageHeader from "@/components/ui/PageHeader";
+import FilterBar, { FilterBarSection } from "@/components/ui/FilterBar";
+import EmptyState from "@/components/ui/EmptyState";
 
 interface MediaItem {
   id: string;
@@ -19,6 +22,9 @@ export default function MediaPage() {
   const [media, setMedia] = useState<MediaItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
+  const [search, setSearch] = useState("");
+  const [view, setView] = useState<"grid" | "list">("grid");
+  const [selectedId, setSelectedId] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -50,23 +56,46 @@ export default function MediaPage() {
     setMedia((prev) => prev.filter((m) => m.id !== id));
   }
 
+  const filtered = media.filter((item) =>
+    item.filename.toLowerCase().includes(search.toLowerCase()),
+  );
+  const selected = filtered.find((item) => item.id === selectedId) || filtered[0] || null;
+
   return (
     <div className="space-y-6">
-      <div className="flex items-end justify-between border-t-2 border-border-strong pt-4">
-        <div>
-          <p className="page-kicker mb-2">Archives visuelles</p>
-          <h1 className="font-headline text-5xl font-extrabold leading-none text-foreground">
-            Médiathèque
-          </h1>
-        </div>
-        <Button
-          size="sm"
-          onClick={() => inputRef.current?.click()}
-          disabled={uploading}
-        >
-          <Upload className="h-4 w-4 mr-2" />
-          {uploading ? "Téléversement..." : "Téléverser"}
-        </Button>
+      <PageHeader
+        kicker="Archives visuelles"
+        title="Médiathèque"
+        description="Bibliothèque rapide pour la rédaction, avec recherche, consultation et sélection des assets visuels."
+        actions={
+          <Button
+            size="sm"
+            onClick={() => inputRef.current?.click()}
+            disabled={uploading}
+          >
+            <Upload className="mr-2 h-4 w-4" />
+            {uploading ? "Téléversement..." : "Téléverser"}
+          </Button>
+        }
+      />
+      <FilterBar>
+        <FilterBarSection className="min-w-0 flex-1">
+          <div className="relative w-full max-w-sm">
+            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted" />
+            <input
+              type="search"
+              placeholder="Rechercher un média…"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="w-full border border-border-subtle bg-surface py-2 pl-9 pr-4 font-label text-sm text-foreground placeholder:text-muted focus:border-primary focus:outline-none"
+            />
+          </div>
+        </FilterBarSection>
+        <FilterBarSection>
+          <button type="button" onClick={() => setView("grid")} className={`inline-flex items-center gap-1 border px-3 py-2 font-label text-xs font-bold uppercase ${view === "grid" ? "border-border-strong bg-foreground text-background" : "border-border-subtle text-muted"}`}><LayoutGrid className="h-3.5 w-3.5" />Grille</button>
+          <button type="button" onClick={() => setView("list")} className={`inline-flex items-center gap-1 border px-3 py-2 font-label text-xs font-bold uppercase ${view === "list" ? "border-border-strong bg-foreground text-background" : "border-border-subtle text-muted"}`}><Rows2 className="h-3.5 w-3.5" />Liste</button>
+        </FilterBarSection>
+      </FilterBar>
         <input
           ref={inputRef}
           type="file"
@@ -74,21 +103,23 @@ export default function MediaPage() {
           onChange={handleUpload}
           className="hidden"
         />
-      </div>
 
       {loading ? (
         <p className="py-8 text-center font-body text-muted">Chargement...</p>
-      ) : media.length === 0 ? (
-        <Card>
-          <div className="px-6 py-12 text-center font-body text-muted">
-            Aucun média téléversé pour le moment.
-          </div>
-        </Card>
+      ) : filtered.length === 0 ? (
+        <EmptyState
+          icon={Upload}
+          title="Aucun média trouvé"
+          description="Téléversez une première image ou ajustez la recherche."
+        />
       ) : (
-        <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
-          {media.map((item) => (
+        <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
+          {view === "grid" ? (
+            <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-3">
+          {filtered.map((item) => (
             <div
               key={item.id}
+              onClick={() => setSelectedId(item.id)}
               className="group relative h-40 overflow-hidden border border-border-subtle"
             >
               <Image
@@ -111,6 +142,41 @@ export default function MediaPage() {
               </div>
             </div>
           ))}
+            </div>
+          ) : (
+            <Card>
+              <div className="divide-y divide-border-subtle">
+                {filtered.map((item) => (
+                  <button key={item.id} type="button" onClick={() => setSelectedId(item.id)} className="flex w-full items-center justify-between px-4 py-3 text-left hover:bg-surface-newsprint">
+                    <div>
+                      <p className="font-label text-sm font-bold text-foreground">{item.filename}</p>
+                      <p className="font-label text-xs text-muted">{Math.round(item.size / 1024)} KB</p>
+                    </div>
+                    <span className="font-label text-xs text-muted">{new Date(item.createdAt).toLocaleDateString("fr-FR")}</span>
+                  </button>
+                ))}
+              </div>
+            </Card>
+          )}
+          <Card>
+            <div className="p-4">
+              <p className="page-kicker mb-2">Preview</p>
+              {selected ? (
+                <>
+                  <div className="relative aspect-[4/3] overflow-hidden border border-border-subtle bg-surface-newsprint">
+                    <Image src={selected.url} alt={selected.filename} fill sizes="320px" className="object-cover" />
+                  </div>
+                  <div className="mt-4 space-y-1">
+                    <p className="font-label text-sm font-bold text-foreground">{selected.filename}</p>
+                    <p className="font-label text-xs uppercase text-muted">{selected.type} · {Math.round(selected.size / 1024)} KB</p>
+                    <p className="font-label text-xs text-muted">Ajouté le {new Date(selected.createdAt).toLocaleDateString("fr-FR")}</p>
+                  </div>
+                </>
+              ) : (
+                <p className="font-body text-sm text-muted">Sélectionnez un média pour voir ses détails.</p>
+              )}
+            </div>
+          </Card>
         </div>
       )}
     </div>

@@ -3,8 +3,11 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import Badge from "@/components/ui/Badge";
-import Card, { CardContent } from "@/components/ui/Card";
+import Card from "@/components/ui/Card";
+import PageHeader from "@/components/ui/PageHeader";
+import FilterBar, { FilterBarSection } from "@/components/ui/FilterBar";
+import EmptyState from "@/components/ui/EmptyState";
+import UserRoleBadge from "@/components/ui/UserRoleBadge";
 import { Users, FileText, Search } from "lucide-react";
 
 interface Author {
@@ -20,21 +23,6 @@ interface Author {
 }
 
 const NEWSROOM_ROLES = ["writer", "editor", "publisher", "admin"];
-
-function roleBadgeVariant(role: string): "danger" | "warning" | "info" | "default" {
-  if (role === "admin") return "danger";
-  if (role === "publisher") return "warning";
-  if (role === "editor") return "info";
-  return "default";
-}
-
-function roleLabel(role: string): string {
-  if (role === "admin") return "Admin";
-  if (role === "publisher") return "Publisher";
-  if (role === "editor") return "Éditeur";
-  if (role === "writer") return "Rédacteur";
-  return role;
-}
 
 function Avatar({ author }: { author: Author }) {
   const initials = (author.name || author.email)
@@ -89,18 +77,23 @@ export default function AuthorsPage() {
 
   return (
     <div className="space-y-6">
-      <header className="border-t-2 border-border-strong pt-4">
-        <p className="page-kicker mb-2">Équipe</p>
-        <h1 className="font-headline text-5xl font-extrabold leading-none text-foreground">
-          Auteurs
-        </h1>
-        <p className="mt-3 max-w-2xl font-body text-sm text-muted">
-          Membres de la rédaction avec accès au backoffice.
-        </p>
-      </header>
+      <PageHeader
+        kicker="Équipe"
+        title="Auteurs"
+        description="Membres de la rédaction, profils institutionnels et accès liés à la production éditoriale."
+        actions={
+          <Link
+            href="/dashboard/users"
+            className="rounded-sm border border-border-subtle px-3 py-2 font-label text-xs font-bold text-muted transition-colors hover:text-foreground"
+          >
+            Gérer les accès
+          </Link>
+        }
+      />
 
-      <div className="flex items-center gap-3">
-        <div className="relative flex-1 max-w-sm">
+      <FilterBar>
+        <FilterBarSection className="min-w-0 flex-1 max-w-sm">
+          <div className="relative w-full">
           <Search className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted" />
           <input
             type="search"
@@ -109,21 +102,14 @@ export default function AuthorsPage() {
             onChange={(e) => setSearch(e.target.value)}
             className="w-full rounded-sm border border-border-subtle bg-surface py-2 pl-9 pr-3 font-label text-sm text-foreground placeholder-muted focus:border-primary focus:outline-none"
           />
-        </div>
-        <Link
-          href="/dashboard/users"
-          className="rounded-sm border border-border-subtle px-3 py-2 font-label text-xs font-bold text-muted transition-colors hover:text-foreground"
-        >
-          Gérer les accès
-        </Link>
-      </div>
-
-      <div className="flex items-center gap-2">
-        <Users className="h-4 w-4 text-muted" />
-        <span className="font-label text-xs text-muted">
-          {loading ? "—" : filtered.length} membre{filtered.length !== 1 ? "s" : ""}
-        </span>
-      </div>
+          </div>
+        </FilterBarSection>
+        <FilterBarSection>
+          <span className="font-label text-xs uppercase text-muted">
+            {loading ? "—" : filtered.length} membre{filtered.length !== 1 ? "s" : ""}
+          </span>
+        </FilterBarSection>
+      </FilterBar>
 
       {loading ? (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -132,12 +118,13 @@ export default function AuthorsPage() {
           ))}
         </div>
       ) : filtered.length === 0 ? (
-        <Card>
-          <CardContent className="py-14 text-center">
-            <Users className="mx-auto mb-3 h-8 w-8 text-muted" />
-            <p className="font-label text-sm font-bold text-foreground">Aucun auteur trouvé</p>
-          </CardContent>
-        </Card>
+        <EmptyState
+          icon={Users}
+          title="Aucun auteur trouvé"
+          description="Affinez la recherche ou ouvrez la gestion des utilisateurs pour ajouter un nouveau profil."
+          actionHref="/dashboard/users"
+          actionLabel="Ouvrir les utilisateurs"
+        />
       ) : (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {filtered.map((author) => (
@@ -150,13 +137,14 @@ export default function AuthorsPage() {
                       <h3 className="font-headline text-base font-extrabold text-foreground truncate">
                         {author.name || author.email}
                       </h3>
-                      <Badge variant={roleBadgeVariant(author.role)}>
-                        {author.roleFr || roleLabel(author.role)}
-                      </Badge>
+                      <UserRoleBadge role={author.role} />
                     </div>
                     <p className="mt-0.5 font-label text-xs text-muted truncate">
                       {author.email}
                     </p>
+                    {author.roleFr ? (
+                      <p className="mt-1 font-label text-[11px] uppercase text-muted">{author.roleFr}</p>
+                    ) : null}
                     {author.bio && (
                       <p className="mt-2 line-clamp-2 font-body text-xs text-muted">
                         {author.bio}

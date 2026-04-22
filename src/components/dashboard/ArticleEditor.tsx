@@ -6,7 +6,10 @@ import Button from "@/components/ui/Button";
 import MediaUploader from "@/components/dashboard/MediaUploader";
 import SourceArticlePicker from "@/components/dashboard/SourceArticlePicker";
 import Badge from "@/components/ui/Badge";
-import { canTransitionStatus, getEditorialStatusLabel, getEditorialStatusVariant, normalizeWorkflowRole } from "@/lib/editorial-workflow";
+import AlertBanner from "@/components/ui/AlertBanner";
+import StatusChip from "@/components/ui/StatusChip";
+import PriorityFlag from "@/components/ui/PriorityFlag";
+import { canTransitionStatus, normalizeWorkflowRole } from "@/lib/editorial-workflow";
 import { useSession } from "next-auth/react";
 import CommentsPanel from "@/components/dashboard/editorial/CommentsPanel";
 import HistoryPanel from "@/components/dashboard/editorial/HistoryPanel";
@@ -328,6 +331,7 @@ export default function ArticleEditor({
   const completionScore = Math.round(
     (qualityChecks.filter((check) => check.ok).length / qualityChecks.length) * 100,
   );
+  const missingChecks = qualityChecks.filter((check) => !check.ok);
 
   const completionVariant = completionScore >= 90 ? "success" : completionScore >= 70 ? "info" : "warning";
   const statusOptions = [
@@ -366,7 +370,9 @@ export default function ArticleEditor({
                 : "Prêt"}
             </Badge>
             <Badge variant={completionVariant}>Complétude {completionScore}%</Badge>
-            <Badge variant={getEditorialStatusVariant(normalizedStatus)}>{getEditorialStatusLabel(normalizedStatus)}</Badge>
+            <StatusChip status={normalizedStatus} />
+            {isBreaking ? <PriorityFlag kind="breaking" /> : null}
+            {isHomepagePinned ? <PriorityFlag kind="homepage" /> : null}
           </div>
 
           <div className="flex flex-wrap items-center gap-2">
@@ -387,6 +393,20 @@ export default function ArticleEditor({
           </div>
         </div>
       </div>
+
+      {missingChecks.length > 0 ? (
+        <AlertBanner variant="warning" title="Points à compléter avant publication">
+          <p>
+            Champs manquants : {missingChecks.map((check) => check.label).join(", ")}.
+          </p>
+        </AlertBanner>
+      ) : null}
+
+      {autosaveState === "error" ? (
+        <AlertBanner variant="danger" title="Autosave échoué">
+          Réessayez ou enregistrez manuellement avant de quitter l’éditeur.
+        </AlertBanner>
+      ) : null}
 
       <div className="grid gap-6 xl:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">
         <div className="space-y-6">
@@ -804,11 +824,7 @@ export default function ArticleEditor({
         </aside>
       </div>
 
-      {submitError && (
-        <div className="border border-primary/30 bg-primary/5 px-4 py-3 font-label text-sm text-primary">
-          {submitError}
-        </div>
-      )}
+      {submitError ? <AlertBanner variant="danger" title="Enregistrement impossible">{submitError}</AlertBanner> : null}
 
       <div className="flex flex-wrap items-center gap-3 pt-2">
         <Button

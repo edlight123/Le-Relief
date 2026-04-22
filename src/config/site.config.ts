@@ -54,6 +54,8 @@ export const siteConfig = {
       { label: "Tableau de Bord", href: "/dashboard" },
       { label: "Une", href: "/dashboard/homepage" },
       { label: "Articles", href: "/dashboard/articles" },
+      { label: "Rubriques", href: "/dashboard/categories" },
+      { label: "Auteurs", href: "/dashboard/authors" },
       { label: "Nouvel Article", href: "/dashboard/articles/new" },
       { label: "Médias", href: "/dashboard/media" },
       { label: "Analytiques", href: "/dashboard/analytics" },
