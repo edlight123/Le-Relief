@@ -209,9 +209,15 @@ export async function getHomepageContent(): Promise<HomepageContent> {
     (article) => !article.publishedAt || article.publishedAt >= ninetyDaysAgo,
   );
   const mostReadPool = recentArticles.length >= 3 ? recentArticles : allArticles;
+  const usedForMostRead = new Set<string>([
+    ...(hero ? [hero.id] : []),
+    ...secondary.map((article) => article.id),
+    ...latestList.map((article) => article.id),
+    ...editorial.map((article) => article.id),
+  ]);
   const mostRead = [...mostReadPool]
     .sort((a, b) => b.views - a.views)
-    .filter((article) => article.id !== hero?.id)
+    .filter((article) => !usedForMostRead.has(article.id))
     .slice(0, 5);
   const englishSelection = allArticles
     .filter((article) => article.language === "en")

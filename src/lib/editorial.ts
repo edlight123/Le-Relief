@@ -181,6 +181,48 @@ const CATEGORY_OVERRIDES: Record<
       "Recherche, santé, environnement et données utiles au débat public.",
     priority: 95,
   },
+  actualite: {
+    name: "Actualités",
+    description:
+      "Les faits marquants du jour, vérifiés et mis en contexte par la rédaction.",
+    priority: 5,
+  },
+  actualites: {
+    name: "Actualités",
+    description:
+      "Les faits marquants du jour, vérifiés et mis en contexte par la rédaction.",
+    priority: 5,
+  },
+  sante: {
+    name: "Santé",
+    description:
+      "Système de soins, santé publique, prévention et enjeux médicaux en Haïti.",
+    priority: 45,
+  },
+  sport: {
+    name: "Sport",
+    description:
+      "Football, performances, fédérations et grands rendez-vous sportifs.",
+    priority: 85,
+  },
+  tribune: {
+    name: "Tribune",
+    description:
+      "Espace de débats et de prises de position signées, distinctes de l'actualité.",
+    priority: 75,
+  },
+  emission_speciale: {
+    name: "Émission spéciale",
+    description:
+      "Formats vidéo et audio produits par la rédaction sur des sujets clés.",
+    priority: 92,
+  },
+  "emission-speciale": {
+    name: "Émission spéciale",
+    description:
+      "Formats vidéo et audio produits par la rédaction sur des sujets clés.",
+    priority: 92,
+  },
 };
 
 function asString(value: unknown, fallback = "") {
@@ -263,7 +305,7 @@ export function normalizeCategory(
     description:
       override?.description ||
       asOptionalString(category.description) ||
-      "Articles et analyses publiés par la rédaction.",
+      null,
     count,
     priority: override?.priority || 100,
   };
@@ -660,9 +702,15 @@ export async function getHomepageContent(
     (article) => !article.publishedAt || article.publishedAt >= ninetyDaysAgo,
   );
   const mostReadPool = recentArticles.length >= 3 ? recentArticles : allArticles;
+  const usedForMostRead = new Set<string>([
+    ...(hero ? [hero.id] : []),
+    ...secondary.map((article) => article.id),
+    ...latestList.map((article) => article.id),
+    ...editorial.map((article) => article.id),
+  ]);
   const mostRead = [...mostReadPool]
     .sort((a, b) => b.views - a.views)
-    .filter((article) => article.id !== hero?.id)
+    .filter((article) => !usedForMostRead.has(article.id))
     .slice(0, 5);
   const homepageCategories = selectHomepageCategories(categories, settings);
 
