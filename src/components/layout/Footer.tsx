@@ -10,19 +10,18 @@ import NewsletterSignup from "@/components/public/NewsletterSignup";
 export default function Footer() {
   const pathname = usePathname();
   const locale = pathname === "/en" || pathname.startsWith("/en/") ? "en" : "fr";
-  const withLocale = (href: string) => (href === "/" ? `/${locale}` : `/${locale}${href}`);
 
   return (
     <footer className="mt-16 border-t-4 border-border-strong bg-surface-newsprint pb-10 pt-8 sm:mt-24 sm:pt-12">
       <div className="newspaper-shell">
         <div className="mb-8 border-b border-border-strong pb-6 text-center">
-          <Link href={`/${locale}`} className="inline-flex items-center justify-center gap-3">
+          <Link href="/" className="inline-flex items-center justify-center gap-3">
             <Image
               src="/logo.png"
               alt="Le Relief"
               width={34}
               height={34}
-                            sizes="34px"
+              sizes="34px"
               className="rounded-sm"
             />
             <span className="font-headline text-4xl font-extrabold leading-none text-foreground sm:text-5xl">
@@ -65,7 +64,7 @@ export default function Footer() {
                 ]).map((item) => (
               <Link
                 key={item.href}
-                href={withLocale(item.href)}
+                href={item.href}
                 className="ink-link text-muted"
               >
                 {item.label}
@@ -77,34 +76,19 @@ export default function Footer() {
             <h4 className="border-b border-border-subtle pb-3 text-xs font-extrabold uppercase text-foreground">
               {locale === "fr" ? "Institutionnel" : "Institutional"}
             </h4>
-            <Link
-              href={withLocale("/about")}
-              className="ink-link text-muted"
-            >
+            <Link href="/about" className="ink-link text-muted">
               {locale === "fr" ? "À propos" : "About"}
             </Link>
-            <Link
-              href={withLocale("/politique-editoriale")}
-              className="ink-link text-muted"
-            >
+            <Link href="/politique-editoriale" className="ink-link text-muted">
               {locale === "fr" ? "Politique éditoriale" : "Editorial policy"}
             </Link>
-            <Link
-              href={withLocale("/corrections")}
-              className="ink-link text-muted"
-            >
+            <Link href="/corrections" className="ink-link text-muted">
               Corrections
             </Link>
-            <Link
-              href={withLocale("/traduction-ia")}
-              className="ink-link text-muted"
-            >
+            <Link href="/traduction-ia" className="ink-link text-muted">
               {locale === "fr" ? "Traduction assistée par IA" : "AI-assisted translation"}
             </Link>
-            <Link
-              href={withLocale("/privacy")}
-              className="ink-link text-muted"
-            >
+            <Link href="/privacy" className="ink-link text-muted">
               {locale === "fr" ? "Confidentialité" : "Privacy"}
             </Link>
             <a
@@ -114,10 +98,7 @@ export default function Footer() {
             >
               Flux RSS
             </a>
-            <Link
-              href={withLocale("/contact")}
-              className="ink-link text-muted"
-            >
+            <Link href="/contact" className="ink-link text-muted">
               Contact
             </Link>
           </div>
