@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, Suspense } from "react";
-import { useSearchParams, useRouter, usePathname } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
 import { Search as SearchIcon } from "lucide-react";
 import ArticleCard from "@/components/public/ArticleCard";
 import { useDebounce } from "@/hooks/useDebounce";
@@ -10,7 +10,6 @@ import { analyticsClient } from "@/lib/analytics-client";
 function SearchPageContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
-  const pathname = usePathname();
   const initialQ = searchParams.get("q") || "";
   const initialCategory = searchParams.get("categoryId") || "";
   const initialLanguage = searchParams.get("language") || "";
@@ -42,10 +41,6 @@ function SearchPageContent() {
   const filterKey = `${trimmedQuery}|${categoryId}|${language}`;
   const isSearching = !!trimmedQuery && resolvedQuery !== filterKey;
   const visibleResults = resolvedQuery === filterKey ? results : [];
-
-  // Determine current locale from pathname
-  const isEnglish = pathname.startsWith("/en");
-  const currentLocale: "fr" | "en" = isEnglish ? "en" : "fr";
 
   useEffect(() => {
     let cancelled = false;

@@ -1,11 +1,9 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { subDays, format } from "date-fns";
-import { fr, enUS } from "date-fns/locale";
+import { enUS } from "date-fns/locale";
 import {
-  BarChart,
-  Bar,
   LineChart,
   Line,
   PieChart,
@@ -18,7 +16,7 @@ import {
   Legend,
   ResponsiveContainer,
 } from "recharts";
-import { Calendar, TrendingUp, Search, Eye, Mail, Zap } from "lucide-react";
+import { TrendingUp, Search, Eye, Mail, Zap } from "lucide-react";
 import Card, { CardHeader, CardContent } from "@/components/ui/Card";
 
 // Types
@@ -84,7 +82,12 @@ interface LanguageMetrics {
   languageSwitches: number;
 }
 
-const COLORS = ["#3b82f6", "#ef4444", "#10b981", "#f59e0b", "#8b5cf6"];
+interface ChartPoint {
+  date: string;
+  FR: number;
+  EN: number;
+  total: number;
+}
 
 export default function AnalyticsPage() {
   const [days, setDays] = useState(30);
@@ -96,13 +99,9 @@ export default function AnalyticsPage() {
   const [searchQueries, setSearchQueries] = useState<SearchQuery[]>([]);
   const [newsletter, setNewsletter] = useState<NewsletterMetrics | null>(null);
   const [languageMetrics, setLanguageMetrics] = useState<LanguageMetrics | null>(null);
-  const [chartData, setChartData] = useState<any[]>([]);
+  const [chartData, setChartData] = useState<ChartPoint[]>([]);
 
-  useEffect(() => {
-    fetchData();
-  }, [days, language]);
-
-  async function fetchData() {
+  const fetchData = useCallback(async () => {
     setLoading(true);
     try {
       const [summaryRes, articlesRes, searchRes, newsletterRes, langRes] =
@@ -127,29 +126,29 @@ export default function AnalyticsPage() {
       if (langRes.ok) setLanguageMetrics(await langRes.json());
 
       // Generate mock time-series data (would come from actual API in production)
-      generateChartData();
+      const now = new Date();
+      const data: ChartPoint[] = [];
+      for (let i = Math.min(days, 30) - 1; i >= 0; i--) {
+        const date = subDays(now, i);
+        data.push({
+          date: format(date, "MMM d", { locale: enUS }),
+          FR: Math.floor(Math.random() * 50) + 10,
+          EN: Math.floor(Math.random() * 40) + 5,
+          total: 0,
+        });
+      }
+      data.forEach((d) => (d.total = d.FR + d.EN));
+      setChartData(data);
     } catch (error) {
       console.error("Failed to fetch analytics:", error);
     } finally {
       setLoading(false);
     }
-  }
+  }, [days, language]);
 
-  function generateChartData() {
-    const now = new Date();
-    const data = [];
-    for (let i = Math.min(days, 30) - 1; i >= 0; i--) {
-      const date = subDays(now, i);
-      data.push({
-        date: format(date, "MMM d", { locale: enUS }),
-        FR: Math.floor(Math.random() * 50) + 10,
-        EN: Math.floor(Math.random() * 40) + 5,
-        total: 0,
-      });
-    }
-    data.forEach((d) => (d.total = d.FR + d.EN));
-    setChartData(data);
-  }
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
 
   const StatCard = ({
     label,

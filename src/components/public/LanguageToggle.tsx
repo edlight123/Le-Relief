@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { analyticsClient } from "@/lib/analytics-client";
 
 const LOCALE_COOKIE = "NEXT_LOCALE";
@@ -15,11 +15,9 @@ function readLocaleCookie(): "fr" | "en" {
 
 export default function LanguageToggle() {
   const router = useRouter();
-  const [locale, setLocaleState] = useState<"fr" | "en">("fr");
-
-  useEffect(() => {
-    setLocaleState(readLocaleCookie());
-  }, []);
+  const [locale, setLocaleState] = useState<"fr" | "en">(() =>
+    readLocaleCookie(),
+  );
 
   const targetLocale = locale === "fr" ? "en" : "fr";
 

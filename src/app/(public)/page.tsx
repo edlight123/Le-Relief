@@ -211,13 +211,13 @@ export default async function HomePage() {
         <section className="mt-16 bg-foreground py-14 sm:mt-20 sm:py-20">
           <div className="newspaper-shell text-center">
             <p className="mb-4 font-label text-xs font-extrabold uppercase tracking-[1.2px] text-background/60">
-              Lettre d'information
+              Lettre d&apos;information
             </p>
             <h2 className="font-headline text-3xl font-extrabold leading-tight text-background sm:text-4xl">
               Recevez Le Relief directement.
             </h2>
             <p className="mx-auto mt-4 max-w-md font-body text-base leading-relaxed text-background/70">
-              Une sélection éditoriale de l'actualité haïtienne, sans bruit.
+              Une sélection éditoriale de l&apos;actualité haïtienne, sans bruit.
             </p>
             <div className="mx-auto mt-8 max-w-sm">
               <NewsletterSignup context="home-hero" />

@@ -126,7 +126,11 @@ export async function GET(req: NextRequest) {
         );
 
     const total = ranked.length;
-    const paginated = ranked.slice(skip, skip + take).map(({ _score: _ignored, ...article }) => article);
+    const paginated = ranked.slice(skip, skip + take).map((item) => {
+      const article = { ...item } as SearchRouteArticle & { _score?: number };
+      delete article._score;
+      return article;
+    });
     const hydrated = await hydrateArticles(paginated as Record<string, unknown>[]);
 
     let searchMeta:

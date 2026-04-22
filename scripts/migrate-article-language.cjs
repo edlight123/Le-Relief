@@ -2,6 +2,7 @@
  * Migration: set language="fr" on all articles missing the language field.
  * Run once: node scripts/migrate-article-language.cjs
  */
+/* eslint-disable @typescript-eslint/no-require-imports */
 const dotenv = require("dotenv");
 dotenv.config({ path: require("path").resolve(__dirname, "../.env") });
 

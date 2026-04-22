@@ -49,7 +49,6 @@ export default function ArticlesPage() {
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
   useEffect(() => {
-    setLoading(true);
     const params = filter !== "all" ? `?status=${filter}` : "";
     fetch(`/api/articles${params}`)
       .then((r) => r.json())
@@ -109,7 +108,12 @@ export default function ArticlesPage() {
           {STATUS_FILTERS.map((f) => (
             <button
               key={f.value}
-              onClick={() => setFilter(f.value)}
+              onClick={() => {
+                if (f.value !== filter) {
+                  setLoading(true);
+                  setFilter(f.value);
+                }
+              }}
               className={`rounded-sm px-3 py-1.5 font-label text-xs font-extrabold uppercase transition-colors ${
                 filter === f.value
                   ? "bg-foreground text-background"

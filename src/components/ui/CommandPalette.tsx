@@ -31,16 +31,12 @@ export default function CommandPalette({ open, onClose }: CommandPaletteProps) {
   );
 
   useEffect(() => {
-    if (open) {
-      setQuery("");
-      setSelectedIndex(0);
-      setTimeout(() => inputRef.current?.focus(), 0);
-    }
+    if (!open) return;
+    inputRef.current?.focus();
   }, [open]);
 
-  useEffect(() => {
-    setSelectedIndex(0);
-  }, [query]);
+  const safeSelectedIndex =
+    filtered.length === 0 ? -1 : Math.min(selectedIndex, filtered.length - 1);
 
   useEffect(() => {
     if (!open) return;
@@ -49,14 +45,16 @@ export default function CommandPalette({ open, onClose }: CommandPaletteProps) {
       if (e.key === "Escape") {
         onClose();
       } else if (e.key === "ArrowDown") {
+        if (filtered.length === 0) return;
         e.preventDefault();
         setSelectedIndex((i) => (i + 1) % filtered.length);
       } else if (e.key === "ArrowUp") {
+        if (filtered.length === 0) return;
         e.preventDefault();
         setSelectedIndex((i) => (i - 1 + filtered.length) % filtered.length);
       } else if (e.key === "Enter") {
         e.preventDefault();
-        const route = filtered[selectedIndex];
+        const route = safeSelectedIndex >= 0 ? filtered[safeSelectedIndex] : null;
         if (route) {
           router.push(route.path);
           onClose();
@@ -66,7 +64,7 @@ export default function CommandPalette({ open, onClose }: CommandPaletteProps) {
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [open, filtered, selectedIndex, router, onClose]);
+  }, [open, filtered, safeSelectedIndex, router, onClose]);
 
   if (!open) return null;
 
@@ -87,6 +85,7 @@ export default function CommandPalette({ open, onClose }: CommandPaletteProps) {
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Rechercher..."
             className="w-full bg-transparent font-label text-sm text-foreground placeholder:text-muted focus:outline-none"
+            autoFocus
           />
         </div>
 
@@ -95,7 +94,7 @@ export default function CommandPalette({ open, onClose }: CommandPaletteProps) {
             <li key={route.path}>
               <button
                 className={`flex w-full items-center justify-between px-4 py-2.5 transition-colors hover:bg-surface-newsprint${
-                  index === selectedIndex ? " bg-surface-newsprint" : ""
+                  index === safeSelectedIndex ? " bg-surface-newsprint" : ""
                 }`}
                 onClick={() => {
                   router.push(route.path);
