@@ -2,6 +2,18 @@ Tech Spec / Page-by-Page Admin Spec — Le Relief Editorial OS
 
 Back-office rédaction premium, workflow éditorial et opérations newsroom
 
+## ✅ COMPLETION STATUS
+
+**All pages fully implemented and shipped.**
+
+Latest commit: `dcffaf4` (spec gaps: revisions, approved, published queue pages; authors page; notifications system)
+
+Previous phases: `e8a4e7b` (Phase 5 analytics), `3d68a66` (Phases 1-4 core platform)
+
+To verify: all pages listed below are live in the backoffice at `/dashboard/*`
+
+⸻
+
 1. Objectif du document
 
 Ce document traduit la roadmap en spécification produit/admin concrète, page par page.

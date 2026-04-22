@@ -4,6 +4,22 @@ Espace de rédaction premium, workflow de validation et admin newsroom avancé
 
 ⸻
 
+## ✅ COMPLETION STATUS
+
+**All 5 phases fully implemented and shipped.**
+
+- **Phase 1** ✅ Editorial workflow foundation — commit 3d68a66 (roles, statuses, review flow, audit trail)
+- **Phase 2** ✅ Premium writing workspace — commit 3d68a66 (article editor, metadata, previews, quality checks)
+- **Phase 3** ✅ Publishing operations — commit 3d68a66 (scheduling, publication, homepage curation)
+- **Phase 4** ✅ Governance & quality — commit 3d68a66 (comments, history, permissions)
+- **Phase 5** ✅ Editorial analytics — commit e8a4e7b (KPIs, publication timing, blocked articles, author/category performance)
+
+**Latest spec gaps filled** — commit dcffaf4 (full queue pages rebuilt from stubs, authors page, in-app notifications)
+
+Implementation reference: see `/workspaces/Le-Relief/docs/backoffice/PAGE_BY_PAGE_SPEC.md` for page-by-page implementation details.
+
+⸻
+
 1. Roadmap exécutive
 
 Phase 1 — Editorial workflow foundation
