@@ -1,4 +1,4 @@
-import DashboardLayout from "@/components/layout/DashboardLayout";
+import AdminShell from "@/components/layout/AdminShell";
 import { SessionProvider } from "next-auth/react";
 import { auth } from "@/lib/auth";
 import { canAccessDashboard, normalizeRole } from "@/lib/permissions";
@@ -19,7 +19,7 @@ export default async function DashboardRootLayout({
 
   return (
     <SessionProvider>
-      <DashboardLayout>{children}</DashboardLayout>
+      <AdminShell>{children}</AdminShell>
     </SessionProvider>
   );
 }

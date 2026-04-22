@@ -13,7 +13,19 @@ interface CommentItem {
   author?: { name?: string | null } | null;
 }
 
-export default function CommentsPanel({ articleId }: { articleId: string }) {
+type CommentsPanelProps = {
+  articleId: string;
+  role?: "writer" | "editor" | "publisher" | "admin";
+  threadMode?: "flat" | "threaded";
+  showBlockingOnly?: boolean;
+};
+
+export default function CommentsPanel({
+  articleId,
+  role,
+  threadMode = "flat",
+  showBlockingOnly = false,
+}: CommentsPanelProps) {
   const [comments, setComments] = useState<CommentItem[]>([]);
   const [body, setBody] = useState("");
   const [type, setType] = useState<CommentItem["type"]>("comment");
@@ -67,6 +79,10 @@ export default function CommentsPanel({ articleId }: { articleId: string }) {
     }
   }
 
+  const visibleComments = showBlockingOnly
+    ? comments.filter((comment) => comment.type === "blocking")
+    : comments;
+
   return (
     <section className="space-y-4 border border-border-subtle p-4">
       <h3 className="font-label text-xs font-extrabold uppercase text-foreground">Commentaires éditoriaux</h3>
@@ -94,11 +110,11 @@ export default function CommentsPanel({ articleId }: { articleId: string }) {
 
       {loading ? (
         <p className="font-label text-xs text-muted">Chargement...</p>
-      ) : comments.length === 0 ? (
+      ) : visibleComments.length === 0 ? (
         <p className="font-label text-xs text-muted">Aucun commentaire.</p>
       ) : (
         <ul className="space-y-2">
-          {comments.map((comment) => (
+          {visibleComments.map((comment) => (
             <li key={comment.id} className="border border-border-subtle p-3">
               <div className="mb-2 flex flex-wrap items-center gap-2">
                 <Badge variant={comment.type === "blocking" ? "danger" : comment.type === "revision_note" ? "warning" : "default"}>
@@ -110,7 +126,7 @@ export default function CommentsPanel({ articleId }: { articleId: string }) {
                 </span>
               </div>
               <p className="font-body text-sm text-foreground">{comment.body}</p>
-              {!comment.resolvedAt ? (
+              {!comment.resolvedAt && role !== "writer" ? (
                 <button
                   type="button"
                   onClick={() => resolve(comment.id)}
@@ -118,6 +134,9 @@ export default function CommentsPanel({ articleId }: { articleId: string }) {
                 >
                   Marquer résolu
                 </button>
+              ) : null}
+              {threadMode === "threaded" ? (
+                <p className="mt-1 font-label text-[10px] text-muted">Mode fil activé (vue simplifiée)</p>
               ) : null}
             </li>
           ))}

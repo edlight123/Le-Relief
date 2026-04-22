@@ -5,4 +5,10 @@ export const analyticsConfig = {
     secondary: "hsl(var(--chart-secondary))",
     accent: "hsl(var(--chart-accent))",
   },
+  adminEvents: {
+    enabled: true,
+    eventType: "admin_event",
+    defaultLocale: "fr",
+    namespace: "admin",
+  },
 };

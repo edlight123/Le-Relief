@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import { Command, Menu } from "lucide-react";
-import Sidebar from "@/components/layout/Sidebar";
+import RoleAwareSidebar from "@/components/layout/RoleAwareSidebar";
 import ThemeToggle from "@/components/public/ThemeToggle";
 import CommandPalette from "@/components/ui/CommandPalette";
 import NotificationsPanel from "@/components/notifications/NotificationsPanel";
@@ -75,7 +75,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
   return (
     <div className="flex h-screen bg-surface-newsprint">
-      <Sidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
+      <RoleAwareSidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
       <CommandPalette open={paletteOpen} onClose={() => setPaletteOpen(false)} />
       <div className="flex flex-1 flex-col overflow-hidden">
         <header className="flex h-14 shrink-0 items-center gap-4 border-b border-border-subtle bg-surface px-5">
