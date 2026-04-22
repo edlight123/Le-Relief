@@ -87,9 +87,15 @@ export default async function CategoryPage({ params }: Props) {
       ) : null}
 
       {!featured && articles.length === 0 ? (
-        <p className="border-t border-border-subtle py-8 font-body text-lg text-muted">
-          Aucun article publié dans cette rubrique pour le moment.
-        </p>
+        <div className="border-t-2 border-border-strong py-16 text-center">
+          <p className="page-kicker mb-4">Rubrique en cours</p>
+          <p className="font-headline text-3xl font-extrabold text-foreground">
+            Aucun article publié dans cette rubrique.
+          </p>
+          <p className="mt-4 font-body text-base leading-relaxed text-muted">
+            La rédaction prépare du contenu pour cette section. Revenez bientôt.
+          </p>
+        </div>
       ) : null}
     </div>
   );

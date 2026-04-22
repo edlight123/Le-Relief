@@ -63,25 +63,27 @@ export default async function HomePage() {
             </div>
             <SectionHeader kicker="À suivre" title="Les autres titres" />
             <div className="grid gap-0 md:grid-cols-3">
-              {secondary.map((article, index) => (
-                <div
-                  key={article.id}
-                  className={index < secondary.length - 1 ? "md:border-r md:border-border-subtle" : ""}
-                >
-                  {index === 0 ? (
-                    <ArticleCard article={article} />
-                  ) : (
-                    <div className="md:pl-6">
-                      <ArticleCard article={article} variant="text" />
-                    </div>
-                  )}
+              {secondary.length > 0 ? (
+                <div className="md:col-span-2 md:border-r md:border-border-subtle md:pr-6">
+                  <ArticleCard article={secondary[0]} variant="list" />
                 </div>
-              ))}
+              ) : null}
+              {secondary.length > 1 ? (
+                <div className="flex flex-col divide-y divide-border-subtle md:pl-6">
+                  {secondary.slice(1).map((article) => (
+                    <ArticleCard key={article.id} article={article} variant="text" />
+                  ))}
+                </div>
+              ) : null}
             </div>
           </section>
         ) : null}
 
-        <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_300px] lg:gap-12">
+        <div
+          className={`grid gap-10 lg:grid-cols-[minmax(0,1fr)_300px] lg:gap-12 ${
+            secondary.length > 0 ? "border-t border-border-subtle pt-10 sm:pt-12" : ""
+          }`}
+        >
           <div className="min-w-0">
             {latest.length > 0 ? (
               <section className="mb-14 sm:mb-20">
@@ -103,10 +105,19 @@ export default async function HomePage() {
                   kicker="Contexte"
                   title="Analyses, opinions et dossiers"
                 />
-                <div className="grid gap-7 md:grid-cols-2">
-                  {editorial.map((article) => (
-                    <ArticleCard key={article.id} article={article} />
-                  ))}
+                <div>
+                  {editorial.length > 0 ? (
+                    <div className="mb-8 border-b border-border-subtle pb-8">
+                      <ArticleCard article={editorial[0]} variant="list" />
+                    </div>
+                  ) : null}
+                  {editorial.length > 1 ? (
+                    <div className="grid gap-7 md:grid-cols-2">
+                      {editorial.slice(1).map((article) => (
+                        <ArticleCard key={article.id} article={article} />
+                      ))}
+                    </div>
+                  ) : null}
                 </div>
               </section>
             ) : null}
@@ -125,11 +136,11 @@ export default async function HomePage() {
             ) : null}
           </div>
 
-          <aside className="space-y-10 lg:sticky lg:top-40 lg:h-fit">
+          <aside className="space-y-10 border-t-4 border-border-strong pt-4 lg:sticky lg:top-40 lg:h-fit lg:bg-surface-newsprint lg:p-6 lg:pt-6">
             {mostRead.length > 0 ? (
-              <section className="border-t-2 border-border-strong pt-4">
-                <p className="section-kicker mb-2">Lecture</p>
-                <h3 className="mb-4 font-headline text-2xl font-extrabold text-foreground">
+              <section>
+                <p className="section-kicker mb-2">Popularité</p>
+                <h3 className="mb-5 font-headline text-2xl font-extrabold leading-none text-foreground">
                   Les plus lus
                 </h3>
                 <div className="divide-y divide-border-subtle">

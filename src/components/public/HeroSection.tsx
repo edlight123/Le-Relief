@@ -1,6 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
-import { type Locale, t } from "@/lib/i18n";
+import { type Locale } from "@/lib/i18n";
+import MetadataRow from "@/components/public/MetadataRow";
 import {
   formatHeadlineTypography,
   sanitizeExcerptText,
@@ -74,17 +75,14 @@ export default function HeroSection({ article, locale }: HeroSectionProps) {
     : null;
 
   const meta = (
-    <div className="mt-5 flex flex-wrap items-center gap-3 border-t border-border-subtle pt-4 font-label text-[11px] font-bold uppercase text-muted tracking-[1px]">
-      {article.author?.name && <span>{t(resolvedLocale, "by")} {article.author.name}</span>}
-      {article.author?.name && date && <span className="text-border-subtle">/</span>}
-      {date && <span>{date}</span>}
-      {article.readingTime ? (
-        <>
-          <span className="text-border-subtle">/</span>
-          <span>{article.readingTime} {t(resolvedLocale, "minRead")}</span>
-        </>
-      ) : null}
-    </div>
+    <MetadataRow
+      author={article.author?.name ? { name: article.author.name } : null}
+      date={date}
+      readingTime={article.readingTime}
+      language={article.language}
+      bordered
+      className="mt-5"
+    />
   );
 
   /* No cover image — full-width editorial layout */

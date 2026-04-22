@@ -1,6 +1,8 @@
 import Link from "next/link";
 import Image from "next/image";
-import { formatArticleDate, type Locale, t } from "@/lib/i18n";
+import { formatArticleDate, type Locale } from "@/lib/i18n";
+import MetadataRow from "@/components/public/MetadataRow";
+import SectionLabel from "@/components/public/SectionLabel";
 import {
   formatHeadlineTypography,
   sanitizeExcerptText,
@@ -65,16 +67,12 @@ export default function ArticleCard({
           )}
           <div className="min-w-0">
             {article.contentTypeLabel && (
-              <p className="mb-2 font-label text-[11px] font-extrabold uppercase text-primary">
-                {article.contentTypeLabel}
-              </p>
+              <SectionLabel label={article.contentTypeLabel} variant="type" className="mb-2 block" />
             )}
             <h3 className="font-headline text-base font-bold leading-snug text-foreground transition-colors group-hover:text-primary">
               {displayTitle}
             </h3>
-            {date && (
-              <p className="mt-2 font-[family-name:var(--font-mono)] text-[11px] font-bold uppercase text-muted tracking-[1px]">{date}</p>
-            )}
+            <MetadataRow date={date} className="mt-2" />
           </div>
         </div>
       </Link>
@@ -100,26 +98,11 @@ export default function ArticleCard({
           <div className="flex flex-col justify-center md:pr-4">
             <div className="mb-2 flex flex-wrap items-center gap-2">
               {article.contentTypeLabel && (
-                <span className="page-kicker">{article.contentTypeLabel}</span>
+                <SectionLabel label={article.contentTypeLabel} variant="kicker" />
               )}
               {article.category && (
-                <span className="font-label text-[11px] font-bold uppercase text-muted tracking-[1px]">
-                  {article.category.name}
-                </span>
+                <SectionLabel label={article.category.name} variant="category" />
               )}
-              {article.language === "en" && (
-                <span className="font-label text-[11px] font-bold uppercase text-primary tracking-[1px]">
-                  English
-                </span>
-              )}
-              {date && (
-                <span className="font-[family-name:var(--font-mono)] text-[11px] font-bold uppercase text-muted tracking-[1px]">{date}</span>
-              )}
-              {article.readingTime ? (
-                <span className="font-[family-name:var(--font-mono)] text-[11px] font-bold uppercase text-muted tracking-[1px]">
-                  {article.readingTime} min
-                </span>
-              ) : null}
             </div>
             <h3 className="font-headline text-xl font-bold leading-tight text-foreground transition-colors group-hover:text-primary sm:text-2xl">
               {displayTitle}
@@ -129,11 +112,13 @@ export default function ArticleCard({
                 {cleanedExcerpt}
               </p>
             )}
-            {article.author?.name && (
-              <p className="mt-3 font-label text-[11px] font-bold uppercase text-muted tracking-[1px]">
-                {t(resolvedLocale, "by")} {article.author.name}
-              </p>
-            )}
+            <MetadataRow
+              author={article.author?.name ? { name: article.author.name, id: article.author?.id } : null}
+              date={date}
+              readingTime={article.readingTime}
+              language={article.language}
+              className="mt-3"
+            />
           </div>
         </div>
       </Link>
@@ -147,12 +132,10 @@ export default function ArticleCard({
         <div className="article-card flex h-full flex-col px-0 py-5 sm:px-5">
           <div className="mb-3 flex flex-wrap items-center gap-2">
             {article.category && (
-              <span className="page-kicker tracking-[1px]">{article.category.name}</span>
+              <SectionLabel label={article.category.name} variant="kicker" />
             )}
             {article.contentTypeLabel && (
-              <span className="font-label text-[11px] font-extrabold uppercase text-muted tracking-[1px]">
-                {article.contentTypeLabel}
-              </span>
+              <SectionLabel label={article.contentTypeLabel} variant="type" />
             )}
           </div>
           <h3 className="font-headline text-xl font-bold leading-snug text-foreground transition-colors group-hover:text-primary sm:text-2xl">
@@ -163,17 +146,12 @@ export default function ArticleCard({
               {cleanedExcerpt}
             </p>
           )}
-          <div className="mt-auto flex flex-wrap items-center gap-2 pt-4 font-label text-[11px] font-bold uppercase text-muted">
-            {article.author?.name && <span className="tracking-[1px]">{article.author.name}</span>}
-            {article.author?.name && date && <span className="text-border-subtle">/</span>}
-            {date && <span className="font-[family-name:var(--font-mono)] tracking-[1px]">{date}</span>}
-            {article.readingTime ? (
-              <>
-                <span className="text-border-subtle">/</span>
-                <span className="font-[family-name:var(--font-mono)] tracking-[1px]">{article.readingTime} min</span>
-              </>
-            ) : null}
-          </div>
+          <MetadataRow
+            author={article.author?.name ? { name: article.author.name, id: article.author?.id } : null}
+            date={date}
+            readingTime={article.readingTime}
+            className="mt-auto pt-4"
+          />
         </div>
       </Link>
     );
@@ -218,23 +196,16 @@ export default function ArticleCard({
             {cleanedExcerpt}
           </p>
         )}
-        <div className="mt-4 flex flex-wrap items-center gap-2 font-label text-[11px] font-bold uppercase text-muted">
-          {article.contentTypeLabel && <span className="tracking-[1px]">{article.contentTypeLabel}</span>}
-          {article.contentTypeLabel && (article.author?.name || date) && (
-            <span className="text-border-subtle">/</span>
-          )}
-          {article.author?.name && <span className="tracking-[1px]">{article.author.name}</span>}
-          {article.author?.name && date && (
-            <span className="text-border-subtle">/</span>
-          )}
-          {date && <span className="font-[family-name:var(--font-mono)] tracking-[1px]">{date}</span>}
-          {article.readingTime ? (
-            <>
-              <span className="text-border-subtle">/</span>
-              <span className="font-[family-name:var(--font-mono)] tracking-[1px]">{article.readingTime} min</span>
-            </>
-          ) : null}
-        </div>
+        {article.contentTypeLabel && (
+          <SectionLabel label={article.contentTypeLabel} variant="type" className="mt-4 block" />
+        )}
+        <MetadataRow
+          author={article.author?.name ? { name: article.author.name, id: article.author?.id } : null}
+          date={date}
+          readingTime={article.readingTime}
+          language={article.language}
+          className="mt-2"
+        />
       </div>
     </Link>
   );

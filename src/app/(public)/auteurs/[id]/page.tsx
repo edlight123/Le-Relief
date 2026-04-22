@@ -82,9 +82,15 @@ export default async function AuthorPage({ params }: Props) {
             variant="grid"
           />
         ) : (
-          <p className="border-t border-border-subtle py-8 font-body text-lg text-muted">
-            Aucun article publié pour cet auteur pour le moment.
-          </p>
+          <div className="border-t-2 border-border-strong py-16 text-center">
+            <p className="page-kicker mb-4">En cours</p>
+            <p className="font-headline text-3xl font-extrabold text-foreground">
+              Aucun article publié pour le moment.
+            </p>
+            <p className="mt-4 font-body text-base leading-relaxed text-muted">
+              Cet auteur n&apos;a pas encore publié d&apos;articles sur Le Relief.
+            </p>
+          </div>
         )}
       </section>
     </div>

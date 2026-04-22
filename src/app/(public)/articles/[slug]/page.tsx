@@ -233,26 +233,20 @@ export default async function ArticlePage({ params }: Props) {
               </time>
             </>
           ) : null}
-          {wasUpdated && article.updatedAt ? (
-            <>
-              <span className="text-border-subtle">/</span>
-              <span className="text-accent-teal">
-                Mis à jour le{" "}
-                {format(new Date(article.updatedAt), "d MMMM yyyy", { locale: fr })}
-              </span>
-            </>
-          ) : null}
           <span className="text-border-subtle">/</span>
           <span>{article.readingTime} min de lecture</span>
         </div>
 
         {article.alternateLanguageSlug ? (
-          <div className="mt-4 border-l-2 border-primary pl-4 font-label text-xs font-bold uppercase text-muted">
+          <div className="mt-5 flex items-center gap-4 border border-border-subtle px-5 py-3">
+            <span className="font-label text-[10px] font-extrabold uppercase text-muted tracking-[1px]">
+              {article.language === "fr" ? "Also available in" : "Aussi disponible en"}
+            </span>
             <Link
               href={`/articles/${article.alternateLanguageSlug}`}
-              className="text-foreground transition-colors hover:text-primary"
+              className="font-label text-xs font-extrabold uppercase text-primary transition-colors hover:text-foreground"
             >
-              {alternateLabel}
+              {alternateLabel} →
             </Link>
           </div>
         ) : null}
@@ -274,6 +268,22 @@ export default async function ArticlePage({ params }: Props) {
               {tag}
             </span>
           ))}
+        </div>
+      ) : null}
+
+      {wasUpdated && article.updatedAt ? (
+        <div className="mt-5 flex items-start gap-3 border border-border-subtle bg-surface-newsprint px-5 py-4">
+          <span className="mt-0.5 font-label text-[11px] font-extrabold uppercase text-muted tracking-[1px]">Mise à jour</span>
+          <p className="font-body text-sm leading-relaxed text-muted">
+            Cet article a été mis à jour le{" "}
+            <time dateTime={article.updatedAt} className="font-semibold text-foreground">
+              {format(new Date(article.updatedAt), "d MMMM yyyy", { locale: fr })}
+            </time>
+            .{" "}
+            <Link href="/corrections" className="font-label text-[11px] font-bold uppercase text-primary transition-colors hover:underline">
+              Politique de correction →
+            </Link>
+          </p>
         </div>
       ) : null}
 

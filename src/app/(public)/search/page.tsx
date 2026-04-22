@@ -155,21 +155,41 @@ function SearchPageContent() {
         </label>
       </div>
 
+      {!trimmedQuery && !isSearching && (
+        <div className="border-t border-border-subtle py-12 text-center">
+          <p className="font-label text-xs font-bold uppercase tracking-[1px] text-muted">Entrez un terme pour commencer la recherche</p>
+        </div>
+      )}
+
       {isSearching && (
-        <p className="font-body text-lg text-muted">Recherche en cours...</p>
+        <div className="border-t border-border-subtle py-12 text-center">
+          <p className="font-label text-xs font-bold uppercase tracking-[1px] text-muted">Recherche en cours…</p>
+        </div>
       )}
 
       {!isSearching && trimmedQuery && visibleResults.length === 0 && (
-        <p className="font-body text-lg text-muted">
-          Aucun résultat pour &ldquo;{trimmedQuery}&rdquo;
-        </p>
+        <div className="border-t-2 border-border-strong py-16">
+          <p className="page-kicker mb-4">Aucun résultat</p>
+          <p className="font-headline text-3xl font-extrabold text-foreground">
+            Aucun article trouvé pour &ldquo;{trimmedQuery}&rdquo;
+          </p>
+          <p className="mt-4 font-body text-base leading-relaxed text-muted">
+            Essayez un autre terme ou parcourez nos rubriques.
+          </p>
+        </div>
       )}
 
       {visibleResults.length > 0 && (
         <>
-          <p className="mb-5 font-label text-xs font-bold uppercase text-muted">
-            {visibleResults.length} résultat{visibleResults.length > 1 ? "s" : ""} pour &ldquo;{trimmedQuery}&rdquo;
-          </p>
+          <div className="mb-6 flex items-center gap-3 border-b border-border-subtle pb-4">
+            <p className="font-label text-xs font-bold uppercase tracking-[1px] text-muted">
+              {visibleResults.length} résultat{visibleResults.length > 1 ? "s" : ""}
+            </p>
+            <span className="font-label text-xs text-border-subtle">—</span>
+            <p className="font-label text-xs font-bold uppercase tracking-[1px] text-foreground">
+              &ldquo;{trimmedQuery}&rdquo;
+            </p>
+          </div>
           <div className="divide-y divide-border-subtle border-t border-border-strong">
             {visibleResults.map((article) => (
               <ArticleCard key={article.id || article.slug} article={article} variant="list" />
