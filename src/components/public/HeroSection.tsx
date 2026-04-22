@@ -59,8 +59,12 @@ export default function HeroSection({ article, locale }: HeroSectionProps) {
 
   const imageSrc = article.coverImageFirebaseUrl || article.coverImage;
   const displayTitle = formatHeadlineTypography(article.title);
-  const cleanedExcerpt = sanitizeExcerptText(article.excerpt);
-  const showExcerpt = shouldShowCardExcerpt(article.title, article.excerpt);
+  const cleanedExcerpt = sanitizeExcerptText(article.excerpt, {
+    authorName: article.author?.name,
+  });
+  const showExcerpt = shouldShowCardExcerpt(article.title, article.excerpt, {
+    authorName: article.author?.name,
+  });
   const date = article.publishedAt
     ? new Intl.DateTimeFormat(resolvedLocale === "fr" ? "fr-FR" : "en-US", {
         day: "numeric",

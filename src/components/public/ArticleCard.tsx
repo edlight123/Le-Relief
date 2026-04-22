@@ -34,8 +34,12 @@ export default function ArticleCard({
 }: ArticleCardProps) {
   const resolvedLocale = locale || article.language || "fr";
   const displayTitle = formatHeadlineTypography(article.title);
-  const cleanedExcerpt = sanitizeExcerptText(article.excerpt);
-  const showExcerpt = shouldShowCardExcerpt(article.title, article.excerpt);
+  const cleanedExcerpt = sanitizeExcerptText(article.excerpt, {
+    authorName: article.author?.name,
+  });
+  const showExcerpt = shouldShowCardExcerpt(article.title, article.excerpt, {
+    authorName: article.author?.name,
+  });
   const date = article.publishedAt
     ? formatArticleDate(article.publishedAt, resolvedLocale)
     : null;
