@@ -51,6 +51,22 @@ function normalizeForComparison(input: string) {
     .trim();
 }
 
+function isDuplicateIntro(deckText: string, firstBodyParagraph: string) {
+  const deck = normalizeForComparison(deckText);
+  const first = normalizeForComparison(firstBodyParagraph);
+  if (!deck || !first) return false;
+  if (deck === first) return true;
+
+  const prefixLength = 180;
+  const deckPrefix = deck.slice(0, prefixLength).trim();
+  const firstPrefix = first.slice(0, prefixLength).trim();
+
+  return (
+    (deckPrefix.length > 40 && first.startsWith(deckPrefix)) ||
+    (firstPrefix.length > 40 && deck.startsWith(firstPrefix))
+  );
+}
+
 interface Props {
   params: Promise<{ locale: string; slug: string }>;
 }
@@ -136,9 +152,7 @@ export default async function LocalizedArticlePage({ params }: Props) {
     .map((paragraph) => paragraph.trim())
     .find(Boolean) || "";
   const deckText = sanitizeDeckText(article.subtitle || article.excerpt || "");
-  const shouldShowDeck =
-    Boolean(deckText) &&
-    normalizeForComparison(deckText) !== normalizeForComparison(firstBodyParagraph);
+  const shouldShowDeck = Boolean(deckText) && !isDuplicateIntro(deckText, firstBodyParagraph);
   const articleUrl = `${siteConfig.url}/${locale}/articles/${slug}`;
   const alternateLabel = locale === "fr" ? "Lire en anglais" : "Read in French";
   const articleJsonLd = buildNewsArticleJsonLd({
