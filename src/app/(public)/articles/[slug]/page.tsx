@@ -19,6 +19,29 @@ import * as articlesRepo from "@/lib/repositories/articles";
 
 export const revalidate = 300;
 
+function stripHtml(input: string) {
+  return input.replace(/<[^>]*>/g, " ");
+}
+
+function sanitizeDeckText(input: string) {
+  return input
+    .replace(
+      /^\s*(par|by)\s+(la rédaction|l[ae] redaction|newsroom|staff|[A-ZÀ-ÖØ-öø-ÿ][\p{L}'’-]+(?:\s+[A-ZÀ-ÖØ-öø-ÿ][\p{L}'’-]+){0,3})\s*/iu,
+      "",
+    )
+    .replace(/(?:\[\s*…\s*\]|\[\s*\.\.\.\s*\]|…)\s*$/u, "")
+    .trim();
+}
+
+function normalizeForComparison(input: string) {
+  return input
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9]+/g, " ")
+    .trim();
+}
+
 interface Props {
   params: Promise<{ slug: string }>;
 }
@@ -84,6 +107,14 @@ export default async function ArticlePage({ params }: Props) {
   }
   const related = await getRelatedArticles(article, 4);
   const bodyHasHtml = /<\/?[a-z][\s\S]*>/i.test(article.body);
+  const firstBodyParagraph = (bodyHasHtml ? stripHtml(article.body) : article.body)
+    .split(/\n+/)
+    .map((paragraph) => paragraph.trim())
+    .find(Boolean) || "";
+  const deckText = sanitizeDeckText(article.subtitle || article.excerpt || "");
+  const shouldShowDeck =
+    Boolean(deckText) &&
+    normalizeForComparison(deckText) !== normalizeForComparison(firstBodyParagraph);
   const articleUrl = `${siteConfig.url}/articles/${slug}`;
   const alternateLabel = article.language === "fr" ? "Lire en anglais" : "Lire en français";
 
@@ -158,9 +189,9 @@ export default async function ArticlePage({ params }: Props) {
           {article.title}
         </h1>
 
-        {(article.subtitle || article.excerpt) ? (
+        {shouldShowDeck ? (
           <p className="editorial-deck mt-5 max-w-3xl font-body text-2xl">
-            {article.subtitle || article.excerpt}
+            {deckText}
           </p>
         ) : null}
 
