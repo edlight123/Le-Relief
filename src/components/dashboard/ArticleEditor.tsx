@@ -1,6 +1,8 @@
 "use client";
 
+import Link from "next/link";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { ChevronDown, ChevronUp } from "lucide-react";
 import Input from "@/components/ui/Input";
 import Button from "@/components/ui/Button";
 import MediaUploader from "@/components/dashboard/MediaUploader";
@@ -85,6 +87,36 @@ interface ArticleEditorProps {
   submitLabel?: string;
 }
 
+function EditorSection({
+  title,
+  open,
+  onToggle,
+  children,
+}: {
+  title: string;
+  open: boolean;
+  onToggle: () => void;
+  children: React.ReactNode;
+}) {
+  return (
+    <section className="border border-border-subtle bg-surface">
+      <button
+        type="button"
+        onClick={onToggle}
+        className="flex w-full items-center justify-between px-4 py-3 text-left"
+      >
+        <p className="font-label text-xs font-extrabold uppercase text-muted">{title}</p>
+        {open ? (
+          <ChevronUp className="h-4 w-4 text-muted" />
+        ) : (
+          <ChevronDown className="h-4 w-4 text-muted" />
+        )}
+      </button>
+      {open ? <div className="space-y-4 border-t border-border-subtle p-4">{children}</div> : null}
+    </section>
+  );
+}
+
 export default function ArticleEditor({
   initial,
   categories,
@@ -135,6 +167,13 @@ export default function ArticleEditor({
   const [saving, setSaving] = useState(false);
   const [autosaveState, setAutosaveState] = useState<"idle" | "saving" | "saved" | "error">("idle");
   const [previewMode, setPreviewMode] = useState<"desktop" | "mobile" | "social">("desktop");
+  const [openSections, setOpenSections] = useState({
+    workflow: true,
+    metadata: true,
+    seo: true,
+    translation: true,
+    quality: true,
+  });
   const lastAutosavedPayloadRef = useRef<string>("");
   const autosaveTimerRef = useRef<number | null>(null);
 
@@ -346,6 +385,35 @@ export default function ArticleEditor({
     { value: "archived", label: "Archivé" },
   ];
 
+  const canApprove = canTransitionStatus({
+    role,
+    fromStatus: status,
+    toStatus: "approved",
+    isOwner,
+  }).allowed;
+  const canPublish = canTransitionStatus({
+    role,
+    fromStatus: status,
+    toStatus: "published",
+    isOwner,
+  }).allowed;
+  const canRequestReview = canTransitionStatus({
+    role,
+    fromStatus: status,
+    toStatus: "in_review",
+    isOwner,
+  }).allowed;
+  const canSaveDraft = canTransitionStatus({
+    role,
+    fromStatus: status,
+    toStatus: "draft",
+    isOwner,
+  }).allowed;
+
+  function toggleSection(section: keyof typeof openSections) {
+    setOpenSections((current) => ({ ...current, [section]: !current[section] }));
+  }
+
   async function uploadFile(file: File): Promise<string> {
     const form = new FormData();
     form.append("file", file);
@@ -356,40 +424,113 @@ export default function ArticleEditor({
 
   return (
     <div className="space-y-6 border-t-2 border-border-strong pt-5">
-      <div className="sticky top-0 z-20 border border-border-subtle bg-surface p-3">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <div className="flex items-center gap-2">
-            <span className="font-label text-xs font-extrabold uppercase text-muted">Autosave</span>
-            <Badge variant={autosaveState === "saved" ? "success" : autosaveState === "saving" ? "info" : autosaveState === "error" ? "danger" : "default"}>
-              {autosaveState === "saved"
-                ? "Saved"
-                : autosaveState === "saving"
-                ? "Saving"
-                : autosaveState === "error"
-                ? "Erreur"
-                : "Prêt"}
-            </Badge>
-            <Badge variant={completionVariant}>Complétude {completionScore}%</Badge>
-            <StatusChip status={normalizedStatus} />
-            {isBreaking ? <PriorityFlag kind="breaking" /> : null}
-            {isHomepagePinned ? <PriorityFlag kind="homepage" /> : null}
+      <div className="sticky top-0 z-20 space-y-3 border border-border-subtle bg-surface p-4 shadow-sm backdrop-blur supports-[backdrop-filter]:bg-surface/95">
+        <div className="flex flex-wrap items-start justify-between gap-4">
+          <div className="space-y-2">
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="font-label text-xs font-extrabold uppercase tracking-[0.24em] text-muted">
+                Éditeur
+              </span>
+              <StatusChip status={normalizedStatus} />
+              <Badge variant={completionVariant}>Complétude {completionScore}%</Badge>
+              <Badge
+                variant={autosaveState === "saved" ? "success" : autosaveState === "saving" ? "info" : autosaveState === "error" ? "danger" : "default"}
+              >
+                {autosaveState === "saved"
+                  ? "Autosave actif"
+                  : autosaveState === "saving"
+                  ? "Enregistrement…"
+                  : autosaveState === "error"
+                  ? "Autosave en erreur"
+                  : "Prêt"}
+              </Badge>
+              {isBreaking ? <PriorityFlag kind="breaking" /> : null}
+              {isHomepagePinned ? <PriorityFlag kind="homepage" /> : null}
+            </div>
+            <div>
+              <h1 className="font-headline text-2xl font-extrabold text-foreground">
+                {title || "Nouvel article"}
+              </h1>
+              <p className="mt-1 max-w-3xl font-body text-sm text-muted">
+                {subtitle || excerpt || "Préparez le contenu, la publication et les métadonnées dans un seul flux éditorial."}
+              </p>
+            </div>
+            <div className="flex flex-wrap items-center gap-2 text-[11px]">
+              <Badge variant="default">Rôle {role}</Badge>
+              <Badge variant="default">Langue {language.toUpperCase()}</Badge>
+              <Badge variant="default">Type {contentType || "non défini"}</Badge>
+              <Badge variant={statusVariant}>Traduction {translationStatus}</Badge>
+            </div>
           </div>
 
-          <div className="flex flex-wrap items-center gap-2">
-            {(["desktop", "mobile", "social"] as const).map((mode) => (
-              <button
-                key={mode}
-                type="button"
-                onClick={() => setPreviewMode(mode)}
-                className={`px-2.5 py-1 font-label text-[11px] font-bold uppercase ${
-                  previewMode === mode
-                    ? "bg-foreground text-background"
-                    : "border border-border-subtle text-muted"
-                }`}
-              >
-                {mode}
-              </button>
-            ))}
+          <div className="space-y-3">
+            <div className="flex flex-wrap items-center justify-end gap-2">
+              {(["desktop", "mobile", "social"] as const).map((mode) => (
+                <button
+                  key={mode}
+                  type="button"
+                  onClick={() => setPreviewMode(mode)}
+                  className={`px-2.5 py-1 font-label text-[11px] font-bold uppercase ${
+                    previewMode === mode
+                      ? "bg-foreground text-background"
+                      : "border border-border-subtle text-muted"
+                  }`}
+                >
+                  {mode}
+                </button>
+              ))}
+            </div>
+
+            <div className="flex flex-wrap justify-end gap-2">
+              {scheduledAt ? (
+                <Button
+                  variant="outline"
+                  onClick={() => handleSubmit("scheduled")}
+                  disabled={saving || !title || !body}
+                >
+                  Programmer
+                </Button>
+              ) : null}
+              {canRequestReview ? (
+                <Button
+                  variant="outline"
+                  onClick={() => handleSubmit("in_review")}
+                  disabled={saving || !title || !body}
+                >
+                  Soumettre en revue
+                </Button>
+              ) : null}
+              {canApprove ? (
+                <Button
+                  variant="outline"
+                  onClick={() => handleSubmit("approved")}
+                  disabled={saving || !title || !body}
+                >
+                  Approuver
+                </Button>
+              ) : null}
+              {canPublish ? (
+                <Button
+                  variant="outline"
+                  onClick={() => handleSubmit("published")}
+                  disabled={saving || !title || !body}
+                >
+                  Publier
+                </Button>
+              ) : null}
+              {canSaveDraft ? (
+                <Button
+                  variant="outline"
+                  onClick={() => handleSubmit("draft")}
+                  disabled={saving || !title}
+                >
+                  Sauvegarder brouillon
+                </Button>
+              ) : null}
+              <Button onClick={() => handleSubmit(status)} disabled={saving || !title || !body}>
+                {saving ? "Enregistrement..." : submitLabel}
+              </Button>
+            </div>
           </div>
         </div>
       </div>
@@ -500,9 +641,11 @@ export default function ArticleEditor({
         </div>
 
         <aside className="space-y-6">
-          <section className="space-y-4 border border-border-subtle p-4">
-            <p className="font-label text-xs font-extrabold uppercase text-muted">Workflow & publication</p>
-
+          <EditorSection
+            title="Workflow & publication"
+            open={openSections.workflow}
+            onToggle={() => toggleSection("workflow")}
+          >
             <div>
               <label className="mb-2 block font-label text-xs font-extrabold uppercase text-foreground">
                 Statut éditorial
@@ -529,16 +672,18 @@ export default function ArticleEditor({
               </select>
             </div>
 
-            <div className="border-t border-border-subtle pt-4 space-y-3">
-              <label className="mb-2 block font-label text-xs font-extrabold uppercase text-foreground">
-                Publication programmée
-              </label>
-              <input
-                type="datetime-local"
-                value={scheduledAt}
-                onChange={(e) => setScheduledAt(e.target.value)}
-                className="w-full border border-border-subtle bg-surface px-4 py-3 font-label text-sm text-foreground focus:border-primary focus:outline-none"
-              />
+            <div className="grid gap-3 border-t border-border-subtle pt-4 md:grid-cols-2">
+              <div className="space-y-3 md:col-span-2">
+                <label className="mb-2 block font-label text-xs font-extrabold uppercase text-foreground">
+                  Publication programmée
+                </label>
+                <input
+                  type="datetime-local"
+                  value={scheduledAt}
+                  onChange={(e) => setScheduledAt(e.target.value)}
+                  className="w-full border border-border-subtle bg-surface px-4 py-3 font-label text-sm text-foreground focus:border-primary focus:outline-none"
+                />
+              </div>
 
               <Input
                 label="Niveau de priorité"
@@ -548,31 +693,38 @@ export default function ArticleEditor({
                 onChange={(e) => setPriorityLevel(e.target.value)}
               />
 
-              <label className="flex items-center gap-2 font-label text-xs font-extrabold uppercase text-foreground">
-                <input
-                  type="checkbox"
-                  checked={isBreaking}
-                  onChange={(e) => setIsBreaking(e.target.checked)}
-                  className="h-4 w-4 accent-primary"
-                />
-                Marquer Breaking
-              </label>
+              <div className="space-y-2 border border-border-subtle p-3">
+                <p className="font-label text-[11px] font-extrabold uppercase tracking-[0.18em] text-muted">
+                  Signaux de diffusion
+                </p>
+                <label className="flex items-center gap-2 font-label text-xs font-extrabold uppercase text-foreground">
+                  <input
+                    type="checkbox"
+                    checked={isBreaking}
+                    onChange={(e) => setIsBreaking(e.target.checked)}
+                    className="h-4 w-4 accent-primary"
+                  />
+                  Marquer Breaking
+                </label>
 
-              <label className="flex items-center gap-2 font-label text-xs font-extrabold uppercase text-foreground">
-                <input
-                  type="checkbox"
-                  checked={isHomepagePinned}
-                  onChange={(e) => setIsHomepagePinned(e.target.checked)}
-                  className="h-4 w-4 accent-primary"
-                />
-                Épingler homepage
-              </label>
+                <label className="flex items-center gap-2 font-label text-xs font-extrabold uppercase text-foreground">
+                  <input
+                    type="checkbox"
+                    checked={isHomepagePinned}
+                    onChange={(e) => setIsHomepagePinned(e.target.checked)}
+                    className="h-4 w-4 accent-primary"
+                  />
+                  Épingler homepage
+                </label>
+              </div>
             </div>
-          </section>
+          </EditorSection>
 
-          <section className="space-y-4 border border-border-subtle p-4">
-            <p className="font-label text-xs font-extrabold uppercase text-muted">Métadonnées</p>
-
+          <EditorSection
+            title="Métadonnées"
+            open={openSections.metadata}
+            onToggle={() => toggleSection("metadata")}
+          >
             <div>
               <label className="mb-2 block font-label text-xs font-extrabold uppercase text-foreground">
                 Catégorie
@@ -653,11 +805,13 @@ export default function ArticleEditor({
                 className="w-full border border-border-subtle bg-surface px-4 py-3 font-label text-sm text-foreground focus:border-primary focus:outline-none"
               />
             </div>
-          </section>
+          </EditorSection>
 
-          <section className="space-y-4 border border-border-subtle p-4">
-            <p className="font-label text-xs font-extrabold uppercase text-muted">SEO & média</p>
-
+          <EditorSection
+            title="SEO & média"
+            open={openSections.seo}
+            onToggle={() => toggleSection("seo")}
+          >
             <div>
               <label className="mb-2 block font-label text-xs font-extrabold uppercase text-foreground">
                 Image de couverture
@@ -696,11 +850,13 @@ export default function ArticleEditor({
               value={metaDescription}
               onChange={(e) => setMetaDescription(e.target.value)}
             />
-          </section>
+          </EditorSection>
 
-          <section className="space-y-4 border border-border-subtle p-4">
-            <p className="font-label text-xs font-extrabold uppercase text-muted">Traduction</p>
-
+          <EditorSection
+            title="Traduction"
+            open={openSections.translation}
+            onToggle={() => toggleSection("translation")}
+          >
             <div>
               <label className="mb-2 block font-label text-xs font-extrabold uppercase text-foreground">
                 Statut de traduction
@@ -764,10 +920,13 @@ export default function ArticleEditor({
                 }}
               />
             )}
-          </section>
+          </EditorSection>
 
-          <section className="space-y-3 border border-border-subtle p-4">
-            <p className="font-label text-xs font-extrabold uppercase text-muted">Contrôle qualité</p>
+          <EditorSection
+            title="Contrôle qualité"
+            open={openSections.quality}
+            onToggle={() => toggleSection("quality")}
+          >
             <ul className="space-y-1">
               {qualityChecks.map((check) => (
                 <li key={check.label} className="flex items-center justify-between text-xs">
@@ -781,25 +940,25 @@ export default function ArticleEditor({
             </div>
 
             <div className="flex items-center gap-2">
-              <span className="font-label text-xs font-extrabold uppercase text-foreground">Translation status:</span>
+              <span className="font-label text-xs font-extrabold uppercase text-foreground">Statut de traduction</span>
               <Badge variant={statusVariant}>{translationStatus}</Badge>
             </div>
 
             {language === "fr" ? (
               <div>
-                <p className="mb-2 font-label text-xs font-extrabold uppercase text-foreground">Existing EN translations</p>
+                <p className="mb-2 font-label text-xs font-extrabold uppercase text-foreground">Traductions EN existantes</p>
                 {translations.length === 0 ? (
                   <p className="font-label text-xs text-muted">Aucune traduction EN liée.</p>
                 ) : (
                   <ul className="space-y-1">
                     {translations.map((translation) => (
                       <li key={translation.id}>
-                        <a
+                        <Link
                           href={`/dashboard/articles/${translation.id}/edit`}
                           className="font-label text-xs text-accent-blue underline"
                         >
                           {translation.title}
-                        </a>
+                        </Link>
                       </li>
                     ))}
                   </ul>
@@ -807,55 +966,41 @@ export default function ArticleEditor({
               </div>
             ) : (
               <div>
-                <p className="mb-2 font-label text-xs font-extrabold uppercase text-foreground">FR source article</p>
-                {sourceArticlePreview ? (
-                  <a
-                    href={sourceArticlePreview.id ? `/dashboard/articles/${sourceArticlePreview.id}/edit` : "#"}
+                <p className="mb-2 font-label text-xs font-extrabold uppercase text-foreground">Article source FR</p>
+                {sourceArticlePreview?.id ? (
+                  <Link
+                    href={`/dashboard/articles/${sourceArticlePreview.id}/edit`}
                     className="font-label text-xs text-accent-blue underline"
                   >
                     {sourceArticlePreview.title}
-                  </a>
+                  </Link>
                 ) : (
                   <p className="font-label text-xs text-muted">Aucune source FR sélectionnée.</p>
                 )}
               </div>
             )}
-          </section>
+          </EditorSection>
         </aside>
       </div>
 
       {submitError ? <AlertBanner variant="danger" title="Enregistrement impossible">{submitError}</AlertBanner> : null}
 
-      <div className="flex flex-wrap items-center gap-3 pt-2">
-        <Button
-          onClick={() => handleSubmit(status)}
-          disabled={saving || !title || !body}
-        >
-          {saving ? "Enregistrement..." : submitLabel}
-        </Button>
-        {scheduledAt && (
-          <Button
-            variant="outline"
-            onClick={() => handleSubmit("scheduled")}
-            disabled={saving || !title || !body}
-          >
-            Programmer
-          </Button>
-        )}
-        <Button
-          variant="outline"
-          onClick={() => handleSubmit("in_review")}
-          disabled={saving || !title || !body}
-        >
-          Soumettre en revue
-        </Button>
-        <Button
-          variant="outline"
-          onClick={() => handleSubmit("draft")}
-          disabled={saving || !title}
-        >
-          Sauvegarder brouillon
-        </Button>
+      <div className="flex flex-wrap items-center justify-between gap-3 border border-border-subtle bg-surface p-4">
+        <div>
+          <p className="font-label text-xs font-extrabold uppercase tracking-[0.18em] text-muted">
+            Résumé de validation
+          </p>
+          <p className="mt-1 font-body text-sm text-foreground">
+            {missingChecks.length === 0
+              ? "Tous les blocs requis sont complétés pour une mise en ligne sereine."
+              : `Encore ${missingChecks.length} point${missingChecks.length > 1 ? "s" : ""} à compléter avant publication.`}
+          </p>
+        </div>
+        <div className="flex flex-wrap items-center gap-2">
+          <StatusChip status={normalizedStatus} />
+          <Badge variant={completionVariant}>Complétude {completionScore}%</Badge>
+          <Badge variant={statusVariant}>Traduction {translationStatus}</Badge>
+        </div>
       </div>
 
       {isExistingArticle && initial?.id ? (
