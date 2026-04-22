@@ -108,6 +108,33 @@ export default function HomepageDashboardPage() {
     .map((id) => articles.find((article) => article.id === id))
     .filter((article): article is ArticleOption => Boolean(article));
 
+  const curationWarnings = useMemo(() => {
+    const warnings: string[] = [];
+    const ids = settings.secondaryArticleIds.filter(Boolean);
+    const duplicates = ids.length - new Set(ids).size;
+
+    if (!settings.heroArticleId) {
+      warnings.push("Le slot Hero est automatique. Sélection manuelle recommandée pour les éditions premium.");
+    }
+
+    if (duplicates > 0) {
+      warnings.push("Un même article est utilisé plusieurs fois dans les slots secondaires.");
+    }
+
+    if (settings.heroArticleId && ids.includes(settings.heroArticleId)) {
+      warnings.push("L'article Hero est aussi présent en secondaire.");
+    }
+
+    if (selectedHero?.publishedAt) {
+      const ageHours = (Date.now() - new Date(selectedHero.publishedAt).getTime()) / 36e5;
+      if (ageHours > 72) {
+        warnings.push("Le Hero est potentiellement stale (plus de 72h). Vérifiez l'actualité.");
+      }
+    }
+
+    return warnings;
+  }, [settings.heroArticleId, settings.secondaryArticleIds, selectedHero?.publishedAt]);
+
   function updateSettings(next: Partial<HomepageSettings>) {
     setSettings((current) => ({ ...current, ...next }));
   }
@@ -166,6 +193,19 @@ export default function HomepageDashboardPage() {
         <p className="font-label text-sm font-bold text-accent-teal">
           {message}
         </p>
+      ) : null}
+
+      {curationWarnings.length > 0 ? (
+        <div className="border border-primary/20 bg-primary/5 px-4 py-3">
+          <p className="font-label text-xs font-extrabold uppercase text-primary">Alertes curation</p>
+          <ul className="mt-2 space-y-1">
+            {curationWarnings.map((warning) => (
+              <li key={warning} className="font-label text-xs text-primary">
+                • {warning}
+              </li>
+            ))}
+          </ul>
+        </div>
       ) : null}
 
       <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">

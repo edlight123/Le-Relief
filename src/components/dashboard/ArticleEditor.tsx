@@ -8,6 +8,8 @@ import SourceArticlePicker from "@/components/dashboard/SourceArticlePicker";
 import Badge from "@/components/ui/Badge";
 import { canTransitionStatus, getEditorialStatusLabel, getEditorialStatusVariant, normalizeWorkflowRole } from "@/lib/editorial-workflow";
 import { useSession } from "next-auth/react";
+import CommentsPanel from "@/components/dashboard/editorial/CommentsPanel";
+import HistoryPanel from "@/components/dashboard/editorial/HistoryPanel";
 
 type TranslationLink = {
   id: string;
@@ -43,6 +45,9 @@ interface ArticleEditorProps {
     allowTranslation?: boolean;
     translationPriority?: string;
     scheduledAt?: string;
+    priorityLevel?: string;
+    isBreaking?: boolean;
+    isHomepagePinned?: boolean;
     slug?: string;
     seoTitle?: string;
     metaDescription?: string;
@@ -67,6 +72,9 @@ interface ArticleEditorProps {
     allowTranslation: boolean;
     translationPriority: string;
     scheduledAt: string;
+    priorityLevel: string;
+    isBreaking: boolean;
+    isHomepagePinned: boolean;
     slug: string;
     seoTitle: string;
     metaDescription: string;
@@ -92,6 +100,9 @@ export default function ArticleEditor({
   const [coverImage, setCoverImage] = useState(initial?.coverImage || "");
   const [coverImageCaption, setCoverImageCaption] = useState(initial?.coverImageCaption || "");
   const [scheduledAt, setScheduledAt] = useState(initial?.scheduledAt || "");
+  const [priorityLevel, setPriorityLevel] = useState(initial?.priorityLevel || "");
+  const [isBreaking, setIsBreaking] = useState(Boolean(initial?.isBreaking));
+  const [isHomepagePinned, setIsHomepagePinned] = useState(Boolean(initial?.isHomepagePinned));
   const [status, setStatus] = useState(initial?.status || "draft");
   const [categoryId, setCategoryId] = useState(initial?.categoryId || "");
   const [contentType, setContentType] = useState(initial?.contentType || "actualite");
@@ -152,6 +163,9 @@ export default function ArticleEditor({
       allowTranslation,
       translationPriority,
       scheduledAt,
+      priorityLevel,
+      isBreaking,
+      isHomepagePinned,
       slug,
       seoTitle,
       metaDescription,
@@ -174,6 +188,9 @@ export default function ArticleEditor({
       allowTranslation,
       translationPriority,
       scheduledAt,
+      priorityLevel,
+      isBreaking,
+      isHomepagePinned,
       slug,
       seoTitle,
       metaDescription,
@@ -226,6 +243,9 @@ export default function ArticleEditor({
       if (parsed.sourceArticleId && !sourceArticleId) setSourceArticleId(parsed.sourceArticleId);
       if (parsed.alternateLanguageSlug && !alternateLanguageSlug) setAlternateLanguageSlug(parsed.alternateLanguageSlug);
       if (parsed.translationPriority && !translationPriority) setTranslationPriority(parsed.translationPriority);
+      if (parsed.priorityLevel && !priorityLevel) setPriorityLevel(parsed.priorityLevel);
+      if (typeof parsed.isBreaking === "boolean") setIsBreaking(parsed.isBreaking);
+      if (typeof parsed.isHomepagePinned === "boolean") setIsHomepagePinned(parsed.isHomepagePinned);
       if (parsed.slug && !slug) setSlug(parsed.slug);
       if (parsed.seoTitle && !seoTitle) setSeoTitle(parsed.seoTitle);
       if (parsed.metaDescription && !metaDescription) setMetaDescription(parsed.metaDescription);
@@ -489,7 +509,7 @@ export default function ArticleEditor({
               </select>
             </div>
 
-            <div className="border-t border-border-subtle pt-4">
+            <div className="border-t border-border-subtle pt-4 space-y-3">
               <label className="mb-2 block font-label text-xs font-extrabold uppercase text-foreground">
                 Publication programmée
               </label>
@@ -499,6 +519,34 @@ export default function ArticleEditor({
                 onChange={(e) => setScheduledAt(e.target.value)}
                 className="w-full border border-border-subtle bg-surface px-4 py-3 font-label text-sm text-foreground focus:border-primary focus:outline-none"
               />
+
+              <Input
+                label="Niveau de priorité"
+                id="priorityLevel"
+                placeholder="normal, urgent, majeur"
+                value={priorityLevel}
+                onChange={(e) => setPriorityLevel(e.target.value)}
+              />
+
+              <label className="flex items-center gap-2 font-label text-xs font-extrabold uppercase text-foreground">
+                <input
+                  type="checkbox"
+                  checked={isBreaking}
+                  onChange={(e) => setIsBreaking(e.target.checked)}
+                  className="h-4 w-4 accent-primary"
+                />
+                Marquer Breaking
+              </label>
+
+              <label className="flex items-center gap-2 font-label text-xs font-extrabold uppercase text-foreground">
+                <input
+                  type="checkbox"
+                  checked={isHomepagePinned}
+                  onChange={(e) => setIsHomepagePinned(e.target.checked)}
+                  className="h-4 w-4 accent-primary"
+                />
+                Épingler homepage
+              </label>
             </div>
           </section>
 
@@ -793,6 +841,13 @@ export default function ArticleEditor({
           Sauvegarder brouillon
         </Button>
       </div>
+
+      {isExistingArticle && initial?.id ? (
+        <div className="grid gap-6 xl:grid-cols-2">
+          <CommentsPanel articleId={initial.id} />
+          <HistoryPanel articleId={initial.id} />
+        </div>
+      ) : null}
     </div>
   );
 }

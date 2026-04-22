@@ -18,6 +18,8 @@ interface QueueArticle {
   scheduledAt?: string | null;
   publishedAt?: string | null;
   views?: number;
+  priorityLevel?: string | null;
+  isBreaking?: boolean;
   language?: "fr" | "en";
   category?: { name: string } | null;
   author?: { name: string | null } | null;
@@ -134,7 +136,11 @@ export default function WorkflowQueueTable({
                 >
                   <td className="px-4 py-3">
                     <p className="line-clamp-1 font-body font-semibold text-foreground">{article.title}</p>
-                    <p className="mt-0.5 font-label text-xs text-muted uppercase">{article.language || "fr"}</p>
+                    <div className="mt-0.5 flex flex-wrap items-center gap-2">
+                      <p className="font-label text-xs text-muted uppercase">{article.language || "fr"}</p>
+                      {article.isBreaking ? <Badge variant="danger">Breaking</Badge> : null}
+                      {article.priorityLevel ? <Badge variant="warning">{article.priorityLevel}</Badge> : null}
+                    </div>
                   </td>
                   <td className="hidden px-4 py-3 font-label text-xs text-muted md:table-cell">
                     {article.author?.name || "La rédaction"}

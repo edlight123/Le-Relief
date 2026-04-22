@@ -42,6 +42,9 @@ interface ArticleBase {
   coverImage: string | null;
   status: ArticleStatus;
   featured: boolean;
+  priorityLevel: string | null;
+  isBreaking: boolean;
+  isHomepagePinned: boolean;
   views: number;
   publishedAt: Date | null;
   createdAt: Date;
@@ -100,6 +103,9 @@ interface CreateArticleInputBase {
   tags?: string[];
   status?: ArticleStatus;
   featured?: boolean;
+  priorityLevel?: string | null;
+  isBreaking?: boolean;
+  isHomepagePinned?: boolean;
   contentType?: ArticleContentType;
   alternateLanguageSlug?: string | null;
   allowTranslation?: boolean;

@@ -39,6 +39,9 @@ export const articleSchema = z.object({
     ])
     .optional(),
   featured: z.boolean().optional(),
+  priorityLevel: z.string().optional(),
+  isBreaking: z.boolean().optional(),
+  isHomepagePinned: z.boolean().optional(),
   scheduledAt: z.string().optional(),
   contentType: z
     .enum([

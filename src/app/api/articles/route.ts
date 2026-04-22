@@ -20,6 +20,8 @@ import {
 } from "@/lib/search-ranking";
 import { validateSourceArticleReference } from "@/lib/validation";
 import type { Role } from "@/types/user";
+import { validatePublishReadiness } from "@/lib/editorial-quality";
+import { logEditorialEvent } from "@/lib/repositories/editorial/audit";
 
 function parseBoundedInt(value: string | null, fallback: number, min: number, max: number) {
   const parsed = Number.parseInt(value || "", 10);
@@ -302,6 +304,9 @@ export async function POST(req: NextRequest) {
         : [],
       status: resolvedStatus,
       featured: body.featured || false,
+      priorityLevel: body.priorityLevel || null,
+      isBreaking: Boolean(body.isBreaking),
+      isHomepagePinned: Boolean(body.isHomepagePinned),
       authorId: session.user.id,
       categoryId: body.categoryId || null,
       contentType: body.contentType || "actualite",
@@ -316,6 +321,88 @@ export async function POST(req: NextRequest) {
       scheduledAt,
       ...workflowDates,
     });
+
+    if (resolvedStatus === "published") {
+      const readiness = await validatePublishReadiness({
+        articleId: String(article.id),
+        title: String(article.title || ""),
+        body: String(article.body || ""),
+        excerpt: String(article.excerpt || ""),
+        coverImage: String(article.coverImage || ""),
+        categoryId: String(article.categoryId || ""),
+        contentType: String(article.contentType || ""),
+        slug: String(article.slug || ""),
+        seoTitle: String(article.seoTitle || ""),
+        metaDescription: String(article.metaDescription || ""),
+      });
+
+      if (!readiness.valid) {
+        await articlesRepo.updateArticle(String(article.id), {
+          status: "approved",
+          publishedAt: null,
+        });
+        return NextResponse.json(
+          { error: `Publication bloquée: ${readiness.errors.join(", ")}` },
+          { status: 422 },
+        );
+      }
+    }
+
+    await logEditorialEvent({
+      articleId: String(article.id),
+      actorId: session.user.id,
+      type: "article_created",
+      toStatus: String(article.status || "draft"),
+    });
+
+    if (resolvedStatus === "in_review") {
+      await logEditorialEvent({
+        articleId: String(article.id),
+        actorId: session.user.id,
+        type: "submitted_for_review",
+        toStatus: "in_review",
+      });
+    }
+    if (resolvedStatus === "approved") {
+      await logEditorialEvent({
+        articleId: String(article.id),
+        actorId: session.user.id,
+        type: "approved",
+        toStatus: "approved",
+      });
+    }
+    if (resolvedStatus === "revisions_requested") {
+      await logEditorialEvent({
+        articleId: String(article.id),
+        actorId: session.user.id,
+        type: "revision_requested",
+        toStatus: "revisions_requested",
+      });
+    }
+    if (resolvedStatus === "rejected") {
+      await logEditorialEvent({
+        articleId: String(article.id),
+        actorId: session.user.id,
+        type: "rejected",
+        toStatus: "rejected",
+      });
+    }
+    if (resolvedStatus === "scheduled") {
+      await logEditorialEvent({
+        articleId: String(article.id),
+        actorId: session.user.id,
+        type: "scheduled",
+        toStatus: "scheduled",
+      });
+    }
+    if (resolvedStatus === "published") {
+      await logEditorialEvent({
+        articleId: String(article.id),
+        actorId: session.user.id,
+        type: "published",
+        toStatus: "published",
+      });
+    }
 
     return NextResponse.json(article, { status: 201 });
   } catch (error) {

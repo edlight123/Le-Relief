@@ -34,6 +34,9 @@ export default function NewArticlePage() {
     allowTranslation: boolean;
     translationPriority: string;
     scheduledAt: string;
+    priorityLevel: string;
+    isBreaking: boolean;
+    isHomepagePinned: boolean;
     slug: string;
     seoTitle: string;
     metaDescription: string;

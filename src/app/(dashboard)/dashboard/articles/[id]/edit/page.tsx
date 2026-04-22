@@ -30,6 +30,9 @@ export default function EditArticlePage() {
     allowTranslation: boolean;
     translationPriority: string;
     scheduledAt: string;
+    priorityLevel?: string;
+    isBreaking?: boolean;
+    isHomepagePinned?: boolean;
     slug?: string;
     seoTitle?: string;
     metaDescription?: string;
@@ -98,6 +101,9 @@ export default function EditArticlePage() {
         allowTranslation: Boolean(articleData.allowTranslation),
         translationPriority: articleData.translationPriority || "",
         scheduledAt: articleData.scheduledAt || "",
+        priorityLevel: articleData.priorityLevel || "",
+        isBreaking: Boolean(articleData.isBreaking),
+        isHomepagePinned: Boolean(articleData.isHomepagePinned),
         slug: articleData.slug || "",
         seoTitle: articleData.seoTitle || "",
         metaDescription: articleData.metaDescription || "",
@@ -128,6 +134,9 @@ export default function EditArticlePage() {
     allowTranslation: boolean;
     translationPriority: string;
     scheduledAt: string;
+    priorityLevel: string;
+    isBreaking: boolean;
+    isHomepagePinned: boolean;
     slug: string;
     seoTitle: string;
     metaDescription: string;

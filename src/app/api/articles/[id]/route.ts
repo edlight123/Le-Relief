@@ -7,6 +7,8 @@ import { hasRole } from "@/lib/permissions";
 import { normalizeAuthor, normalizeCategory } from "@/lib/editorial";
 import { validateSourceArticleReference } from "@/lib/validation";
 import { canEditArticle, canTransitionStatus, normalizeEditorialStatus, normalizeWorkflowRole } from "@/lib/editorial-workflow";
+import { validatePublishReadiness } from "@/lib/editorial-quality";
+import { logEditorialEvent } from "@/lib/repositories/editorial/audit";
 
 interface RouteParams {
   params: Promise<{ id: string }>;
@@ -94,6 +96,9 @@ export async function PATCH(req: NextRequest, { params }: RouteParams) {
       : [];
   }
   if (body.featured !== undefined) data.featured = body.featured;
+  if (body.priorityLevel !== undefined) data.priorityLevel = body.priorityLevel || null;
+  if (body.isBreaking !== undefined) data.isBreaking = Boolean(body.isBreaking);
+  if (body.isHomepagePinned !== undefined) data.isHomepagePinned = Boolean(body.isHomepagePinned);
   if (body.status !== undefined) {
     const canPublish = hasRole(normalizedRole, "publisher");
     const scheduledAt = (data.scheduledAt as string) ?? (existing.scheduledAt as string) ?? null;
@@ -168,6 +173,71 @@ export async function PATCH(req: NextRequest, { params }: RouteParams) {
 
   try {
     const article = await articlesRepo.updateArticle(id, data);
+
+    if (!article) {
+      return NextResponse.json({ error: "Introuvable" }, { status: 404 });
+    }
+
+    const nextStatus = String((article as Record<string, unknown>).status || existing.status || "draft");
+    if (nextStatus === "published") {
+      const readiness = await validatePublishReadiness({
+        articleId: id,
+        title: String((article as Record<string, unknown>).title || ""),
+        body: String((article as Record<string, unknown>).body || ""),
+        excerpt: String((article as Record<string, unknown>).excerpt || ""),
+        coverImage: String((article as Record<string, unknown>).coverImage || ""),
+        categoryId: String((article as Record<string, unknown>).categoryId || ""),
+        contentType: String((article as Record<string, unknown>).contentType || ""),
+        slug: String((article as Record<string, unknown>).slug || ""),
+        seoTitle: String((article as Record<string, unknown>).seoTitle || ""),
+        metaDescription: String((article as Record<string, unknown>).metaDescription || ""),
+      });
+
+      if (!readiness.valid) {
+        await articlesRepo.updateArticle(id, { status: "approved", publishedAt: null });
+        return NextResponse.json(
+          { error: `Publication bloquée: ${readiness.errors.join(", ")}` },
+          { status: 422 },
+        );
+      }
+    }
+
+    const previousStatus = String(existing.status || "draft");
+    if (previousStatus !== nextStatus) {
+      const eventType =
+        nextStatus === "in_review"
+          ? "submitted_for_review"
+          : nextStatus === "approved"
+          ? "approved"
+          : nextStatus === "revisions_requested"
+          ? "revision_requested"
+          : nextStatus === "rejected"
+          ? "rejected"
+          : nextStatus === "scheduled"
+          ? "scheduled"
+          : nextStatus === "published"
+          ? "published"
+          : nextStatus === "archived"
+          ? "archived"
+          : "article_updated";
+
+      await logEditorialEvent({
+        articleId: id,
+        actorId: session.user.id,
+        type: eventType,
+        fromStatus: previousStatus,
+        toStatus: nextStatus,
+      });
+    } else {
+      await logEditorialEvent({
+        articleId: id,
+        actorId: session.user.id,
+        type: "metadata_updated",
+        fromStatus: previousStatus,
+        toStatus: nextStatus,
+      });
+    }
+
     return NextResponse.json(article);
   } catch (error) {
     const message = error instanceof Error ? error.message : "Impossible de mettre à jour l'article";
@@ -213,5 +283,13 @@ export async function DELETE(req: NextRequest, { params }: RouteParams) {
   }
 
   await articlesRepo.deleteArticle(id);
+  await logEditorialEvent({
+    articleId: id,
+    actorId: session.user.id,
+    type: "archived",
+    fromStatus: String(article.status || "draft"),
+    toStatus: "archived",
+    note: "Article supprimé",
+  });
   return NextResponse.json({ success: true });
 }
