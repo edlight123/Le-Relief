@@ -9,6 +9,7 @@ import { validateSourceArticleReference } from "@/lib/validation";
 import { canEditArticle, canTransitionStatus, normalizeEditorialStatus, normalizeWorkflowRole } from "@/lib/editorial-workflow";
 import { validatePublishReadiness } from "@/lib/editorial-quality";
 import { logEditorialEvent } from "@/lib/repositories/editorial/audit";
+import * as notificationsRepo from "@/lib/repositories/notifications";
 
 interface RouteParams {
   params: Promise<{ id: string }>;
@@ -228,6 +229,63 @@ export async function PATCH(req: NextRequest, { params }: RouteParams) {
         fromStatus: previousStatus,
         toStatus: nextStatus,
       });
+
+      // Fire in-app notifications
+      const articleTitle = String((article as Record<string, unknown>).title || "");
+      const actorName = (session.user as { name?: string }).name || "Rédaction";
+      const authorId = String((article as Record<string, unknown>).authorId || existing.authorId || "");
+
+      if (nextStatus === "in_review" && authorId !== session.user.id) {
+        // Notify editors that a new article is waiting for review
+        const editors = await import("@/lib/repositories/users")
+          .then((m) => m.getUsers())
+          .then((users) =>
+            users.filter((u) =>
+              ["editor", "publisher", "admin"].includes(String(u.role || "")),
+            ),
+          );
+        await Promise.all(
+          editors.map((ed) =>
+            notificationsRepo.createNotification({
+              userId: String(ed.id),
+              type: "article_submitted",
+              articleId: id,
+              articleTitle,
+              actorName,
+              message: `${actorName} a soumis « ${articleTitle} » pour review.`,
+            }),
+          ),
+        );
+      } else if (
+        (nextStatus === "approved" ||
+          nextStatus === "revisions_requested" ||
+          nextStatus === "rejected" ||
+          nextStatus === "published") &&
+        authorId
+      ) {
+        const msgMap: Record<string, string> = {
+          approved: `Votre article « ${articleTitle} » a été approuvé.`,
+          revisions_requested: `Des révisions ont été demandées pour « ${articleTitle} ».`,
+          rejected: `Votre article « ${articleTitle} » a été rejeté.`,
+          published: `Votre article « ${articleTitle} » est maintenant publié !`,
+        };
+        const typeMap: Record<string, notificationsRepo.NotificationData["type"]> = {
+          approved: "article_approved",
+          revisions_requested: "revision_requested",
+          rejected: "article_rejected",
+          published: "article_published",
+        };
+        if (authorId !== session.user.id) {
+          await notificationsRepo.createNotification({
+            userId: authorId,
+            type: typeMap[nextStatus]!,
+            articleId: id,
+            articleTitle,
+            actorName,
+            message: msgMap[nextStatus]!,
+          });
+        }
+      }
     } else {
       await logEditorialEvent({
         articleId: id,

@@ -6,6 +6,7 @@ import { Command, Menu } from "lucide-react";
 import Sidebar from "@/components/layout/Sidebar";
 import ThemeToggle from "@/components/public/ThemeToggle";
 import CommandPalette from "@/components/ui/CommandPalette";
+import NotificationsPanel from "@/components/notifications/NotificationsPanel";
 
 const sectionLabels: Record<string, string> = {
   "/dashboard": "Tableau de bord",
@@ -24,6 +25,7 @@ const sectionLabels: Record<string, string> = {
   "/dashboard/product": "Métriques produit",
   "/dashboard/settings": "Paramètres",
   "/dashboard/users": "Utilisateurs",
+  "/dashboard/authors": "Auteurs",
 };
 
 function getSectionLabel(pathname: string) {
@@ -73,6 +75,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               <span>K</span>
             </button>
             <ThemeToggle />
+            <NotificationsPanel />
           </div>
         </header>
         <main className="flex-1 overflow-y-auto p-6 sm:p-8">{children}</main>

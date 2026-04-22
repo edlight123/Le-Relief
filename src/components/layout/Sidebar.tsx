@@ -17,6 +17,7 @@ import {
   BarChart3,
   Settings,
   Users,
+  UserCheck,
   LogOut,
   X,
   ExternalLink,
@@ -60,6 +61,7 @@ const navGroups = [
     items: [
       { label: "Paramètres", href: "/dashboard/settings", icon: Settings },
       { label: "Utilisateurs", href: "/dashboard/users", icon: Users },
+      { label: "Auteurs", href: "/dashboard/authors", icon: UserCheck },
     ],
   },
 ];
