@@ -175,12 +175,6 @@ export default async function EditorialDashboardPage() {
           >
             Nouvel article
           </Link>
-          <Link
-            href="/dashboard/editorial/export"
-            className="inline-flex items-center gap-2 rounded-sm border border-border-subtle bg-surface px-4 py-2 font-label text-xs font-extrabold uppercase tracking-wide text-foreground transition-colors hover:bg-surface-elevated"
-          >
-            Exporter CSV
-          </Link>
         </div>
       </div>
 
@@ -458,11 +452,11 @@ export default async function EditorialDashboardPage() {
                 Nouvel article
               </Link>
               <Link
-                href="/dashboard/categories/new"
+                href="/dashboard/settings"
                 className="flex items-center gap-2 rounded-sm border border-border-subtle bg-surface-elevated px-3 py-2.5 font-label text-xs font-bold text-foreground transition-colors hover:bg-surface"
               >
                 <AlertCircle className="h-4 w-4 text-accent-blue" />
-                Nouvelle catégorie
+                Gérer les catégories
               </Link>
             </div>
           </CardContent>
