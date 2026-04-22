@@ -23,6 +23,10 @@ function stripHtml(input: string) {
   return input.replace(/<[^>]*>/g, " ");
 }
 
+function formatHeadlineTypography(input: string) {
+  return input.replace(/\s+([:;!?])/g, "\u00A0$1");
+}
+
 function sanitizeDeckText(input: string) {
   return input
     .replace(
@@ -129,6 +133,7 @@ export default async function ArticlePage({ params }: Props) {
     .find(Boolean) || "";
   const deckText = sanitizeDeckText(article.subtitle || article.excerpt || "");
   const shouldShowDeck = Boolean(deckText) && !isDuplicateIntro(deckText, firstBodyParagraph);
+  const displayTitle = formatHeadlineTypography(article.title);
   const articleUrl = `${siteConfig.url}/articles/${slug}`;
   const alternateLabel = article.language === "fr" ? "Lire en anglais" : "Lire en français";
 
@@ -200,7 +205,7 @@ export default async function ArticlePage({ params }: Props) {
         </div>
 
         <h1 className="editorial-title mt-4 max-w-5xl text-4xl text-foreground sm:text-5xl lg:text-6xl">
-          {article.title}
+          {displayTitle}
         </h1>
 
         {shouldShowDeck ? (
