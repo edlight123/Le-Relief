@@ -359,3 +359,27 @@ Every PR must include:
 - Confirmation that forbidden routes are blocked server-side
 - Confirmation that forbidden actions are hidden client-side
 - Link to acceptance criteria checked
+
+## 10) Completion status (2026-04-22)
+
+Implemented and validated:
+- Canonical `/admin/*` IA + legacy `/dashboard/*` compatibility
+- Role guard enforcement + access-denied flow
+- Role-aware shell/sidebar/navigation
+- Writer/editor/publisher/admin route surfaces from this matrix
+- Shared editorial component contracts listed in section 5
+- Central capability module and admin analytics event helper
+- QA role matrix sign-off and production build validation
+
+Automation and CI:
+- Role-matrix E2E suite: [tests/e2e/qa-role-matrix.spec.ts](../../tests/e2e/qa-role-matrix.spec.ts)
+- Playwright config: [playwright.config.ts](../../playwright.config.ts)
+- CI build + E2E gate: [.github/workflows/ci.yml](../../.github/workflows/ci.yml)
+
+## 11) Phase-2 enhancement backlog
+
+Planned next iteration (non-blocking for this matrix):
+- Deepen wrapper/scaffold components into richer operator workflows
+- Add visual regression snapshots for critical admin routes
+- Expand telemetry to explicit action outcomes (approve/revise/publish/schedule)
+- Add mobile-specific E2E assertions for drawer/table responsive behavior

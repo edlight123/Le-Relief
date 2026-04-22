@@ -7,6 +7,12 @@ import {
   isRoleScopedRoute,
   normalizeAppRole,
 } from "@/lib/role-routing";
+import {
+  E2E_REQUEST_ROLE_HEADER,
+  E2E_REQUEST_USER_ID_HEADER,
+  E2E_ROLE_HEADER,
+  resolveE2ERole,
+} from "@/lib/e2e-role";
 
 export const LOCALE_COOKIE = "NEXT_LOCALE";
 const DEFAULT_LOCALE = "fr";
@@ -45,10 +51,37 @@ function redirectToLogin(request: NextRequest) {
 
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
+  const e2eRole = resolveE2ERole(request.headers.get(E2E_ROLE_HEADER));
 
   if (isRoleScopedRoute(pathname)) {
     if (pathname.startsWith("/admin/access-denied")) {
+      if (e2eRole) {
+        const requestHeaders = new Headers(request.headers);
+        requestHeaders.set(E2E_REQUEST_ROLE_HEADER, e2eRole);
+        requestHeaders.set(E2E_REQUEST_USER_ID_HEADER, `e2e-${e2eRole}`);
+        return NextResponse.next({
+          request: {
+            headers: requestHeaders,
+          },
+        });
+      }
+
       return NextResponse.next();
+    }
+
+    if (e2eRole) {
+      if (!canAccessRoleScopedRoute(pathname, e2eRole)) {
+        return redirectToAccessDenied(request);
+      }
+
+      const requestHeaders = new Headers(request.headers);
+      requestHeaders.set(E2E_REQUEST_ROLE_HEADER, e2eRole);
+      requestHeaders.set(E2E_REQUEST_USER_ID_HEADER, `e2e-${e2eRole}`);
+      return NextResponse.next({
+        request: {
+          headers: requestHeaders,
+        },
+      });
     }
 
     const token = await getToken({ req: request });

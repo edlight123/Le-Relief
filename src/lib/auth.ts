@@ -6,6 +6,7 @@ import * as usersRepo from "@/lib/repositories/users";
 import type { Role } from "@/types/user";
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
+  trustHost: true,
   session: { strategy: "jwt" },
   pages: {
     signIn: "/login",

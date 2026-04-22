@@ -27,9 +27,9 @@ export function getRoleLandingPath(role: AppRole): string {
 }
 
 export function canAccessRoleScopedRoute(pathname: string, role: AppRole): boolean {
-  const matchingRule = ROLE_SCOPED_ROUTE_RULES.find((rule) =>
-    pathname === rule.prefix || pathname.startsWith(`${rule.prefix}/`),
-  );
+  const matchingRule = ROLE_SCOPED_ROUTE_RULES
+    .filter((rule) => pathname === rule.prefix || pathname.startsWith(`${rule.prefix}/`))
+    .sort((a, b) => b.prefix.length - a.prefix.length)[0];
 
   if (!matchingRule) {
     return true;

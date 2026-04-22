@@ -107,6 +107,13 @@ Expected deny behavior: redirect to `/admin/access-denied`.
 - Sidebar active state works for both canonical and legacy aliases
 - Unauthorized users are redirected before page render
 
+## 6) Automated suite coverage
+
+- Playwright spec: [tests/e2e/qa-role-matrix.spec.ts](../../tests/e2e/qa-role-matrix.spec.ts)
+- Command: `npm run test:e2e`
+- Runtime mode: `E2E_TEST_MODE=1` with per-test role header injection
+- CI gate: [.github/workflows/ci.yml](../../.github/workflows/ci.yml)
+
 ## Sign-off checklist
 - [x] Writer smoke path passed
 - [x] Editor smoke path passed
@@ -115,6 +122,7 @@ Expected deny behavior: redirect to `/admin/access-denied`.
 - [x] Route protection matrix validated
 - [x] Action visibility validated in `ArticleEditor`
 - [x] Revisions and approved queues validated
+- [x] Automated role-matrix E2E suite added
 
 ## Agent sign-off
 - Date: 2026-04-22
