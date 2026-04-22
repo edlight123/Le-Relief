@@ -7,6 +7,7 @@ import Button from "@/components/ui/Button";
 import Card from "@/components/ui/Card";
 import PageHeader from "@/components/ui/PageHeader";
 import EmptyState from "@/components/ui/EmptyState";
+import { useSession } from "next-auth/react";
 import { formatDistanceToNow, differenceInHours } from "date-fns";
 import { fr } from "date-fns/locale";
 import { Clock, AlertTriangle, MessageSquare, Send, CheckCircle2, Pencil } from "lucide-react";
@@ -132,13 +133,43 @@ function ArticleCard({ article, onResubmit }: { article: RevisionArticle; onResu
 }
 
 export default function RevisionsRequestedPage() {
+  const { data: session } = useSession();
   const [articles, setArticles] = useState<RevisionArticle[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadingUser, setLoadingUser] = useState(true);
+  const [authorId, setAuthorId] = useState<string | null>(null);
+  const [scope, setScope] = useState<"mine" | "all">("mine");
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
 
+  const role = (session?.user as { role?: string } | undefined)?.role;
+  const canViewAll = role === "editor" || role === "admin" || role === "publisher";
+
+  useEffect(() => {
+    fetch("/api/users/me")
+      .then((r) => r.json())
+      .then((data) => setAuthorId(data?.id ?? data?.uid ?? null))
+      .catch(() => setAuthorId(null))
+      .finally(() => setLoadingUser(false));
+  }, []);
+
   const load = useCallback(async () => {
+    if (scope === "mine" && !authorId) {
+      setArticles([]);
+      setLoading(false);
+      return;
+    }
+
     setLoading(true);
-    const res = await fetch("/api/articles?status=revisions_requested&take=100").then((r) => r.json());
+    const query = new URLSearchParams({
+      status: "revisions_requested",
+      take: "100",
+    });
+
+    if (scope === "mine" && authorId) {
+      query.set("authorId", authorId);
+    }
+
+    const res = await fetch(`/api/articles?${query.toString()}`).then((r) => r.json());
     const sorted: RevisionArticle[] = (res.articles || []).sort((a: RevisionArticle, b: RevisionArticle) => {
       const aDate = new Date(a.revisionRequestedAt || a.updatedAt).getTime();
       const bDate = new Date(b.revisionRequestedAt || b.updatedAt).getTime();
@@ -146,10 +177,19 @@ export default function RevisionsRequestedPage() {
     });
     setArticles(sorted);
     setLoading(false);
-  }, []);
+  }, [authorId, scope]);
+
+  useEffect(() => {
+    if (!canViewAll && scope !== "mine") {
+      setScope("mine");
+    }
+  }, [canViewAll, scope]);
 
   // eslint-disable-next-line react-hooks/set-state-in-effect
-  useEffect(() => { load(); }, [load]);
+  useEffect(() => {
+    if (loadingUser) return;
+    load();
+  }, [load, loadingUser]);
 
   const overdueCount = useMemo(() =>
     articles.filter((a) => a.revisionRequestedAt && differenceInHours(new Date(), new Date(a.revisionRequestedAt)) > 72).length,
@@ -168,10 +208,31 @@ export default function RevisionsRequestedPage() {
       <PageHeader
         kicker="Workflow"
         title="Révisions demandées"
-        description="Articles renvoyés aux rédacteurs pour corrections. Triés du plus ancien au plus récent."
+        description={scope === "mine"
+          ? "Articles vous concernant, renvoyés pour corrections. Triés du plus ancien au plus récent."
+          : "Tous les articles renvoyés aux rédacteurs pour corrections. Triés du plus ancien au plus récent."}
       />
       <div className="flex flex-wrap items-center gap-3">
-        <span className="font-label text-sm font-bold text-foreground">{loading ? "—" : articles.length} article{articles.length !== 1 ? "s" : ""}</span>
+        <span className="font-label text-sm font-bold text-foreground">{loading || loadingUser ? "—" : articles.length} article{articles.length !== 1 ? "s" : ""}</span>
+        <Badge variant={scope === "mine" ? "info" : "default"}>{scope === "mine" ? "Mes révisions" : "Toutes les révisions"}</Badge>
+        {canViewAll && (
+          <div className="inline-flex items-center gap-1 rounded-sm border border-border-subtle p-1">
+            <button
+              type="button"
+              onClick={() => setScope("mine")}
+              className={`rounded-sm px-2 py-1 font-label text-xs font-bold ${scope === "mine" ? "bg-foreground text-background" : "text-muted hover:text-foreground"}`}
+            >
+              Mes articles
+            </button>
+            <button
+              type="button"
+              onClick={() => setScope("all")}
+              className={`rounded-sm px-2 py-1 font-label text-xs font-bold ${scope === "all" ? "bg-foreground text-background" : "text-muted hover:text-foreground"}`}
+            >
+              Toute la file
+            </button>
+          </div>
+        )}
         {overdueCount > 0 && (
           <span className="flex items-center gap-1 rounded-sm bg-red-500/10 px-2 py-1 font-label text-xs font-bold text-red-600">
             <Clock className="h-3 w-3" /> {overdueCount} en retard (&gt;72h)
@@ -179,7 +240,7 @@ export default function RevisionsRequestedPage() {
         )}
         {successMsg && <span className="rounded-sm bg-accent-teal/10 px-2 py-1 font-label text-xs font-bold text-accent-teal">{successMsg}</span>}
       </div>
-      {loading ? (
+      {loading || loadingUser ? (
         <div className="space-y-3">{Array.from({ length: 3 }).map((_, i) => (<div key={i} className="h-24 animate-pulse border border-border-subtle bg-surface" />))}</div>
       ) : articles.length === 0 ? (
         <EmptyState

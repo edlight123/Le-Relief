@@ -7,6 +7,7 @@ import Button from "@/components/ui/Button";
 import Card from "@/components/ui/Card";
 import PageHeader from "@/components/ui/PageHeader";
 import EmptyState from "@/components/ui/EmptyState";
+import AlertBanner from "@/components/ui/AlertBanner";
 import { formatDistanceToNow } from "date-fns";
 import { fr } from "date-fns/locale";
 import { CheckCircle2, Globe, Calendar, RotateCcw } from "lucide-react";
@@ -23,8 +24,32 @@ interface ApprovedArticle {
   isBreaking?: boolean;
   isHomepagePinned?: boolean;
   translationStatus?: string | null;
+  body?: string | null;
+  excerpt?: string | null;
+  coverImage?: string | null;
+  categoryId?: string | null;
+  contentType?: string | null;
+  slug?: string | null;
+  seoTitle?: string | null;
+  metaDescription?: string | null;
+  authorId?: string | null;
   author?: { name: string | null } | null;
   category?: { name: string } | null;
+}
+
+function publishBlockers(a: ApprovedArticle): string[] {
+  const flags: string[] = [];
+  if (!a.title?.trim()) flags.push("Titre requis");
+  if (!a.body?.trim()) flags.push("Corps requis");
+  if (!a.excerpt?.trim()) flags.push("Chapô requis");
+  if (!a.coverImage?.trim()) flags.push("Image principale requise");
+  if (!a.categoryId?.trim()) flags.push("Rubrique requise");
+  if (!a.contentType?.trim()) flags.push("Type de contenu requis");
+  if (!a.slug?.trim()) flags.push("Slug requis");
+  if (!a.seoTitle?.trim()) flags.push("SEO title requis");
+  if (!a.metaDescription?.trim()) flags.push("Meta description requise");
+  if (!a.authorId?.trim()) flags.push("Auteur manquant");
+  return flags;
 }
 
 function ArticleCard({ article, onPublish, onSchedule, onSendBack }: {
@@ -38,6 +63,8 @@ function ArticleCard({ article, onPublish, onSchedule, onSendBack }: {
   const [scheduleMode, setScheduleMode] = useState(false);
   const [scheduleAt, setScheduleAt] = useState("");
   const [scheduling, setScheduling] = useState(false);
+  const blockers = useMemo(() => publishBlockers(article), [article]);
+  const isPublishReady = blockers.length === 0;
 
   async function handlePublish() {
     setPublishing(true);
@@ -89,11 +116,20 @@ function ArticleCard({ article, onPublish, onSchedule, onSendBack }: {
             <Button size="sm" variant="outline" onClick={() => setScheduleMode((v) => !v)} disabled={publishing}>
               <Calendar className="mr-1.5 h-3 w-3" />Programmer
             </Button>
-            <Button size="sm" onClick={handlePublish} disabled={publishing || scheduling}>
+            <Button size="sm" onClick={handlePublish} disabled={publishing || scheduling || !isPublishReady}>
               {publishing ? "Publication..." : "Publier maintenant"}
             </Button>
           </div>
         </div>
+        {!isPublishReady && (
+          <div className="mt-3 border-t border-border-subtle pt-3">
+            <AlertBanner variant="warning" title="Préparation incomplète">
+              <p className="font-body text-sm">
+                Corriger avant publication : {blockers.join(", ")}.
+              </p>
+            </AlertBanner>
+          </div>
+        )}
         {scheduleMode && (
           <div className="mt-3 flex items-center gap-2 border-t border-border-subtle pt-3">
             <input
@@ -102,7 +138,7 @@ function ArticleCard({ article, onPublish, onSchedule, onSendBack }: {
               onChange={(e) => setScheduleAt(e.target.value)}
               className="rounded-sm border border-border-subtle bg-surface px-2 py-1 font-label text-xs text-foreground"
             />
-            <Button size="sm" onClick={handleSchedule} disabled={!scheduleAt || scheduling}>
+            <Button size="sm" onClick={handleSchedule} disabled={!scheduleAt || scheduling || !isPublishReady}>
               {scheduling ? "Programmation..." : "Confirmer"}
             </Button>
             <button type="button" onClick={() => setScheduleMode(false)} className="font-label text-xs text-muted hover:text-foreground">Annuler</button>
@@ -134,6 +170,7 @@ export default function ApprovedQueuePage() {
   useEffect(() => { load(); }, [load]);
 
   const breakingCount = useMemo(() => articles.filter((a) => a.isBreaking).length, [articles]);
+  const blockedCount = useMemo(() => articles.filter((a) => publishBlockers(a).length > 0).length, [articles]);
 
   function showSuccess(msg: string) {
     setSuccessMsg(msg);
@@ -168,6 +205,7 @@ export default function ApprovedQueuePage() {
       <div className="flex flex-wrap items-center gap-3">
         <span className="font-label text-sm font-bold text-foreground">{loading ? "—" : articles.length} article{articles.length !== 1 ? "s" : ""}</span>
         {breakingCount > 0 && <Badge variant="danger">{breakingCount} Breaking</Badge>}
+        {blockedCount > 0 && <Badge variant="warning">{blockedCount} avec blocages</Badge>}
         {successMsg && <span className="rounded-sm bg-accent-teal/10 px-2 py-1 font-label text-xs font-bold text-accent-teal">{successMsg}</span>}
       </div>
       {loading ? (

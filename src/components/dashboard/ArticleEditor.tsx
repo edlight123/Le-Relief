@@ -167,13 +167,13 @@ export default function ArticleEditor({
   const [saving, setSaving] = useState(false);
   const [autosaveState, setAutosaveState] = useState<"idle" | "saving" | "saved" | "error">("idle");
   const [previewMode, setPreviewMode] = useState<"desktop" | "mobile" | "social">("desktop");
-  const [openSections, setOpenSections] = useState({
-    workflow: true,
+  const [openSections, setOpenSections] = useState(() => ({
+    workflow: role !== "writer",
     metadata: true,
-    seo: true,
-    translation: true,
+    seo: role !== "writer",
+    translation: role !== "writer",
     quality: true,
-  });
+  }));
   const lastAutosavedPayloadRef = useRef<string>("");
   const autosaveTimerRef = useRef<number | null>(null);
 
@@ -456,7 +456,18 @@ export default function ArticleEditor({
               </p>
             </div>
             <div className="flex flex-wrap items-center gap-2 text-[11px]">
-              <Badge variant="default">Rôle {role}</Badge>
+              {role === "writer" && (
+                <Badge variant="default">Mode rédaction</Badge>
+              )}
+              {role === "editor" && (
+                <Badge variant="info">Mode révision</Badge>
+              )}
+              {role === "publisher" && (
+                <Badge variant="warning">Mode publication</Badge>
+              )}
+              {role === "admin" && (
+                <Badge variant="danger">Mode admin</Badge>
+              )}
               <Badge variant="default">Langue {language.toUpperCase()}</Badge>
               <Badge variant="default">Type {contentType || "non défini"}</Badge>
               <Badge variant={statusVariant}>Traduction {translationStatus}</Badge>
@@ -482,7 +493,7 @@ export default function ArticleEditor({
             </div>
 
             <div className="flex flex-wrap justify-end gap-2">
-              {scheduledAt ? (
+              {scheduledAt && role !== "writer" ? (
                 <Button
                   variant="outline"
                   onClick={() => handleSubmit("scheduled")}
@@ -500,7 +511,7 @@ export default function ArticleEditor({
                   Soumettre en revue
                 </Button>
               ) : null}
-              {canApprove ? (
+              {canApprove && role !== "writer" ? (
                 <Button
                   variant="outline"
                   onClick={() => handleSubmit("approved")}
@@ -509,7 +520,7 @@ export default function ArticleEditor({
                   Approuver
                 </Button>
               ) : null}
-              {canPublish ? (
+              {canPublish && role !== "writer" ? (
                 <Button
                   variant="outline"
                   onClick={() => handleSubmit("published")}
@@ -549,6 +560,17 @@ export default function ArticleEditor({
         </AlertBanner>
       ) : null}
 
+
+      {role === "editor" && (
+        <AlertBanner variant="info" title="Mode révision éditoriale">
+          Examinez le contenu, les métadonnées et les commentaires. Utilisez les contrôles qualité pour valider avant d&apos;approuver ou de demander des révisions.
+        </AlertBanner>
+      )}
+      {role === "publisher" && (
+        <AlertBanner variant="info" title="Mode publication">
+          Vérifiez l&apos;état de préparation avant de publier ou de programmer. Activez les signaux de diffusion si nécessaire.
+        </AlertBanner>
+      )}
       <div className="grid gap-6 xl:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">
         <div className="space-y-6">
           <section className="space-y-4 border border-border-subtle p-4">
@@ -672,52 +694,54 @@ export default function ArticleEditor({
               </select>
             </div>
 
-            <div className="grid gap-3 border-t border-border-subtle pt-4 md:grid-cols-2">
-              <div className="space-y-3 md:col-span-2">
-                <label className="mb-2 block font-label text-xs font-extrabold uppercase text-foreground">
-                  Publication programmée
-                </label>
-                <input
-                  type="datetime-local"
-                  value={scheduledAt}
-                  onChange={(e) => setScheduledAt(e.target.value)}
-                  className="w-full border border-border-subtle bg-surface px-4 py-3 font-label text-sm text-foreground focus:border-primary focus:outline-none"
+            {role !== "writer" && (
+              <div className="grid gap-3 border-t border-border-subtle pt-4 md:grid-cols-2">
+                <div className="space-y-3 md:col-span-2">
+                  <label className="mb-2 block font-label text-xs font-extrabold uppercase text-foreground">
+                    Publication programmée
+                  </label>
+                  <input
+                    type="datetime-local"
+                    value={scheduledAt}
+                    onChange={(e) => setScheduledAt(e.target.value)}
+                    className="w-full border border-border-subtle bg-surface px-4 py-3 font-label text-sm text-foreground focus:border-primary focus:outline-none"
+                  />
+                </div>
+
+                <Input
+                  label="Niveau de priorité"
+                  id="priorityLevel"
+                  placeholder="normal, urgent, majeur"
+                  value={priorityLevel}
+                  onChange={(e) => setPriorityLevel(e.target.value)}
                 />
+
+                <div className="space-y-2 border border-border-subtle p-3">
+                  <p className="font-label text-[11px] font-extrabold uppercase tracking-[0.18em] text-muted">
+                    Signaux de diffusion
+                  </p>
+                  <label className="flex items-center gap-2 font-label text-xs font-extrabold uppercase text-foreground">
+                    <input
+                      type="checkbox"
+                      checked={isBreaking}
+                      onChange={(e) => setIsBreaking(e.target.checked)}
+                      className="h-4 w-4 accent-primary"
+                    />
+                    Marquer Breaking
+                  </label>
+
+                  <label className="flex items-center gap-2 font-label text-xs font-extrabold uppercase text-foreground">
+                    <input
+                      type="checkbox"
+                      checked={isHomepagePinned}
+                      onChange={(e) => setIsHomepagePinned(e.target.checked)}
+                      className="h-4 w-4 accent-primary"
+                    />
+                    Épingler homepage
+                  </label>
+                </div>
               </div>
-
-              <Input
-                label="Niveau de priorité"
-                id="priorityLevel"
-                placeholder="normal, urgent, majeur"
-                value={priorityLevel}
-                onChange={(e) => setPriorityLevel(e.target.value)}
-              />
-
-              <div className="space-y-2 border border-border-subtle p-3">
-                <p className="font-label text-[11px] font-extrabold uppercase tracking-[0.18em] text-muted">
-                  Signaux de diffusion
-                </p>
-                <label className="flex items-center gap-2 font-label text-xs font-extrabold uppercase text-foreground">
-                  <input
-                    type="checkbox"
-                    checked={isBreaking}
-                    onChange={(e) => setIsBreaking(e.target.checked)}
-                    className="h-4 w-4 accent-primary"
-                  />
-                  Marquer Breaking
-                </label>
-
-                <label className="flex items-center gap-2 font-label text-xs font-extrabold uppercase text-foreground">
-                  <input
-                    type="checkbox"
-                    checked={isHomepagePinned}
-                    onChange={(e) => setIsHomepagePinned(e.target.checked)}
-                    className="h-4 w-4 accent-primary"
-                  />
-                  Épingler homepage
-                </label>
-              </div>
-            </div>
+            )}
           </EditorSection>
 
           <EditorSection

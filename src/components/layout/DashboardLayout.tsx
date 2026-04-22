@@ -9,6 +9,7 @@ import CommandPalette from "@/components/ui/CommandPalette";
 import NotificationsPanel from "@/components/notifications/NotificationsPanel";
 
 const sectionLabels: Record<string, string> = {
+  // Legacy /dashboard routes
   "/dashboard": "Tableau de bord",
   "/dashboard/homepage": "Une",
   "/dashboard/articles": "Articles",
@@ -27,10 +28,31 @@ const sectionLabels: Record<string, string> = {
   "/dashboard/settings": "Paramètres",
   "/dashboard/users": "Utilisateurs",
   "/dashboard/authors": "Auteurs",
+  // Canonical /admin routes
+  "/admin/workspace": "Espace de travail",
+  "/admin/drafts": "Mes brouillons",
+  "/admin/revisions": "Révisions demandées",
+  "/admin/submitted": "Soumis",
+  "/admin/my-published": "Mes articles publiés",
+  "/admin/review": "Review Queue",
+  "/admin/review/attention": "Besoin d'attention",
+  "/admin/review/approved": "Approuvés",
+  "/admin/publishing": "Tableau de publication",
+  "/admin/publishing/ready": "Prêts à publier",
+  "/admin/publishing/scheduled": "Programmés",
+  "/admin/publishing/published": "Publiés",
+  "/admin/publishing/priority": "Priorité & breaking",
+  "/admin/homepage": "Une",
+  "/admin/articles": "Articles",
+  "/admin/dashboard": "Tableau de bord",
+  "/admin/users": "Utilisateurs",
+  "/admin/settings": "Paramètres",
+  "/admin/audit": "Journal d'audit",
 };
 
 function getSectionLabel(pathname: string) {
   if (pathname.includes("/edit")) return "Modifier l'article";
+  if (pathname.includes("/review") && pathname.includes("/articles/")) return "Review article";
   return sectionLabels[pathname] ?? "Tableau de bord";
 }
 

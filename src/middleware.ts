@@ -1,6 +1,12 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
+import { getToken } from "next-auth/jwt";
 import { validateLocale } from "@/lib/locale";
+import {
+  canAccessRoleScopedRoute,
+  isRoleScopedRoute,
+  normalizeAppRole,
+} from "@/lib/role-routing";
 
 export const LOCALE_COOKIE = "NEXT_LOCALE";
 const DEFAULT_LOCALE = "fr";
@@ -25,8 +31,44 @@ function withLocaleCookie(response: NextResponse, locale: "fr" | "en") {
   return response;
 }
 
-export function middleware(request: NextRequest) {
+function redirectToAccessDenied(request: NextRequest) {
+  const url = request.nextUrl.clone();
+  url.pathname = "/admin/access-denied";
+  return NextResponse.redirect(url);
+}
+
+function redirectToLogin(request: NextRequest) {
+  const url = request.nextUrl.clone();
+  url.pathname = "/login";
+  url.searchParams.set("callbackUrl", `${request.nextUrl.pathname}${request.nextUrl.search}`);
+  return NextResponse.redirect(url);
+}
+
+export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
+
+  if (isRoleScopedRoute(pathname)) {
+    if (pathname.startsWith("/admin/access-denied")) {
+      return NextResponse.next();
+    }
+
+    const token = await getToken({ req: request });
+    if (!token?.sub) {
+      return redirectToLogin(request);
+    }
+
+    const role = normalizeAppRole(typeof token.role === "string" ? token.role : null);
+    if (!role) {
+      return redirectToAccessDenied(request);
+    }
+
+    if (!canAccessRoleScopedRoute(pathname, role)) {
+      return redirectToAccessDenied(request);
+    }
+
+    return NextResponse.next();
+  }
+
   const segments = pathname.split("/").filter(Boolean);
   const firstSegment = segments[0];
 
@@ -51,6 +93,6 @@ export function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
-    "/((?!api|_next/static|_next/image|favicon.ico|.*\\..*|dashboard).*)",
+    "/((?!api|_next/static|_next/image|favicon.ico|.*\\..*).*)",
   ],
 };

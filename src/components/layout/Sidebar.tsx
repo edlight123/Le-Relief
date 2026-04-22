@@ -4,69 +4,10 @@ import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { clsx } from "clsx";
-import {
-  LayoutDashboard,
-  Home,
-  FileText,
-  FolderTree,
-  PenSquare,
-  ClipboardCheck,
-  RotateCcw,
-  CalendarClock,
-  CheckCircle2,
-  Image as ImageIcon,
-  BarChart3,
-  Settings,
-  Users,
-  UserCheck,
-  LogOut,
-  X,
-  ExternalLink,
-} from "lucide-react";
-import { signOut } from "next-auth/react";
-import { useSession } from "next-auth/react";
-import { normalizeWorkflowRole } from "@/lib/editorial-workflow";
-
-const navGroups = [
-  {
-    label: "Édition",
-    items: [
-      { label: "Tableau de bord", href: "/dashboard", icon: LayoutDashboard, exact: true },
-      { label: "Une", href: "/dashboard/homepage", icon: Home },
-      { label: "Articles", href: "/dashboard/articles", icon: FileText },
-      { label: "Rubriques", href: "/dashboard/categories", icon: FolderTree },
-      { label: "Mes brouillons", href: "/dashboard/my-drafts", icon: PenSquare },
-      { label: "Nouvel article", href: "/dashboard/articles/new", icon: PenSquare },
-      { label: "Review Queue", href: "/dashboard/review", icon: ClipboardCheck },
-      { label: "Révisions", href: "/dashboard/revisions", icon: RotateCcw },
-      { label: "Approuvés", href: "/dashboard/approved", icon: CheckCircle2 },
-      { label: "Programmés", href: "/dashboard/scheduled", icon: CalendarClock },
-      { label: "Publiés", href: "/dashboard/published", icon: CheckCircle2 },
-    ],
-  },
-  {
-    label: "Médias",
-    items: [
-      { label: "Médiathèque", href: "/dashboard/media", icon: ImageIcon },
-    ],
-  },
-  {
-    label: "Analyse",
-    items: [
-      { label: "Analytiques", href: "/dashboard/analytics", icon: BarChart3 },
-      { label: "Rapport éditorial", href: "/dashboard/editorial", icon: BarChart3 },
-      { label: "Métriques produit", href: "/dashboard/product", icon: BarChart3 },
-    ],
-  },
-  {
-    label: "Configuration",
-    items: [
-      { label: "Paramètres", href: "/dashboard/settings", icon: Settings },
-      { label: "Utilisateurs", href: "/dashboard/users", icon: Users },
-      { label: "Auteurs", href: "/dashboard/authors", icon: UserCheck },
-    ],
-  },
-];
+import { LogOut, X, ExternalLink } from "lucide-react";
+import { signOut, useSession } from "next-auth/react";
+import { normalizeAppRole } from "@/lib/role-routing";
+import { NAV_BY_ROLE, ROLE_LABEL } from "@/config/admin-nav.config";
 
 interface SidebarProps {
   open: boolean;
@@ -76,21 +17,29 @@ interface SidebarProps {
 export default function Sidebar({ open, onClose }: SidebarProps) {
   const pathname = usePathname();
   const { data: session } = useSession();
-  const role = normalizeWorkflowRole((session?.user as { role?: string } | undefined)?.role || "writer");
+  const rawRole = (session?.user as { role?: string } | undefined)?.role;
+  const role = normalizeAppRole(rawRole) ?? "writer";
   const userName = (session?.user as { name?: string } | undefined)?.name || "Rédaction";
-  const roleLabel =
-    role === "admin"
-      ? "Administration"
-      : role === "publisher"
-      ? "Publication"
-      : role === "editor"
-      ? "Édition"
-      : "Rédaction";
+  const roleLabel = ROLE_LABEL[role];
+  const navGroups = NAV_BY_ROLE[role];
 
-  function isActive(href: string, exact = false) {
+  function isActive(href: string, exact = false, alsoActiveFor?: string[]) {
     if (exact) return pathname === href;
-    if (href === "/dashboard/articles" && pathname.startsWith("/dashboard/articles/new")) return false;
-    return pathname === href || pathname.startsWith(href + "/");
+
+    // Prevent /dashboard/articles from activating on /dashboard/articles/new
+    if (href === "/dashboard/articles" && pathname.startsWith("/dashboard/articles/new")) {
+      return false;
+    }
+
+    if (pathname === href || pathname.startsWith(href + "/")) return true;
+
+    if (alsoActiveFor) {
+      return alsoActiveFor.some(
+        (alt) => pathname === alt || pathname.startsWith(alt + "/"),
+      );
+    }
+
+    return false;
   }
 
   return (
@@ -111,13 +60,13 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
       >
         {/* Logo */}
         <div className="flex h-14 items-center justify-between px-4">
-          <Link href="/dashboard" className="flex items-center gap-2.5">
+          <Link href="/admin" className="flex items-center gap-2.5">
             <Image
               src="/logo.png"
               alt="Le Relief"
               width={28}
               height={28}
-                            sizes="28px"
+              sizes="28px"
               className="h-7 w-7 rounded-sm"
             />
             <span className="font-headline text-base font-extrabold tracking-tight text-foreground">
@@ -132,16 +81,23 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
           </button>
         </div>
 
+        {/* Role badge */}
+        <div className="mx-3 mb-1 rounded-sm border border-border-subtle bg-surface-newsprint px-3 py-1.5">
+          <p className="font-label text-[10px] font-extrabold uppercase tracking-widest text-muted/60">
+            {roleLabel}
+          </p>
+          <p className="truncate font-label text-xs font-bold text-foreground">{userName}</p>
+        </div>
+
         {/* Nav */}
-        <nav className="flex-1 overflow-y-auto px-3 py-3">
+        <nav className="flex-1 overflow-y-auto px-3 py-2">
           {navGroups.map((group) => (
             <div key={group.label} className="mb-5">
               <p className="mb-1.5 px-2 font-label text-[10px] font-extrabold uppercase tracking-widest text-muted/50">
                 {group.label}
               </p>
               {group.items.map((item) => {
-                if (item.href === "/dashboard/users" && role !== "admin") return null;
-                const active = isActive(item.href, item.exact);
+                const active = isActive(item.href, item.exact, item.alsoActiveFor);
                 return (
                   <Link
                     key={item.href}
@@ -154,9 +110,13 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
                         : "text-muted hover:bg-surface-elevated hover:text-foreground",
                     )}
                   >
-                    <item.icon className={clsx("h-4 w-4 shrink-0", active ? "text-primary" : "")} />
+                    <item.icon
+                      className={clsx("h-4 w-4 shrink-0", active ? "text-primary" : "")}
+                    />
                     <span className="flex-1">{item.label}</span>
-                    {active && <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-primary" />}
+                    {active && (
+                      <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-primary" />
+                    )}
                   </Link>
                 );
               })}
@@ -165,14 +125,7 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
         </nav>
 
         {/* Footer */}
-        <div className="border-t border-border-subtle px-3 py-3 space-y-2">
-          <div className="rounded-sm border border-border-subtle bg-surface-newsprint px-3 py-2">
-            <p className="font-label text-[10px] font-extrabold uppercase tracking-widest text-muted/70">
-              Session
-            </p>
-            <p className="mt-1 truncate font-label text-sm font-bold text-foreground">{userName}</p>
-            <p className="font-label text-[11px] uppercase text-muted">{roleLabel}</p>
-          </div>
+        <div className="space-y-1 border-t border-border-subtle px-3 py-3">
           <Link
             href="/"
             target="_blank"

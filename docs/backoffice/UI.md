@@ -1178,3 +1178,11 @@ La priorité UI absolue doit être :
 3. Articles table
 4. Homepage Curation
 5. Dashboard
+
+⸻
+
+18. Engineering implementation matrix
+
+Le plan d’implémentation détaillé (routes, fichiers, rôles, composants, agents) est documenté ici :
+
+* docs/backoffice/COPILOT_IMPLEMENTATION_MATRIX.md
