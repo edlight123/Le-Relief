@@ -595,17 +595,14 @@ export async function getPublicCategories(
     return sortCategories(categories);
   }
 
-  const withLanguageCount = await Promise.all(
-    categories.map(async (category) => {
-      const { total } = await articlesRepo.getArticles({
-        status: "published",
-        categoryId: category.id,
-        language: locale,
-        take: 1,
-      });
-      return { ...category, count: total };
-    }),
+  const languageCounts = await categoriesRepo.getCategoryCountsByLanguage(
+    locale,
+    true,
   );
+  const withLanguageCount = categories.map((category) => ({
+    ...category,
+    count: languageCounts.get(category.id) || 0,
+  }));
 
   return sortCategories(
     withLanguageCount.filter((category) =>

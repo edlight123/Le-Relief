@@ -62,6 +62,33 @@ export async function getCategoriesWithCounts(publishedOnly = false) {
   });
 }
 
+export async function getCategoryCountsByLanguage(
+  language: "fr" | "en",
+  publishedOnly = true,
+) {
+  let query = getDb()
+    .collection("articles")
+    .where("language", "==", language)
+    .select("categoryId", "status") as FirebaseFirestore.Query;
+
+  if (publishedOnly) {
+    query = query.where("status", "==", "published");
+  }
+
+  const snap = await query.get();
+  const counts = new Map<string, number>();
+
+  for (const doc of snap.docs) {
+    const data = doc.data() as { categoryId?: unknown; status?: unknown };
+    const categoryId = typeof data.categoryId === "string" ? data.categoryId : null;
+    if (!categoryId) continue;
+
+    counts.set(categoryId, (counts.get(categoryId) || 0) + 1);
+  }
+
+  return counts;
+}
+
 export async function updateCategory(
   id: string,
   data: { name?: string; slug?: string; description?: string | null }
