@@ -7,6 +7,7 @@ import CategoryGrid from "@/components/public/CategoryGrid";
 import NewsletterSignup from "@/components/public/NewsletterSignup";
 import SectionRibbon from "@/components/ui/SectionRibbon";
 import { getHomepageContent } from "@/lib/editorial";
+import { formatHeadlineTypography } from "@/lib/content-format";
 import { validateLocale } from "@/lib/locale";
 import {
   buildBreadcrumbJsonLd,
@@ -222,7 +223,7 @@ export default async function LocalizedHomePage({
                         {String(index + 1).padStart(2, "0")}
                       </span>
                       <span className="font-headline text-lg font-bold leading-snug text-foreground transition-colors group-hover:text-primary">
-                        {article.title}
+                        {formatHeadlineTypography(article.title)}
                       </span>
                     </Link>
                   ))}

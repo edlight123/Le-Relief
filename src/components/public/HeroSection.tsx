@@ -1,6 +1,11 @@
 import Link from "next/link";
 import Image from "next/image";
 import { type Locale, t } from "@/lib/i18n";
+import {
+  formatHeadlineTypography,
+  sanitizeExcerptText,
+  shouldShowCardExcerpt,
+} from "@/lib/content-format";
 
 interface HeroSectionProps {
   article?: {
@@ -53,6 +58,9 @@ export default function HeroSection({ article, locale }: HeroSectionProps) {
   }
 
   const imageSrc = article.coverImageFirebaseUrl || article.coverImage;
+  const displayTitle = formatHeadlineTypography(article.title);
+  const cleanedExcerpt = sanitizeExcerptText(article.excerpt);
+  const showExcerpt = shouldShowCardExcerpt(article.title, article.excerpt);
   const date = article.publishedAt
     ? new Intl.DateTimeFormat(resolvedLocale === "fr" ? "fr-FR" : "en-US", {
         day: "numeric",
@@ -95,11 +103,11 @@ export default function HeroSection({ article, locale }: HeroSectionProps) {
                 </p>
               )}
               <h1 className="editorial-title max-w-5xl text-4xl text-foreground transition-colors group-hover:text-primary sm:text-5xl lg:text-7xl xl:text-8xl tracking-tight lg:tracking-[-1px]">
-                {article.title}
+                {displayTitle}
               </h1>
-              {article.excerpt && (
+              {showExcerpt && (
                 <p className="editorial-deck mt-5 max-w-3xl font-body text-xl sm:text-2xl">
-                  {article.excerpt}
+                  {cleanedExcerpt}
                 </p>
               )}
               {meta}
@@ -132,11 +140,11 @@ export default function HeroSection({ article, locale }: HeroSectionProps) {
                   )}
                 </div>
                 <h1 className="editorial-title text-3xl text-foreground transition-colors group-hover:text-primary sm:text-4xl lg:text-6xl tracking-tight lg:tracking-[-0.5px]">
-                  {article.title}
+                  {displayTitle}
                 </h1>
-                {article.excerpt && (
+                {showExcerpt && (
                   <p className="editorial-deck mt-5 font-body text-lg sm:text-xl">
-                    {article.excerpt}
+                    {cleanedExcerpt}
                   </p>
                 )}
                 {meta}
@@ -148,7 +156,7 @@ export default function HeroSection({ article, locale }: HeroSectionProps) {
               <div className="relative aspect-[16/10] overflow-hidden bg-surface-elevated">
                 <Image
                   src={imageSrc}
-                  alt={article.title}
+                  alt={displayTitle}
                   fill
                   sizes="(min-width: 1024px) 58vw, 100vw"
                   className="object-cover transition-transform duration-500 group-hover:scale-[1.02]"

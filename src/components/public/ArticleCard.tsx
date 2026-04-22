@@ -1,6 +1,11 @@
 import Link from "next/link";
 import Image from "next/image";
 import { formatArticleDate, type Locale, t } from "@/lib/i18n";
+import {
+  formatHeadlineTypography,
+  sanitizeExcerptText,
+  shouldShowCardExcerpt,
+} from "@/lib/content-format";
 
 interface ArticleCardProps {
   article: {
@@ -28,6 +33,9 @@ export default function ArticleCard({
   locale,
 }: ArticleCardProps) {
   const resolvedLocale = locale || article.language || "fr";
+  const displayTitle = formatHeadlineTypography(article.title);
+  const cleanedExcerpt = sanitizeExcerptText(article.excerpt);
+  const showExcerpt = shouldShowCardExcerpt(article.title, article.excerpt);
   const date = article.publishedAt
     ? formatArticleDate(article.publishedAt, resolvedLocale)
     : null;
@@ -44,7 +52,7 @@ export default function ArticleCard({
             <div className="relative h-20 w-20 flex-shrink-0 overflow-hidden">
               <Image
                 src={imageSrc}
-                alt={article.title}
+                alt={displayTitle}
                 fill
                 sizes="80px"
                 className="object-cover grayscale transition duration-300 group-hover:grayscale-0"
@@ -58,7 +66,7 @@ export default function ArticleCard({
               </p>
             )}
             <h3 className="font-headline text-base font-bold leading-snug text-foreground transition-colors group-hover:text-primary">
-              {article.title}
+              {displayTitle}
             </h3>
             {date && (
               <p className="mt-2 font-[family-name:var(--font-mono)] text-[11px] font-bold uppercase text-muted tracking-[1px]">{date}</p>
@@ -78,7 +86,7 @@ export default function ArticleCard({
             <div className="relative h-44 w-full shrink-0 overflow-hidden bg-surface-elevated sm:h-32 sm:w-48">
               <Image
                 src={imageSrc}
-                alt={article.title}
+                alt={displayTitle}
                 fill
                 sizes="(min-width: 640px) 192px, 100vw"
                 className="object-cover grayscale transition duration-300 group-hover:grayscale-0"
@@ -110,11 +118,11 @@ export default function ArticleCard({
               ) : null}
             </div>
             <h3 className="font-headline text-xl font-bold leading-tight text-foreground transition-colors group-hover:text-primary sm:text-2xl">
-              {article.title}
+              {displayTitle}
             </h3>
-            {article.excerpt && (
+            {showExcerpt && (
               <p className="mt-2 line-clamp-2 font-body text-base leading-relaxed text-muted">
-                {article.excerpt}
+                {cleanedExcerpt}
               </p>
             )}
             {article.author?.name && (
@@ -144,11 +152,11 @@ export default function ArticleCard({
             )}
           </div>
           <h3 className="font-headline text-xl font-bold leading-snug text-foreground transition-colors group-hover:text-primary sm:text-2xl">
-            {article.title}
+            {displayTitle}
           </h3>
-          {article.excerpt && (
+          {showExcerpt && (
             <p className="mt-2 line-clamp-3 font-body text-sm leading-relaxed text-muted sm:text-base">
-              {article.excerpt}
+              {cleanedExcerpt}
             </p>
           )}
           <div className="mt-auto flex flex-wrap items-center gap-2 pt-4 font-label text-[11px] font-bold uppercase text-muted">
@@ -176,7 +184,7 @@ export default function ArticleCard({
             <>
               <Image
                 src={imageSrc}
-                alt={article.title}
+                alt={displayTitle}
                 fill
                 sizes="(min-width: 1024px) 33vw, (min-width: 768px) 50vw, 100vw"
                 className="object-cover grayscale transition duration-300 group-hover:grayscale-0"
@@ -199,11 +207,11 @@ export default function ArticleCard({
           )}
         </div>
         <h3 className="font-headline text-2xl font-bold leading-tight text-foreground transition-colors group-hover:text-primary">
-          {article.title}
+          {displayTitle}
         </h3>
-        {article.excerpt && (
+        {showExcerpt && (
           <p className="mt-3 line-clamp-3 font-body text-base leading-relaxed text-muted">
-            {article.excerpt}
+            {cleanedExcerpt}
           </p>
         )}
         <div className="mt-4 flex flex-wrap items-center gap-2 font-label text-[11px] font-bold uppercase text-muted">
