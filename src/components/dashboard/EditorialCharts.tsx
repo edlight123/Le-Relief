@@ -103,6 +103,61 @@ export function WeeklyVelocityChart({ data }: { data: WeeklyData[] }) {
   );
 }
 
+interface DailyData {
+  date: string;
+  count: number;
+}
+
+export function DailyPublicationChart({ data }: { data: DailyData[] }) {
+  return (
+    <div className="h-[200px]">
+      <ResponsiveContainer width="100%" height="100%">
+        <BarChart data={data} margin={{ left: 0, right: 0, top: 4, bottom: 0 }}>
+          <CartesianGrid strokeDasharray="3 3" className="stroke-border-subtle" />
+          <XAxis
+            dataKey="date"
+            tick={{ fontSize: 10 }}
+            interval={Math.max(Math.floor(data.length / 7) - 1, 0)}
+          />
+          <YAxis tick={{ fontSize: 11 }} allowDecimals={false} />
+          <Tooltip />
+          <Bar
+            dataKey="count"
+            name="Publiés"
+            fill="var(--color-primary, #c0392b)"
+            radius={[2, 2, 0, 0]}
+          />
+        </BarChart>
+      </ResponsiveContainer>
+    </div>
+  );
+}
+
+interface PipelineStage {
+  stage: string;
+  hours: number;
+}
+
+export function PipelineTimingChart({ data }: { data: PipelineStage[] }) {
+  return (
+    <div className="h-[140px]">
+      <ResponsiveContainer width="100%" height="100%">
+        <BarChart data={data} layout="vertical" margin={{ left: 8, right: 24, top: 4, bottom: 0 }}>
+          <CartesianGrid strokeDasharray="3 3" className="stroke-border-subtle" />
+          <XAxis type="number" tick={{ fontSize: 11 }} unit="h" />
+          <YAxis dataKey="stage" type="category" tick={{ fontSize: 11 }} width={130} />
+          <Tooltip formatter={(v) => [`${v}h`, "Délai moyen"]} />
+          <Bar
+            dataKey="hours"
+            fill="var(--color-accent-blue, #2563eb)"
+            radius={[0, 3, 3, 0]}
+          />
+        </BarChart>
+      </ResponsiveContainer>
+    </div>
+  );
+}
+
 export function TrafficLanguageBar({ frViews, enViews }: { frViews: number; enViews: number }) {
   const data = [
     { name: "Français", value: frViews },
