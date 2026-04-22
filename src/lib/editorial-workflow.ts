@@ -61,6 +61,11 @@ export function normalizeWorkflowRole(role: Role | string | null | undefined): W
   return "writer";
 }
 
+export function canAccessDashboard(role: Role | string | null | undefined): boolean {
+  const normalizedRole = normalizeWorkflowRole(role);
+  return normalizedRole === "editor" || normalizedRole === "publisher" || normalizedRole === "admin";
+}
+
 export function canEditArticle(
   role: Role | string | null | undefined,
   isOwner: boolean,
