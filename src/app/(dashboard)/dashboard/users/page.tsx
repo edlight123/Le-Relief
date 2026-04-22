@@ -39,6 +39,8 @@ export default function UsersPage() {
     switch (role) {
       case "admin":
         return "danger" as const;
+      case "editor":
+        return "warning" as const;
       case "publisher":
         return "info" as const;
       default:
@@ -123,8 +125,10 @@ export default function UsersPage() {
                       }
                       className="border border-border-subtle bg-surface px-3 py-2 font-label text-sm text-foreground focus:border-primary focus:outline-none"
                     >
-                      <option value="reader">Lecteur</option>
-                      <option value="publisher">Éditeur</option>
+                      <option value="reader">Lecteur (legacy)</option>
+                      <option value="writer">Rédacteur</option>
+                      <option value="editor">Éditeur</option>
+                      <option value="publisher">Publisher</option>
                       <option value="admin">Admin</option>
                     </select>
                   </td>

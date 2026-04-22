@@ -31,7 +31,7 @@ export async function POST(req: NextRequest) {
       name,
       email,
       hashedPassword,
-      role: "publisher",
+      role: "writer",
     });
 
     return NextResponse.json(

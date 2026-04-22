@@ -69,7 +69,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             name: user.name || "",
             email: user.email,
             hashedPassword: "",
-            role: "reader",
+            role: "writer",
             image: user.image || null,
           });
           user.id = newUser.id as string;

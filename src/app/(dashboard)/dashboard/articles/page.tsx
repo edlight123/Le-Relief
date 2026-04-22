@@ -8,6 +8,11 @@ import Badge from "@/components/ui/Badge";
 import { PenSquare, Trash2, Search, Eye } from "lucide-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
+import {
+  getEditorialStatusLabel,
+  getEditorialStatusVariant,
+  normalizeEditorialStatus,
+} from "@/lib/editorial-workflow";
 
 interface Article {
   id: string;
@@ -22,23 +27,16 @@ interface Article {
 
 const STATUS_FILTERS = [
   { value: "all", label: "Tous" },
+  { value: "writing", label: "Rédaction" },
+  { value: "in_review", label: "En revue" },
+  { value: "revisions_requested", label: "Révisions" },
+  { value: "approved", label: "Approuvés" },
+  { value: "scheduled", label: "Programmés" },
   { value: "published", label: "Publiés" },
   { value: "draft", label: "Brouillons" },
-  { value: "pending_review", label: "En revue" },
+  { value: "rejected", label: "Rejetés" },
+  { value: "archived", label: "Archivés" },
 ];
-
-function statusVariant(status: string) {
-  if (status === "published") return "success" as const;
-  if (status === "pending_review") return "info" as const;
-  return "warning" as const;
-}
-
-function statusLabel(status: string) {
-  if (status === "published") return "Publié";
-  if (status === "pending_review") return "En revue";
-  if (status === "draft") return "Brouillon";
-  return status;
-}
 
 export default function ArticlesPage() {
   const router = useRouter();
@@ -49,11 +47,26 @@ export default function ArticlesPage() {
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
   useEffect(() => {
-    const params = filter !== "all" ? `?status=${filter}` : "";
-    fetch(`/api/articles${params}`)
-      .then((r) => r.json())
-      .then((data) => setArticles(data.articles || []))
-      .finally(() => setLoading(false));
+    async function load() {
+      const selected = normalizeEditorialStatus(filter);
+      const statuses =
+        filter === "all"
+          ? ["all"]
+          : selected === "in_review"
+          ? ["in_review", "pending_review"]
+          : [selected];
+
+      const requests = statuses.map((status) => {
+        const params = status !== "all" ? `?status=${status}` : "";
+        return fetch(`/api/articles${params}`).then((r) => r.json());
+      });
+      const responses = await Promise.all(requests);
+      const merged = responses.flatMap((data) => data.articles || []);
+      setArticles(merged);
+      setLoading(false);
+    }
+
+    load();
   }, [filter]);
 
   const filtered = useMemo(() => {
@@ -185,8 +198,8 @@ export default function ArticlesPage() {
                     {article.category?.name ?? <span className="text-muted/40">—</span>}
                   </td>
                   <td className="px-5 py-3.5">
-                    <Badge variant={statusVariant(article.status)}>
-                      {statusLabel(article.status)}
+                    <Badge variant={getEditorialStatusVariant(article.status)}>
+                      {getEditorialStatusLabel(article.status)}
                     </Badge>
                   </td>
                   <td className="hidden px-5 py-3.5 text-right sm:table-cell">

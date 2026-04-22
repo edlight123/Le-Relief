@@ -9,6 +9,10 @@ import {
   Home,
   FileText,
   PenSquare,
+  ClipboardCheck,
+  RotateCcw,
+  CalendarClock,
+  CheckCircle2,
   Image as ImageIcon,
   BarChart3,
   Settings,
@@ -18,6 +22,8 @@ import {
   ExternalLink,
 } from "lucide-react";
 import { signOut } from "next-auth/react";
+import { useSession } from "next-auth/react";
+import { normalizeWorkflowRole } from "@/lib/editorial-workflow";
 
 const navGroups = [
   {
@@ -26,7 +32,13 @@ const navGroups = [
       { label: "Tableau de bord", href: "/dashboard", icon: LayoutDashboard, exact: true },
       { label: "Une", href: "/dashboard/homepage", icon: Home },
       { label: "Articles", href: "/dashboard/articles", icon: FileText },
+      { label: "Mes brouillons", href: "/dashboard/my-drafts", icon: PenSquare },
       { label: "Nouvel article", href: "/dashboard/articles/new", icon: PenSquare },
+      { label: "Review Queue", href: "/dashboard/review", icon: ClipboardCheck },
+      { label: "Révisions", href: "/dashboard/revisions", icon: RotateCcw },
+      { label: "Approuvés", href: "/dashboard/approved", icon: CheckCircle2 },
+      { label: "Programmés", href: "/dashboard/scheduled", icon: CalendarClock },
+      { label: "Publiés", href: "/dashboard/published", icon: CheckCircle2 },
     ],
   },
   {
@@ -59,6 +71,8 @@ interface SidebarProps {
 
 export default function Sidebar({ open, onClose }: SidebarProps) {
   const pathname = usePathname();
+  const { data: session } = useSession();
+  const role = normalizeWorkflowRole((session?.user as { role?: string } | undefined)?.role || "writer");
 
   function isActive(href: string, exact = false) {
     if (exact) return pathname === href;
@@ -113,6 +127,7 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
                 {group.label}
               </p>
               {group.items.map((item) => {
+                if (item.href === "/dashboard/users" && role !== "admin") return null;
                 const active = isActive(item.href, item.exact);
                 return (
                   <Link

@@ -6,6 +6,7 @@ import { auth } from "@/lib/auth";
 import { hasRole } from "@/lib/permissions";
 import { normalizeAuthor, normalizeCategory } from "@/lib/editorial";
 import { validateSourceArticleReference } from "@/lib/validation";
+import { canEditArticle, canTransitionStatus, normalizeEditorialStatus, normalizeWorkflowRole } from "@/lib/editorial-workflow";
 
 interface RouteParams {
   params: Promise<{ id: string }>;
@@ -44,10 +45,22 @@ export async function PATCH(req: NextRequest, { params }: RouteParams) {
   if (!existing) {
     return NextResponse.json({ error: "Introuvable" }, { status: 404 });
   }
+  const sessionRole = ((session.user as { role?: string }).role || "writer").toString();
+  const normalizedRole = normalizeWorkflowRole(sessionRole);
+  const isOwner = existing.authorId === session.user.id;
+
+  if (!canEditArticle(normalizedRole, isOwner, existing.status as string)) {
+    return NextResponse.json({ error: "Permissions insuffisantes pour modifier cet article." }, { status: 403 });
+  }
+
   const body = await req.json();
 
   const data: Record<string, unknown> = {};
   if (body.title !== undefined) data.title = body.title;
+  if (body.slug !== undefined) data.slug = body.slug || null;
+  if (body.seoTitle !== undefined) data.seoTitle = body.seoTitle || null;
+  if (body.metaDescription !== undefined) data.metaDescription = body.metaDescription || null;
+  if (body.canonicalUrl !== undefined) data.canonicalUrl = body.canonicalUrl || null;
   if (body.subtitle !== undefined) data.subtitle = body.subtitle || null;
   if (body.body !== undefined) data.body = body.body;
   if (body.excerpt !== undefined) data.excerpt = body.excerpt || null;
@@ -82,17 +95,25 @@ export async function PATCH(req: NextRequest, { params }: RouteParams) {
   }
   if (body.featured !== undefined) data.featured = body.featured;
   if (body.status !== undefined) {
-    const sessionRole = (session.user as { role?: "reader" | "publisher" | "admin" }).role;
-    const canPublish = hasRole(
-      sessionRole || "reader",
-      "publisher"
-    );
+    const canPublish = hasRole(normalizedRole, "publisher");
     const scheduledAt = (data.scheduledAt as string) ?? (existing.scheduledAt as string) ?? null;
     const scheduledInPast = scheduledAt && new Date(scheduledAt) <= new Date();
     const requestedStatus =
       body.status === "scheduled" && scheduledInPast ? "published" : body.status;
+    const normalizedRequestedStatus = normalizeEditorialStatus(requestedStatus);
+    const transitionCheck = canTransitionStatus({
+      role: normalizedRole,
+      fromStatus: existing.status as string,
+      toStatus: normalizedRequestedStatus,
+      isOwner,
+    });
+    if (!transitionCheck.allowed) {
+      return NextResponse.json({ error: transitionCheck.reason }, { status: 403 });
+    }
     const nextStatus =
-      requestedStatus === "published" && !canPublish ? "pending_review" : requestedStatus;
+      normalizedRequestedStatus === "published" && !canPublish
+        ? "in_review"
+        : normalizedRequestedStatus;
     data.status = nextStatus;
     if (nextStatus === "published" && !existing.publishedAt) {
       data.publishedAt = scheduledInPast ? new Date(scheduledAt!) : new Date();
@@ -100,6 +121,25 @@ export async function PATCH(req: NextRequest, { params }: RouteParams) {
       data.publishedAt = null;
     } else if (nextStatus !== "published") {
       data.publishedAt = null;
+    }
+
+    if (nextStatus === "in_review") {
+      data.submittedForReviewAt = new Date();
+    }
+    if (nextStatus === "approved") {
+      data.approvedAt = new Date();
+      data.approvedBy = session.user.id;
+    }
+    if (nextStatus === "revisions_requested") {
+      data.revisionRequestedAt = new Date();
+      data.revisionRequestedBy = session.user.id;
+    }
+    if (nextStatus === "rejected") {
+      data.rejectedAt = new Date();
+      data.rejectedBy = session.user.id;
+    }
+    if (nextStatus === "published") {
+      data.publishedBy = session.user.id;
     }
   }
 
@@ -145,6 +185,13 @@ export async function DELETE(req: NextRequest, { params }: RouteParams) {
   const article = await articlesRepo.getArticle(id);
   if (!article) {
     return NextResponse.json({ error: "Introuvable" }, { status: 404 });
+  }
+
+  const sessionRole = ((session.user as { role?: string }).role || "writer").toString();
+  const normalizedRole = normalizeWorkflowRole(sessionRole);
+  const isOwner = article.authorId === session.user.id;
+  if (!hasRole(normalizedRole, "editor") && !(normalizedRole === "writer" && isOwner)) {
+    return NextResponse.json({ error: "Permissions insuffisantes" }, { status: 403 });
   }
 
   if (article.language === "fr") {

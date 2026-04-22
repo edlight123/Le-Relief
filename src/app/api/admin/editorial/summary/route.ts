@@ -38,7 +38,7 @@ export async function GET() {
     // By status
     const byStatus = {
       draft: allDocs.filter((a) => a.status === "draft").length,
-      pending_review: allDocs.filter((a) => a.status === "pending_review").length,
+      pending_review: allDocs.filter((a) => a.status === "pending_review" || a.status === "in_review").length,
       published: allDocs.filter((a) => a.status === "published").length,
     };
 

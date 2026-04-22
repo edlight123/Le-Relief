@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import * as articlesRepo from "@/lib/repositories/articles";
 import * as usersRepo from "@/lib/repositories/users";
 import { auth } from "@/lib/auth";
-import { canAccessDashboard } from "@/lib/permissions";
+import { canManageUsers, normalizeRole } from "@/lib/permissions";
 import type { Role } from "@/types/user";
 
 export async function GET(request: NextRequest) {
@@ -36,7 +36,7 @@ export async function GET(request: NextRequest) {
 
   const session = await auth();
   const userRole = (session?.user as { role?: Role } | undefined)?.role;
-  if (!userRole || !canAccessDashboard(userRole)) {
+  if (!userRole || !canManageUsers(normalizeRole(userRole))) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 

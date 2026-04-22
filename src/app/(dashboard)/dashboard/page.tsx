@@ -7,18 +7,29 @@ import Link from "next/link";
 import Badge from "@/components/ui/Badge";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
+import {
+  getEditorialStatusLabel,
+  getEditorialStatusVariant,
+  normalizeEditorialStatus,
+} from "@/lib/editorial-workflow";
 
 export const dynamic = "force-dynamic";
 
 export default async function DashboardPage() {
-  let totalArticles = 0, publishedCount = 0, draftCount = 0, totalViews = 0, totalUsers = 0;
+  let totalArticles = 0, publishedCount = 0, draftCount = 0, inReviewCount = 0, approvedCount = 0, scheduledCount = 0, totalViews = 0, totalUsers = 0;
   let recentArticles: Record<string, unknown>[] = [];
 
   try {
-    [totalArticles, publishedCount, draftCount, totalViews, totalUsers] = await Promise.all([
+    [totalArticles, publishedCount, draftCount, inReviewCount, approvedCount, scheduledCount, totalViews, totalUsers] = await Promise.all([
       articlesRepo.countArticles(),
       articlesRepo.countArticles("published"),
       articlesRepo.countArticles("draft"),
+      Promise.all([
+        articlesRepo.countArticles("in_review"),
+        articlesRepo.countArticles("pending_review"),
+      ]).then(([inReview, pendingReview]) => inReview + pendingReview),
+      articlesRepo.countArticles("approved"),
+      articlesRepo.countArticles("scheduled"),
       articlesRepo.sumViews(),
       usersRepo.countUsers(),
     ]);
@@ -39,16 +50,23 @@ export default async function DashboardPage() {
   const stats = [
     { label: "Publiés", value: publishedCount, icon: FileText, color: "teal" as const },
     { label: "Brouillons", value: draftCount, icon: FileText, color: "amber" as const },
+    { label: "En revue", value: inReviewCount, icon: FileText, color: "blue" as const },
+    { label: "Approuvés", value: approvedCount, icon: FileText, color: "blue" as const },
+    { label: "Programmés", value: scheduledCount, icon: FileText, color: "red" as const },
     { label: "Total vues", value: totalViews, icon: Eye, color: "blue" as const },
-    { label: "Articles", value: totalArticles, icon: FileText, color: "red" as const },
     { label: "Utilisateurs", value: totalUsers, icon: Users, color: "blue" as const },
+    { label: "Articles", value: totalArticles, icon: FileText, color: "red" as const },
   ];
 
   const quickActions = [
     { label: "Nouvel article", href: "/dashboard/articles/new", icon: PenSquare, desc: "Rédiger et publier" },
+    { label: "Mes brouillons", href: "/dashboard/my-drafts", icon: PenSquare, desc: "Reprendre mes articles" },
+    { label: "Review queue", href: "/dashboard/review", icon: FileText, desc: "Traiter les validations" },
+    { label: "File approuvée", href: "/dashboard/approved", icon: FileText, desc: "Préparer la publication" },
+    { label: "Programmés", href: "/dashboard/scheduled", icon: FileText, desc: "Piloter le calendrier" },
     { label: "Analytiques", href: "/dashboard/analytics", icon: BarChart3, desc: "Consulter les stats" },
-    { label: "Tous les articles", href: "/dashboard/articles", icon: FileText, desc: "Gérer le contenu" },
     { label: "Utilisateurs", href: "/dashboard/users", icon: Users, desc: "Gérer l'équipe" },
+    { label: "Tous les articles", href: "/dashboard/articles", icon: FileText, desc: "Gérer le contenu" },
   ];
 
   return (
@@ -76,7 +94,7 @@ export default async function DashboardPage() {
       <StatsCards stats={stats} />
 
       {/* Quick actions */}
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-8">
         {quickActions.map((action) => (
           <Link
             key={action.href}
@@ -120,7 +138,7 @@ export default async function DashboardPage() {
             </div>
           ) : (
             recentArticles.map((article) => {
-              const status = article.status as string;
+              const status = normalizeEditorialStatus(article.status as string);
               return (
                 <Link
                   key={article.id as string}
@@ -139,13 +157,9 @@ export default async function DashboardPage() {
                     </p>
                   </div>
                   <Badge
-                    variant={
-                      status === "published" ? "success" :
-                      status === "pending_review" ? "info" : "warning"
-                    }
+                    variant={getEditorialStatusVariant(status)}
                   >
-                    {status === "published" ? "Publié" :
-                     status === "pending_review" ? "En revue" : "Brouillon"}
+                    {getEditorialStatusLabel(status)}
                   </Badge>
                 </Link>
               );

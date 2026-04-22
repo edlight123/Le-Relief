@@ -30,6 +30,10 @@ export default function EditArticlePage() {
     allowTranslation: boolean;
     translationPriority: string;
     scheduledAt: string;
+    slug?: string;
+    seoTitle?: string;
+    metaDescription?: string;
+    authorId?: string;
   } | null>(null);
   const [categories, setCategories] = useState<{ id: string; name: string }[]>(
     []
@@ -94,6 +98,10 @@ export default function EditArticlePage() {
         allowTranslation: Boolean(articleData.allowTranslation),
         translationPriority: articleData.translationPriority || "",
         scheduledAt: articleData.scheduledAt || "",
+        slug: articleData.slug || "",
+        seoTitle: articleData.seoTitle || "",
+        metaDescription: articleData.metaDescription || "",
+        authorId: articleData.authorId || "",
       });
       setCategories(catData.categories || []);
       setLoading(false);
@@ -120,6 +128,9 @@ export default function EditArticlePage() {
     allowTranslation: boolean;
     translationPriority: string;
     scheduledAt: string;
+    slug: string;
+    seoTitle: string;
+    metaDescription: string;
   }) {
     const res = await fetch(`/api/articles/${id}`, {
       method: "PATCH",

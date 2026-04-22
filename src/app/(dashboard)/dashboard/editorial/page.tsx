@@ -51,7 +51,7 @@ export default async function EditorialDashboardPage() {
 
   const byStatus = {
     draft: allArticles.filter((a) => a.status === "draft").length,
-    pending_review: allArticles.filter((a) => a.status === "pending_review").length,
+    pending_review: allArticles.filter((a) => a.status === "pending_review" || a.status === "in_review").length,
     published: allArticles.filter((a) => a.status === "published").length,
   };
 
@@ -142,7 +142,11 @@ export default async function EditorialDashboardPage() {
   authorsWithNames.sort((a, b) => b.count - a.count);
 
   // Pending articles (for quick publish)
-  const { articles: pendingArticles } = await articlesRepo.getArticles({ status: "pending_review", take: 5 });
+  const [inReview, legacyPending] = await Promise.all([
+    articlesRepo.getArticles({ status: "in_review", take: 5 }),
+    articlesRepo.getArticles({ status: "pending_review", take: 5 }),
+  ]);
+  const pendingArticles = [...inReview.articles, ...legacyPending.articles].slice(0, 5);
 
   // Featured article
   const featured = await articlesRepo.getFeaturedArticle();
@@ -392,7 +396,7 @@ export default async function EditorialDashboardPage() {
               </ul>
             )}
             <Link
-              href="/dashboard/articles?status=pending_review"
+              href="/dashboard/review"
               className="mt-3 block font-label text-xs text-primary hover:underline"
             >
               Voir tout →

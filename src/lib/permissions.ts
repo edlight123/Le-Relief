@@ -1,9 +1,16 @@
 import type { Role } from "@/types/user";
 
+export function normalizeRole(role: Role): Exclude<Role, "reader"> {
+  if (role === "reader") return "writer";
+  return role;
+}
+
 const roleHierarchy: Record<Role, number> = {
-  reader: 0,
-  publisher: 1,
-  admin: 2,
+  reader: 1,
+  writer: 1,
+  editor: 2,
+  publisher: 3,
+  admin: 4,
 };
 
 export function hasRole(userRole: Role, requiredRole: Role): boolean {
@@ -11,17 +18,18 @@ export function hasRole(userRole: Role, requiredRole: Role): boolean {
 }
 
 export function canManageArticles(role: Role): boolean {
-  return hasRole(role, "publisher");
+  return hasRole(normalizeRole(role), "editor");
 }
 
 export function canManageUsers(role: Role): boolean {
-  return hasRole(role, "admin");
+  return hasRole(normalizeRole(role), "admin");
 }
 
 export function canAccessDashboard(role: Role): boolean {
-  return hasRole(role, "publisher");
+  return hasRole(normalizeRole(role), "writer");
 }
 
 export function canDeleteArticle(role: Role, isOwner: boolean): boolean {
-  return hasRole(role, "admin") || (hasRole(role, "publisher") && isOwner);
+  const normalized = normalizeRole(role);
+  return hasRole(normalized, "admin") || (hasRole(normalized, "editor") && isOwner);
 }

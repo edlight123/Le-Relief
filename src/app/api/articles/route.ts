@@ -8,6 +8,7 @@ import { auth } from "@/lib/auth";
 import { generateSlug } from "@/lib/slug";
 import { hasRole } from "@/lib/permissions";
 import { normalizeArticle } from "@/lib/editorial";
+import { canTransitionStatus, normalizeEditorialStatus, normalizeWorkflowRole } from "@/lib/editorial-workflow";
 import {
   filterByDateRange,
   findDidYouMean,
@@ -18,6 +19,7 @@ import {
   type SearchableArticle,
 } from "@/lib/search-ranking";
 import { validateSourceArticleReference } from "@/lib/validation";
+import type { Role } from "@/types/user";
 
 function parseBoundedInt(value: string | null, fallback: number, min: number, max: number) {
   const parsed = Number.parseInt(value || "", 10);
@@ -74,11 +76,15 @@ async function hydrateArticles(articles: Record<string, unknown>[]) {
 }
 
 export async function GET(req: NextRequest) {
+  const session = await auth();
+  const sessionRole = ((session?.user as { role?: Role } | undefined)?.role || "writer") as Role;
+  const normalizedRole = normalizeWorkflowRole(sessionRole);
+
   const { searchParams } = new URL(req.url);
-  const status = normalizeOptionalFilter(searchParams.get("status"));
+  let status = normalizeOptionalFilter(searchParams.get("status"));
   const search = normalizeOptionalFilter(searchParams.get("search"));
   const categoryId = normalizeOptionalFilter(searchParams.get("categoryId"));
-  const authorId = normalizeOptionalFilter(searchParams.get("authorId"));
+  let authorId = normalizeOptionalFilter(searchParams.get("authorId"));
   const language = normalizeLanguageFilter(searchParams.get("language"));
   const sourceArticleId = normalizeOptionalFilter(searchParams.get("sourceArticleId"));
   const take = parseBoundedInt(searchParams.get("take"), 20, 1, 100);
@@ -87,6 +93,16 @@ export async function GET(req: NextRequest) {
   const contentType = normalizeContentType(searchParams.get("contentType"));
   const dateRange = normalizeDateRange(searchParams.get("dateRange"));
   const sortBy = normalizeSortBy(searchParams.get("sortBy"), Boolean(search));
+
+  if (!session?.user?.id) {
+    status = "published";
+    authorId = undefined;
+  } else if (normalizedRole === "writer") {
+    const requestedStatus = normalizeEditorialStatus(status || "draft");
+    if (requestedStatus !== "published" && !authorId) {
+      authorId = session.user.id;
+    }
+  }
 
   const needsAdvancedSearch = Boolean(search || contentType || dateRange !== "all" || sortBy !== "recent");
 
@@ -207,6 +223,9 @@ export async function POST(req: NextRequest) {
 
   try {
     const body = await req.json();
+    const sessionRole = ((session.user as { role?: string }).role || "writer").toString();
+    const normalizedRole = normalizeWorkflowRole(sessionRole);
+
     const language = body.language || "fr";
     const sourceArticleId = body.sourceArticleId || null;
     const sourceValidation = await validateSourceArticleReference(language, sourceArticleId);
@@ -218,16 +237,22 @@ export async function POST(req: NextRequest) {
     }
 
     const slug = generateSlug(body.title);
-    const sessionRole = (session.user as { role?: "reader" | "publisher" | "admin" }).role;
     const requestedStatus = body.status || "draft";
-    const canPublish = hasRole(
-      sessionRole || "reader",
-      "publisher"
-    );
-    const status =
-      requestedStatus === "published" && !canPublish
-        ? "pending_review"
-        : requestedStatus;
+    const normalizedRequestedStatus = normalizeEditorialStatus(requestedStatus);
+    const transitionCheck = canTransitionStatus({
+      role: normalizedRole,
+      fromStatus: "draft",
+      toStatus: normalizedRequestedStatus,
+      isOwner: true,
+    });
+    if (!transitionCheck.allowed) {
+      return NextResponse.json({ error: transitionCheck.reason }, { status: 403 });
+    }
+
+    const canPublish = hasRole(normalizedRole, "publisher");
+    const status = normalizedRequestedStatus === "published" && !canPublish
+      ? "in_review"
+      : normalizedRequestedStatus;
 
     const scheduledAt = body.scheduledAt || null;
     const publishedAt =
@@ -241,12 +266,35 @@ export async function POST(req: NextRequest) {
         ? "published"
         : status;
 
+    const workflowDates: Record<string, unknown> = {};
+    if (resolvedStatus === "in_review") {
+      workflowDates.submittedForReviewAt = new Date();
+    }
+    if (resolvedStatus === "approved") {
+      workflowDates.approvedAt = new Date();
+      workflowDates.approvedBy = session.user.id;
+    }
+    if (resolvedStatus === "revisions_requested") {
+      workflowDates.revisionRequestedAt = new Date();
+      workflowDates.revisionRequestedBy = session.user.id;
+    }
+    if (resolvedStatus === "rejected") {
+      workflowDates.rejectedAt = new Date();
+      workflowDates.rejectedBy = session.user.id;
+    }
+    if (resolvedStatus === "published") {
+      workflowDates.publishedBy = session.user.id;
+    }
+
     const article = await articlesRepo.createArticle({
       title: body.title,
       subtitle: body.subtitle || null,
-      slug,
+      slug: body.slug || slug,
       body: body.body,
       excerpt: body.excerpt || null,
+      seoTitle: body.seoTitle || null,
+      metaDescription: body.metaDescription || null,
+      canonicalUrl: body.canonicalUrl || null,
       coverImage: body.coverImage || null,
       coverImageCaption: body.coverImageCaption || null,
       tags: Array.isArray(body.tags)
@@ -266,6 +314,7 @@ export async function POST(req: NextRequest) {
       translationPriority: body.translationPriority || null,
       publishedAt,
       scheduledAt,
+      ...workflowDates,
     });
 
     return NextResponse.json(article, { status: 201 });

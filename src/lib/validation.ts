@@ -17,11 +17,29 @@ export const articleSchema = z.object({
   subtitle: z.string().max(300).optional(),
   body: z.string().min(1, "Le contenu est requis"),
   excerpt: z.string().max(500).optional(),
+  slug: z.string().max(220).optional(),
+  seoTitle: z.string().max(220).optional(),
+  metaDescription: z.string().max(320).optional(),
+  canonicalUrl: z.string().url().optional(),
   coverImage: z.string().optional(),
   categoryId: z.string().optional(),
   tags: z.array(z.string()).optional(),
-  status: z.enum(["draft", "published"]).optional(),
+  status: z
+    .enum([
+      "draft",
+      "writing",
+      "in_review",
+      "revisions_requested",
+      "approved",
+      "scheduled",
+      "published",
+      "rejected",
+      "archived",
+      "pending_review",
+    ])
+    .optional(),
   featured: z.boolean().optional(),
+  scheduledAt: z.string().optional(),
   contentType: z
     .enum([
       "actualite",

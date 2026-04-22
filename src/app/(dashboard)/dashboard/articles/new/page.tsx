@@ -34,6 +34,9 @@ export default function NewArticlePage() {
     allowTranslation: boolean;
     translationPriority: string;
     scheduledAt: string;
+    slug: string;
+    seoTitle: string;
+    metaDescription: string;
   }) {
     const res = await fetch("/api/articles", {
       method: "POST",

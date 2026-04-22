@@ -21,6 +21,9 @@ type ArticleDoc = Record<string, unknown> & {
 type CreateArticleRepoInput = CreateArticleInput & {
   slug: string;
   authorId: string;
+  seoTitle?: string | null;
+  metaDescription?: string | null;
+  canonicalUrl?: string | null;
   subtitle?: string | null;
   excerpt?: string | null;
   coverImage?: string | null;
@@ -69,6 +72,9 @@ export async function createArticle(data: CreateArticleRepoInput) {
     ...normalizedInput,
     subtitle: normalizedInput.subtitle || null,
     excerpt: normalizedInput.excerpt || null,
+    seoTitle: (normalizedInput.seoTitle as string | null | undefined) || null,
+    metaDescription: (normalizedInput.metaDescription as string | null | undefined) || null,
+    canonicalUrl: (normalizedInput.canonicalUrl as string | null | undefined) || null,
     coverImage: normalizedInput.coverImage || null,
     coverImageCaption: normalizedInput.coverImageCaption || null,
     tags: (normalizedInput.tags as string[] | undefined) || [],
@@ -124,7 +130,7 @@ export async function getArticles(options?: {
   excludeId?: string;
   orderBy?: string;
 }) {
-  let query = collection() as FirebaseFirestore.Query;
+  let baseQuery = collection() as FirebaseFirestore.Query;
   const normalizedSearch = options?.search?.trim();
   const normalizedLanguage =
     options?.language === "fr" || options?.language === "en"
@@ -132,30 +138,32 @@ export async function getArticles(options?: {
       : undefined;
 
   if (options?.status) {
-    query = query.where("status", "==", options.status);
+    baseQuery = baseQuery.where("status", "==", options.status);
   }
   if (options?.featured !== undefined) {
-    query = query.where("featured", "==", options.featured);
+    baseQuery = baseQuery.where("featured", "==", options.featured);
   }
   if (options?.categoryId) {
-    query = query.where("categoryId", "==", options.categoryId);
+    baseQuery = baseQuery.where("categoryId", "==", options.categoryId);
   }
   if (options?.authorId) {
-    query = query.where("authorId", "==", options.authorId);
+    baseQuery = baseQuery.where("authorId", "==", options.authorId);
   }
   if (normalizedLanguage) {
-    query = query.where("language", "==", normalizedLanguage);
+    baseQuery = baseQuery.where("language", "==", normalizedLanguage);
   }
   if (options?.sourceArticleId) {
-    query = query.where("sourceArticleId", "==", options.sourceArticleId);
+    baseQuery = baseQuery.where("sourceArticleId", "==", options.sourceArticleId);
   }
-
-  const orderField = options?.orderBy || "publishedAt";
-  query = query.orderBy(orderField, "desc");
 
   if (options?.before) {
-    query = query.where(orderField, "<", new Date(options.before));
+    const beforeField = options?.orderBy || "publishedAt";
+    baseQuery = baseQuery.where(beforeField, "<", new Date(options.before));
   }
+
+  const totalQuery = baseQuery;
+  const orderField = options?.orderBy || "publishedAt";
+  let query = baseQuery.orderBy(orderField, "desc");
 
   const needsClientFilter = !!(normalizedSearch || options?.excludeId);
   if (!options?.skip) {
@@ -185,7 +193,15 @@ export async function getArticles(options?: {
     docs = docs.filter((d) => d.id !== options.excludeId);
   }
 
-  const total = docs.length;
+  let total = docs.length;
+  if (!needsClientFilter) {
+    try {
+      const totalSnap = await totalQuery.count().get();
+      total = totalSnap.data().count;
+    } catch {
+      total = docs.length;
+    }
+  }
   const skip = options?.skip || 0;
   const take = options?.take || 20;
   if (needsClientFilter || options?.skip) {

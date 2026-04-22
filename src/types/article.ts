@@ -1,4 +1,14 @@
-export type ArticleStatus = "draft" | "pending_review" | "published";
+export type ArticleStatus =
+  | "draft"
+  | "writing"
+  | "in_review"
+  | "revisions_requested"
+  | "approved"
+  | "scheduled"
+  | "published"
+  | "rejected"
+  | "archived"
+  | "pending_review";
 export type ArticleLanguage = "fr" | "en";
 export type ArticleContentType =
   | "actualite"
@@ -26,6 +36,9 @@ interface ArticleBase {
   slug: string;
   body: string;
   excerpt: string | null;
+  seoTitle: string | null;
+  metaDescription: string | null;
+  canonicalUrl: string | null;
   coverImage: string | null;
   status: ArticleStatus;
   featured: boolean;
@@ -39,6 +52,14 @@ interface ArticleBase {
   alternateLanguageSlug: string | null;
   allowTranslation: boolean;
   translationPriority: string | null;
+  submittedForReviewAt: Date | null;
+  approvedBy: string | null;
+  approvedAt: Date | null;
+  publishedBy: string | null;
+  revisionRequestedBy: string | null;
+  revisionRequestedAt: Date | null;
+  rejectedBy: string | null;
+  rejectedAt: Date | null;
   author?: { id: string; name: string | null; image: string | null };
   category?: { id: string; name: string; slug: string } | null;
   tags?: string[];
@@ -72,6 +93,9 @@ interface CreateArticleInputBase {
   body: string;
   excerpt?: string | null;
   coverImage?: string | null;
+  seoTitle?: string | null;
+  metaDescription?: string | null;
+  canonicalUrl?: string | null;
   categoryId?: string | null;
   tags?: string[];
   status?: ArticleStatus;
