@@ -84,10 +84,10 @@ export default async function LocalizedCategoryPage({ params }: Props) {
       <Breadcrumb
         locale={locale}
         crumbs={[
-          { label: locale === "fr" ? "Accueil" : "Home", href: `/${locale}` },
+          { label: locale === "fr" ? "Accueil" : "Home", href: "/" },
           {
             label: locale === "fr" ? "Rubriques" : "Categories",
-            href: `/${locale}/categories`,
+            href: "/categories",
           },
           { label: category.name },
         ]}

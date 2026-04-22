@@ -248,7 +248,7 @@ export default function SearchExperience() {
         setResolvedFilterKey(filterKey);
       });
 
-    router.replace(params.size ? `/${locale}/search?${params.toString()}` : `/${locale}/search`, {
+    router.replace(params.size ? `/search?${params.toString()}` : "/search", {
       scroll: false,
     });
 

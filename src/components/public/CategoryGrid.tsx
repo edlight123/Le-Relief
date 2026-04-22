@@ -30,7 +30,7 @@ export default function CategoryGrid({
         {categories.map((cat, index) => (
           <Link
             key={cat.slug}
-            href={`/${locale}/categories/${cat.slug}`}
+            href={`/categories/${cat.slug}`}
             className="group flex items-center gap-4 border-b border-border-subtle py-3 text-muted transition-colors hover:text-primary"
           >
             <span className="font-label text-[10px] font-extrabold uppercase text-muted/70">
@@ -61,7 +61,7 @@ export default function CategoryGrid({
       {categories.map((cat, index) => (
         <Link
           key={cat.slug}
-          href={`/${locale}/categories/${cat.slug}`}
+          href={`/categories/${cat.slug}`}
           className="group border-b border-border-subtle px-0 py-6 transition-colors hover:bg-surface-newsprint sm:px-5"
         >
           <div className="flex items-start gap-4">

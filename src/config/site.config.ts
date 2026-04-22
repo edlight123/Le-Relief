@@ -1,15 +1,35 @@
 const DEFAULT_APP_URL = "http://localhost:3000";
 
-function getNormalizedAppUrl() {
-  const envUrl = process.env.NEXT_PUBLIC_APP_URL;
-  const firstToken = envUrl?.split(/\s+/)[0]?.replaceAll('"', "").trim();
-  const candidate = firstToken || DEFAULT_APP_URL;
+function normalizeCandidateUrl(value?: string) {
+  const token = value?.split(/\s+/)[0]?.replaceAll('"', "").trim();
+  if (!token) return null;
+
+  const withProtocol = token.startsWith("http://") || token.startsWith("https://")
+    ? token
+    : `https://${token}`;
 
   try {
-    return new URL(candidate).origin;
+    return new URL(withProtocol).origin;
   } catch {
-    return DEFAULT_APP_URL;
+    return null;
   }
+}
+
+function getNormalizedAppUrl() {
+  const candidates = [
+    process.env.NEXT_PUBLIC_APP_URL,
+    process.env.APP_URL,
+    process.env.VERCEL_PROJECT_PRODUCTION_URL,
+    process.env.VERCEL_URL,
+    DEFAULT_APP_URL,
+  ];
+
+  for (const candidate of candidates) {
+    const normalized = normalizeCandidateUrl(candidate);
+    if (normalized) return normalized;
+  }
+
+  return DEFAULT_APP_URL;
 }
 
 export const siteConfig = {

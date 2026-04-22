@@ -175,7 +175,7 @@ export default async function LocalizedHomePage({
                 <SectionHeader
                   kicker={locale === "fr" ? "Dernières nouvelles" : "Latest"}
                   title={locale === "fr" ? "Le fil de la rédaction" : "Latest from the newsroom"}
-                  href={`/${locale}/categories`}
+                  href="/categories"
                 />
                 <LatestArticlesFeed initialArticles={latest} locale={locale} />
               </section>
@@ -216,7 +216,7 @@ export default async function LocalizedHomePage({
                   {mostRead.map((article, index) => (
                     <Link
                       key={article.id}
-                      href={`/${locale}/articles/${article.slug}`}
+                      href={`/articles/${article.slug}`}
                       className="group grid grid-cols-[3rem_1fr] gap-3 py-4"
                     >
                       <span className="editorial-numeral" style={{ fontSize: "1.75rem", color: "var(--border-subtle)" }}>
@@ -263,7 +263,7 @@ export default async function LocalizedHomePage({
           <SectionHeader
             kicker={locale === "fr" ? "Taxonomie" : "Taxonomy"}
             title={locale === "fr" ? "Rubriques principales" : "Main sections"}
-            href={`/${locale}/categories`}
+            href="/categories"
           />
           <CategoryGrid variant="grid" categories={categories} locale={locale} />
         </section>

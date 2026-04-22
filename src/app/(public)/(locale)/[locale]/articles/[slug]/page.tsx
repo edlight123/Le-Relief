@@ -209,18 +209,18 @@ export default async function LocalizedArticlePage({ params }: Props) {
         <Breadcrumb
           locale={locale}
           crumbs={[
-            { label: locale === "fr" ? "Accueil" : "Home", href: `/${locale}` },
+            { label: locale === "fr" ? "Accueil" : "Home", href: "/" },
             ...(article.category
               ? [
                   {
                     label: article.category.name,
-                    href: `/${locale}/categories/${article.category.slug}`,
+                    href: `/categories/${article.category.slug}`,
                   },
                 ]
               : [
                   {
                     label: locale === "fr" ? "Articles" : "Articles",
-                    href: `/${locale}/categories`,
+                    href: "/categories",
                   },
                 ]),
             { label: article.title },
@@ -231,7 +231,7 @@ export default async function LocalizedArticlePage({ params }: Props) {
           <div className="flex flex-wrap items-center gap-3 font-label text-xs font-extrabold uppercase">
             {article.category ? (
               <Link
-                href={`/${locale}/categories/${article.category.slug}`}
+                href={`/categories/${article.category.slug}`}
                 className="text-primary transition-colors hover:text-foreground"
               >
                 {article.category.name}
@@ -255,7 +255,7 @@ export default async function LocalizedArticlePage({ params }: Props) {
           <div className="mt-6 flex flex-wrap items-center gap-3 border-y border-border-subtle py-3 font-label text-xs font-bold uppercase text-muted">
             {article.author ? (
               <Link
-                href={`/${locale}/auteurs/${article.author.id}`}
+                href={`/auteurs/${article.author.id}`}
                 className="transition-colors hover:text-primary"
               >
                 {locale === "fr" ? "Par" : "By"}{" "}
@@ -345,7 +345,7 @@ export default async function LocalizedArticlePage({ params }: Props) {
 
             <div className="mt-10 border-t border-border-subtle pt-4">
               <Link
-                href={`/${locale}/corrections`}
+                href="/corrections"
                 className="font-label text-[11px] font-bold uppercase text-muted transition-colors hover:text-primary"
               >
                 {locale === "fr"
