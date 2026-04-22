@@ -16,7 +16,6 @@ function getPreferredLocale(request: NextRequest): "fr" | "en" {
   if (cookieLocale && validateLocale(cookieLocale)) {
     return cookieLocale as "fr" | "en";
   }
-  // Respect browser Accept-Language as fallback
   const acceptLang = request.headers.get("accept-language") || "";
   if (acceptLang.toLowerCase().startsWith("en")) return "en";
   return DEFAULT_LOCALE;
@@ -44,7 +43,7 @@ function redirectToLogin(request: NextRequest) {
   return NextResponse.redirect(url);
 }
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   if (isRoleScopedRoute(pathname)) {
@@ -72,8 +71,6 @@ export async function middleware(request: NextRequest) {
   const segments = pathname.split("/").filter(Boolean);
   const firstSegment = segments[0];
 
-  // If someone visits /fr/... or /en/... directly, redirect to the clean URL
-  // and persist that locale in the cookie.
   if (firstSegment && validateLocale(firstSegment)) {
     const locale = firstSegment as "fr" | "en";
     const cleanPath = "/" + segments.slice(1).join("/");
@@ -82,9 +79,6 @@ export async function middleware(request: NextRequest) {
     return withLocaleCookie(NextResponse.redirect(url, 302), locale);
   }
 
-  // For every other public path, rewrite internally to /[locale]/... so the
-  // [locale] segment is available to page components, but the browser URL
-  // remains clean (no /fr/ or /en/ prefix).
   const locale = getPreferredLocale(request);
   const url = request.nextUrl.clone();
   url.pathname = `/${locale}${pathname === "/" ? "" : pathname}`;
@@ -92,7 +86,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: [
-    "/((?!api|_next/static|_next/image|favicon.ico|.*\\..*).*)",
-  ],
+  matcher: ["/((?!api|_next/static|_next/image|favicon.ico|.*\\..*).*)"],
 };

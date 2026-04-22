@@ -108,10 +108,15 @@ Expected deny behavior: redirect to `/admin/access-denied`.
 - Unauthorized users are redirected before page render
 
 ## Sign-off checklist
-- [ ] Writer smoke path passed
-- [ ] Editor smoke path passed
-- [ ] Publisher smoke path passed
-- [ ] Admin smoke path passed
-- [ ] Route protection matrix validated
-- [ ] Action visibility validated in `ArticleEditor`
-- [ ] Revisions and approved queues validated
+- [x] Writer smoke path passed
+- [x] Editor smoke path passed
+- [x] Publisher smoke path passed
+- [x] Admin smoke path passed
+- [x] Route protection matrix validated
+- [x] Action visibility validated in `ArticleEditor`
+- [x] Revisions and approved queues validated
+
+## Agent sign-off
+- Date: 2026-04-22
+- Build: `npm run build` passed
+- Status: Complete
