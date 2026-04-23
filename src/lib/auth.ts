@@ -13,8 +13,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   },
   providers: [
     Google({
-      clientId: process.env.GOOGLE_CLIENT_ID,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+      clientId: process.env.AUTH_GOOGLE_ID ?? process.env.GOOGLE_CLIENT_ID,
+      clientSecret: process.env.AUTH_GOOGLE_SECRET ?? process.env.GOOGLE_CLIENT_SECRET,
     }),
     Credentials({
       name: "credentials",
@@ -49,8 +49,17 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
-        token.role = (user as { role: Role }).role;
+        const userRole = (user as { role?: Role }).role;
+        token.role = userRole ?? "writer";
         token.id = user.id;
+      }
+
+      if ((!token.role || !token.id) && token.email) {
+        const existing = await usersRepo.findByEmail(token.email);
+        if (existing) {
+          token.role = (existing.role as Role) ?? "writer";
+          token.id = existing.id as string;
+        }
       }
       return token;
     },
@@ -74,9 +83,10 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             image: user.image || null,
           });
           user.id = newUser.id as string;
+          (user as { role?: Role }).role = "writer";
         } else {
           user.id = existing.id as string;
-          (user as { role?: string }).role = existing.role as string;
+          (user as { role?: Role }).role = existing.role as Role;
         }
       }
       return true;

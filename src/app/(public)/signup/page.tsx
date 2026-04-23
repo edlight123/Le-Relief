@@ -118,7 +118,7 @@ export default function SignupPage() {
 
           <div className="mt-4">
             <button
-              onClick={() => signIn("google", { callbackUrl: "/dashboard" })}
+              onClick={() => signIn("google", { callbackUrl: "/admin" })}
               className="flex w-full items-center justify-center border border-border-subtle px-4 py-3 font-label text-sm font-bold text-foreground transition-colors hover:bg-surface-elevated"
             >
               Google
