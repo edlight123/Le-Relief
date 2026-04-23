@@ -84,7 +84,16 @@ export async function proxy(request: NextRequest) {
       });
     }
 
-    const token = await getToken({ req: request });
+    const secureCookie =
+      request.nextUrl.protocol === "https:" || process.env.NODE_ENV === "production";
+    const token = await getToken({
+      req: request,
+      secret: process.env.AUTH_SECRET ?? process.env.NEXTAUTH_SECRET,
+      secureCookie,
+      cookieName: secureCookie
+        ? "__Secure-authjs.session-token"
+        : "authjs.session-token",
+    });
     if (!token?.sub) {
       return redirectToLogin(request);
     }
