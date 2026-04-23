@@ -56,3 +56,10 @@ export async function getArticleHistory(articleId: string) {
     serializeTimestamps({ id: doc.id, ...doc.data() } as Record<string, unknown>),
   );
 }
+
+export async function getRecentEditorialEvents(limit = 100) {
+  const snap = await collection().orderBy("createdAt", "desc").limit(limit).get();
+  return snap.docs.map((doc) =>
+    serializeTimestamps({ id: doc.id, ...doc.data() } as Record<string, unknown>),
+  );
+}
