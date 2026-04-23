@@ -80,10 +80,15 @@ export default async function EditorialDashboardPage() {
   const db = getDb();
 
   // ── Core data ────────────────────────────────────────────────────────────
-  const snap = await db.collection("articles").get();
-  const allArticles = snap.docs.map((d) =>
-    serializeTimestamps({ id: d.id, ...d.data() } as Record<string, unknown>),
-  );
+  let allArticles: Record<string, unknown>[] = [];
+  try {
+    const snap = await db.collection("articles").get();
+    allArticles = snap.docs.map((d) =>
+      serializeTimestamps({ id: d.id, ...d.data() } as Record<string, unknown>),
+    );
+  } catch {
+    allArticles = [];
+  }
 
   const frArticles = allArticles.filter((a) => a.language === "fr");
   const enArticles = allArticles.filter((a) => a.language === "en");
@@ -105,11 +110,18 @@ export default async function EditorialDashboardPage() {
   ).length;
   byStatus["pending_review"] = 0; // merged into in_review above
 
-  // ── KPI computations (audit-based) ───────────────────────────────────────
+  // ── KPI computations (audit-based) — soft-fail if indexes missing ────────
   const [timingStats, blockedArticles, dailyRate] = await Promise.all([
-    getWorkflowTimingStats(),
-    getBlockedArticles(),
-    getDailyPublicationRate(30),
+    getWorkflowTimingStats().catch(() => ({
+      avgDraftToReview: null,
+      avgReviewToApproved: null,
+      avgApprovedToPublished: null,
+      revisionRate: 0,
+      totalArticlesSubmitted: 0,
+      totalRevised: 0,
+    })),
+    getBlockedArticles().catch(() => []),
+    getDailyPublicationRate(30).catch(() => [] as { date: string; count: number }[]),
   ]);
 
   // ── Content type distribution ─────────────────────────────────────────────
@@ -135,9 +147,13 @@ export default async function EditorialDashboardPage() {
   const categoryNames: Record<string, string> = {};
   await Promise.all(
     catIds.map(async (id) => {
-      const catSnap = await db.collection("categories").doc(id).get();
-      if (catSnap.exists) {
-        categoryNames[id] = (catSnap.data()?.name as string) || id;
+      try {
+        const catSnap = await db.collection("categories").doc(id).get();
+        if (catSnap.exists) {
+          categoryNames[id] = (catSnap.data()?.name as string) || id;
+        }
+      } catch {
+        // ignore single category lookup failure
       }
     }),
   );
@@ -213,7 +229,12 @@ export default async function EditorialDashboardPage() {
   }
   const authorsWithNames = await Promise.all(
     Object.keys(authorStats).map(async (id) => {
-      const user = await usersRepo.getUser(id);
+      let user: Record<string, unknown> | null = null;
+      try {
+        user = await usersRepo.getUser(id);
+      } catch {
+        user = null;
+      }
       const s = authorStats[id]!;
       return {
         id,
@@ -227,11 +248,15 @@ export default async function EditorialDashboardPage() {
 
   // ── Pending + featured ────────────────────────────────────────────────────
   const [inReview, legacyPending] = await Promise.all([
-    articlesRepo.getArticles({ status: "in_review", take: 5 }),
-    articlesRepo.getArticles({ status: "pending_review", take: 5 }),
+    articlesRepo
+      .getArticles({ status: "in_review", take: 5 })
+      .catch(() => ({ articles: [] as Record<string, unknown>[] })),
+    articlesRepo
+      .getArticles({ status: "pending_review", take: 5 })
+      .catch(() => ({ articles: [] as Record<string, unknown>[] })),
   ]);
   const pendingArticles = [...inReview.articles, ...legacyPending.articles].slice(0, 5);
-  const featured = await articlesRepo.getFeaturedArticle();
+  const featured = await articlesRepo.getFeaturedArticle().catch(() => null);
 
   // ── Stats cards ───────────────────────────────────────────────────────────
   const stats = [
