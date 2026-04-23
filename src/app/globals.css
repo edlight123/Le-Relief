@@ -132,13 +132,47 @@ html {
 }
 
 .newspaper-shell {
-  width: min(100% - 2rem, 1280px);
+  width: min(100% - 2rem, 1320px);
   margin-inline: auto;
 }
 
 .newspaper-rule {
   border-top: 1px solid var(--border-strong);
   border-bottom: 1px solid var(--border-strong);
+}
+
+/* Premium double-rule masthead divider */
+.double-rule-bottom {
+  border-bottom: 4px double var(--border-strong);
+}
+.double-rule-top {
+  border-top: 4px double var(--border-strong);
+}
+
+/* Live indicator dot */
+.live-dot {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 9999px;
+  background: var(--primary);
+  box-shadow: 0 0 0 0 color-mix(in srgb, var(--primary) 60%, transparent);
+  animation: live-pulse 1.6s ease-out infinite;
+}
+@keyframes live-pulse {
+  0%   { box-shadow: 0 0 0 0 color-mix(in srgb, var(--primary) 60%, transparent); }
+  70%  { box-shadow: 0 0 0 8px color-mix(in srgb, var(--primary) 0%, transparent); }
+  100% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--primary) 0%, transparent); }
+}
+
+/* Premium pull-quote glyph */
+.pull-quote-glyph {
+  font-family: var(--font-headline);
+  font-size: 4.5rem;
+  line-height: 0.6;
+  color: var(--primary);
+  display: inline-block;
+  vertical-align: top;
+  margin-right: 0.25rem;
 }
 
 .section-rule {
