@@ -24,7 +24,8 @@ import {
   type WriteBatch,
 } from "firebase-admin/firestore";
 import { getStorage } from "firebase-admin/storage";
-import type { Bucket } from "@google-cloud/storage";
+
+type Bucket = ReturnType<ReturnType<typeof getStorage>["bucket"]>;
 
 const WP_ORIGIN = "https://lereliefhaiti.com";
 const IMAGE_EXTENSIONS = new Set([

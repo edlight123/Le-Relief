@@ -6,10 +6,11 @@ import {
 } from "firebase-admin/app";
 import { initializeFirestore, type Firestore } from "firebase-admin/firestore";
 import { getStorage as getAdminStorage } from "firebase-admin/storage";
-import type { Bucket } from "@google-cloud/storage";
 import { writeFileSync, existsSync } from "fs";
 import { tmpdir } from "os";
 import { join } from "path";
+
+type Bucket = ReturnType<ReturnType<typeof getAdminStorage>["bucket"]>;
 
 let app: App;
 let db: Firestore;
