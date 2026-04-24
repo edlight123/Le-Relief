@@ -82,19 +82,19 @@ export default function Footer() {
             <h4 className="mb-1 font-label text-[11px] font-extrabold uppercase tracking-[1.4px] text-primary">
               {locale === "fr" ? "Institution" : "Institutional"}
             </h4>
-            <Link href="/about" className="ink-link font-body text-[15px] text-foreground">
+            <Link href={`/${locale}/about`} className="ink-link font-body text-[15px] text-foreground">
               {locale === "fr" ? "À propos" : "About"}
             </Link>
-            <Link href="/politique-editoriale" className="ink-link font-body text-[15px] text-foreground">
+            <Link href={`/${locale}/politique-editoriale`} className="ink-link font-body text-[15px] text-foreground">
               {locale === "fr" ? "Politique éditoriale" : "Editorial policy"}
             </Link>
-            <Link href="/corrections" className="ink-link font-body text-[15px] text-foreground">
+            <Link href={`/${locale}/corrections`} className="ink-link font-body text-[15px] text-foreground">
               Corrections
             </Link>
-            <Link href="/traduction-ia" className="ink-link font-body text-[15px] text-foreground">
+            <Link href={`/${locale}/traduction-ia`} className="ink-link font-body text-[15px] text-foreground">
               {locale === "fr" ? "Traduction IA" : "AI translation"}
             </Link>
-            <Link href="/privacy" className="ink-link font-body text-[15px] text-foreground">
+            <Link href={`/${locale}/privacy`} className="ink-link font-body text-[15px] text-foreground">
               {locale === "fr" ? "Confidentialité" : "Privacy"}
             </Link>
             <a
