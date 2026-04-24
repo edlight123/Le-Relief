@@ -15,6 +15,7 @@ import {
   getPublicArticleBySlug,
   getRelatedArticles,
 } from "@/lib/public-content";
+import { sanitizeExcerptText } from "@/lib/content-format";
 import * as articlesRepo from "@/lib/repositories/articles";
 
 export const revalidate = 300;
@@ -72,8 +73,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   if (!article) return {};
 
   const title = `${article.title} | Le Relief`;
+  const cleanedExcerpt = sanitizeExcerptText(article.excerpt, {
+    authorName: article.author?.name ?? null,
+  });
   const description =
-    article.excerpt || article.subtitle || "Retrouvez cet article sur Le Relief.";
+    cleanedExcerpt || article.subtitle || "Retrouvez cet article sur Le Relief.";
   const coverImage = article.imageSrc || null;
   const ogParams = new URLSearchParams({ title: article.title });
   if (article.category) ogParams.set("category", article.category.name);
@@ -146,7 +150,12 @@ export default async function ArticlePage({ params }: Props) {
     "@context": "https://schema.org",
     "@type": "NewsArticle",
     headline: article.title,
-    description: article.excerpt || article.subtitle || "",
+    description:
+      sanitizeExcerptText(article.excerpt, {
+        authorName: article.author?.name ?? null,
+      }) ||
+      article.subtitle ||
+      "",
     image: article.imageSrc ? [article.imageSrc] : undefined,
     datePublished: article.publishedAt || undefined,
     dateModified: article.updatedAt || undefined,
