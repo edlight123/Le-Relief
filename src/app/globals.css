@@ -102,10 +102,10 @@ body::before {
   pointer-events: none;
   z-index: -1;
   background:
-    linear-gradient(90deg, rgba(22, 24, 29, 0.018) 1px, transparent 1px),
-    linear-gradient(rgba(22, 24, 29, 0.012) 1px, transparent 1px);
-  background-size: 96px 96px, 96px 96px;
-  opacity: 0.5;
+    linear-gradient(90deg, rgba(22, 24, 29, 0.012) 1px, transparent 1px),
+    linear-gradient(rgba(22, 24, 29, 0.008) 1px, transparent 1px);
+  background-size: 128px 128px, 128px 128px;
+  opacity: 0.4;
 }
 
 /* Prose dark mode */
@@ -549,15 +549,56 @@ html {
 /* ─── Print ─── */
 @media print {
   body::before { display: none; }
-  nav, aside, footer, .newsletter-signup, [data-print-hide] { display: none !important; }
-  body { background: #fff; color: #000; font-size: 12pt; }
+  nav, aside, footer, .newsletter-signup, [data-print-hide], .ai-translation-notice { display: none !important; }
+  body {
+    background: #fff;
+    color: #000;
+    font-family: var(--font-body), Georgia, serif;
+    font-size: 11pt;
+    line-height: 1.55;
+  }
   .newspaper-shell { width: 100%; max-width: 100%; margin: 0; padding: 0; }
   article { max-width: 100%; }
-  .prose { max-width: 100%; }
-  a[href]::after { content: " (" attr(href) ")"; font-size: 9pt; color: #555; }
-  a[href^="#"]::after, a[href^="mailto"]::after { content: ""; }
-  h1, h2, h3 { page-break-after: avoid; }
-  img { max-width: 100%; page-break-inside: avoid; }
-  .editorial-title { font-size: 24pt; line-height: 1.1; }
-  .editorial-deck { font-size: 13pt; line-height: 1.5; color: #333; }
+  .prose { max-width: 100%; text-align: left; hyphens: none; font-size: 11pt; }
+  .prose p { margin-block: 0.7em; }
+  .prose > p:first-of-type::first-letter { font-size: 3.2em; }
+  /* Print URL annotation only on real article-body links */
+  .prose a[href^="http"]::after {
+    content: " \2192 " attr(href);
+    font-size: 8pt;
+    color: #555;
+    word-break: break-all;
+  }
+  h1, h2, h3 { page-break-after: avoid; font-family: var(--font-headline), Georgia, serif; }
+  img, figure { max-width: 100%; page-break-inside: avoid; }
+  figcaption { font-size: 9pt; color: #444; }
+  .editorial-title { font-size: 22pt; line-height: 1.05; }
+  .editorial-deck { font-size: 12pt; line-height: 1.45; color: #333; font-style: italic; }
+  .editorial-dateline { font-size: 10pt; color: #444; }
+
+  /* Print masthead inserted before article */
+  article::before {
+    content: "Le Relief \b7 Port-au-Prince \b7 \E9 dition num\E9 rique";
+    display: block;
+    font-family: var(--font-headline), Georgia, serif;
+    font-weight: 700;
+    font-size: 10pt;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    border-bottom: 1pt solid #000;
+    padding-bottom: 4pt;
+    margin-bottom: 14pt;
+  }
+  /* Print colophon at end */
+  article::after {
+    content: "\A9  Le Relief \b7 lerelief.ht \b7 Imprim\E9  depuis le site";
+    display: block;
+    font-family: var(--font-mono), monospace;
+    font-size: 8pt;
+    color: #666;
+    border-top: 1pt solid #000;
+    margin-top: 24pt;
+    padding-top: 6pt;
+    text-align: center;
+  }
 }
