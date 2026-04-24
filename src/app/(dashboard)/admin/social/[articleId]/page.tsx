@@ -66,12 +66,27 @@ export default function SocialEditorPage() {
         headers: { "content-type": "application/json" },
         body: JSON.stringify({ articleId, platforms: all ? PLATFORMS : undefined }),
       });
-      const j = await r.json();
+      const text = await r.text();
+      let j: {
+        post?: typeof post;
+        warnings?: string[];
+        error?: string;
+        detail?: string;
+      } = {};
+      try {
+        j = text ? JSON.parse(text) : {};
+      } catch {
+        j = { error: `HTTP ${r.status}`, detail: text.slice(0, 300) };
+      }
       if (!r.ok) {
-        setError(j?.error ?? "Render failed");
+        const parts = [j.error ?? `HTTP ${r.status}`];
+        if (j.detail) parts.push(j.detail);
+        if (j.warnings?.length) parts.push(j.warnings.join(" · "));
+        setError(parts.join(" — "));
+        if (j.warnings?.length) setWarnings(j.warnings);
         return;
       }
-      setPost(j.post);
+      setPost(j.post ?? null);
       setWarnings(j.warnings ?? []);
     } catch (err) {
       setError(String(err));

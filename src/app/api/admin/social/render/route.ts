@@ -37,6 +37,30 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
+  // On Vercel the inline Playwright path cannot run — fail fast with a clear
+  // remediation hint instead of a 300s timeout / opaque "Chromium not found".
+  if (process.env.VERCEL && process.env.RENDERER_MODE !== "cloud-run") {
+    return NextResponse.json(
+      {
+        error: "Renderer not configured",
+        detail:
+          "Set RENDERER_MODE=cloud-run and RENDERER_URL on this Vercel project. " +
+          "Playwright/Chromium cannot run inside a Vercel function — the renderer " +
+          "must be hosted on Cloud Run (see packages/renderer-server).",
+      },
+      { status: 503 },
+    );
+  }
+  if (process.env.RENDERER_MODE === "cloud-run" && !process.env.RENDERER_URL) {
+    return NextResponse.json(
+      {
+        error: "Renderer not configured",
+        detail: "RENDERER_MODE=cloud-run is set but RENDERER_URL is missing.",
+      },
+      { status: 503 },
+    );
+  }
+
   const body = await req.json().catch(() => ({}));
   const articleId = body?.articleId as string | undefined;
   const platforms: PlatformId[] = Array.isArray(body?.platforms) && body.platforms.length > 0
@@ -55,13 +79,32 @@ export async function POST(req: NextRequest) {
 
   try {
     const result = await renderArticleSocialAssets({ article, platforms });
+    const renderedCount = Object.keys(result.platforms).length;
+
+    // If nothing rendered, surface the underlying warnings rather than
+    // silently writing an empty post — this is what was producing 200-with-
+    // empty-platforms in production.
+    if (renderedCount === 0) {
+      console.error("[social/render] all platforms failed", { warnings: result.warnings });
+      return NextResponse.json(
+        {
+          error: "Render failed for every platform",
+          warnings: result.warnings,
+        },
+        { status: 502 },
+      );
+    }
+
+    const status: "ready" | "partially_published" =
+      renderedCount === platforms.length ? "ready" : "partially_published";
+
     const post = await socialRepo.upsert({
       articleId: article.id,
       articleSlug: article.slug,
       articleTitle: article.title,
       articleLanguage: article.language,
       brandName: result.brandName,
-      status: Object.keys(result.platforms).length === platforms.length ? "ready" : "partially_published",
+      status,
       platforms: result.platforms,
       createdBy: actorId,
     });
@@ -70,14 +113,17 @@ export async function POST(req: NextRequest) {
       type: "render.completed",
       actorId,
       actorEmail,
-      message: `Rendered ${Object.keys(result.platforms).length} / ${platforms.length} platforms`,
+      message: `Rendered ${renderedCount} / ${platforms.length} platforms`,
       details: { platforms, warnings: result.warnings },
     });
     return NextResponse.json({ post, warnings: result.warnings });
   } catch (err) {
     console.error("[social/render] failed", err);
     return NextResponse.json(
-      { error: "Render failed", detail: String(err) },
+      {
+        error: "Render failed",
+        detail: err instanceof Error ? err.message : String(err),
+      },
       { status: 500 },
     );
   }

@@ -33,9 +33,23 @@ export default function NotificationsPanel() {
   const panelRef = useRef<HTMLDivElement>(null);
 
   const load = useCallback(async () => {
-    const res = await fetch("/api/notifications").then((r) => r.json());
-    setNotifications(res.notifications || []);
-    setUnreadCount(res.unreadCount || 0);
+    // Defensive: API may return non-JSON / 5xx during cold starts or if a
+    // Firestore composite index is missing. Never let polling throw.
+    try {
+      const res = await fetch("/api/notifications", { cache: "no-store" });
+      const text = await res.text();
+      if (!text) return;
+      let data: { notifications?: Notification[]; unreadCount?: number };
+      try {
+        data = JSON.parse(text);
+      } catch {
+        return;
+      }
+      setNotifications(data.notifications ?? []);
+      setUnreadCount(data.unreadCount ?? 0);
+    } catch {
+      // network error — keep previous state, retry on next interval
+    }
   }, []);
 
   useEffect(() => {
