@@ -8,8 +8,8 @@ import { validateLocale } from "@/lib/locale";
 import {
   buildBreadcrumbJsonLd,
   buildCanonicalAlternates,
+  buildEditorialOgImage,
   buildMetaDescription,
-  buildOgImage,
   serializeJsonLd,
 } from "@/lib/seo";
 
@@ -55,7 +55,12 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       type: "website",
       locale: locale === "fr" ? "fr_FR" : "en_US",
       url: `/${locale}/categories/${slug}`,
-      images: buildOgImage("/logo.png", content.category.name),
+      images: buildEditorialOgImage({
+        title: content.category.name,
+        category: locale === "fr" ? "Rubrique" : "Section",
+        locale,
+        alt: content.category.name,
+      }),
     },
   };
 }

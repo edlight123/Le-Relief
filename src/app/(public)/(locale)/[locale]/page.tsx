@@ -11,8 +11,8 @@ import { validateLocale } from "@/lib/locale";
 import {
   buildBreadcrumbJsonLd,
   buildCanonicalAlternates,
+  buildEditorialOgImage,
   buildMetaDescription,
-  buildOgImage,
   buildOrganizationJsonLd,
   buildWebSiteJsonLd,
   serializeJsonLd,
@@ -57,7 +57,12 @@ export async function generateMetadata({
       url: `/${locale}`,
       title,
       description,
-      images: buildOgImage("/logo.png", "Le Relief"),
+      images: buildEditorialOgImage({
+        title: locale === "fr" ? "Le Relief" : "Le Relief",
+        category: locale === "fr" ? "Édition numérique" : "Digital edition",
+        locale,
+        alt: "Le Relief",
+      }),
     },
     twitter: {
       card: "summary_large_image",
