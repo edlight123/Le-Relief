@@ -295,10 +295,30 @@ async function uploadSlide(input: UploadInput): Promise<SocialAsset> {
  * Google OAuth token endpoint).
  */
 async function mintGoogleIdToken(audience: string): Promise<string | null> {
-  const clientEmail = process.env.FIREBASE_CLIENT_EMAIL;
+  let clientEmail = process.env.FIREBASE_CLIENT_EMAIL || "";
   let privateKey = process.env.FIREBASE_PRIVATE_KEY || "";
+
+  // Prefer the base64-encoded service-account JSON when present — it round-
+  // trips cleanly (no shell-escaping mishaps with the PEM newlines that
+  // FIREBASE_PRIVATE_KEY frequently suffers on Vercel).
+  const b64 = process.env.FIREBASE_SERVICE_ACCOUNT_BASE64;
+  if (b64) {
+    try {
+      const sa = JSON.parse(Buffer.from(b64, "base64").toString("utf8")) as {
+        client_email?: string;
+        private_key?: string;
+      };
+      if (sa.client_email) clientEmail = sa.client_email;
+      if (sa.private_key) privateKey = sa.private_key;
+    } catch {
+      // fall back to discrete env vars
+    }
+  }
+
   if (!clientEmail || !privateKey) return null;
   if (privateKey.includes("\\n")) privateKey = privateKey.replace(/\\n/g, "\n");
+  // PEM parsers are picky about a trailing newline after -----END … -----
+  if (!privateKey.endsWith("\n")) privateKey += "\n";
 
   const now = Math.floor(Date.now() / 1000);
   const header = { alg: "RS256", typ: "JWT" };

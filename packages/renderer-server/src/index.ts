@@ -30,12 +30,23 @@ const TOKEN = process.env.RENDERER_AUTH_TOKEN;
 
 app.use((req, res, next) => {
   if (!TOKEN || req.path === "/healthz") return next();
+  // Two valid auth modes:
+  //   1. `Authorization: Bearer <RENDERER_AUTH_TOKEN>` — legacy / dev.
+  //   2. `x-renderer-token: <RENDERER_AUTH_TOKEN>` — used when the
+  //      `Authorization` header carries a Google-signed ID token (Cloud
+  //      Run IAM has already validated it). The shared secret then acts
+  //      as defense in depth.
   const auth = req.headers.authorization ?? "";
-  if (auth !== `Bearer ${TOKEN}`) {
-    res.status(401).json({ error: "unauthorized" });
-    return;
+  const xToken = (req.headers["x-renderer-token"] as string | undefined) ?? "";
+  // If a Google ID token is present we trust Cloud Run's IAM gate and
+  // only require the shared secret in the side-channel header.
+  const isGoogleIdToken = auth.startsWith("Bearer eyJ");
+  if (isGoogleIdToken) {
+    if (xToken === TOKEN) return next();
+  } else if (auth === `Bearer ${TOKEN}`) {
+    return next();
   }
-  next();
+  res.status(401).json({ error: "unauthorized" });
 });
 
 app.get("/healthz", (_req, res) => {
