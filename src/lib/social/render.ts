@@ -165,31 +165,65 @@ async function renderViaCloudRun(input: RenderInput): Promise<RenderResult> {
     headers.authorization = `Bearer ${bearer}`;
   }
 
-  const res = await fetch(`${audience}/render`, {
-    method: "POST",
-    headers,
-    body: JSON.stringify({
-      article: input.article,
-      platforms: input.platforms,
-    }),
-  });
-  if (!res.ok) {
-    throw new Error(`Cloud Run renderer returned ${res.status}: ${await res.text()}`);
+  // Cloud Run caps a single response body at ~32 MiB. With ~14 platforms
+  // × multiple base64 PNG slides per article, the combined payload
+  // routinely blows that limit. Chunk the request: 2 platforms per call,
+  // run sequentially to keep the worker's in-process Chromium pool happy.
+  const CHUNK_SIZE = 2;
+  const chunks: PlatformId[][] = [];
+  for (let i = 0; i < input.platforms.length; i += CHUNK_SIZE) {
+    chunks.push(input.platforms.slice(i, i + CHUNK_SIZE));
   }
-  const json = (await res.json()) as {
-    brandName: string;
-    warnings: string[];
-    platforms: Record<
-      PlatformId,
-      {
-        slides: Array<{ slideNumber: number; pngBase64: string; format: "png" | "webp" | "jpeg"; width: number; height: number }>;
-        caption: string;
-        firstComment?: string | null;
-        thread?: string[] | null;
-        meta?: Record<string, unknown> | null;
-      }
-    >;
-  };
+
+  let brandName = "";
+  const warnings: string[] = [];
+  const aggregated: Record<string, {
+    slides: Array<{ slideNumber: number; pngBase64: string; format: "png" | "webp" | "jpeg"; width: number; height: number }>;
+    caption: string;
+    firstComment?: string | null;
+    thread?: string[] | null;
+    meta?: Record<string, unknown> | null;
+  }> = {};
+
+  for (const chunk of chunks) {
+    const res = await fetch(`${audience}/render`, {
+      method: "POST",
+      headers,
+      body: JSON.stringify({
+        article: input.article,
+        platforms: chunk,
+      }),
+    });
+    if (!res.ok) {
+      warnings.push(
+        `chunk ${chunk.join(",")}: Cloud Run renderer returned ${res.status}: ${(await res.text()).slice(0, 300)}`,
+      );
+      continue;
+    }
+    const json = (await res.json()) as {
+      brandName: string;
+      warnings: string[];
+      platforms: typeof aggregated;
+    };
+    if (!brandName) brandName = json.brandName;
+    if (Array.isArray(json.warnings)) warnings.push(...json.warnings);
+    Object.assign(aggregated, json.platforms);
+  }
+
+  // Synthesize the same shape downstream code expects.
+  const json = { brandName, warnings, platforms: aggregated as Record<
+    PlatformId,
+    {
+      slides: Array<{ slideNumber: number; pngBase64: string; format: "png" | "webp" | "jpeg"; width: number; height: number }>;
+      caption: string;
+      firstComment?: string | null;
+      thread?: string[] | null;
+      meta?: Record<string, unknown> | null;
+    }
+  > };
+  // Skip the now-redundant fetch/parse below — jump straight to upload.
+  const _placeholder = await Promise.resolve(json);
+  void _placeholder;
 
   const platforms: Partial<Record<PlatformId, PlatformPostState>> = {};
   for (const [platform, payload] of Object.entries(json.platforms) as [PlatformId, typeof json.platforms[PlatformId]][]) {
