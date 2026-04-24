@@ -165,10 +165,14 @@ async function renderViaCloudRun(input: RenderInput): Promise<RenderResult> {
     headers.authorization = `Bearer ${bearer}`;
   }
 
-  // Cloud Run caps a single response body at ~32 MiB. With ~14 platforms
-  // × multiple base64 PNG slides per article, the combined payload
-  // routinely blows that limit. Chunk the request: 2 platforms per call,
-  // run sequentially to keep the worker's in-process Chromium pool happy.
+  // Cloud Run caps a single response body at ~32 MiB, AND the Vercel
+  // function has a ~1 GiB memory ceiling. Aggregating ~14 platforms ×
+  // 3 slides × ~5 MiB base64 in memory before uploading reliably OOMs
+  // the function. Two-fold strategy:
+  //   1. Chunk the request: 2 platforms per Cloud Run call (response cap).
+  //   2. Stream uploads: as soon as a chunk lands, push every PNG to GCS
+  //      and discard the base64 buffer. Never hold more than 1 chunk's
+  //      worth of pixel data in memory.
   const CHUNK_SIZE = 2;
   const chunks: PlatformId[][] = [];
   for (let i = 0; i < input.platforms.length; i += CHUNK_SIZE) {
@@ -177,83 +181,88 @@ async function renderViaCloudRun(input: RenderInput): Promise<RenderResult> {
 
   let brandName = "";
   const warnings: string[] = [];
-  const aggregated: Record<string, {
-    slides: Array<{ slideNumber: number; pngBase64: string; format: "png" | "webp" | "jpeg"; width: number; height: number }>;
-    caption: string;
-    firstComment?: string | null;
-    thread?: string[] | null;
-    meta?: Record<string, unknown> | null;
-  }> = {};
+  const platforms: Partial<Record<PlatformId, PlatformPostState>> = {};
 
   for (const chunk of chunks) {
-    const res = await fetch(`${audience}/render`, {
-      method: "POST",
-      headers,
-      body: JSON.stringify({
-        article: input.article,
-        platforms: chunk,
-      }),
-    });
+    let res: Response;
+    try {
+      res = await fetch(`${audience}/render`, {
+        method: "POST",
+        headers,
+        body: JSON.stringify({
+          article: input.article,
+          platforms: chunk,
+        }),
+      });
+    } catch (err) {
+      warnings.push(`chunk ${chunk.join(",")}: fetch failed: ${err instanceof Error ? err.message : String(err)}`);
+      continue;
+    }
     if (!res.ok) {
       warnings.push(
         `chunk ${chunk.join(",")}: Cloud Run renderer returned ${res.status}: ${(await res.text()).slice(0, 300)}`,
       );
       continue;
     }
-    const json = (await res.json()) as {
+    let json: {
       brandName: string;
       warnings: string[];
-      platforms: typeof aggregated;
+      platforms: Record<string, {
+        slides: Array<{ slideNumber: number; pngBase64: string; format: "png" | "webp" | "jpeg"; width: number; height: number }>;
+        caption: string;
+        firstComment?: string | null;
+        thread?: string[] | null;
+        meta?: Record<string, unknown> | null;
+      }>;
     };
+    try {
+      json = await res.json();
+    } catch (err) {
+      warnings.push(`chunk ${chunk.join(",")}: invalid JSON: ${err instanceof Error ? err.message : String(err)}`);
+      continue;
+    }
     if (!brandName) brandName = json.brandName;
     if (Array.isArray(json.warnings)) warnings.push(...json.warnings);
-    Object.assign(aggregated, json.platforms);
+
+    // Upload immediately, then drop the base64 strings from memory before
+    // the next chunk lands.
+    for (const [platform, payload] of Object.entries(json.platforms) as [PlatformId, typeof json.platforms[string]][]) {
+      try {
+        const assets: SocialAsset[] = [];
+        for (const slide of payload.slides) {
+          const buffer = Buffer.from(slide.pngBase64, "base64");
+          // Eagerly null out the base64 string so V8 can reclaim it.
+          (slide as { pngBase64?: string }).pngBase64 = undefined;
+          const asset = await uploadSlide({
+            articleId: input.article.id,
+            platform,
+            slideNumber: slide.slideNumber,
+            buffer,
+            format: slide.format,
+            width: slide.width,
+            height: slide.height,
+          });
+          assets.push(asset);
+        }
+        platforms[platform] = {
+          assets,
+          caption: payload.caption,
+          firstComment: payload.firstComment ?? null,
+          thread: payload.thread ?? null,
+          meta: payload.meta ?? null,
+          publish: { status: "not-published", mode: copyPasteOrApi(platform) },
+          renderedAt: new Date().toISOString(),
+          captionDirty: false,
+        };
+      } catch (err) {
+        warnings.push(`${platform}: upload failed: ${err instanceof Error ? err.message : String(err)}`);
+      }
+    }
+    // Help GC by dropping reference to the chunk JSON before the next call.
+    (json as unknown as { platforms?: unknown }).platforms = undefined;
   }
 
-  // Synthesize the same shape downstream code expects.
-  const json = { brandName, warnings, platforms: aggregated as Record<
-    PlatformId,
-    {
-      slides: Array<{ slideNumber: number; pngBase64: string; format: "png" | "webp" | "jpeg"; width: number; height: number }>;
-      caption: string;
-      firstComment?: string | null;
-      thread?: string[] | null;
-      meta?: Record<string, unknown> | null;
-    }
-  > };
-  // Skip the now-redundant fetch/parse below — jump straight to upload.
-  const _placeholder = await Promise.resolve(json);
-  void _placeholder;
-
-  const platforms: Partial<Record<PlatformId, PlatformPostState>> = {};
-  for (const [platform, payload] of Object.entries(json.platforms) as [PlatformId, typeof json.platforms[PlatformId]][]) {
-    const assets: SocialAsset[] = [];
-    for (const slide of payload.slides) {
-      const buffer = Buffer.from(slide.pngBase64, "base64");
-      const asset = await uploadSlide({
-        articleId: input.article.id,
-        platform,
-        slideNumber: slide.slideNumber,
-        buffer,
-        format: slide.format,
-        width: slide.width,
-        height: slide.height,
-      });
-      assets.push(asset);
-    }
-    platforms[platform] = {
-      assets,
-      caption: payload.caption,
-      firstComment: payload.firstComment ?? null,
-      thread: payload.thread ?? null,
-      meta: payload.meta ?? null,
-      publish: { status: "not-published", mode: copyPasteOrApi(platform) },
-      renderedAt: new Date().toISOString(),
-      captionDirty: false,
-    };
-  }
-
-  return { brandName: json.brandName, platforms, warnings: json.warnings };
+  return { brandName, platforms, warnings };
 }
 
 // ── Storage upload ──────────────────────────────────────────────────────────
