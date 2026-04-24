@@ -79,8 +79,8 @@
   --color-border-subtle: var(--border-subtle);
   --color-border-strong: var(--border-strong);
   --color-muted: var(--muted);
-  --font-headline: var(--font-newsreader), Georgia, serif;
-  --font-body: var(--font-newsreader), Georgia, serif;
+  --font-headline: var(--font-spectral), Georgia, "Times New Roman", serif;
+  --font-body: var(--font-source-serif), Georgia, "Times New Roman", serif;
   --font-label: var(--font-libre-franklin), Helvetica, sans-serif;
   --font-mono: var(--font-ibm-plex-mono), "Courier New", monospace;
 }
@@ -89,7 +89,10 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-body);
+  font-feature-settings: "kern", "liga", "onum";
+  font-optical-sizing: auto;
   text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
 }
 
 body::before {
@@ -208,14 +211,88 @@ html {
 .editorial-title {
   font-family: var(--font-headline);
   font-weight: 800;
-  line-height: 0.96;
-  letter-spacing: 0;
+  line-height: 0.98;
+  letter-spacing: -0.015em;
+  text-wrap: balance;
+  font-feature-settings: "lnum", "kern", "liga", "ss01";
 }
 
 .editorial-deck {
   color: var(--muted);
-  line-height: 1.625;
+  line-height: 1.5;
+  font-style: italic;
+  font-family: var(--font-body);
+  text-wrap: pretty;
 }
+
+/* ── Editorial article body ────────────────────────────────── */
+.prose {
+  --tw-prose-body: var(--foreground);
+  --tw-prose-headings: var(--foreground);
+  --tw-prose-quote-borders: var(--primary);
+  font-family: var(--font-body);
+  font-size: 1.125rem;
+  line-height: 1.75;
+  font-feature-settings: "kern", "liga", "onum";
+  hyphens: auto;
+  -webkit-hyphens: auto;
+  hyphenate-limit-chars: 8 4 4;
+}
+@media (min-width: 768px) {
+  .prose { text-align: justify; }
+}
+.prose p { margin-block: 1.25em; }
+.prose h2 {
+  font-family: var(--font-headline);
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  line-height: 1.15;
+  margin-top: 2.4em;
+  margin-bottom: 0.6em;
+}
+.prose h3 {
+  font-family: var(--font-headline);
+  font-weight: 700;
+  margin-top: 1.8em;
+  margin-bottom: 0.5em;
+}
+.prose blockquote {
+  font-family: var(--font-headline);
+  font-style: italic;
+  font-size: 1.4em;
+  line-height: 1.4;
+  border-left-width: 3px;
+  margin-block: 2em;
+  padding-left: 1.25em;
+  color: var(--foreground);
+  quotes: none;
+}
+.prose blockquote p::before,
+.prose blockquote p::after { content: none; }
+.prose hr {
+  border: 0;
+  text-align: center;
+  margin: 3em auto;
+  width: 100%;
+  color: var(--muted);
+  letter-spacing: 0.6em;
+  font-family: var(--font-headline);
+  font-size: 1.2rem;
+}
+.prose hr::before { content: "\2217   \2217   \2217"; }
+
+/* Drop cap on the first paragraph of an article body */
+.prose > p:first-of-type::first-letter {
+  font-family: var(--font-headline);
+  font-weight: 800;
+  float: left;
+  font-size: 4.4em;
+  line-height: 0.85;
+  padding: 0.05em 0.12em 0 0;
+  margin-top: 0.06em;
+  color: var(--foreground);
+}
+.dark .prose > p:first-of-type::first-letter { color: var(--foreground); }
 
 .ink-link {
   text-decoration: underline;

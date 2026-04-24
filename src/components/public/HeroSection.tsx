@@ -1,7 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
 import { type Locale } from "@/lib/i18n";
-import MetadataRow from "@/components/public/MetadataRow";
 import {
   formatHeadlineTypography,
   sanitizeExcerptText,
@@ -74,16 +73,28 @@ export default function HeroSection({ article, locale }: HeroSectionProps) {
       }).format(new Date(article.publishedAt))
     : null;
 
-  const meta = (
-    <MetadataRow
-      author={article.author?.name ? { name: article.author.name } : null}
-      date={date}
-      readingTime={article.readingTime}
-      language={article.language}
-      bordered
-      className="mt-5"
-    />
-  );
+  const bylineParts = [
+    article.author?.name
+      ? `${resolvedLocale === "fr" ? "Par" : "By"} ${article.author.name}`
+      : null,
+    "Port-au-Prince",
+    date,
+  ].filter(Boolean) as string[];
+
+  const editorialDateline = bylineParts.length ? (
+    <p className="mt-5 border-t border-border-subtle pt-3 font-body text-sm italic text-muted">
+      {bylineParts.join(" · ")}
+      {article.readingTime ? (
+        <span className="ml-2 not-italic font-label text-[11px] font-bold uppercase tracking-[1px] text-muted">
+          · {article.readingTime} min
+        </span>
+      ) : null}
+    </p>
+  ) : null;
+
+  const meta = editorialDateline;
+
+  const featuredLabel = resolvedLocale === "fr" ? "À la une" : "Top story";
 
   /* No cover image — full-width editorial layout */
   if (!imageSrc) {
@@ -92,7 +103,7 @@ export default function HeroSection({ article, locale }: HeroSectionProps) {
         <Link href={`/${resolvedLocale}/articles/${article.slug}`} className="group block">
           <div className="border-t-2 border-border-strong pt-5">
             <div className="flex items-center justify-between border-b border-border-subtle pb-3">
-              <p className="font-label text-[11px] font-bold uppercase text-muted">À la une</p>
+              <p className="font-label text-[11px] font-bold uppercase text-muted">{featuredLabel}</p>
               {article.category && (
                 <p className="page-kicker" style={{ letterSpacing: "1.2px" }}>{article.category.name}</p>
               )}
@@ -141,7 +152,7 @@ export default function HeroSection({ article, locale }: HeroSectionProps) {
                     </p>
                   )}
                 </div>
-                <h1 className="editorial-title text-3xl text-foreground transition-colors group-hover:text-primary sm:text-4xl lg:text-6xl tracking-tight lg:tracking-[-0.5px]">
+                <h1 className="editorial-title text-3xl text-foreground transition-colors group-hover:text-primary sm:text-4xl lg:text-6xl xl:text-7xl tracking-tight lg:tracking-[-0.6px]">
                   {displayTitle}
                 </h1>
                 {showExcerpt && (
@@ -161,13 +172,10 @@ export default function HeroSection({ article, locale }: HeroSectionProps) {
                   alt={displayTitle}
                   fill
                   sizes="(min-width: 1024px) 58vw, 100vw"
-                  className="object-cover transition-transform duration-500 group-hover:scale-[1.02]"
+                  className="object-cover"
                   priority
                 />
               </div>
-              <p className="mt-2 border-b border-border-subtle pb-3 font-label text-[11px] uppercase text-muted">
-                À la une
-              </p>
             </div>
 
           </div>

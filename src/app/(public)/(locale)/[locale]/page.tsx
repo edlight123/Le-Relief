@@ -3,7 +3,6 @@ import HeroSection from "@/components/public/HeroSection";
 import ArticleCard from "@/components/public/ArticleCard";
 import LatestArticlesFeed from "@/components/public/LatestArticlesFeed";
 import CategoryGrid from "@/components/public/CategoryGrid";
-import SectionRibbon from "@/components/ui/SectionRibbon";
 import SectionHeader from "@/components/public/SectionHeader";
 import MostReadList from "@/components/public/MostReadList";
 import NewsletterBlock from "@/components/public/NewsletterBlock";
@@ -115,11 +114,8 @@ export default async function LocalizedHomePage({
       <div className="newspaper-shell">
         {secondary.length > 0 ? (
           <section className="mb-14 sm:mb-20">
-            <div className="mb-4">
-              <SectionRibbon label={locale === "fr" ? "À la une" : "Top stories"} variant="dark" />
-            </div>
             <SectionHeader
-              kicker={locale === "fr" ? "À suivre" : "Coverage"}
+              kicker={locale === "fr" ? "À la une" : "Top stories"}
               title={locale === "fr" ? "Les autres titres" : "More headlines"}
             />
             <div className="grid gap-0 md:grid-cols-3">
@@ -156,13 +152,8 @@ export default async function LocalizedHomePage({
 
             {editorial.length > 0 ? (
               <section className="mb-14 sm:mb-20">
-                <div className="mb-4">
-                  <SectionRibbon
-                    label={locale === "fr" ? "Contexte & analyse" : "Context & analysis"}
-                  />
-                </div>
                 <SectionHeader
-                  kicker={locale === "fr" ? "Contexte" : "Perspective"}
+                  kicker={locale === "fr" ? "Contexte & analyse" : "Context & analysis"}
                   title={
                     locale === "fr"
                       ? "Analyses, opinions et dossiers"

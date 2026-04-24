@@ -2,24 +2,30 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import { Menu, X, Search, User } from "lucide-react";
 import { siteConfig } from "@/config/site.config";
 import ThemeToggle from "@/components/public/ThemeToggle";
 import LanguageToggle from "@/components/public/LanguageToggle";
 
-const editionDate = new Intl.DateTimeFormat("fr-FR", {
-  weekday: "long",
-  day: "numeric",
-  month: "long",
-  year: "numeric",
-}).format(new Date());
+function formatEditionDate(locale: "fr" | "en") {
+  return new Intl.DateTimeFormat(locale === "fr" ? "fr-FR" : "en-US", {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  }).format(new Date());
+}
 
 export default function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const pathname = usePathname();
   const locale = pathname === "/en" || pathname.startsWith("/en/") ? "en" : "fr";
+  const [editionDate, setEditionDate] = useState("");
+  useEffect(() => {
+    setEditionDate(formatEditionDate(locale));
+  }, [locale]);
   const withLocale = (href: string) => {
     if (href === "/") return `/${locale}`;
     return `/${locale}${href}`;
@@ -40,10 +46,14 @@ export default function Navbar() {
     <header className="sticky top-0 z-50 border-b border-border-strong bg-background/95 backdrop-blur-sm">
       <div className="newspaper-shell">
         <div className="hidden items-center justify-between border-b border-border-subtle py-2 font-label text-[11px] font-semibold uppercase text-muted md:flex">
-          <span>{editionDate}</span>
-          <span>Autorité calme, contexte et précision</span>
+          <span className="capitalize">{editionDate}{editionDate ? " \u00B7 Port-au-Prince" : ""}</span>
+          <span className="tracking-[1.5px]">
+            {locale === "fr"
+              ? "\u00C9dition num\u00E9rique \u00B7 Autorit\u00E9 calme, contexte et pr\u00E9cision"
+              : "Digital edition \u00B7 Calm authority, context and precision"}
+          </span>
           <Link href={withLocale("/login")} className="ink-link text-foreground">
-            {locale === "fr" ? "Espace rédaction" : "Newsroom login"}
+            {locale === "fr" ? "Espace r\u00E9daction" : "Newsroom login"}
           </Link>
         </div>
 
@@ -67,10 +77,13 @@ export default function Navbar() {
               width={40}
               height={40}
               sizes="40px"
-              className="h-8 w-8 rounded-sm md:h-10 md:w-10"
+              className="h-9 w-9 rounded-sm md:h-11 md:w-11"
               priority
             />
-            <span className="font-headline text-3xl font-extrabold leading-none text-foreground sm:text-4xl md:text-6xl">
+            <span
+              className="font-headline text-4xl font-extrabold leading-none text-foreground sm:text-5xl md:text-6xl"
+              style={{ letterSpacing: "-0.02em" }}
+            >
               {siteConfig.name}
             </span>
           </Link>
@@ -95,7 +108,7 @@ export default function Navbar() {
           </div>
         </div>
 
-        <nav className="hidden border-t border-border-strong py-2 md:block">
+        <nav className="hidden border-y border-border-strong py-2 md:block" style={{ boxShadow: "inset 0 1px 0 var(--background), inset 0 -1px 0 var(--background)" }}>
           <div className="flex items-center justify-center gap-6 lg:gap-10">
             {navItems.map((item) => {
               const href = withLocale(item.href);
@@ -104,13 +117,19 @@ export default function Navbar() {
                 <Link
                   key={item.href}
                   href={href}
-                  className={`font-label text-xs font-bold uppercase transition-colors ${
+                  className={`relative font-label text-xs font-bold uppercase tracking-[1px] transition-colors ${
                     isActive
                       ? "text-primary"
                       : "text-foreground hover:text-primary"
                   }`}
                 >
                   {item.label}
+                  {isActive ? (
+                    <span
+                      className="absolute -bottom-[10px] left-0 right-0 mx-auto h-[2px] w-6 bg-primary"
+                      aria-hidden
+                    />
+                  ) : null}
                 </Link>
               );
             })}
