@@ -299,9 +299,14 @@ async function assertChromiumAvailable(): Promise<void> {
     }
   }
   // Last resort: let playwright-core resolve its own bundled binary.
+  // playwright-core is a transitive dep (via @le-relief/renderer) and is
+  // not declared in the root package.json — type-erase the dynamic import
+  // so the type checker doesn't try to resolve its declarations.
   try {
-    const { chromium } = await import("playwright-core");
-    const exe = chromium.executablePath();
+    const mod: { chromium: { executablePath(): string } } = await import(
+      /* webpackIgnore: true */ "playwright-core" as string
+    );
+    const exe = mod.chromium.executablePath();
     if (exe) {
       try {
         await fs.access(exe);
