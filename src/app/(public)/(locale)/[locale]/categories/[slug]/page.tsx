@@ -92,42 +92,34 @@ export default async function LocalizedCategoryPage({ params }: Props) {
           { label: category.name },
         ]}
       />
-      <header className="mb-10 border-t-2 border-border-strong pt-5">
-        <p className="page-kicker mb-3">{locale === "fr" ? "Rubrique" : "Category"}</p>
-        <h1 className="editorial-title text-5xl text-foreground sm:text-7xl">
+      <header className="mb-10 border-y-2 border-border-strong py-8 text-center sm:py-12">
+        <p className="page-kicker mb-4" style={{ letterSpacing: "1.4px" }}>
+          {locale === "fr" ? "Rubrique" : "Section"}
+        </p>
+        <h1 className="editorial-title mx-auto max-w-4xl text-5xl text-foreground sm:text-7xl lg:text-8xl">
           {category.name}
         </h1>
-        <p className="mt-4 max-w-3xl font-body text-base leading-relaxed text-muted sm:text-lg">
+        <p className="editorial-deck mx-auto mt-5 max-w-2xl font-body text-lg sm:text-xl">
           {category.description ||
             (locale === "fr"
-              ? `Retrouvez les dernières actualités, analyses et reportages de la rubrique ${category.name}.`
-              : `Browse the latest news, analysis and reporting from ${category.name}.`)}
+              ? `Actualités, analyses et reportages de la rédaction du Relief sur ${category.name.toLowerCase()}.`
+              : `News, analysis and reporting from the Le Relief newsroom on ${category.name.toLowerCase()}.`)}
         </p>
       </header>
 
       {featured ? (
-        <section className="mb-12">
-          <div className="mb-5 border-t-2 border-border-strong pt-3">
-            <p className="section-kicker mb-2">
-              {locale === "fr" ? "Article vedette" : "Featured"}
-            </p>
-            <h2 className="font-headline text-3xl font-extrabold leading-none text-foreground">
-              {locale === "fr" ? "À lire dans cette rubrique" : "Read in this section"}
-            </h2>
+        <section className="mb-14">
+          <div className="mb-5 flex items-baseline justify-between border-t border-border-strong pt-3">
+            <p className="section-kicker">{locale === "fr" ? "À la une de la rubrique" : "Top of the section"}</p>
           </div>
-          <div className="max-w-4xl">
-            <ArticleCard article={featured} variant="list" locale={locale} />
-          </div>
+          <ArticleCard article={featured} variant="list" locale={locale} />
         </section>
       ) : null}
 
       {articles.length > 0 ? (
         <section>
-          <div className="mb-5 border-t border-border-strong pt-3">
-            <p className="section-kicker mb-2">{locale === "fr" ? "Archives" : "Archive"}</p>
-            <h2 className="font-headline text-3xl font-extrabold leading-none text-foreground">
-              {locale === "fr" ? "Tous les articles" : "All articles"}
-            </h2>
+          <div className="mb-5 flex items-baseline justify-between border-t border-border-strong pt-3">
+            <p className="section-kicker">{locale === "fr" ? "Tous les articles" : "All articles"}</p>
           </div>
           <LatestArticlesFeed
             initialArticles={articles}
