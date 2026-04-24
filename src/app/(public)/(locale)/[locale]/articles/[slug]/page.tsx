@@ -266,17 +266,17 @@ export default async function LocalizedArticlePage({ params }: Props) {
             ) : null}
           </div>
 
-          <h1 className="editorial-title mt-4 max-w-5xl text-4xl text-foreground sm:text-5xl lg:text-6xl">
+          <h1 className="editorial-title mt-3 max-w-5xl text-4xl text-foreground sm:text-5xl lg:text-6xl">
             {displayTitle}
           </h1>
 
           {shouldShowDeck ? (
-            <p className="editorial-deck mt-5 max-w-3xl font-body text-2xl">
+            <p className="editorial-deck mt-4 max-w-3xl font-body text-2xl">
               {deckText}
             </p>
           ) : null}
 
-          <p className="editorial-dateline mt-6 border-y border-border-subtle py-3">
+          <p className="editorial-dateline mt-5 border-y border-border-subtle py-3">
             {article.author ? (
               <>
                 {locale === "fr" ? "Par " : "By "}
@@ -341,7 +341,7 @@ export default async function LocalizedArticlePage({ params }: Props) {
         </header>
 
         {article.imageSrc ? (
-          <figure className="mt-6">
+          <figure className="mt-5">
             <div className="relative aspect-[16/9] overflow-hidden bg-surface-elevated">
               <Image
                 src={article.imageSrc}
@@ -366,7 +366,7 @@ export default async function LocalizedArticlePage({ params }: Props) {
           </figure>
         ) : null}
 
-        <div className="mt-8 grid gap-8 lg:grid-cols-[minmax(0,760px)_1fr] lg:gap-12">
+        <div className="mt-8 grid gap-8 lg:grid-cols-[minmax(0,1fr)_300px] lg:gap-10">
           <div className="min-w-0">
             {/* Editorial enrichments — render only when article data carries them. */}
             <ArticleKeyPoints
@@ -436,7 +436,7 @@ export default async function LocalizedArticlePage({ params }: Props) {
             <RelatedDossier articles={related} locale={locale as "fr" | "en"} />
           </div>
 
-          <aside className="space-y-8 border-t-2 border-border-strong pt-4 lg:border-l lg:border-t-0 lg:pl-8" data-print-hide>
+          <aside className="space-y-8 border-t-2 border-border-strong pt-4 lg:sticky lg:top-28 lg:h-fit lg:border-l lg:border-t-0 lg:pl-8" data-print-hide>
             {article.toc.length >= 3 ? <TableOfContents toc={article.toc} locale={locale} /> : null}
 
             <section>
