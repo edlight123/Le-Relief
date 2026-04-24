@@ -90,7 +90,6 @@ export default async function LocalizedHomePage({
     editorial,
     mostRead,
     categories,
-    englishSelection,
     showNewsletter,
   } = await getHomepageContent(locale);
 
@@ -118,12 +117,20 @@ export default async function LocalizedHomePage({
 
       <div className="newspaper-shell">
         {secondary.length > 0 ? (
-          <section className="mb-10 sm:mb-14">
+          <section className="mb-8 sm:mb-10">
             <SectionHeader
               kicker={locale === "fr" ? "À la une" : "Top stories"}
               title={locale === "fr" ? "Les autres titres" : "More headlines"}
             />
-            <div className="grid gap-0 md:grid-cols-3">
+            <div
+              className={`grid gap-0 ${
+                secondary.length >= 3
+                  ? "md:grid-cols-3"
+                  : secondary.length === 2
+                  ? "md:grid-cols-2"
+                  : "md:grid-cols-1"
+              }`}
+            >
               {secondary.map((article, index) => (
                 <div
                   key={article.id}
@@ -142,10 +149,10 @@ export default async function LocalizedHomePage({
           </section>
         ) : null}
 
-        <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_300px] lg:gap-10">
+        <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_280px] lg:gap-10">
           <div className="min-w-0">
             {latest.length > 0 ? (
-              <section className="mb-10 sm:mb-14">
+              <section className="mb-8 sm:mb-10">
                 <SectionHeader
                   kicker={locale === "fr" ? "Dernières nouvelles" : "Latest"}
                   title={locale === "fr" ? "Le fil de la rédaction" : "Latest from the newsroom"}
@@ -156,7 +163,7 @@ export default async function LocalizedHomePage({
             ) : null}
 
             {editorial.length > 0 ? (
-              <section className="mb-10 sm:mb-14">
+              <section className="mb-8 sm:mb-10">
                 <SectionHeader
                   kicker={locale === "fr" ? "Contexte & analyse" : "Context & analysis"}
                   title={
@@ -174,7 +181,7 @@ export default async function LocalizedHomePage({
             ) : null}
           </div>
 
-          <aside className="space-y-8 lg:sticky lg:top-40 lg:h-fit">
+          <aside className="space-y-8">
             {mostRead.length > 0 ? (
               <div className="border-t-2 border-border-strong pt-4">
                 <MostReadList
@@ -183,18 +190,6 @@ export default async function LocalizedHomePage({
                   kicker={locale === "fr" ? "Lecture" : "Read"}
                 />
               </div>
-            ) : null}
-
-            {categories.length > 0 ? (
-              <section className="border-t-2 border-border-strong pt-4">
-                <div className="mb-5">
-                  <p className="section-kicker mb-2">{locale === "fr" ? "Rubriques" : "Sections"}</p>
-                  <h3 className="font-headline text-2xl font-extrabold text-foreground">
-                    {locale === "fr" ? "Parcourir" : "Browse"}
-                  </h3>
-                </div>
-                <CategoryGrid categories={categories} locale={locale} />
-              </section>
             ) : null}
 
             {showNewsletter ? (
@@ -209,24 +204,13 @@ export default async function LocalizedHomePage({
       </div>
 
       {categories.length > 0 ? (
-        <section className="newspaper-shell mt-10 pb-10 sm:mt-14 sm:pb-14">
+        <section className="newspaper-shell mt-8 pb-10 sm:mt-10 sm:pb-12">
           <SectionHeader
             kicker={locale === "fr" ? "Taxonomie" : "Taxonomy"}
             title={locale === "fr" ? "Rubriques principales" : "Main sections"}
             href="/categories"
           />
           <CategoryGrid variant="grid" categories={categories} locale={locale} />
-        </section>
-      ) : null}
-
-      {locale === "fr" && englishSelection.length > 0 ? (
-        <section className="newspaper-shell pb-10 sm:pb-14">
-          <SectionHeader kicker="English" title="Selected English coverage" href="/en" />
-          <div className="grid gap-7 md:grid-cols-2 lg:grid-cols-4">
-            {englishSelection.map((article) => (
-              <ArticleCard key={article.id} article={article} locale="en" />
-            ))}
-          </div>
         </section>
       ) : null}
     </>
