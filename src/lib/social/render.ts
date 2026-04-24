@@ -144,14 +144,30 @@ async function renderInline(input: RenderInput): Promise<RenderResult> {
 async function renderViaCloudRun(input: RenderInput): Promise<RenderResult> {
   const url = process.env.RENDERER_URL;
   if (!url) throw new Error("RENDERER_URL not configured");
-  const token = process.env.RENDERER_AUTH_TOKEN;
+  const bearer = process.env.RENDERER_AUTH_TOKEN;
+  const audience = url.replace(/\/$/, "");
 
-  const res = await fetch(`${url.replace(/\/$/, "")}/render`, {
+  // For private Cloud Run services we must present a Google-signed ID
+  // token whose `aud` is the service URL. We mint it from the same
+  // service-account credentials Firebase Admin already uses on Vercel.
+  const idToken = await mintGoogleIdToken(audience).catch((err) => {
+    console.warn("[renderer] could not mint Google ID token:", err);
+    return null;
+  });
+
+  const headers: Record<string, string> = {
+    "content-type": "application/json",
+  };
+  if (idToken) {
+    headers.authorization = `Bearer ${idToken}`;
+    if (bearer) headers["x-renderer-token"] = bearer;
+  } else if (bearer) {
+    headers.authorization = `Bearer ${bearer}`;
+  }
+
+  const res = await fetch(`${audience}/render`, {
     method: "POST",
-    headers: {
-      "content-type": "application/json",
-      ...(token ? { authorization: `Bearer ${token}` } : {}),
-    },
+    headers,
     body: JSON.stringify({
       article: input.article,
       platforms: input.platforms,
@@ -267,6 +283,59 @@ async function uploadSlide(input: UploadInput): Promise<SocialAsset> {
 }
 
 // ── Helpers ─────────────────────────────────────────────────────────────────
+
+/**
+ * Mint a Google-signed ID token with `aud=audience` so we can invoke a
+ * private Cloud Run service. Uses the same SA credentials Firebase Admin
+ * already consumes on Vercel (FIREBASE_CLIENT_EMAIL + FIREBASE_PRIVATE_KEY)
+ * or Application Default Credentials when present.
+ *
+ * Pure JWT-bearer flow — no extra dependency required beyond what
+ * firebase-admin already pulls in (we sign locally and exchange at the
+ * Google OAuth token endpoint).
+ */
+async function mintGoogleIdToken(audience: string): Promise<string | null> {
+  const clientEmail = process.env.FIREBASE_CLIENT_EMAIL;
+  let privateKey = process.env.FIREBASE_PRIVATE_KEY || "";
+  if (!clientEmail || !privateKey) return null;
+  if (privateKey.includes("\\n")) privateKey = privateKey.replace(/\\n/g, "\n");
+
+  const now = Math.floor(Date.now() / 1000);
+  const header = { alg: "RS256", typ: "JWT" };
+  const claims = {
+    iss: clientEmail,
+    sub: clientEmail,
+    aud: "https://oauth2.googleapis.com/token",
+    iat: now,
+    exp: now + 3600,
+    target_audience: audience,
+  };
+  const b64u = (b: Buffer | string) =>
+    Buffer.from(b)
+      .toString("base64")
+      .replace(/=+$/, "")
+      .replace(/\+/g, "-")
+      .replace(/\//g, "_");
+  const signingInput = `${b64u(JSON.stringify(header))}.${b64u(JSON.stringify(claims))}`;
+  const signer = crypto.createSign("RSA-SHA256");
+  signer.update(signingInput);
+  const sig = signer.sign(privateKey);
+  const assertion = `${signingInput}.${b64u(sig)}`;
+
+  const res = await fetch("https://oauth2.googleapis.com/token", {
+    method: "POST",
+    headers: { "content-type": "application/x-www-form-urlencoded" },
+    body: new URLSearchParams({
+      grant_type: "urn:ietf:params:oauth:grant-type:jwt-bearer",
+      assertion,
+    }),
+  });
+  if (!res.ok) {
+    throw new Error(`token exchange ${res.status}: ${await res.text()}`);
+  }
+  const json = (await res.json()) as { id_token?: string };
+  return json.id_token ?? null;
+}
 
 /** Which platforms publish via API vs copy-paste in V1. */
 export function copyPasteOrApi(platform: PlatformId): "api" | "copy-paste" {

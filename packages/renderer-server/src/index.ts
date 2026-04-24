@@ -75,7 +75,7 @@ app.post("/render", async (req, res) => {
     if (body.article.language === "en") {
       setBrand({
         labels: { sourceCredit: "Source", readMore: "Read on lereliefhaiti.com" },
-      } as Parameters<typeof setBrand>[0]);
+      } as unknown as Parameters<typeof setBrand>[0]);
     }
     const built = buildPost({ intake, rawSlides, caption });
     const warnings = [...built.overflowWarnings];
@@ -140,7 +140,7 @@ function articleToContent(a: RenderRequest["article"]) {
       sourceSummary: stripHtml(a.excerpt) || stripHtml(a.body).slice(0, 400),
       category: a.category?.slug || "news",
       preferredLanguage: a.language,
-      urgencyLevel: a.isBreaking ? "breaking" : "normal",
+      urgencyLevel: (a.isBreaking ? "breaking" : "normal") as "breaking" | "normal",
       sourceNote: sourceLine,
     },
     rawSlides: [

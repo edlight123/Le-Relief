@@ -13,7 +13,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
   && rm -rf /var/lib/apt/lists/*
 
 ENV PLAYWRIGHT_CHROMIUM_PATH=/usr/bin/chromium
-ENV NODE_ENV=production
 ENV PORT=8080
 
 WORKDIR /app
@@ -38,6 +37,10 @@ COPY packages/renderer-server/src ./packages/renderer-server/src
 RUN pnpm --filter @le-relief/types build \
  && pnpm --filter @le-relief/renderer build \
  && pnpm --filter @le-relief/renderer-server build
+
+# Strip dev dependencies after build to keep image lean.
+ENV NODE_ENV=production
+RUN pnpm install --prod --frozen-lockfile=false --filter "@le-relief/renderer-server..." || true
 
 EXPOSE 8080
 WORKDIR /app/packages/renderer-server
