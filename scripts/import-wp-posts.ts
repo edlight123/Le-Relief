@@ -246,12 +246,30 @@ async function main() {
   // Build a media cache to avoid fetching one-by-one
   const mediaCache = new Map<number, string>();
 
+  // Stop early once we encounter a full page of already-imported slugs
+  // (WP API returns posts newest-first, so older pages are guaranteed to
+  // be already in Firestore once we cross that boundary).
+  const STOP_ON_FULL_KNOWN_PAGE = process.env.IMPORT_FULL !== "1";
+
   for (let page = 1; page <= totalPages; page++) {
     console.log(`📄 Page ${page}/${totalPages}...`);
 
     const posts = await wpFetch<WPPost[]>(
       `/posts?per_page=100&page=${page}&_fields=id,date,slug,title,content,excerpt,featured_media,categories,author`
     );
+
+    if (
+      STOP_ON_FULL_KNOWN_PAGE &&
+      posts.length > 0 &&
+      posts.every((p) => existingSlugs.has(p.slug))
+    ) {
+      console.log(
+        `   ⏭  All ${posts.length} posts on this page already imported — stopping early. ` +
+          `Set IMPORT_FULL=1 to force a full backfill.`
+      );
+      skipped += posts.length;
+      break;
+    }
 
     // Collect media IDs to batch-fetch
     const mediaIds = posts
