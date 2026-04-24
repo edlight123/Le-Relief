@@ -60,8 +60,9 @@ export default function ArticleCard({
                 src={imageSrc}
                 alt={displayTitle}
                 fill
-                sizes="80px"
-                className="object-cover grayscale transition duration-300 group-hover:grayscale-0"
+                sizes="160px"
+                quality={90}
+                className="object-cover transition-opacity duration-300 group-hover:opacity-90"
               />
             </div>
           )}
@@ -90,8 +91,9 @@ export default function ArticleCard({
                 src={imageSrc}
                 alt={displayTitle}
                 fill
-                sizes="(min-width: 640px) 192px, 100vw"
-                className="object-cover grayscale transition duration-300 group-hover:grayscale-0"
+                sizes="(min-width: 640px) 384px, 100vw"
+                quality={90}
+                className="object-cover transition-opacity duration-300 group-hover:opacity-90"
               />
             </div>
           )}
@@ -161,33 +163,23 @@ export default function ArticleCard({
   return (
     <Link href={`/${resolvedLocale}/articles/${article.slug}`} className="group block h-full">
       <div className="article-card flex h-full flex-col border-b border-border-subtle pb-6">
-        <div className="relative mb-4 aspect-[16/10] overflow-hidden bg-surface-elevated">
-          {imageSrc ? (
-            <>
-              <Image
-                src={imageSrc}
-                alt={displayTitle}
-                fill
-                sizes="(min-width: 1024px) 33vw, (min-width: 768px) 50vw, 100vw"
-                className="object-cover grayscale transition duration-300 group-hover:grayscale-0"
-              />
-              {article.category && (
-                <span className="absolute left-0 top-0 bg-foreground px-3 py-1 font-label text-[11px] font-bold uppercase text-background tracking-[1px]">
-                  {article.category.name}
-                </span>
-              )}
-            </>
-          ) : (
-            <div className="flex h-full w-full items-center justify-center border border-border-subtle bg-surface-newsprint">
-              {article.category && (
-                <span className="absolute left-0 top-0 bg-foreground px-3 py-1 font-label text-[11px] font-bold uppercase text-background tracking-[1px]">
-                  {article.category.name}
-                </span>
-              )}
-              <span className="font-label text-xs font-bold uppercase text-muted">Le Relief</span>
-            </div>
-          )}
-        </div>
+        {article.category && (
+          <p className="page-kicker mb-3" style={{ letterSpacing: "1.2px" }}>
+            {article.category.name}
+          </p>
+        )}
+        {imageSrc ? (
+          <div className="relative mb-4 aspect-[16/10] overflow-hidden bg-surface-elevated">
+            <Image
+              src={imageSrc}
+              alt={displayTitle}
+              fill
+              sizes="(min-width: 1024px) 480px, (min-width: 768px) 50vw, 100vw"
+              quality={90}
+              className="object-cover transition-opacity duration-300 group-hover:opacity-90"
+            />
+          </div>
+        ) : null}
         <h3 className="font-headline text-2xl font-bold leading-tight text-foreground transition-colors group-hover:text-primary">
           {displayTitle}
         </h3>

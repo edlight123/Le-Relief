@@ -160,6 +160,34 @@ export function buildOgImage(
   ];
 }
 
+/**
+ * Build a fully editorial Open Graph card URL via /api/og.
+ * Preferred for articles — ignores the cover image and uses the
+ * Spectral-on-cream branded card with kicker, dateline and masthead.
+ */
+export function buildEditorialOgImage(input: {
+  title: string;
+  category?: string | null;
+  author?: string | null;
+  date?: string | null;
+  locale: SeoLocale;
+  alt?: string;
+}) {
+  const params = new URLSearchParams({ title: input.title, locale: input.locale });
+  if (input.category) params.set("category", input.category);
+  if (input.author) params.set("author", input.author);
+  if (input.date) params.set("date", input.date);
+
+  return [
+    {
+      url: buildAbsoluteUrl(`/api/og?${params.toString()}`),
+      width: 1200,
+      height: 630,
+      alt: input.alt || input.title,
+    },
+  ];
+}
+
 export function buildArticleImageAlt({
   title,
   categoryName,

@@ -70,16 +70,16 @@ export default async function LocalizedAuthorPage({ params }: Props) {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: serializeJsonLd(breadcrumbJsonLd) }}
       />
-      <div className="newspaper-shell py-10 sm:py-14">
-      <header className="mb-10 grid gap-6 border-t-2 border-border-strong pt-5 sm:grid-cols-[120px_1fr]">
-        <div className="flex h-[120px] w-[120px] items-center justify-center border border-border-subtle bg-surface-newsprint font-headline text-5xl font-extrabold text-foreground">
+      <div className="newspaper-shell py-6 sm:py-10">
+      <header className="mb-8 border-y-2 border-border-strong py-8 text-center sm:py-12">
+        <div className="mx-auto mb-5 flex h-[110px] w-[110px] items-center justify-center overflow-hidden rounded-full border border-border-subtle bg-surface-newsprint font-headline text-4xl font-extrabold text-foreground">
           {author.image ? (
             <Image
               src={author.image}
               alt={author.name}
-              width={120}
-              height={120}
-                            sizes="120px"
+              width={110}
+              height={110}
+              sizes="110px"
               className="h-full w-full object-cover"
               priority
             />
@@ -87,30 +87,38 @@ export default async function LocalizedAuthorPage({ params }: Props) {
             author.name.slice(0, 1)
           )}
         </div>
-        <div>
-          <p className="page-kicker mb-3">{locale === "fr" ? "Auteur" : "Author"}</p>
-          <h1 className="editorial-title text-5xl text-foreground sm:text-7xl">
-            {author.name}
-          </h1>
-          <p className="mt-3 font-label text-xs font-bold uppercase text-muted">
+        <p className="page-kicker mb-3" style={{ letterSpacing: "1.4px" }}>
+          {locale === "fr" ? "L’auteur" : "The author"}
+        </p>
+        <h1 className="editorial-title mx-auto max-w-3xl text-4xl text-foreground sm:text-6xl">
+          {author.name}
+        </h1>
+        {author.role ? (
+          <p className="mt-3 font-body text-base italic text-muted sm:text-lg">
             {author.role}
           </p>
-          {author.bio ? (
-            <p className="mt-4 max-w-3xl font-body text-base leading-relaxed text-muted sm:text-lg">
-              {author.bio}
-            </p>
-          ) : null}
-        </div>
+        ) : null}
+        {author.bio ? (
+          <p className="editorial-deck mx-auto mt-4 max-w-2xl font-body text-base sm:text-lg">
+            {author.bio}
+          </p>
+        ) : null}
       </header>
 
       <section>
-        <div className="mb-5 border-t border-border-strong pt-3">
-          <p className="section-kicker mb-2">
-            {locale === "fr" ? "Articles récents" : "Latest"}
-          </p>
-          <h2 className="font-headline text-3xl font-extrabold leading-none text-foreground">
+        <div className="mb-4 flex items-baseline justify-between border-t border-border-strong pt-2">
+          <p className="section-kicker">
             {locale === "fr" ? "Publications" : "Publications"}
-          </h2>
+          </p>
+          {content.articles.length > 0 ? (
+            <p className="font-label text-[11px] font-bold uppercase tracking-[1px] text-muted">
+              {content.articles.length}
+              {" "}
+              {locale === "fr"
+                ? content.articles.length > 1 ? "articles" : "article"
+                : content.articles.length > 1 ? "stories" : "story"}
+            </p>
+          ) : null}
         </div>
 
         {content.articles.length > 0 ? (
@@ -121,7 +129,7 @@ export default async function LocalizedAuthorPage({ params }: Props) {
             locale={locale}
           />
         ) : (
-          <p className="border-t border-border-subtle py-8 font-body text-lg text-muted">
+          <p className="py-8 text-center font-body text-base italic text-muted">
             {locale === "fr"
               ? "Aucun article publié pour cet auteur pour le moment."
               : "No published article for this author yet."}

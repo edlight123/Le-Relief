@@ -4,7 +4,6 @@ import ArticleCard from "@/components/public/ArticleCard";
 import LatestArticlesFeed from "@/components/public/LatestArticlesFeed";
 import CategoryGrid from "@/components/public/CategoryGrid";
 import NewsletterSignup from "@/components/public/NewsletterSignup";
-import SectionRibbon from "@/components/ui/SectionRibbon";
 import { getHomepageContent } from "@/lib/public-content";
 import { formatHeadlineTypography } from "@/lib/content-format";
 
@@ -58,10 +57,7 @@ export default async function HomePage() {
       <div className="newspaper-shell">
         {secondary.length > 0 ? (
           <section className="mb-14 sm:mb-20">
-            <div className="mb-4">
-              <SectionRibbon label="À la une" variant="dark" />
-            </div>
-            <SectionHeader kicker="À suivre" title="Les autres titres" />
+            <SectionHeader kicker="À la une" title="Les autres titres" />
             <div className="grid gap-0 md:grid-cols-3">
               {secondary.length > 0 ? (
                 <div className="md:col-span-2 md:border-r md:border-border-subtle md:pr-6">
@@ -98,11 +94,8 @@ export default async function HomePage() {
 
             {editorial.length > 0 ? (
               <section className="mb-14 sm:mb-20">
-                <div className="mb-4">
-                  <SectionRibbon label="Contexte & analyse" />
-                </div>
                 <SectionHeader
-                  kicker="Contexte"
+                  kicker="Contexte & analyse"
                   title="Analyses, opinions et dossiers"
                 />
                 <div>

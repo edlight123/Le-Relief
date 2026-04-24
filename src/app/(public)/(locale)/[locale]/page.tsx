@@ -3,7 +3,6 @@ import HeroSection from "@/components/public/HeroSection";
 import ArticleCard from "@/components/public/ArticleCard";
 import LatestArticlesFeed from "@/components/public/LatestArticlesFeed";
 import CategoryGrid from "@/components/public/CategoryGrid";
-import SectionRibbon from "@/components/ui/SectionRibbon";
 import SectionHeader from "@/components/public/SectionHeader";
 import MostReadList from "@/components/public/MostReadList";
 import NewsletterBlock from "@/components/public/NewsletterBlock";
@@ -12,8 +11,8 @@ import { validateLocale } from "@/lib/locale";
 import {
   buildBreadcrumbJsonLd,
   buildCanonicalAlternates,
+  buildEditorialOgImage,
   buildMetaDescription,
-  buildOgImage,
   buildOrganizationJsonLd,
   buildWebSiteJsonLd,
   serializeJsonLd,
@@ -58,7 +57,12 @@ export async function generateMetadata({
       url: `/${locale}`,
       title,
       description,
-      images: buildOgImage("/logo.png", "Le Relief"),
+      images: buildEditorialOgImage({
+        title: locale === "fr" ? "Le Relief" : "Le Relief",
+        category: locale === "fr" ? "Édition numérique" : "Digital edition",
+        locale,
+        alt: "Le Relief",
+      }),
     },
     twitter: {
       card: "summary_large_image",
@@ -86,7 +90,6 @@ export default async function LocalizedHomePage({
     editorial,
     mostRead,
     categories,
-    englishSelection,
     showNewsletter,
   } = await getHomepageContent(locale);
 
@@ -114,15 +117,20 @@ export default async function LocalizedHomePage({
 
       <div className="newspaper-shell">
         {secondary.length > 0 ? (
-          <section className="mb-14 sm:mb-20">
-            <div className="mb-4">
-              <SectionRibbon label={locale === "fr" ? "À la une" : "Top stories"} variant="dark" />
-            </div>
+          <section className="mb-8 sm:mb-10">
             <SectionHeader
-              kicker={locale === "fr" ? "À suivre" : "Coverage"}
+              kicker={locale === "fr" ? "À la une" : "Top stories"}
               title={locale === "fr" ? "Les autres titres" : "More headlines"}
             />
-            <div className="grid gap-0 md:grid-cols-3">
+            <div
+              className={`grid gap-0 ${
+                secondary.length >= 3
+                  ? "md:grid-cols-3"
+                  : secondary.length === 2
+                  ? "md:grid-cols-2"
+                  : "md:grid-cols-1"
+              }`}
+            >
               {secondary.map((article, index) => (
                 <div
                   key={article.id}
@@ -141,10 +149,10 @@ export default async function LocalizedHomePage({
           </section>
         ) : null}
 
-        <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_300px] lg:gap-12">
+        <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_280px] lg:gap-10">
           <div className="min-w-0">
             {latest.length > 0 ? (
-              <section className="mb-14 sm:mb-20">
+              <section className="mb-8 sm:mb-10">
                 <SectionHeader
                   kicker={locale === "fr" ? "Dernières nouvelles" : "Latest"}
                   title={locale === "fr" ? "Le fil de la rédaction" : "Latest from the newsroom"}
@@ -155,14 +163,9 @@ export default async function LocalizedHomePage({
             ) : null}
 
             {editorial.length > 0 ? (
-              <section className="mb-14 sm:mb-20">
-                <div className="mb-4">
-                  <SectionRibbon
-                    label={locale === "fr" ? "Contexte & analyse" : "Context & analysis"}
-                  />
-                </div>
+              <section className="mb-8 sm:mb-10">
                 <SectionHeader
-                  kicker={locale === "fr" ? "Contexte" : "Perspective"}
+                  kicker={locale === "fr" ? "Contexte & analyse" : "Context & analysis"}
                   title={
                     locale === "fr"
                       ? "Analyses, opinions et dossiers"
@@ -178,7 +181,7 @@ export default async function LocalizedHomePage({
             ) : null}
           </div>
 
-          <aside className="space-y-10 lg:sticky lg:top-40 lg:h-fit">
+          <aside className="space-y-8">
             {mostRead.length > 0 ? (
               <div className="border-t-2 border-border-strong pt-4">
                 <MostReadList
@@ -187,18 +190,6 @@ export default async function LocalizedHomePage({
                   kicker={locale === "fr" ? "Lecture" : "Read"}
                 />
               </div>
-            ) : null}
-
-            {categories.length > 0 ? (
-              <section className="border-t-2 border-border-strong pt-4">
-                <div className="mb-5">
-                  <p className="section-kicker mb-2">{locale === "fr" ? "Rubriques" : "Sections"}</p>
-                  <h3 className="font-headline text-2xl font-extrabold text-foreground">
-                    {locale === "fr" ? "Parcourir" : "Browse"}
-                  </h3>
-                </div>
-                <CategoryGrid categories={categories} locale={locale} />
-              </section>
             ) : null}
 
             {showNewsletter ? (
@@ -213,24 +204,13 @@ export default async function LocalizedHomePage({
       </div>
 
       {categories.length > 0 ? (
-        <section className="newspaper-shell mt-14 pb-16 sm:mt-20 sm:pb-20">
+        <section className="newspaper-shell mt-8 pb-10 sm:mt-10 sm:pb-12">
           <SectionHeader
             kicker={locale === "fr" ? "Taxonomie" : "Taxonomy"}
             title={locale === "fr" ? "Rubriques principales" : "Main sections"}
             href="/categories"
           />
           <CategoryGrid variant="grid" categories={categories} locale={locale} />
-        </section>
-      ) : null}
-
-      {locale === "fr" && englishSelection.length > 0 ? (
-        <section className="newspaper-shell pb-16 sm:pb-20">
-          <SectionHeader kicker="English" title="Selected English coverage" href="/en" />
-          <div className="grid gap-7 md:grid-cols-2 lg:grid-cols-4">
-            {englishSelection.map((article) => (
-              <ArticleCard key={article.id} article={article} locale="en" />
-            ))}
-          </div>
         </section>
       ) : null}
     </>

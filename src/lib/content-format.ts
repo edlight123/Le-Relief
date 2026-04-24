@@ -7,8 +7,50 @@ function normalizeForComparison(input: string) {
     .trim();
 }
 
-export function formatHeadlineTypography(input: string) {
-  return input.replace(/\s+([:;!?])/g, "\u00A0$1");
+/**
+ * Apply editorial smart-typography rules to a headline or short text.
+ * - Non-breaking space before French high punctuation (: ; ! ? »).
+ * - Smart quotes: « … » in FR, “…” in EN.
+ * - En-dash for digit ranges (e.g. 2024-2026 → 2024–2026).
+ * - Three dots → ellipsis character.
+ */
+export function formatHeadlineTypography(
+  input: string,
+  locale: "fr" | "en" = "fr",
+) {
+  let out = input;
+
+  // Ellipsis
+  out = out.replace(/\.{3,}/g, "\u2026");
+
+  // En-dash for digit ranges (e.g. "1990-2010")
+  out = out.replace(/(\d)\s*-\s*(\d)/g, "$1\u2013$2");
+
+  // Smart quotes
+  if (locale === "fr") {
+    // "text" → « text » (only when paired)
+    out = out.replace(/"([^"]+)"/g, "\u00ab\u00a0$1\u00a0\u00bb");
+    // Apostrophe l' d' n' s' → ’
+    out = out.replace(/([A-Za-z\u00C0-\u017F])'([A-Za-z\u00C0-\u017F])/g, "$1\u2019$2");
+  } else {
+    out = out
+      .replace(/(^|[\s(\[])"/g, "$1\u201c")
+      .replace(/"/g, "\u201d")
+      .replace(/(^|[\s(\[])'/g, "$1\u2018")
+      .replace(/'/g, "\u2019");
+  }
+
+  // FR rule: non-breaking space before : ; ! ? and before » / after «
+  if (locale === "fr") {
+    out = out.replace(/\s+([:;!?])/g, "\u00A0$1");
+    out = out.replace(/\s+»/g, "\u00A0»");
+    out = out.replace(/«\s+/g, "«\u00A0");
+  } else {
+    // EN: only thin space before — (em dash) optional; otherwise leave
+    out = out.replace(/\s+([:;!?])/g, "\u00A0$1");
+  }
+
+  return out;
 }
 
 function escapeRegExp(input: string) {

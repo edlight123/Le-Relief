@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Libre_Franklin, Newsreader, IBM_Plex_Mono } from "next/font/google";
+import { Libre_Franklin, Source_Serif_4, Spectral, IBM_Plex_Mono } from "next/font/google";
 import { siteConfig } from "@/config/site.config";
 import { buildOgImage } from "@/lib/seo";
 import "./globals.css";
@@ -10,10 +10,17 @@ const libreFranklin = Libre_Franklin({
   weight: ["400", "500", "600", "700", "800"],
 });
 
-const newsreader = Newsreader({
-  variable: "--font-newsreader",
+const sourceSerif = Source_Serif_4({
+  variable: "--font-source-serif",
   subsets: ["latin"],
-  weight: ["400", "700", "800"],
+  weight: ["400", "500", "600", "700"],
+  style: ["normal", "italic"],
+});
+
+const spectral = Spectral({
+  variable: "--font-spectral",
+  subsets: ["latin"],
+  weight: ["400", "600", "700", "800"],
   style: ["normal", "italic"],
 });
 
@@ -79,7 +86,7 @@ export default function RootLayout({
   return (
     <html
       lang="fr"
-      className={`${libreFranklin.variable} ${newsreader.variable} ${ibmPlexMono.variable} h-full antialiased`}
+      className={`${libreFranklin.variable} ${sourceSerif.variable} ${spectral.variable} ${ibmPlexMono.variable} h-full antialiased`}
       suppressHydrationWarning
     >
       <body className="min-h-full flex flex-col bg-background text-foreground font-body">

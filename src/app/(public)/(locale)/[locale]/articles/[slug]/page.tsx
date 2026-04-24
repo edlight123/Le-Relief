@@ -23,9 +23,9 @@ import {
   buildArticleImageAlt,
   buildBreadcrumbJsonLd,
   buildCanonicalAlternates,
+  buildEditorialOgImage,
   buildMetaDescription,
   buildNewsArticleJsonLd,
-  buildOgImage,
   buildRobotsDirective,
   serializeJsonLd,
 } from "@/lib/seo";
@@ -125,7 +125,20 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       siteName: siteConfig.name,
       title,
       description,
-      images: buildOgImage(article.imageSrc, article.title, article.title),
+      images: buildEditorialOgImage({
+        title: article.title,
+        category: article.category?.name,
+        author: article.author?.name,
+        date: article.publishedAt
+          ? new Intl.DateTimeFormat(locale === "fr" ? "fr-FR" : "en-US", {
+              day: "numeric",
+              month: "long",
+              year: "numeric",
+            }).format(new Date(article.publishedAt))
+          : null,
+        locale,
+        alt: article.title,
+      }),
       publishedTime: article.publishedAt || undefined,
       modifiedTime: article.updatedAt || undefined,
       section: article.category?.name,
@@ -135,7 +148,14 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       card: "summary_large_image",
       title,
       description,
-      images: article.imageSrc ? [article.imageSrc] : ["/logo.png"],
+      images: article.imageSrc
+        ? [article.imageSrc]
+        : buildEditorialOgImage({
+            title: article.title,
+            category: article.category?.name,
+            author: article.author?.name,
+            locale,
+          }).map((i) => i.url),
     },
   };
 }
@@ -209,7 +229,7 @@ export default async function LocalizedArticlePage({ params }: Props) {
         readingTime={article.readingTime}
       />
       <ReadingProgress />
-      <article className="newspaper-shell py-10 sm:py-14" data-print-hide="false">
+      <article className="newspaper-shell py-6 sm:py-10" data-print-hide="false">
         <Breadcrumb
           locale={locale}
           crumbs={[
@@ -231,7 +251,7 @@ export default async function LocalizedArticlePage({ params }: Props) {
           ]}
         />
 
-        <header className="border-t-2 border-border-strong pt-5">
+        <header className="border-t-2 border-border-strong pt-4">
           <div className="flex flex-wrap items-center gap-3 font-label text-xs font-extrabold uppercase">
             {article.category ? (
               <Link
@@ -256,26 +276,29 @@ export default async function LocalizedArticlePage({ params }: Props) {
             </p>
           ) : null}
 
-          <div className="mt-6 flex flex-wrap items-center gap-3 border-y border-border-subtle py-3 font-label text-xs font-bold uppercase text-muted">
+          <p className="editorial-dateline mt-6 border-y border-border-subtle py-3">
             {article.author ? (
-              <Link
-                href={`/auteurs/${article.author.id}`}
-                className="transition-colors hover:text-primary"
-              >
-                {locale === "fr" ? "Par" : "By"}{" "}
-                <span className="text-foreground">{article.author.name}</span>
-              </Link>
+              <>
+                {locale === "fr" ? "Par " : "By "}
+                <Link
+                  href={`/auteurs/${article.author.id}`}
+                  className="name transition-colors hover:text-primary"
+                >
+                  {article.author.name}
+                </Link>
+              </>
             ) : (
-              <span>
-                {locale === "fr" ? "Par" : "By"}{" "}
-                <span className="text-foreground">
+              <>
+                {locale === "fr" ? "Par " : "By "}
+                <span className="name">
                   {locale === "fr" ? "La rédaction" : "Newsroom"}
                 </span>
-              </span>
+              </>
             )}
+            {" · Port-au-Prince"}
             {article.publishedAt ? (
               <>
-                <span className="text-border-subtle">/</span>
+                {" · "}
                 <time dateTime={article.publishedAt}>
                   {format(new Date(article.publishedAt), "d MMMM yyyy", {
                     locale: locale === "fr" ? fr : enUS,
@@ -283,22 +306,22 @@ export default async function LocalizedArticlePage({ params }: Props) {
                 </time>
               </>
             ) : null}
+            {" · "}
+            <span className="not-italic font-label text-[11px] font-bold uppercase tracking-[1px]">
+              {article.readingTime} {locale === "fr" ? "min de lecture" : "min read"}
+            </span>
             {wasUpdated && article.updatedAt ? (
               <>
-                <span className="text-border-subtle">/</span>
+                {" · "}
                 <span className="text-accent-teal">
-                  {locale === "fr" ? "Mis à jour le" : "Updated on"}{" "}
+                  {locale === "fr" ? "Mis à jour le" : "Updated"}{" "}
                   {format(new Date(article.updatedAt), "d MMMM yyyy", {
                     locale: locale === "fr" ? fr : enUS,
                   })}
                 </span>
               </>
             ) : null}
-            <span className="text-border-subtle">/</span>
-            <span>
-              {article.readingTime} {locale === "fr" ? "min de lecture" : "min read"}
-            </span>
-          </div>
+          </p>
 
           {article.alternateLanguageSlug ? (
             <div className="mt-4 border-l-2 border-primary pl-4 font-label text-xs font-bold uppercase text-muted">
@@ -318,7 +341,7 @@ export default async function LocalizedArticlePage({ params }: Props) {
         </header>
 
         {article.imageSrc ? (
-          <figure className="mt-8">
+          <figure className="mt-6">
             <div className="relative aspect-[16/9] overflow-hidden bg-surface-elevated">
               <Image
                 src={article.imageSrc}
@@ -330,19 +353,20 @@ export default async function LocalizedArticlePage({ params }: Props) {
                 })}
                 fill
                 sizes="(min-width: 1280px) 1280px, 100vw"
+                quality={92}
                 className="object-cover"
                 priority
               />
             </div>
             {article.coverImageCaption ? (
-              <figcaption className="mt-2 border-b border-border-subtle pb-3 font-label text-[11px] uppercase tracking-[1px] text-muted">
+              <figcaption className="mt-3 border-t border-border-subtle pt-3 font-body text-sm italic leading-snug text-muted">
                 {article.coverImageCaption}
               </figcaption>
             ) : null}
           </figure>
         ) : null}
 
-        <div className="mt-10 grid gap-10 lg:grid-cols-[minmax(0,760px)_1fr] lg:gap-14">
+        <div className="mt-8 grid gap-8 lg:grid-cols-[minmax(0,760px)_1fr] lg:gap-12">
           <div className="min-w-0">
             {/* Editorial enrichments — render only when article data carries them. */}
             <ArticleKeyPoints
@@ -366,6 +390,32 @@ export default async function LocalizedArticlePage({ params }: Props) {
                 )}
               </div>
             )}
+
+            <hr className="end-of-article" aria-hidden="true" />
+
+            {article.author?.name ? (
+              <aside className="author-bio" aria-label={locale === "fr" ? "À propos de l’auteur" : "About the author"}>
+                <div className="min-w-0 flex-1">
+                  <p className="author-bio-label">
+                    {locale === "fr" ? "L’auteur" : "The author"}
+                  </p>
+                  <p className="author-bio-name">{article.author.name}</p>
+                  <p className="author-bio-text">
+                    {locale === "fr"
+                      ? `Journaliste au Relief${article.category?.name ? `, couvre la rubrique ${article.category.name}` : ""}.`
+                      : `Journalist at Le Relief${article.category?.name ? `, covers ${article.category.name}` : ""}.`}
+                  </p>
+                  <Link
+                    href={`/${locale}/auteurs/${article.author.id}`}
+                    className="author-bio-link"
+                  >
+                    {locale === "fr"
+                      ? `Tous les articles de ${article.author.name}`
+                      : `More from ${article.author.name}`}
+                  </Link>
+                </div>
+              </aside>
+            ) : null}
 
             <SourceAttribution
               sources={(article as { sources?: import("@/components/public/SourceAttribution").ArticleSource[] | null }).sources}

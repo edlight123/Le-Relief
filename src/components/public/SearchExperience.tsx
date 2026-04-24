@@ -272,16 +272,18 @@ export default function SearchExperience() {
   };
 
   return (
-    <div className="newspaper-shell py-10 sm:py-14">
-      <header className="mb-8 border-t-2 border-border-strong pt-5">
-        <p className="page-kicker mb-3">{locale === "fr" ? "Archives" : "Archive"}</p>
-        <h1 className="editorial-title text-5xl text-foreground sm:text-7xl">
+    <div className="newspaper-shell py-6 sm:py-10">
+      <header className="mb-6 border-y-2 border-border-strong py-6 text-center sm:py-9">
+        <p className="page-kicker mb-3" style={{ letterSpacing: "1.4px" }}>
+          {locale === "fr" ? "Archives" : "Archive"}
+        </p>
+        <h1 className="editorial-title mx-auto max-w-3xl text-4xl text-foreground sm:text-6xl">
           {locale === "fr" ? "Recherche avancée" : "Advanced search"}
         </h1>
-        <p className="mt-4 max-w-3xl font-body text-base leading-relaxed text-muted sm:text-lg">
+        <p className="editorial-deck mx-auto mt-3 max-w-2xl font-body text-base sm:text-lg">
           {locale === "fr"
-            ? "Trouvez plus vite les articles grâce aux suggestions, aux filtres éditoriaux et au tri par pertinence, date ou popularité."
-            : "Find stories faster with auto-complete, editorial filters and ranking by relevance, recency or popularity."}
+            ? "Suggestions instantanées, filtres éditoriaux, tri par pertinence, date ou popularité."
+            : "Instant suggestions, editorial filters, sort by relevance, date or popularity."}
         </p>
       </header>
 
