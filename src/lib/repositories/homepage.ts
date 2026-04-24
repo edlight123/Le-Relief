@@ -8,6 +8,7 @@ const HOMEPAGE_DOC_ID = "homepage";
 export const DEFAULT_HOMEPAGE_SETTINGS: HomepageSettings = {
   id: HOMEPAGE_DOC_ID,
   heroArticleId: null,
+  autoHero: true,
   secondaryArticleIds: [],
   highlightedCategoryIds: [],
   showNewsletter: true,
@@ -37,6 +38,10 @@ function normalizeSettings(
       typeof value.heroArticleId === "string" && value.heroArticleId.trim()
         ? value.heroArticleId.trim()
         : null,
+    autoHero:
+      typeof value.autoHero === "boolean"
+        ? value.autoHero
+        : DEFAULT_HOMEPAGE_SETTINGS.autoHero,
     secondaryArticleIds: normalizeIdList(value.secondaryArticleIds, 3),
     highlightedCategoryIds: normalizeIdList(value.highlightedCategoryIds, 12),
     showNewsletter:
@@ -70,6 +75,7 @@ export async function updateHomepageSettings(input: HomepageSettingsInput) {
   await docRef().set(
     {
       heroArticleId: next.heroArticleId,
+      autoHero: next.autoHero,
       secondaryArticleIds: next.secondaryArticleIds,
       highlightedCategoryIds: next.highlightedCategoryIds,
       showNewsletter: next.showNewsletter,

@@ -177,6 +177,7 @@ export const categorySchema = z.object({
 
 export const homepageSettingsSchema = z.object({
   heroArticleId: z.string().nullable().optional(),
+  autoHero: z.boolean().optional(),
   secondaryArticleIds: z.array(z.string()).max(3).optional(),
   highlightedCategoryIds: z.array(z.string()).max(12).optional(),
   showNewsletter: z.boolean().optional(),

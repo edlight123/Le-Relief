@@ -29,6 +29,7 @@ interface CategoryOption {
 const emptySettings: HomepageSettings = {
   id: "homepage",
   heroArticleId: null,
+  autoHero: true,
   secondaryArticleIds: [],
   highlightedCategoryIds: [],
   showNewsletter: true,
@@ -116,7 +117,7 @@ export default function HomepageDashboardPage() {
     const ids = settings.secondaryArticleIds.filter(Boolean);
     const duplicates = ids.length - new Set(ids).size;
 
-    if (!settings.heroArticleId) {
+    if (!settings.heroArticleId && !settings.autoHero) {
       warnings.push("Le slot Hero est automatique. Sélection manuelle recommandée pour les éditions premium.");
     }
 
@@ -128,7 +129,7 @@ export default function HomepageDashboardPage() {
       warnings.push("L'article Hero est aussi présent en secondaire.");
     }
 
-    if (selectedHero?.publishedAt) {
+    if (!settings.autoHero && selectedHero?.publishedAt) {
       const ageHours = (Date.now() - new Date(selectedHero.publishedAt).getTime()) / 36e5;
       if (ageHours > 72) {
         warnings.push("Le Hero est potentiellement stale (plus de 72h). Vérifiez l'actualité.");
@@ -136,7 +137,7 @@ export default function HomepageDashboardPage() {
     }
 
     return warnings;
-  }, [settings.heroArticleId, settings.secondaryArticleIds, selectedHero?.publishedAt]);
+  }, [settings.heroArticleId, settings.autoHero, settings.secondaryArticleIds, selectedHero?.publishedAt]);
 
   function updateSettings(next: Partial<HomepageSettings>) {
     setSettings((current) => ({ ...current, ...next }));
@@ -161,6 +162,7 @@ export default function HomepageDashboardPage() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         heroArticleId: settings.heroArticleId,
+        autoHero: settings.autoHero,
         secondaryArticleIds: settings.secondaryArticleIds,
         highlightedCategoryIds: settings.highlightedCategoryIds,
         showNewsletter: settings.showNewsletter,
@@ -213,6 +215,17 @@ export default function HomepageDashboardPage() {
       <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
         <div className="space-y-6">
           <CurationSlotCard title="Article principal" description="Sélection éditoriale du hero de homepage.">
+              <label className="flex items-center gap-3 border border-border-subtle bg-surface-newsprint px-3 py-2 font-label text-xs font-extrabold uppercase text-foreground">
+                <input
+                  type="checkbox"
+                  checked={settings.autoHero}
+                  onChange={(e) =>
+                    updateSettings({ autoHero: e.target.checked })
+                  }
+                  className="h-4 w-4 accent-primary"
+                />
+                <span className="flex-1">Hero automatique — dernier article publié avec image</span>
+              </label>
               <label
                 htmlFor="homepage-hero"
                 className="block font-label text-xs font-extrabold uppercase text-foreground"
@@ -222,10 +235,11 @@ export default function HomepageDashboardPage() {
               <select
                 id="homepage-hero"
                 value={settings.heroArticleId || ""}
+                disabled={settings.autoHero}
                 onChange={(e) =>
                   updateSettings({ heroArticleId: e.target.value || null })
                 }
-                className="w-full border border-border-subtle bg-surface px-4 py-3 font-label text-sm text-foreground focus:border-primary focus:outline-none"
+                className="w-full border border-border-subtle bg-surface px-4 py-3 font-label text-sm text-foreground focus:border-primary focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
               >
                 <option value="">Automatique: dernier article avec image</option>
                 {imageReadyArticles.map((article) => (
@@ -235,8 +249,9 @@ export default function HomepageDashboardPage() {
                 ))}
               </select>
               <p className="font-body text-sm leading-relaxed text-muted">
-                La liste privilégie les articles publiés avec image afin
-                d&apos;éviter un bloc hero vide.
+                {settings.autoHero
+                  ? "Le hero suit automatiquement le dernier article publié avec image. Désactivez pour figer une sélection éditoriale."
+                  : "La liste privilégie les articles publiés avec image afin d’éviter un bloc hero vide."}
               </p>
           </CurationSlotCard>
 

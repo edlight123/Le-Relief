@@ -57,6 +57,7 @@ export async function PATCH(req: Request) {
 
     const settings = await homepageRepo.updateHomepageSettings({
       heroArticleId: parsed.data.heroArticleId || null,
+      autoHero: parsed.data.autoHero ?? true,
       secondaryArticleIds: secondaryIds,
       highlightedCategoryIds: parsed.data.highlightedCategoryIds || [],
       showNewsletter: parsed.data.showNewsletter ?? true,

@@ -628,7 +628,7 @@ export async function getHomepageContent(
   }
 
   try {
-    if (settings.heroArticleId) {
+    if (settings.heroArticleId && !settings.autoHero) {
       curatedHero = await hydratePublishedArticleById(settings.heroArticleId);
       if (curatedHero?.language !== locale) curatedHero = null;
     }
@@ -651,6 +651,7 @@ export async function getHomepageContent(
     const rawFeatured = await articlesRepo.getFeaturedArticle();
     featured = rawFeatured ? await hydrateArticle(rawFeatured) : null;
     if (featured?.language !== locale) featured = null;
+    if (settings.autoHero) featured = null;
   } catch {
     featured = null;
   }
