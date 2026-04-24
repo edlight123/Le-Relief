@@ -28,8 +28,8 @@ export default function HeroSection({ article, locale }: HeroSectionProps) {
   const resolvedLocale = locale || article?.language || "fr";
   if (!article) {
     return (
-      <section className="newspaper-shell py-10 sm:py-14">
-        <div className="border-t-2 border-border-strong py-10 text-center sm:py-14">
+      <section className="newspaper-shell py-6 sm:py-10">
+        <div className="border-t-2 border-border-strong py-8 text-center sm:py-12">
           <p className="page-kicker mb-5" style={{ letterSpacing: "1.2px" }}>Journalisme indépendant</p>
           <h1 className="editorial-title mx-auto max-w-4xl text-5xl text-foreground sm:text-7xl md:text-8xl tracking-tight sm:tracking-[-0.5px] md:tracking-[-1px]">
             Le Relief Haïti
@@ -99,16 +99,16 @@ export default function HeroSection({ article, locale }: HeroSectionProps) {
   /* No cover image — full-width editorial layout */
   if (!imageSrc) {
     return (
-      <section className="newspaper-shell py-6 sm:py-10">
+      <section className="newspaper-shell py-4 sm:py-7">
         <Link href={`/${resolvedLocale}/articles/${article.slug}`} className="group block">
-          <div className="border-t-2 border-border-strong pt-5">
-            <div className="flex items-center justify-between border-b border-border-subtle pb-3">
+          <div className="border-t-2 border-border-strong pt-4">
+            <div className="flex items-center justify-between border-b border-border-subtle pb-2">
               <p className="font-label text-[11px] font-bold uppercase text-muted">{featuredLabel}</p>
               {article.category && (
                 <p className="page-kicker" style={{ letterSpacing: "1.2px" }}>{article.category.name}</p>
               )}
             </div>
-            <div className="py-8 sm:py-12">
+            <div className="py-6 sm:py-9">
               {article.contentTypeLabel && (
                 <p className="mb-4 font-label text-xs font-extrabold uppercase text-muted">
                   {article.contentTypeLabel}
@@ -133,9 +133,9 @@ export default function HeroSection({ article, locale }: HeroSectionProps) {
 
   /* With cover image — 2-column, text bottom-aligned */
   return (
-    <section className="newspaper-shell py-6 sm:py-10">
+    <section className="newspaper-shell py-4 sm:py-7">
       <Link href={`/${resolvedLocale}/articles/${article.slug}`} className="group block">
-        <div className="border-t-2 border-border-strong pt-5">
+        <div className="border-t-2 border-border-strong pt-4">
           <div className="grid gap-0 lg:grid-cols-[1fr_1.4fr]">
 
             {/* Text column — bottom-aligned */}

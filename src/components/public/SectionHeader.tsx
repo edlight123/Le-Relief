@@ -25,15 +25,15 @@ export default function SectionHeader({
   const cta = ctaLabel || (locale === "fr" ? "Tout voir" : "See all");
   return (
     <div
-      className={`mb-6 flex items-end justify-between pt-3 ${
+      className={`mb-4 flex items-end justify-between pt-2 sm:mb-5 ${
         variant === "subtle"
           ? "border-t border-border-subtle"
           : "border-t-2 border-border-strong"
       }`}
     >
       <div>
-        <p className="section-kicker mb-2 tracking-[1px]">{kicker}</p>
-        <h2 className="font-headline text-3xl font-extrabold leading-none text-foreground sm:text-4xl">
+        <p className="section-kicker mb-1.5 tracking-[1px]">{kicker}</p>
+        <h2 className="font-headline text-2xl font-extrabold leading-none text-foreground sm:text-3xl">
           {title}
         </h2>
       </div>

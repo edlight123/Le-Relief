@@ -45,7 +45,7 @@ export default function Navbar() {
   return (
     <header className="sticky top-0 z-50 border-b border-border-strong bg-background/95 backdrop-blur-sm">
       <div className="newspaper-shell">
-        <div className="hidden items-center justify-between border-b border-border-subtle py-2 font-label text-[11px] font-semibold uppercase text-muted md:flex">
+        <div className="hidden items-center justify-between border-b border-border-subtle py-1.5 font-label text-[11px] font-semibold uppercase text-muted md:flex">
           <span className="capitalize">{editionDate}{editionDate ? " \u00B7 Port-au-Prince" : ""}</span>
           <span className="tracking-[1.5px]">
             {locale === "fr"
@@ -57,7 +57,7 @@ export default function Navbar() {
           </Link>
         </div>
 
-        <div className="grid grid-cols-[auto_1fr_auto] items-center gap-3 py-3 md:py-5">
+        <div className="grid grid-cols-[auto_1fr_auto] items-center gap-3 py-2.5 md:py-4">
           <button
             className="md:hidden border border-border-subtle p-2 transition-colors hover:bg-surface-elevated"
             onClick={() => setMobileOpen(!mobileOpen)}
@@ -108,7 +108,7 @@ export default function Navbar() {
           </div>
         </div>
 
-        <nav className="hidden border-y border-border-strong py-2 md:block" style={{ boxShadow: "inset 0 1px 0 var(--background), inset 0 -1px 0 var(--background)" }}>
+        <nav className="hidden border-y border-border-strong py-1.5 md:block" style={{ boxShadow: "inset 0 1px 0 var(--background), inset 0 -1px 0 var(--background)" }}>
           <div className="flex items-center justify-center gap-6 lg:gap-10">
             {navItems.map((item) => {
               const href = withLocale(item.href);

@@ -209,7 +209,7 @@ export default async function LocalizedArticlePage({ params }: Props) {
         readingTime={article.readingTime}
       />
       <ReadingProgress />
-      <article className="newspaper-shell py-10 sm:py-14" data-print-hide="false">
+      <article className="newspaper-shell py-6 sm:py-10" data-print-hide="false">
         <Breadcrumb
           locale={locale}
           crumbs={[
@@ -231,7 +231,7 @@ export default async function LocalizedArticlePage({ params }: Props) {
           ]}
         />
 
-        <header className="border-t-2 border-border-strong pt-5">
+        <header className="border-t-2 border-border-strong pt-4">
           <div className="flex flex-wrap items-center gap-3 font-label text-xs font-extrabold uppercase">
             {article.category ? (
               <Link
@@ -321,7 +321,7 @@ export default async function LocalizedArticlePage({ params }: Props) {
         </header>
 
         {article.imageSrc ? (
-          <figure className="mt-8">
+          <figure className="mt-6">
             <div className="relative aspect-[16/9] overflow-hidden bg-surface-elevated">
               <Image
                 src={article.imageSrc}
@@ -345,7 +345,7 @@ export default async function LocalizedArticlePage({ params }: Props) {
           </figure>
         ) : null}
 
-        <div className="mt-10 grid gap-10 lg:grid-cols-[minmax(0,760px)_1fr] lg:gap-14">
+        <div className="mt-8 grid gap-8 lg:grid-cols-[minmax(0,760px)_1fr] lg:gap-12">
           <div className="min-w-0">
             {/* Editorial enrichments — render only when article data carries them. */}
             <ArticleKeyPoints

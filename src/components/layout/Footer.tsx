@@ -12,10 +12,10 @@ export default function Footer() {
   const locale = pathname === "/en" || pathname.startsWith("/en/") ? "en" : "fr";
 
   return (
-    <footer className="mt-16 border-t-4 border-border-strong bg-surface-newsprint pb-8 pt-10 sm:mt-24 sm:pt-14">
+    <footer className="mt-12 border-t-4 border-border-strong bg-surface-newsprint pb-6 pt-8 sm:mt-16 sm:pt-10">
       <div className="newspaper-shell">
         {/* Footer masthead */}
-        <div className="mb-10 border-b border-border-strong pb-8 text-center">
+        <div className="mb-7 border-b border-border-strong pb-6 text-center">
           <Link href="/" className="inline-flex items-center justify-center gap-3">
             <Image
               src="/logo.png"
@@ -40,7 +40,7 @@ export default function Footer() {
         </div>
 
         {/* 4-column link grid */}
-        <div className="grid grid-cols-1 gap-10 font-label text-sm md:grid-cols-4 md:gap-8">
+        <div className="grid grid-cols-1 gap-8 font-label text-sm md:grid-cols-4 md:gap-6">
           <div className="md:border-r md:border-border-subtle md:pr-8">
             <h4 className="mb-4 font-label text-[11px] font-extrabold uppercase tracking-[1.4px] text-primary">
               {locale === "fr" ? "La rédaction" : "The newsroom"}
@@ -120,7 +120,7 @@ export default function Footer() {
         </div>
 
         {/* ISSN-style imprint */}
-        <div className="mt-12 border-t border-border-strong pt-5 text-center">
+        <div className="mt-8 border-t border-border-strong pt-4 text-center">
           <p className="font-mono text-[10px] uppercase tracking-[2px] text-muted">
             {siteConfig.name} · Port-au-Prince · {locale === "fr" ? "Édition numérique" : "Digital edition"} · © {new Date().getFullYear()}
           </p>
