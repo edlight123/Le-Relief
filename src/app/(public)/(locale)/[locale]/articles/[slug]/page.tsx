@@ -4,13 +4,17 @@ import Image from "next/image";
 import Link from "next/link";
 import { format, differenceInHours } from "date-fns";
 import { enUS, fr } from "date-fns/locale";
-import RelatedArticles from "@/components/public/RelatedArticles";
 import NewsletterSignup from "@/components/public/NewsletterSignup";
 import Breadcrumb from "@/components/public/Breadcrumb";
 import ReadingProgress from "@/components/public/ReadingProgress";
 import CopyLinkButton from "@/components/public/CopyLinkButton";
 import TableOfContents from "@/components/public/TableOfContents";
 import ArticleViewTracker from "@/components/public/ArticleViewTracker";
+import AITranslationNotice from "@/components/public/AITranslationNotice";
+import ArticleKeyPoints from "@/components/public/ArticleKeyPoints";
+import ArticleContextBox from "@/components/public/ArticleContextBox";
+import SourceAttribution from "@/components/public/SourceAttribution";
+import RelatedDossier from "@/components/public/RelatedDossier";
 import { siteConfig } from "@/config/site.config";
 import { getPublicArticleBySlug, getRelatedArticles } from "@/lib/editorial";
 import * as articlesRepo from "@/lib/repositories/articles";
@@ -306,6 +310,11 @@ export default async function LocalizedArticlePage({ params }: Props) {
               </Link>
             </div>
           ) : null}
+
+          <AITranslationNotice
+            locale={locale as "fr" | "en"}
+            alternateLanguageSlug={article.alternateLanguageSlug}
+          />
         </header>
 
         {article.imageSrc ? (
@@ -325,11 +334,26 @@ export default async function LocalizedArticlePage({ params }: Props) {
                 priority
               />
             </div>
+            {article.coverImageCaption ? (
+              <figcaption className="mt-2 border-b border-border-subtle pb-3 font-label text-[11px] uppercase tracking-[1px] text-muted">
+                {article.coverImageCaption}
+              </figcaption>
+            ) : null}
           </figure>
         ) : null}
 
         <div className="mt-10 grid gap-10 lg:grid-cols-[minmax(0,760px)_1fr] lg:gap-14">
           <div className="min-w-0">
+            {/* Editorial enrichments — render only when article data carries them. */}
+            <ArticleKeyPoints
+              points={(article as { keyPoints?: string[] | null }).keyPoints}
+              locale={locale as "fr" | "en"}
+            />
+            <ArticleContextBox
+              context={(article as { context?: string | null }).context}
+              locale={locale as "fr" | "en"}
+            />
+
             {bodyHasHtml ? (
               <div
                 className="prose prose-lg max-w-none font-body leading-relaxed dark:prose-invert prose-headings:font-headline prose-a:text-primary"
@@ -343,6 +367,11 @@ export default async function LocalizedArticlePage({ params }: Props) {
               </div>
             )}
 
+            <SourceAttribution
+              sources={(article as { sources?: import("@/components/public/SourceAttribution").ArticleSource[] | null }).sources}
+              locale={locale as "fr" | "en"}
+            />
+
             <div className="mt-10 border-t border-border-subtle pt-4">
               <Link
                 href="/corrections"
@@ -354,7 +383,7 @@ export default async function LocalizedArticlePage({ params }: Props) {
               </Link>
             </div>
 
-            <RelatedArticles articles={related} locale={locale} />
+            <RelatedDossier articles={related} locale={locale as "fr" | "en"} />
           </div>
 
           <aside className="space-y-8 border-t-2 border-border-strong pt-4 lg:border-l lg:border-t-0 lg:pl-8" data-print-hide>

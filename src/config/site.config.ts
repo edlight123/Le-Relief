@@ -45,10 +45,23 @@ export const siteConfig = {
   nav: {
     public: [
       { label: "Accueil", href: "/" },
-      { label: "Catégories", href: "/categories" },
+      { label: "Politique", href: "/categories/politique" },
+      { label: "Économie", href: "/categories/economie" },
+      { label: "Société", href: "/categories/societe" },
+      { label: "International", href: "/categories/international" },
+      { label: "Opinion", href: "/categories/opinion" },
+      { label: "Culture", href: "/categories/culture" },
       { label: "Recherche", href: "/search" },
-      { label: "À propos", href: "/about" },
-      { label: "Contact", href: "/contact" },
+    ],
+    publicEn: [
+      { label: "Home", href: "/" },
+      { label: "Politics", href: "/categories/politique" },
+      { label: "Economy", href: "/categories/economie" },
+      { label: "Society", href: "/categories/societe" },
+      { label: "International", href: "/categories/international" },
+      { label: "Opinion", href: "/categories/opinion" },
+      { label: "Culture", href: "/categories/culture" },
+      { label: "Search", href: "/search" },
     ],
     dashboard: [
       { label: "Tableau de Bord", href: "/dashboard" },

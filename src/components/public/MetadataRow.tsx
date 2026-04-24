@@ -59,7 +59,7 @@ export default function MetadataRow({
   if (readingTime) {
     items.push(
       <span key="reading" className="font-[family-name:var(--font-mono)]">
-        {readingTime} min de lecture
+        {readingTime} {language === "en" ? "min read" : "min de lecture"}
       </span>,
     );
   }

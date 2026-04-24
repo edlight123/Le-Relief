@@ -1,13 +1,13 @@
-import Link from "next/link";
 import type { Metadata } from "next";
 import HeroSection from "@/components/public/HeroSection";
 import ArticleCard from "@/components/public/ArticleCard";
 import LatestArticlesFeed from "@/components/public/LatestArticlesFeed";
 import CategoryGrid from "@/components/public/CategoryGrid";
-import NewsletterSignup from "@/components/public/NewsletterSignup";
 import SectionRibbon from "@/components/ui/SectionRibbon";
+import SectionHeader from "@/components/public/SectionHeader";
+import MostReadList from "@/components/public/MostReadList";
+import NewsletterBlock from "@/components/public/NewsletterBlock";
 import { getHomepageContent } from "@/lib/editorial";
-import { formatHeadlineTypography } from "@/lib/content-format";
 import { validateLocale } from "@/lib/locale";
 import {
   buildBreadcrumbJsonLd,
@@ -69,34 +69,7 @@ export async function generateMetadata({
   };
 }
 
-function SectionHeader({
-  kicker,
-  title,
-  href,
-}: {
-  kicker: string;
-  title: string;
-  href?: string;
-}) {
-  return (
-    <div className="mb-6 flex items-end justify-between border-t-2 border-border-strong pt-3">
-      <div>
-        <p className="section-kicker mb-2 tracking-[1px]">{kicker}</p>
-        <h2 className="font-headline text-3xl font-extrabold leading-none text-foreground sm:text-4xl">
-          {title}
-        </h2>
-      </div>
-      {href ? (
-        <Link
-          href={href}
-          className="hidden font-label text-xs font-extrabold uppercase text-foreground transition-colors hover:text-primary sm:block"
-        >
-          {kicker === "English" ? "See all" : "Tout voir"}
-        </Link>
-      ) : null}
-    </div>
-  );
-}
+
 
 export default async function LocalizedHomePage({
   params,
@@ -207,28 +180,13 @@ export default async function LocalizedHomePage({
 
           <aside className="space-y-10 lg:sticky lg:top-40 lg:h-fit">
             {mostRead.length > 0 ? (
-              <section className="border-t-2 border-border-strong pt-4">
-                <p className="section-kicker mb-2">{locale === "fr" ? "Lecture" : "Read"}</p>
-                <h3 className="mb-4 font-headline text-2xl font-extrabold text-foreground">
-                  {locale === "fr" ? "Les plus lus" : "Most read"}
-                </h3>
-                <div className="divide-y divide-border-subtle">
-                  {mostRead.map((article, index) => (
-                    <Link
-                      key={article.id}
-                      href={`/articles/${article.slug}`}
-                      className="group grid grid-cols-[3rem_1fr] gap-3 py-4"
-                    >
-                      <span className="editorial-numeral" style={{ fontSize: "1.75rem", color: "var(--border-subtle)" }}>
-                        {String(index + 1).padStart(2, "0")}
-                      </span>
-                      <span className="font-headline text-lg font-bold leading-snug text-foreground transition-colors group-hover:text-primary">
-                        {formatHeadlineTypography(article.title)}
-                      </span>
-                    </Link>
-                  ))}
-                </div>
-              </section>
+              <div className="border-t-2 border-border-strong pt-4">
+                <MostReadList
+                  articles={mostRead}
+                  locale={locale as "fr" | "en"}
+                  kicker={locale === "fr" ? "Lecture" : "Read"}
+                />
+              </div>
             ) : null}
 
             {categories.length > 0 ? (
@@ -244,15 +202,11 @@ export default async function LocalizedHomePage({
             ) : null}
 
             {showNewsletter ? (
-              <section className="border-t-2 border-border-strong pt-4">
-                <p className="section-kicker mb-2">Newsletter</p>
-                <h3 className="font-headline text-2xl font-extrabold leading-tight text-foreground">
-                  {locale === "fr" ? "Recevez les sujets qui comptent." : "Get stories that matter."}
-                </h3>
-                <div className="mt-5">
-                  <NewsletterSignup context="home-sidebar" />
-                </div>
-              </section>
+              <NewsletterBlock
+                locale={locale as "fr" | "en"}
+                variant="sidebar"
+                context="home-sidebar"
+              />
             ) : null}
           </aside>
         </div>
