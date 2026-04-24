@@ -172,6 +172,7 @@ export default function HeroSection({ article, locale }: HeroSectionProps) {
                   alt={displayTitle}
                   fill
                   sizes="(min-width: 1024px) 58vw, 100vw"
+                  quality={92}
                   className="object-cover"
                   priority
                 />

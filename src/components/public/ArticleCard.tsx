@@ -60,7 +60,8 @@ export default function ArticleCard({
                 src={imageSrc}
                 alt={displayTitle}
                 fill
-                sizes="80px"
+                sizes="160px"
+                quality={90}
                 className="object-cover transition-opacity duration-300 group-hover:opacity-90"
               />
             </div>
@@ -90,7 +91,8 @@ export default function ArticleCard({
                 src={imageSrc}
                 alt={displayTitle}
                 fill
-                sizes="(min-width: 640px) 192px, 100vw"
+                sizes="(min-width: 640px) 384px, 100vw"
+                quality={90}
                 className="object-cover transition-opacity duration-300 group-hover:opacity-90"
               />
             </div>
@@ -166,21 +168,18 @@ export default function ArticleCard({
             {article.category.name}
           </p>
         )}
-        <div className="relative mb-4 aspect-[16/10] overflow-hidden bg-surface-elevated">
-          {imageSrc ? (
+        {imageSrc ? (
+          <div className="relative mb-4 aspect-[16/10] overflow-hidden bg-surface-elevated">
             <Image
               src={imageSrc}
               alt={displayTitle}
               fill
-              sizes="(min-width: 1024px) 33vw, (min-width: 768px) 50vw, 100vw"
+              sizes="(min-width: 1024px) 480px, (min-width: 768px) 50vw, 100vw"
+              quality={90}
               className="object-cover transition-opacity duration-300 group-hover:opacity-90"
             />
-          ) : (
-            <div className="flex h-full w-full items-center justify-center border border-border-subtle bg-surface-newsprint">
-              <span className="font-label text-xs font-bold uppercase text-muted">Le Relief</span>
-            </div>
-          )}
-        </div>
+          </div>
+        ) : null}
         <h3 className="font-headline text-2xl font-bold leading-tight text-foreground transition-colors group-hover:text-primary">
           {displayTitle}
         </h3>

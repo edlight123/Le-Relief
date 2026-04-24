@@ -353,6 +353,7 @@ export default async function LocalizedArticlePage({ params }: Props) {
                 })}
                 fill
                 sizes="(min-width: 1280px) 1280px, 100vw"
+                quality={92}
                 className="object-cover"
                 priority
               />
