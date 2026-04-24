@@ -134,15 +134,15 @@ export default async function LocalizedHomePage({
               {secondary.map((article, index) => (
                 <div
                   key={article.id}
-                  className={index < secondary.length - 1 ? "md:border-r md:border-border-subtle" : ""}
+                  className={
+                    index < secondary.length - 1
+                      ? "md:border-r md:border-border-subtle md:pr-6"
+                      : ""
+                  }
                 >
-                  {index === 0 ? (
-                    <ArticleCard article={article} />
-                  ) : (
-                    <div className="md:pl-6">
-                      <ArticleCard article={article} variant="text" />
-                    </div>
-                  )}
+                  <div className={index > 0 ? "md:pl-6" : ""}>
+                    <ArticleCard article={article} variant="text" />
+                  </div>
                 </div>
               ))}
             </div>
