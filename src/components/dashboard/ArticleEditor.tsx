@@ -1028,10 +1028,28 @@ export default function ArticleEditor({
       </div>
 
       {isExistingArticle && initial?.id ? (
-        <div className="grid gap-6 xl:grid-cols-2">
-          <CommentsPanel articleId={initial.id} />
-          <HistoryPanel articleId={initial.id} />
-        </div>
+        <>
+          <div className="flex flex-wrap items-center gap-3 border border-primary/40 bg-primary/5 p-4">
+            <div className="flex-1">
+              <p className="font-label text-xs font-extrabold uppercase tracking-[0.18em] text-primary">
+                Réseaux sociaux
+              </p>
+              <p className="mt-1 font-body text-sm text-foreground">
+                Générez les visuels Instagram, Facebook, X, WhatsApp et autres plateformes pour cet article.
+              </p>
+            </div>
+            <Link
+              href={`/admin/social/${initial.id}`}
+              className="inline-flex items-center gap-2 border border-primary bg-primary px-4 py-2 font-label text-xs uppercase tracking-wider text-on-primary hover:bg-primary/90"
+            >
+              Générer les visuels sociaux →
+            </Link>
+          </div>
+          <div className="grid gap-6 xl:grid-cols-2">
+            <CommentsPanel articleId={initial.id} />
+            <HistoryPanel articleId={initial.id} />
+          </div>
+        </>
       ) : null}
     </div>
   );

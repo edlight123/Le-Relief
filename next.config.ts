@@ -5,18 +5,47 @@ import type { NextConfig } from "next";
 const FIREBASE_EXTERNALS = [
   "firebase-admin",
   "@google-cloud/firestore",
+  "@google-cloud/storage",
   "@grpc/grpc-js",
   "google-auth-library",
   "google-gax",
   "gtoken",
   "gaxios",
   "crypto",
+  // Renderer (Playwright + sharp + native libvips) must never be bundled.
+  "@le-relief/renderer",
+  "@le-relief/types",
+  "playwright-core",
+  "sharp",
 ];
 
 const nextConfig: NextConfig = {
   serverExternalPackages: FIREBASE_EXTERNALS,
   poweredByHeader: false,
   turbopack: {},
+  webpack: (config, { isServer }) => {
+    if (isServer) {
+      // Force webpack to leave native/server-only deps as runtime requires.
+      const externals = Array.isArray(config.externals) ? config.externals : [config.externals].filter(Boolean);
+      config.externals = [
+        ...externals,
+        ({ request }: { request?: string }, callback: (err?: Error | null, result?: string) => void) => {
+          if (!request) return callback();
+          if (
+            request === "playwright-core" ||
+            request.startsWith("playwright-core/") ||
+            request === "sharp" ||
+            request === "@le-relief/renderer" ||
+            request.startsWith("@le-relief/renderer/")
+          ) {
+            return callback(null, "commonjs " + request);
+          }
+          callback();
+        },
+      ];
+    }
+    return config;
+  },
   images: {
     remotePatterns: [{ protocol: "https", hostname: "**" }],
     deviceSizes: [320, 424, 640, 768, 1024, 1280, 1536],

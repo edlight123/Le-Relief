@@ -2,6 +2,11 @@
   "name": "le-relief",
   "version": "0.1.0",
   "private": true,
+  "packageManager": "pnpm@9.12.0",
+  "engines": {
+    "node": ">=20",
+    "pnpm": ">=9"
+  },
   "scripts": {
     "dev": "next dev",
     "build": "next build --webpack",
@@ -10,7 +15,11 @@
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
     "seed": "npx tsx scripts/seed.ts",
-    "qa:translations": "npx tsx scripts/translation-qa.ts"
+    "qa:translations": "npx tsx scripts/translation-qa.ts",
+    "renderer:build": "pnpm --filter @le-relief/types build && pnpm --filter @le-relief/renderer build",
+    "renderer:typecheck": "pnpm --filter @le-relief/types typecheck && pnpm --filter @le-relief/renderer typecheck",
+    "renderer:test": "pnpm --filter @le-relief/renderer test",
+    "renderer:smoke": "pnpm --filter @le-relief/renderer smoke"
   },
   "dependencies": {
     "@opentelemetry/api": "^1.9.1",
@@ -19,6 +28,8 @@
     "clsx": "^2.1.1",
     "date-fns": "^4.1.0",
     "dotenv": "^17.4.2",
+    "@le-relief/renderer": "workspace:*",
+    "@le-relief/types": "workspace:*",
     "firebase-admin": "^13.8.0",
     "lucide-react": "^1.8.0",
     "next": "16.2.3",

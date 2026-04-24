@@ -5,6 +5,8 @@ import {
   type App,
 } from "firebase-admin/app";
 import { initializeFirestore, type Firestore } from "firebase-admin/firestore";
+import { getStorage as getAdminStorage } from "firebase-admin/storage";
+import type { Bucket } from "@google-cloud/storage";
 import { writeFileSync, existsSync } from "fs";
 import { tmpdir } from "os";
 import { join } from "path";
@@ -101,6 +103,25 @@ export function getDb(): Firestore {
     db = initializeFirestore(getApp(), { preferRest: true });
   }
   return db;
+}
+
+/**
+ * Returns the default Cloud Storage bucket. Requires either:
+ *   - FIREBASE_STORAGE_BUCKET env var (e.g. "le-relief.appspot.com"), or
+ *   - the bucket on the resolved service-account project (default <project>.appspot.com).
+ */
+let _bucket: Bucket | null = null;
+export function getBucket(): Bucket {
+  if (_bucket) return _bucket;
+  const name =
+    process.env.FIREBASE_STORAGE_BUCKET ||
+    (process.env.FIREBASE_PROJECT_ID
+      ? `${process.env.FIREBASE_PROJECT_ID}.appspot.com`
+      : undefined);
+  _bucket = name
+    ? getAdminStorage(getApp()).bucket(name)
+    : getAdminStorage(getApp()).bucket();
+  return _bucket;
 }
 
 /**

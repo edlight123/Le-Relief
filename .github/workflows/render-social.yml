@@ -1,0 +1,47 @@
+name: Render social assets
+
+# Manually triggered fallback when Cloud Run is down or for one-off
+# bulk renders. Posts the result back to the Next app via the same
+# /api/admin/social/render endpoint that the admin UI calls.
+
+on:
+  workflow_dispatch:
+    inputs:
+      articleId:
+        description: "Article id to render"
+        required: true
+      platforms:
+        description: "Comma-separated platforms (default: all)"
+        required: false
+        default: "instagram-feed,instagram-story,facebook-feed,facebook-link,x-portrait,x-landscape,whatsapp-status,whatsapp-sticker,threads,tiktok,linkedin-feed,linkedin-link,youtube-short-cover,instagram-reel-cover"
+
+jobs:
+  render:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9.12.0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile=false --filter "@le-relief/renderer-server..."
+      - run: npx playwright install chromium
+      - run: pnpm --filter @le-relief/types build
+      - run: pnpm --filter @le-relief/renderer build
+      - run: pnpm --filter @le-relief/renderer-server build
+      - name: Start renderer
+        run: |
+          PORT=8080 RENDERER_AUTH_TOKEN=local node packages/renderer-server/dist/index.js &
+          sleep 3
+      - name: Trigger render via Next.js
+        env:
+          NEXT_API_URL: ${{ secrets.NEXT_API_URL }}
+          NEXT_API_TOKEN: ${{ secrets.NEXT_API_TOKEN }}
+        run: |
+          curl -fsSL -X POST "$NEXT_API_URL/api/admin/social/render" \
+            -H "authorization: Bearer $NEXT_API_TOKEN" \
+            -H "content-type: application/json" \
+            -d "{\"articleId\":\"${{ inputs.articleId }}\",\"platforms\":${{ toJSON(inputs.platforms) }}.split(',')}"

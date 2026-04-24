@@ -1,0 +1,14 @@
+rules_version = '2';
+
+// All access to Firestore from the Le Relief app goes through the
+// Firebase Admin SDK on the server (Next.js API routes + scripts).
+// Client SDKs MUST NOT read or write directly. This file therefore
+// denies all client access to every collection. The Admin SDK
+// bypasses these rules by design.
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

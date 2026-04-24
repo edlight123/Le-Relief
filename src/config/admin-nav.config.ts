@@ -17,6 +17,7 @@ import {
   Newspaper,
   SendHorizonal,
   Rocket,
+  Share2,
   type LucideIcon,
 } from "lucide-react";
 import type { AppRole } from "@/lib/role-routing";
@@ -154,6 +155,11 @@ const publisherNav: NavGroup[] = [
         icon: ImageIcon,
         alsoActiveFor: ["/dashboard/media"],
       },
+      {
+        label: "Réseaux sociaux",
+        href: "/admin/social",
+        icon: Share2,
+      },
     ],
   },
 ];
@@ -204,6 +210,11 @@ const adminNav: NavGroup[] = [
         href: "/admin/homepage",
         icon: Home,
         alsoActiveFor: ["/dashboard/homepage"],
+      },
+      {
+        label: "Réseaux sociaux",
+        href: "/admin/social",
+        icon: Share2,
       },
     ],
   },

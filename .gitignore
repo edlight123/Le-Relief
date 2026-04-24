@@ -13,6 +13,13 @@ prd.md
 !.yarn/releases
 !.yarn/versions
 
+# Workspace packages — ignore build artifacts and nested deps
+packages/**/node_modules
+packages/**/dist
+packages/**/*.tsbuildinfo
+packages/**/out
+packages/renderer/test-results
+
 # testing
 /coverage
 /playwright-report

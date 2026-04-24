@@ -1,0 +1,29 @@
+{
+  "name": "@le-relief/renderer",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": "./dist/index.js",
+    "./engine": "./dist/engine/index.js",
+    "./platforms": "./dist/platforms/index.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "typecheck": "tsc --noEmit",
+    "dev": "tsc --watch",
+    "smoke": "node --import tsx/esm src/scripts/smoke.ts",
+    "test": "node --import tsx/esm --test src/platforms/platforms.test.ts src/engine/renderSlides.test.ts"
+  },
+  "dependencies": {
+    "@le-relief/types": "workspace:*",
+    "playwright-core": "^1.44.0",
+    "sharp": "^0.34.0"
+  },
+  "devDependencies": {
+    "tsx": "^4.11.0",
+    "typescript": "^5.4.5"
+  }
+}
