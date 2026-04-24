@@ -1,5 +1,5 @@
 {
-  "buildCommand": "pnpm --filter @le-relief/types build && next build --webpack",
+  "buildCommand": "pnpm renderer:build && next build --webpack",
   "framework": "nextjs",
   "crons": [
     {
