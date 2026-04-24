@@ -39,7 +39,7 @@ export const siteConfig = {
   locale: "fr-FR",
   socials: {
     instagram: "https://www.instagram.com/lereliefhaiti",
-    facebook: "",
+    facebook: "https://www.facebook.com/profile.php?id=100065575869522",
     x: "https://x.com/lereliefhaiti",
   },
   nav: {
