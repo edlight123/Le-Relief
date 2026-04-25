@@ -34,13 +34,7 @@ export default function Navbar() {
   const navItems =
     locale === "fr"
       ? siteConfig.nav.public
-      : [
-          { label: "Home", href: "/" },
-          { label: "Categories", href: "/categories" },
-          { label: "Search", href: "/search" },
-          { label: "About", href: "/about" },
-          { label: "Contact", href: "/contact" },
-        ];
+      : siteConfig.nav.publicEn;
 
   return (
     <header className="sticky top-0 z-50 border-b border-border-strong bg-background/95 backdrop-blur-sm">
