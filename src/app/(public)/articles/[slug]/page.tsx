@@ -386,7 +386,11 @@ export default async function ArticlePage({ params }: Props) {
             <TableOfContents toc={article.toc} />
           ) : null}
 
-          <ArticleShareButtons url={articleUrl} title={article.title} />
+          <ArticleShareButtons
+            url={articleUrl}
+            title={article.title}
+            locale={article.language === "en" ? "en" : "fr"}
+          />
 
           <section className="border-t border-border-subtle pt-5">
             <p className="section-kicker mb-3">Lettre</p>

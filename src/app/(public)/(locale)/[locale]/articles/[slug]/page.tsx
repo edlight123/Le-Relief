@@ -439,7 +439,11 @@ export default async function LocalizedArticlePage({ params }: Props) {
           <aside className="space-y-8 border-t-2 border-border-strong pt-4 lg:sticky lg:top-28 lg:h-fit lg:border-l lg:border-t-0 lg:pl-8" data-print-hide>
             {article.toc.length >= 3 ? <TableOfContents toc={article.toc} locale={locale} /> : null}
 
-            <ArticleShareButtons url={articleUrl} title={article.title} />
+            <ArticleShareButtons
+              url={articleUrl}
+              title={article.title}
+              locale={locale as "fr" | "en"}
+            />
 
             <section className="border-t border-border-subtle pt-5">
               <p className="section-kicker mb-3">Newsletter</p>

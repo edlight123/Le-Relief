@@ -1,8 +1,5 @@
-"use client";
-
 import { Mail, Share2 } from "lucide-react";
 import CopyLinkButton from "@/components/public/CopyLinkButton";
-import { useLocaleContext } from "@/hooks/useLocaleContext";
 
 function FacebookIcon({ className }: { className?: string }) {
   return (
@@ -31,6 +28,7 @@ function WhatsAppIcon({ className }: { className?: string }) {
 interface ArticleShareButtonsProps {
   url: string;
   title: string;
+  locale?: "fr" | "en";
   variant?: "sidebar" | "footer";
 }
 
@@ -41,9 +39,9 @@ interface ArticleShareButtonsProps {
 export default function ArticleShareButtons({
   url,
   title,
+  locale = "fr",
   variant = "sidebar",
 }: ArticleShareButtonsProps) {
-  const locale = useLocaleContext();
   const shareText = `${title} — ${url}`;
 
   const platforms = [
