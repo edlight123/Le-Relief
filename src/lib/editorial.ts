@@ -677,14 +677,12 @@ export async function getHomepageContent(
       ? [hero, ...curatedSecondary, ...homepageFeatured, ...latest]
       : [...curatedSecondary, ...homepageFeatured, ...latest],
   );
-  const homepageArticles = allArticles.some(hasHomepageImage)
-    ? allArticles.filter(hasHomepageImage)
-    : allArticles;
+  const homepageArticles = allArticles;
   const used = new Set(hero ? [hero.id] : []);
   const remaining = excludeIds(homepageArticles, used);
   const secondary = uniqueById([
     ...curatedSecondary.filter(
-      (article) => article.id !== hero?.id && hasHomepageImage(article),
+      (article) => article.id !== hero?.id,
     ),
     ...remaining,
   ]).slice(0, 3);
