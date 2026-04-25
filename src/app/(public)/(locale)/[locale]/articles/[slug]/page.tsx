@@ -7,7 +7,7 @@ import { enUS, fr } from "date-fns/locale";
 import NewsletterSignup from "@/components/public/NewsletterSignup";
 import Breadcrumb from "@/components/public/Breadcrumb";
 import ReadingProgress from "@/components/public/ReadingProgress";
-import CopyLinkButton from "@/components/public/CopyLinkButton";
+import ArticleShareButtons from "@/components/public/ArticleShareButtons";
 import TableOfContents from "@/components/public/TableOfContents";
 import ArticleViewTracker from "@/components/public/ArticleViewTracker";
 import AITranslationNotice from "@/components/public/AITranslationNotice";
@@ -439,14 +439,7 @@ export default async function LocalizedArticlePage({ params }: Props) {
           <aside className="space-y-8 border-t-2 border-border-strong pt-4 lg:sticky lg:top-28 lg:h-fit lg:border-l lg:border-t-0 lg:pl-8" data-print-hide>
             {article.toc.length >= 3 ? <TableOfContents toc={article.toc} locale={locale} /> : null}
 
-            <section>
-              <p className="section-kicker mb-3">
-                {locale === "fr" ? "Partager" : "Share"}
-              </p>
-              <div className="flex flex-col gap-3 font-label text-xs font-bold uppercase">
-                <CopyLinkButton url={articleUrl} />
-              </div>
-            </section>
+            <ArticleShareButtons url={articleUrl} title={article.title} />
 
             <section className="border-t border-border-subtle pt-5">
               <p className="section-kicker mb-3">Newsletter</p>
