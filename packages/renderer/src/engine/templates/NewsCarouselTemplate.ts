@@ -24,6 +24,7 @@ import { getTemplateConfig } from "../config/templateLimits.js";
 import {
   BRAND,
   GOOGLE_FONTS_LINK,
+  brandLogoHtml,
   escapeHtml,
   getBrandAccent,
   getBrandBackground,
@@ -101,11 +102,12 @@ function buildCoverSlide(
   const deckWeight = editorial ? 500 : 500;
   const deckOpacity = editorial ? 0.95 : 0.88;
   const deckSize = editorial ? Math.round(deckZone.fontSize * 1.12) : deckZone.fontSize;
+  const logo = brandLogoHtml(34);
 
   // Editorial kicker replaces the bold pill: thin uppercase rule + label.
   const topMark = editorial
     ? `<div class="kicker"><span class="kicker-rule"></span><span class="kicker-label">${escapeHtml(label)}</span></div>`
-    : `<span class="pill">${escapeHtml(label)}</span>`;
+    : `<div class="brand-chip">${logo}<span class="pill">${escapeHtml(label)}</span></div>`;
 
   return `<!DOCTYPE html><html><head><meta charset="utf-8">${GOOGLE_FONTS_LINK}
 <style>
@@ -113,7 +115,8 @@ ${baseReset(bg, bodyBg)}
 .overlay { position:absolute;inset:0;background:${overlay};pointer-events:none; }
 .canvas { position:absolute;inset:0;display:flex;flex-direction:column;padding:92px 90px 100px;justify-content:space-between; }
 .top { display:flex;justify-content:space-between;align-items:flex-start; }
-.pill { display:inline-flex;align-items:center;background:${accent};color:#000;font-family:${fonts.headline};font-size:20px;font-weight:800;text-transform:uppercase;letter-spacing:3px;padding:10px 24px;border-radius:4px; }
+.brand-chip { display:inline-flex;align-items:center;gap:12px; }
+.pill { display:inline-flex;align-items:center;background:linear-gradient(135deg, ${accent} 0%, ${BRAND.colors.primaryDark} 100%);color:#fff;font-family:${fonts.headline};font-size:18px;font-weight:800;text-transform:uppercase;letter-spacing:2.8px;padding:12px 24px;border-radius:999px;border:1px solid rgba(255,255,255,0.18);box-shadow:0 10px 26px rgba(0,0,0,0.28); }
 .kicker { display:inline-flex;align-items:center;gap:18px; }
 .kicker-rule { width:42px;height:2px;background:${accent}; }
 .kicker-label { font-family:${fonts.headline};font-size:18px;font-weight:700;letter-spacing:5px;text-transform:uppercase;color:${accent}; }
@@ -177,18 +180,20 @@ function buildDetailSlide(
   const bodyWeight = editorial ? 500 : 400;
   // Drop cap for the first non-bulleted paragraph on editorial detail slides.
   const useDropCap = editorial && !hasBullets && Boolean(slide.body);
+  const logo = brandLogoHtml(32);
 
   // Editorial kicker (thin rule + label) instead of the loud accent pill.
   const topMark = editorial
     ? `<div class="kicker"><span class="kicker-rule"></span><span class="kicker-label">${escapeHtml(label)}</span></div>`
-    : `<span class="pill">${escapeHtml(label)}</span>`;
+    : `<div class="brand-chip">${logo}<span class="pill">${escapeHtml(label)}</span></div>`;
 
   return `<!DOCTYPE html><html><head><meta charset="utf-8">${GOOGLE_FONTS_LINK}
 <style>
 ${baseReset(bg)}
 .canvas { position:absolute;inset:0;display:flex;flex-direction:column;padding:92px 90px 100px;justify-content:space-between; }
 .top { display:flex;justify-content:space-between;align-items:flex-start; }
-.pill { display:inline-flex;align-items:center;background:${accent};color:#000;font-family:${fonts.headline};font-size:20px;font-weight:800;text-transform:uppercase;letter-spacing:3px;padding:10px 24px;border-radius:4px; }
+.brand-chip { display:inline-flex;align-items:center;gap:12px; }
+.pill { display:inline-flex;align-items:center;background:linear-gradient(135deg, ${accent} 0%, ${BRAND.colors.primaryDark} 100%);color:#fff;font-family:${fonts.headline};font-size:18px;font-weight:800;text-transform:uppercase;letter-spacing:2.8px;padding:12px 24px;border-radius:999px;border:1px solid rgba(255,255,255,0.18);box-shadow:0 10px 26px rgba(0,0,0,0.28); }
 .kicker { display:inline-flex;align-items:center;gap:18px; }
 .kicker-rule { width:42px;height:2px;background:${accent}; }
 .kicker-label { font-family:${fonts.headline};font-size:18px;font-weight:700;letter-spacing:5px;text-transform:uppercase;color:${accent}; }
@@ -231,6 +236,7 @@ function buildDataSlide(
   totalSlides: number,
 ): string {
   const cfg = getTemplateConfig("news-carousel");
+  const logo = brandLogoHtml(32);
   const statZone = resolveZone(cfg, "statValue", "data")!;
   const statSize = resolveEffectiveFontSize(statZone, slide.statValue ?? "");
   const descZone = resolveZone(cfg, "statDescription", "data")!;
@@ -239,7 +245,8 @@ function buildDataSlide(
 ${baseReset(bg)}
 .canvas { position:absolute;inset:0;display:flex;flex-direction:column;padding:92px 90px 100px;justify-content:space-between; }
 .top { display:flex;justify-content:space-between;align-items:flex-start; }
-.pill { display:inline-flex;align-items:center;background:${accent};color:#000;font-family:${fonts.headline};font-size:20px;font-weight:800;text-transform:uppercase;letter-spacing:3px;padding:10px 24px;border-radius:4px; }
+.brand-chip { display:inline-flex;align-items:center;gap:12px; }
+.pill { display:inline-flex;align-items:center;background:linear-gradient(135deg, ${accent} 0%, ${BRAND.colors.primaryDark} 100%);color:#fff;font-family:${fonts.headline};font-size:18px;font-weight:800;text-transform:uppercase;letter-spacing:2.8px;padding:12px 24px;border-radius:999px;border:1px solid rgba(255,255,255,0.18);box-shadow:0 10px 26px rgba(0,0,0,0.28); }
 .counter { font-family:${fonts.headline};font-size:17px;font-weight:600;opacity:0.3;letter-spacing:1px; }
 .mid { flex:1;display:flex;flex-direction:column;justify-content:center;align-items:flex-start;gap:24px; }
 .stat { font-family:${fonts.headline};font-size:${statSize}px;font-weight:900;line-height:${statZone.lineHeight};letter-spacing:-4px;color:${accent};overflow:hidden;display:-webkit-box;-webkit-line-clamp:${statZone.limits.maxLines ?? 2};-webkit-box-orient:vertical; }
@@ -249,7 +256,7 @@ ${baseReset(bg)}
 ${premiumAtmosphereHtml(accent)}
 <div class="canvas">
   <div class="top">
-    <span class="pill">${escapeHtml(label)}</span>
+    <div class="brand-chip">${logo}<span class="pill">${escapeHtml(label)}</span></div>
   </div>
   <div class="mid">
     <p class="stat">${escapeHtml(slide.statValue ?? "—")}</p>
@@ -270,6 +277,7 @@ function buildCtaSlide(
   totalSlides: number,
 ): string {
   const hasImage = Boolean(slide.imageUrl);
+  const logo = brandLogoHtml(42);
   const bodyBg = hasImage ? `${bg} url('${slide.imageUrl}') center/cover no-repeat` : bg;
   const overlay = hasImage
     ? `linear-gradient(180deg, rgba(0,0,0,0.75) 0%, rgba(0,0,0,0.3) 40%, rgba(0,0,0,0.6) 70%, rgba(0,0,0,0.92) 100%)`
@@ -280,7 +288,7 @@ function buildCtaSlide(
 ${baseReset(bg, bodyBg)}
 ${hasImage ? `.img-overlay { position:absolute;inset:0;background:${overlay};pointer-events:none; }` : ""}
 .canvas { position:absolute;inset:0;display:flex;flex-direction:column;justify-content:space-between;padding:80px 90px; }
-.top-brand { display:flex;align-items:center;gap:10px;font-family:${fonts.headline};font-size:24px;font-weight:900;letter-spacing:4px; }
+.top-brand { display:flex;align-items:center;gap:12px;font-family:${fonts.headline};font-size:24px;font-weight:900;letter-spacing:4px; }
 .top-brand .el { color:rgba(255,255,255,0.88); }
 .top-brand .nw { color:${accent}; }
 .top-rule { width:56px;height:3px;background:${accent};border-radius:2px;margin-top:14px; }
@@ -293,7 +301,7 @@ ${hasImage ? `.img-overlay { position:absolute;inset:0;background:${overlay};poi
 ${hasImage ? `<div class="img-overlay"></div>` : ""}
 <div class="canvas">
   <div>
-    <div class="top-brand"><span class="el">${BRAND.wordmark.left}</span><span class="nw">${BRAND.wordmark.right}</span></div>
+    <div class="top-brand">${logo}<span class="el">${BRAND.wordmark.left}</span><span class="nw">${BRAND.wordmark.right}</span></div>
     <div class="top-rule"></div>
   </div>
   <div class="center">
