@@ -62,6 +62,11 @@ export function articleToSocialContent(article: Article): ArticleSocialContent {
       supportLine: supportLine || undefined,
       sourceLine,
       layoutVariant: "cover",
+      // Cover image (already upgraded upstream by `upgradeCoverImage`).
+      // The cover template renders this as a full-bleed photo with a
+      // brand-colour gradient overlay. When absent we fall back to the
+      // brand gradient alone.
+      imageUrl: article.coverImage?.trim() || undefined,
     },
     {
       slideNumber: 2,

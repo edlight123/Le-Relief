@@ -64,6 +64,8 @@ interface RenderRequest {
     language?: "fr" | "en";
     contentType?: string;
     isBreaking?: boolean;
+    /** Pre-upgraded cover image URL (see src/lib/social/cover-image-upgrade.ts). */
+    coverImage?: string | null;
     author?: { name?: string };
     category?: { slug?: string };
   };
@@ -156,7 +158,7 @@ function articleToContent(a: RenderRequest["article"]) {
       sourceNote: sourceLine,
     },
     rawSlides: [
-      { slideNumber: 1, headline, supportLine: supportLine || undefined, sourceLine, layoutVariant: "cover" as const },
+      { slideNumber: 1, headline, supportLine: supportLine || undefined, sourceLine, layoutVariant: "cover" as const, imageUrl: a.coverImage?.trim() || undefined },
       { slideNumber: 2, headline: isFr ? "L'essentiel" : "Key points", body: detailBody, sourceLine, layoutVariant: "detail" as const },
       { slideNumber: 3, headline: isFr ? "Lire l'article" : "Read more", supportLine: `${isFr ? "Lire sur" : "Read on"} ${SITE.replace(/^https?:\/\//, "")}.`, sourceLine, layoutVariant: "cta" as const },
     ],

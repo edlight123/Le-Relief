@@ -21,6 +21,7 @@ import type { PlatformId } from "@le-relief/types";
 import type { Article } from "@/types/article";
 import type { PlatformPostState, SocialAsset } from "@/types/social";
 import { articleToSocialContent } from "./article-to-post";
+import { upgradeCoverImage } from "./cover-image-upgrade";
 
 export interface RenderInput {
   article: Article;
@@ -36,10 +37,41 @@ export interface RenderResult {
 export async function renderArticleSocialAssets(
   input: RenderInput,
 ): Promise<RenderResult> {
+  // Try to upgrade the article's cover image to a high-resolution version
+  // BEFORE handing it off to the renderer. WordPress-imported covers are
+  // typically tiny thumbnails (≤ 600 px) that look awful blown up to the
+  // 1080-wide IG canvas. The upgrade step (a) reverse-image-searches via
+  // Google Vision WEB_DETECTION for the same photo at higher resolution
+  // and (b) Gemini-Flash-Lite-validates the result before swapping.
+  // Failure mode is "soft pass" — keeps the original on any error.
+  const upgradedWarnings: string[] = [];
+  let articleForRender = input.article;
+  try {
+    const upgrade = await upgradeCoverImage(input.article);
+    if (upgrade.upgraded && upgrade.imageUrl) {
+      articleForRender = { ...input.article, coverImage: upgrade.imageUrl } as Article;
+      upgradedWarnings.push(
+        `cover-image: upgraded via ${upgrade.source} — ${upgrade.reason}`,
+      );
+    } else if (upgrade.source === "rejected-by-vision") {
+      upgradedWarnings.push(`cover-image: ${upgrade.reason}`);
+    }
+  } catch (err) {
+    upgradedWarnings.push(
+      `cover-image upgrade failed (using publisher image): ${
+        err instanceof Error ? err.message : String(err)
+      }`,
+    );
+  }
+
   const mode = process.env.RENDERER_MODE === "cloud-run" ? "cloud-run" : "inline";
-  return mode === "cloud-run"
-    ? renderViaCloudRun(input)
-    : renderInline(input);
+  const result = await (mode === "cloud-run"
+    ? renderViaCloudRun({ ...input, article: articleForRender })
+    : renderInline({ ...input, article: articleForRender }));
+  if (upgradedWarnings.length) {
+    result.warnings = [...upgradedWarnings, ...result.warnings];
+  }
+  return result;
 }
 
 // ── Inline path (dev / Cloud Run worker) ────────────────────────────────────

@@ -108,16 +108,21 @@ export function getDb(): Firestore {
 
 /**
  * Returns the default Cloud Storage bucket. Requires either:
- *   - FIREBASE_STORAGE_BUCKET env var (e.g. "le-relief.appspot.com"), or
- *   - the bucket on the resolved service-account project (default <project>.appspot.com).
+ *   - FIREBASE_STORAGE_BUCKET env var (e.g. "le-relief-haiti.firebasestorage.app"), or
+ *   - the bucket on the resolved service-account project.
+ *
+ * Firebase projects created with the newer provisioning path use
+ * `<project>.firebasestorage.app` as their default bucket (not
+ * `<project>.appspot.com`). We default to that suffix first.
  */
 let _bucket: Bucket | null = null;
 export function getBucket(): Bucket {
   if (_bucket) return _bucket;
+  const projectId = process.env.FIREBASE_PROJECT_ID?.replace(/^"+|"+$/g, "");
   const name =
     process.env.FIREBASE_STORAGE_BUCKET ||
-    (process.env.FIREBASE_PROJECT_ID
-      ? `${process.env.FIREBASE_PROJECT_ID}.appspot.com`
+    (projectId
+      ? `${projectId}.firebasestorage.app`
       : undefined);
   _bucket = name
     ? getAdminStorage(getApp()).bucket(name)
