@@ -657,8 +657,22 @@ export async function getHomepageContent(
   }
 
   try {
-    const rawLatest = await articlesRepo.getPublishedArticles(24, locale);
-    latest = await hydrateArticles(rawLatest);
+    const [rawLatestByPublished, latestByCreatedResult] = await Promise.all([
+      articlesRepo.getPublishedArticles(24, locale),
+      articlesRepo.getArticles({
+        status: "published",
+        language: locale,
+        take: 24,
+        orderBy: "createdAt",
+      }),
+    ]);
+
+    const [latestByPublished, latestByCreated] = await Promise.all([
+      hydrateArticles(rawLatestByPublished),
+      hydrateArticles(latestByCreatedResult.articles),
+    ]);
+
+    latest = uniqueById([...latestByCreated, ...latestByPublished]);
   } catch {
     latest = [];
   }
