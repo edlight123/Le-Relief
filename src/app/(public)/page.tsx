@@ -2,6 +2,7 @@ import Link from "next/link";
 import HeroSection from "@/components/public/HeroSection";
 import ArticleCard from "@/components/public/ArticleCard";
 import LatestArticlesFeed from "@/components/public/LatestArticlesFeed";
+import FeatureStories from "@/components/public/FeatureStories";
 import CategoryGrid from "@/components/public/CategoryGrid";
 import NewsletterSignup from "@/components/public/NewsletterSignup";
 import { getHomepageContent } from "@/lib/public-content";
@@ -55,30 +56,19 @@ export default async function HomePage() {
       <HeroSection article={hero || undefined} />
 
       <div className="newspaper-shell">
+        {/* "À Suivre" - Secondary/Featured Stories Section */}
         {secondary.length > 0 ? (
-          <section className="mb-14 sm:mb-20">
-            <SectionHeader kicker="À la une" title="Les autres titres" />
-            <div className="grid gap-0 md:grid-cols-3">
-              {secondary.length > 0 ? (
-                <div className="md:col-span-2 md:border-r md:border-border-subtle md:pr-6">
-                  <ArticleCard article={secondary[0]} variant="list" />
-                </div>
-              ) : null}
-              {secondary.length > 1 ? (
-                <div className="flex flex-col divide-y divide-border-subtle md:pl-6">
-                  {secondary.slice(1).map((article) => (
-                    <ArticleCard key={article.id} article={article} variant="text" />
-                  ))}
-                </div>
-              ) : null}
-            </div>
+          <section className="mb-14 border-b-4 border-border-strong pb-14 sm:mb-20 sm:pb-20">
+            <FeatureStories
+              stories={secondary}
+              kicker="À la une"
+              title="À suivre"
+            />
           </section>
         ) : null}
 
         <div
-          className={`grid gap-10 lg:grid-cols-[minmax(0,1fr)_300px] lg:gap-12 ${
-            secondary.length > 0 ? "border-t border-border-subtle pt-10 sm:pt-12" : ""
-          }`}
+          className={`grid gap-10 lg:grid-cols-[minmax(0,1fr)_300px] lg:gap-12`}
         >
           <div className="min-w-0">
             {latest.length > 0 ? (

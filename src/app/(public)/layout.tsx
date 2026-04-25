@@ -1,11 +1,15 @@
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
+import CategoryNavigation from "@/components/public/CategoryNavigation";
+import { getPublicCategories } from "@/lib/public-content";
 
-export default function PublicLayout({
+export default async function PublicLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const categories = await getPublicCategories(true);
+
   return (
     <>
       <a
@@ -15,6 +19,7 @@ export default function PublicLayout({
         Aller au contenu
       </a>
       <Navbar />
+      <CategoryNavigation categories={categories} />
       <main id="main-content" className="flex-1">{children}</main>
       <Footer />
     </>

@@ -8,7 +8,7 @@ import RelatedArticles from "@/components/public/RelatedArticles";
 import NewsletterSignup from "@/components/public/NewsletterSignup";
 import Breadcrumb from "@/components/public/Breadcrumb";
 import ReadingProgress from "@/components/public/ReadingProgress";
-import CopyLinkButton from "@/components/public/CopyLinkButton";
+import ArticleShareButtons from "@/components/public/ArticleShareButtons";
 import TableOfContents from "@/components/public/TableOfContents";
 import { siteConfig } from "@/config/site.config";
 import {
@@ -386,34 +386,7 @@ export default async function ArticlePage({ params }: Props) {
             <TableOfContents toc={article.toc} />
           ) : null}
 
-          <section>
-            <p className="section-kicker mb-3">Partager</p>
-            <div className="flex flex-col gap-3 font-label text-xs font-bold uppercase">
-              <a
-                href={`https://wa.me/?text=${encodeURIComponent(article.title + " — " + articleUrl)}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="ink-link text-muted"
-              >
-                Partager sur WhatsApp
-              </a>
-              <a
-                href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(article.title)}&url=${encodeURIComponent(articleUrl)}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="ink-link text-muted"
-              >
-                Partager sur X
-              </a>
-              <a
-                href={`mailto:?subject=${encodeURIComponent(article.title)}&body=${encodeURIComponent(articleUrl)}`}
-                className="ink-link text-muted"
-              >
-                Envoyer par courriel
-              </a>
-              <CopyLinkButton url={articleUrl} />
-            </div>
-          </section>
+          <ArticleShareButtons url={articleUrl} title={article.title} />
 
           <section className="border-t border-border-subtle pt-5">
             <p className="section-kicker mb-3">Lettre</p>
