@@ -38,7 +38,7 @@ export interface ArticleSocialContent {
 }
 
 export function articleToSocialContent(article: Article): ArticleSocialContent {
-  const lang = article.language;
+  const lang = article.language === "en" ? "en" : "fr";
   const isFr = lang === "fr";
   const sourceLine = article.author?.name
     ? `${isFr ? "Par" : "By"} ${article.author.name}`

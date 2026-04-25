@@ -61,7 +61,7 @@ interface RenderRequest {
     excerpt?: string;
     body: string;
     slug: string;
-    language: "fr" | "en";
+    language?: "fr" | "en";
     contentType?: string;
     isBreaking?: boolean;
     author?: { name?: string };
@@ -133,7 +133,8 @@ app.post("/render", async (req, res) => {
 });
 
 function articleToContent(a: RenderRequest["article"]) {
-  const isFr = a.language === "fr";
+  const language: "fr" | "en" = a.language === "en" ? "en" : "fr";
+  const isFr = language === "fr";
   const SITE = process.env.NEXT_PUBLIC_SITE_URL || "https://lereliefhaiti.com";
   const sourceLine = a.author?.name
     ? `${isFr ? "Par" : "By"} ${a.author.name}`
@@ -150,7 +151,7 @@ function articleToContent(a: RenderRequest["article"]) {
       topic: headline,
       sourceSummary: stripHtml(a.excerpt) || stripHtml(a.body).slice(0, 400),
       category: a.category?.slug || "news",
-      preferredLanguage: a.language,
+      preferredLanguage: language,
       urgencyLevel: (a.isBreaking ? "breaking" : "normal") as "breaking" | "normal",
       sourceNote: sourceLine,
     },

@@ -29,6 +29,10 @@ const ALL_PLATFORMS: PlatformId[] = [
   "youtube-short-cover",
 ];
 
+function normalizeArticleLanguage(article: { language?: unknown }): Article["language"] {
+  return article.language === "en" ? "en" : "fr";
+}
+
 export async function POST(req: NextRequest) {
   const session = await auth();
   if (!session?.user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -73,12 +77,14 @@ export async function POST(req: NextRequest) {
 
   const article = (await articlesRepo.getArticle(articleId)) as Article | null;
   if (!article) return NextResponse.json({ error: "Article not found" }, { status: 404 });
+  const articleLanguage = normalizeArticleLanguage(article);
+  const articleForRender = { ...article, language: articleLanguage } as Article;
 
   const actorId = (session.user.id as string) || "unknown";
   const actorEmail = (session.user.email as string) || null;
 
   try {
-    const result = await renderArticleSocialAssets({ article, platforms });
+    const result = await renderArticleSocialAssets({ article: articleForRender, platforms });
     const renderedCount = Object.keys(result.platforms).length;
 
     // If nothing rendered, surface the underlying warnings rather than
@@ -102,7 +108,7 @@ export async function POST(req: NextRequest) {
       articleId: article.id,
       articleSlug: article.slug,
       articleTitle: article.title,
-      articleLanguage: article.language,
+      articleLanguage,
       brandName: result.brandName,
       status,
       platforms: result.platforms,
