@@ -280,6 +280,7 @@ interface UploadInput {
 async function uploadSlide(input: UploadInput): Promise<SocialAsset> {
   const bucket = getBucket();
   const hash = crypto.randomBytes(4).toString("hex");
+  const downloadToken = crypto.randomUUID();
   const filename = `slide-${String(input.slideNumber).padStart(2, "0")}-${hash}.${input.format}`;
   const storagePath = `social/${input.articleId}/${input.platform}/${filename}`;
   const file = bucket.file(storagePath);
@@ -295,24 +296,13 @@ async function uploadSlide(input: UploadInput): Promise<SocialAsset> {
     resumable: false,
     metadata: {
       cacheControl: "public, max-age=31536000, immutable",
+      metadata: {
+        firebaseStorageDownloadTokens: downloadToken,
+      },
     },
   });
-  await file.makePublic().catch(() => {
-    /* If uniform bucket-level access is on, makePublic throws — we still
-       return a signed URL via getSignedUrl in that case. */
-  });
 
-  // Prefer a stable public URL; fall back to a long-lived signed URL.
-  let url: string;
-  try {
-    url = `https://storage.googleapis.com/${bucket.name}/${encodeURI(storagePath)}`;
-  } catch {
-    const [signed] = await file.getSignedUrl({
-      action: "read",
-      expires: Date.now() + 1000 * 60 * 60 * 24 * 365,
-    });
-    url = signed;
-  }
+  const url = firebaseDownloadUrl(bucket.name, storagePath, downloadToken);
 
   return {
     url,
@@ -323,6 +313,12 @@ async function uploadSlide(input: UploadInput): Promise<SocialAsset> {
     sizeBytes: input.buffer.byteLength,
     slideNumber: input.slideNumber,
   };
+}
+
+function firebaseDownloadUrl(bucketName: string, storagePath: string, token: string): string {
+  return `https://firebasestorage.googleapis.com/v0/b/${bucketName}/o/${encodeURIComponent(
+    storagePath,
+  )}?alt=media&token=${token}`;
 }
 
 // ── Helpers ─────────────────────────────────────────────────────────────────
