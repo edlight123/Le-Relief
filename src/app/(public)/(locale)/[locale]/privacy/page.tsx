@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { validateLocale } from "@/lib/locale";
+import { buildCanonicalAlternates } from "@/lib/seo";
 import InstitutionalPageShell, {
   type InstitutionalSection,
 } from "@/components/public/InstitutionalPageShell";
@@ -20,10 +21,11 @@ export async function generateMetadata({
       locale === "fr"
         ? "Ce que Le Relief collecte, pourquoi et comment vos données sont protégées."
         : "What Le Relief collects, why, and how your data is protected.",
-    alternates: {
-      canonical: `/${locale}/privacy`,
-      languages: { fr: "/fr/privacy", en: "/en/privacy" },
-    },
+    alternates: buildCanonicalAlternates(`/${locale}/privacy`, {
+      fr: "/fr/privacy",
+      en: "/en/privacy",
+      "x-default": "/fr/privacy",
+    }),
   };
 }
 

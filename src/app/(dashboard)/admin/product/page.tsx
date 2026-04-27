@@ -15,7 +15,7 @@ export default async function ProductDashboardPage() {
   const session = await auth();
   const role = (session?.user as { role?: string } | undefined)?.role;
   if (!session || (role !== "admin" && role !== "publisher")) {
-    redirect("/dashboard");
+    redirect("/admin");
   }
 
   const db = getDb();

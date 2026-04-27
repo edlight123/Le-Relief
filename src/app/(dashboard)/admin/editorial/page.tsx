@@ -74,7 +74,7 @@ export default async function EditorialDashboardPage() {
   const session = await auth();
   const role = (session?.user as { role?: string } | undefined)?.role;
   if (!session || (role !== "admin" && role !== "publisher" && role !== "editor")) {
-    redirect("/dashboard");
+    redirect("/admin");
   }
 
   const db = getDb();
@@ -300,7 +300,7 @@ export default async function EditorialDashboardPage() {
           </p>
         </div>
         <Link
-          href="/dashboard/articles/new"
+          href="/admin/articles/new"
           className="inline-flex items-center gap-2 rounded-sm bg-primary px-4 py-2 font-label text-xs font-extrabold uppercase tracking-wide text-white transition-colors hover:bg-primary-dark"
         >
           Nouvel article
@@ -450,7 +450,7 @@ export default async function EditorialDashboardPage() {
                         {a.blockingCount} bloquant{a.blockingCount > 1 ? "s" : ""}
                       </span>
                       <Link
-                        href={`/dashboard/articles/${a.articleId}/edit`}
+                        href={`/admin/articles/${a.articleId}/edit`}
                         className="font-label text-xs text-primary hover:underline"
                       >
                         Éditer
@@ -665,7 +665,7 @@ export default async function EditorialDashboardPage() {
                       </span>
                     ) : null}
                     <Link
-                      href={`/dashboard/articles/${a.id as string}/edit`}
+                      href={`/admin/articles/${a.id as string}/edit`}
                       className="font-label text-xs text-primary hover:underline"
                     >
                       Éditer
@@ -755,7 +755,7 @@ export default async function EditorialDashboardPage() {
                       {a.title as string}
                     </span>
                     <Link
-                      href={`/dashboard/articles/${a.id as string}/edit`}
+                      href={`/admin/articles/${a.id as string}/edit`}
                       className="shrink-0 rounded-sm bg-primary px-2 py-1 font-label text-[10px] font-bold uppercase text-white hover:bg-primary-dark"
                     >
                       Réviser
@@ -798,7 +798,7 @@ export default async function EditorialDashboardPage() {
                   ) : null}
                 </div>
                 <Link
-                  href={`/dashboard/articles/${featured.id as string}/edit`}
+                  href={`/admin/articles/${featured.id as string}/edit`}
                   className="font-label text-xs text-primary hover:underline"
                 >
                   Modifier →
@@ -820,7 +820,7 @@ export default async function EditorialDashboardPage() {
           <CardContent>
             <div className="flex flex-col gap-2">
               <Link
-                href="/dashboard/articles/new"
+                href="/admin/articles/new"
                 className="flex items-center gap-2 rounded-sm border border-border-subtle bg-surface-elevated px-3 py-2.5 font-label text-xs font-bold text-foreground transition-colors hover:bg-surface"
               >
                 <FileText className="h-4 w-4 text-primary" />

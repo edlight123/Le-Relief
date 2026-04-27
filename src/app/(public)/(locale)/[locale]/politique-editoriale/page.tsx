@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { validateLocale } from "@/lib/locale";
+import { buildCanonicalAlternates } from "@/lib/seo";
 import InstitutionalPageShell, {
   type InstitutionalSection,
 } from "@/components/public/InstitutionalPageShell";
@@ -21,13 +22,11 @@ export async function generateMetadata({
       locale === "fr"
         ? "Les principes éditoriaux, standards de publication et distinctions de formats de Le Relief."
         : "The editorial principles, publication standards and format distinctions of Le Relief.",
-    alternates: {
-      canonical: `/${locale}/politique-editoriale`,
-      languages: {
-        fr: "/fr/politique-editoriale",
-        en: "/en/politique-editoriale",
-      },
-    },
+    alternates: buildCanonicalAlternates(`/${locale}/politique-editoriale`, {
+      fr: "/fr/politique-editoriale",
+      en: "/en/politique-editoriale",
+      "x-default": "/fr/politique-editoriale",
+    }),
   };
 }
 

@@ -84,6 +84,14 @@ const nextConfig: NextConfig = {
       { source: "/dashboard/authors", destination: "/admin/authors", permanent: true },
       // Admin: settings
       { source: "/dashboard/settings", destination: "/admin/settings", permanent: true },
+      // Analytics pages
+      { source: "/dashboard/analytics", destination: "/admin/analytics", permanent: true },
+      { source: "/dashboard/editorial", destination: "/admin/editorial", permanent: true },
+      { source: "/dashboard/product", destination: "/admin/product", permanent: true },
+      // Article edit (dynamic segment)
+      { source: "/dashboard/articles/:id/edit", destination: "/admin/articles/:id/edit", permanent: true },
+      // Catch-all for any remaining /dashboard/* deep paths
+      { source: "/dashboard/:path*", destination: "/admin/:path*", permanent: true },
     ];
   },
   async headers() {

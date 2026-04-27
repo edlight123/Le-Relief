@@ -26,7 +26,7 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
   /** Collect all nav item hrefs across all groups to detect parent-child overlaps. */
   const allItemHrefs = navGroups.flatMap((g) => g.items.map((it) => it.href));
 
-  function isActive(href: string, exact = false, alsoActiveFor?: string[]) {
+  function isActive(href: string, exact = false) {
     if (exact) return pathname === href;
 
     // If a DIFFERENT nav item is a more specific match for the current path,
@@ -38,22 +38,10 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
         (pathname === other || pathname.startsWith(other + "/")),
     );
     if (hasMoreSpecificItem) {
-      if (pathname === href) return true;
-      if (alsoActiveFor) {
-        return alsoActiveFor.some(
-          (alt) => pathname === alt || pathname.startsWith(alt + "/"),
-        );
-      }
-      return false;
+      return pathname === href;
     }
 
     if (pathname === href || pathname.startsWith(href + "/")) return true;
-
-    if (alsoActiveFor) {
-      return alsoActiveFor.some(
-        (alt) => pathname === alt || pathname.startsWith(alt + "/"),
-      );
-    }
 
     return false;
   }
@@ -113,7 +101,7 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
                 {group.label}
               </p>
               {group.items.map((item) => {
-                const active = isActive(item.href, item.exact, item.alsoActiveFor);
+                const active = isActive(item.href, item.exact);
                 return (
                   <Link
                     key={item.href}

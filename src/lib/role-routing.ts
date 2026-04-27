@@ -39,7 +39,7 @@ export function canAccessRoleScopedRoute(pathname: string, role: AppRole): boole
 }
 
 export function isRoleScopedRoute(pathname: string): boolean {
-  return pathname.startsWith("/admin") || pathname.startsWith("/dashboard");
+  return pathname.startsWith("/admin");
 }
 
 export function toRoleOrNull(role: Role | string | null | undefined): AppRole | null {
@@ -48,7 +48,6 @@ export function toRoleOrNull(role: Role | string | null | undefined): AppRole | 
 
 const ROLE_SCOPED_ROUTE_RULES: RouteAccessRule[] = [
   { prefix: "/admin", allowedRoles: ["writer", "editor", "publisher", "admin"] },
-  { prefix: "/dashboard", allowedRoles: ["writer", "editor", "publisher", "admin"] },
 
   { prefix: "/admin/dashboard", allowedRoles: ["admin"] },
 
@@ -57,33 +56,21 @@ const ROLE_SCOPED_ROUTE_RULES: RouteAccessRule[] = [
   { prefix: "/admin/audit", allowedRoles: ["admin"] },
   { prefix: "/admin/authors", allowedRoles: ["admin"] },
   { prefix: "/admin/sections", allowedRoles: ["admin"] },
-  { prefix: "/dashboard/users", allowedRoles: ["admin"] },
-  { prefix: "/dashboard/settings", allowedRoles: ["admin"] },
-  { prefix: "/dashboard/authors", allowedRoles: ["admin"] },
-  { prefix: "/dashboard/categories", allowedRoles: ["admin"] },
 
   { prefix: "/admin/workspace", allowedRoles: ["writer", "admin"] },
   { prefix: "/admin/drafts", allowedRoles: ["writer", "admin"] },
   { prefix: "/admin/submitted", allowedRoles: ["writer", "admin"] },
   { prefix: "/admin/revisions", allowedRoles: ["writer", "editor", "admin"] },
-  { prefix: "/dashboard/my-drafts", allowedRoles: ["writer", "admin"] },
-  { prefix: "/dashboard/revisions", allowedRoles: ["writer", "editor", "admin"] },
 
   { prefix: "/admin/review", allowedRoles: ["editor", "admin"] },
   { prefix: "/admin/review/attention", allowedRoles: ["editor", "admin"] },
-  { prefix: "/dashboard/review", allowedRoles: ["editor", "admin"] },
 
   { prefix: "/admin/articles/new", allowedRoles: ["writer", "editor", "admin"] },
   { prefix: "/admin/articles", allowedRoles: ["editor", "publisher", "admin"] },
 
   { prefix: "/admin/publishing/published", allowedRoles: ["editor", "publisher", "admin"] },
-  { prefix: "/dashboard/published", allowedRoles: ["editor", "publisher", "admin"] },
 
   { prefix: "/admin/homepage", allowedRoles: ["publisher", "admin"] },
   { prefix: "/admin/media", allowedRoles: ["publisher", "admin"] },
   { prefix: "/admin/publishing", allowedRoles: ["publisher", "admin"] },
-  { prefix: "/dashboard/homepage", allowedRoles: ["publisher", "admin"] },
-  { prefix: "/dashboard/media", allowedRoles: ["publisher", "admin"] },
-  { prefix: "/dashboard/approved", allowedRoles: ["publisher", "admin"] },
-  { prefix: "/dashboard/scheduled", allowedRoles: ["publisher", "admin"] },
 ];

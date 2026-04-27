@@ -36,6 +36,9 @@ interface ArticleBase {
   slug: string;
   body: string;
   excerpt: string | null;
+  keyPoints: string[] | null;
+  context: string | null;
+  sources: Array<{ title: string; url: string }> | null;
   seoTitle: string | null;
   metaDescription: string | null;
   canonicalUrl: string | null;
@@ -95,6 +98,9 @@ interface CreateArticleInputBase {
   subtitle?: string | null;
   body: string;
   excerpt?: string | null;
+  keyPoints?: string[] | null;
+  context?: string | null;
+  sources?: Array<{ title: string; url: string }> | null;
   coverImage?: string | null;
   seoTitle?: string | null;
   metaDescription?: string | null;

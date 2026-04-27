@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
-import { siteConfig } from "@/config/site.config";
 import { validateLocale } from "@/lib/locale";
+import { buildCanonicalAlternates } from "@/lib/seo";
 import InstitutionalPageShell, {
   type InstitutionalSection,
 } from "@/components/public/InstitutionalPageShell";
@@ -19,10 +19,11 @@ export async function generateMetadata({
       locale === "fr"
         ? "Mission et approche éditoriale de Le Relief."
         : "Mission and editorial approach of Le Relief.",
-    alternates: {
-      canonical: `/${locale}/about`,
-      languages: { fr: "/fr/about", en: "/en/about" },
-    },
+    alternates: buildCanonicalAlternates(`/${locale}/about`, {
+      fr: "/fr/about",
+      en: "/en/about",
+      "x-default": "/fr/about",
+    }),
   };
 }
 
@@ -170,7 +171,7 @@ export default async function LocalizedAboutPage({
       slug="about"
       kicker={isFr ? "La rédaction" : "Newsroom"}
       title={
-        isFr ? `À propos de ${siteConfig.name}` : `About ${siteConfig.name}`
+        isFr ? "À propos de Le Relief" : "About Le Relief"
       }
       deck={
         isFr

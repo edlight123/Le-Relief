@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { validateLocale } from "@/lib/locale";
+import { buildCanonicalAlternates } from "@/lib/seo";
 import InstitutionalPageShell, {
   type InstitutionalSection,
 } from "@/components/public/InstitutionalPageShell";
@@ -18,12 +19,13 @@ export async function generateMetadata({
         : "Corrections policy | Le Relief Haïti",
     description:
       locale === "fr"
-        ? "Comment Le Relief corrige ses erreurs factuelles et s’engage envers la précision."
+        ? "Comment Le Relief corrige ses erreurs factuelles et s'engage envers la précision."
         : "How Le Relief corrects factual errors and upholds accuracy.",
-    alternates: {
-      canonical: `/${locale}/corrections`,
-      languages: { fr: "/fr/corrections", en: "/en/corrections" },
-    },
+    alternates: buildCanonicalAlternates(`/${locale}/corrections`, {
+      fr: "/fr/corrections",
+      en: "/en/corrections",
+      "x-default": "/fr/corrections",
+    }),
   };
 }
 

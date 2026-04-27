@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { validateLocale } from "@/lib/locale";
+import { buildCanonicalAlternates } from "@/lib/seo";
 import InstitutionalPageShell, {
   type InstitutionalSection,
 } from "@/components/public/InstitutionalPageShell";
@@ -18,12 +19,13 @@ export async function generateMetadata({
         : "AI-assisted translation | Le Relief Haïti",
     description:
       locale === "fr"
-        ? "Comment Le Relief utilise l’intelligence artificielle dans son processus de traduction."
+        ? "Comment Le Relief utilise l'intelligence artificielle dans son processus de traduction."
         : "How Le Relief uses artificial intelligence in its translation workflow.",
-    alternates: {
-      canonical: `/${locale}/traduction-ia`,
-      languages: { fr: "/fr/traduction-ia", en: "/en/traduction-ia" },
-    },
+    alternates: buildCanonicalAlternates(`/${locale}/traduction-ia`, {
+      fr: "/fr/traduction-ia",
+      en: "/en/traduction-ia",
+      "x-default": "/fr/traduction-ia",
+    }),
   };
 }
 

@@ -28,11 +28,6 @@ export type NavItem = {
   icon: LucideIcon;
   /** Match exact path only — use for root routes like /dashboard */
   exact?: boolean;
-  /**
-   * Additional href prefixes that should also activate this item.
-   * Useful when the canonical new route and legacy route share active state.
-   */
-  alsoActiveFor?: string[];
 };
 
 export type NavGroup = {
@@ -48,25 +43,21 @@ const writerNav: NavGroup[] = [
         label: "Espace de travail",
         href: "/admin/workspace",
         icon: Newspaper,
-        alsoActiveFor: ["/dashboard/my-drafts", "/dashboard"],
       },
       {
         label: "Nouvel article",
         href: "/admin/articles/new",
         icon: PenSquare,
-        alsoActiveFor: ["/dashboard/articles/new"],
       },
       {
         label: "Mes brouillons",
         href: "/admin/drafts",
         icon: FileText,
-        alsoActiveFor: ["/dashboard/my-drafts"],
       },
       {
         label: "Révisions demandées",
         href: "/admin/revisions",
         icon: RotateCcw,
-        alsoActiveFor: ["/dashboard/revisions"],
       },
       { label: "Soumis", href: "/admin/submitted", icon: SendHorizonal },
     ],
@@ -81,7 +72,6 @@ const editorNav: NavGroup[] = [
         label: "Review Queue",
         href: "/admin/review",
         icon: ClipboardCheck,
-        alsoActiveFor: ["/dashboard/review"],
       },
       {
         label: "Besoin d'attention",
@@ -98,13 +88,11 @@ const editorNav: NavGroup[] = [
         label: "Tous les articles",
         href: "/admin/articles",
         icon: FileText,
-        alsoActiveFor: ["/dashboard/articles"],
       },
       {
         label: "Publiés",
         href: "/admin/publishing/published",
         icon: Rocket,
-        alsoActiveFor: ["/dashboard/published"],
       },
     ],
   },
@@ -118,25 +106,21 @@ const publisherNav: NavGroup[] = [
         label: "Tableau de publication",
         href: "/admin/publishing",
         icon: LayoutDashboard,
-        alsoActiveFor: ["/dashboard/approved", "/dashboard/scheduled", "/dashboard/published"],
       },
       {
         label: "Prêts à publier",
         href: "/admin/publishing/ready",
         icon: CheckCircle2,
-        alsoActiveFor: ["/dashboard/approved"],
       },
       {
         label: "Programmés",
         href: "/admin/publishing/scheduled",
         icon: CalendarClock,
-        alsoActiveFor: ["/dashboard/scheduled"],
       },
       {
         label: "Publiés",
         href: "/admin/publishing/published",
         icon: Rocket,
-        alsoActiveFor: ["/dashboard/published"],
       },
     ],
   },
@@ -147,13 +131,11 @@ const publisherNav: NavGroup[] = [
         label: "Une",
         href: "/admin/homepage",
         icon: Home,
-        alsoActiveFor: ["/dashboard/homepage"],
       },
       {
         label: "Médiathèque",
         href: "/admin/media",
         icon: ImageIcon,
-        alsoActiveFor: ["/dashboard/media"],
       },
       {
         label: "Réseaux sociaux",
@@ -173,43 +155,36 @@ const adminNav: NavGroup[] = [
         href: "/admin/dashboard",
         icon: LayoutDashboard,
         exact: true,
-        alsoActiveFor: ["/dashboard"],
       },
       {
         label: "Articles",
         href: "/admin/articles",
         icon: FileText,
-        alsoActiveFor: ["/dashboard/articles"],
       },
       {
         label: "Review Queue",
         href: "/admin/review",
         icon: ClipboardCheck,
-        alsoActiveFor: ["/dashboard/review"],
       },
       {
         label: "Approuvés",
         href: "/admin/publishing/ready",
         icon: CheckCircle2,
-        alsoActiveFor: ["/dashboard/approved"],
       },
       {
         label: "Programmés",
         href: "/admin/publishing/scheduled",
         icon: CalendarClock,
-        alsoActiveFor: ["/dashboard/scheduled"],
       },
       {
         label: "Publiés",
         href: "/admin/publishing/published",
         icon: Rocket,
-        alsoActiveFor: ["/dashboard/published"],
       },
       {
         label: "Une",
         href: "/admin/homepage",
         icon: Home,
-        alsoActiveFor: ["/dashboard/homepage"],
       },
       {
         label: "Réseaux sociaux",
@@ -221,9 +196,9 @@ const adminNav: NavGroup[] = [
   {
     label: "Analyse",
     items: [
-      { label: "Analytiques", href: "/dashboard/analytics", icon: BarChart3 },
-      { label: "Rapport éditorial", href: "/dashboard/editorial", icon: BarChart3 },
-      { label: "Métriques produit", href: "/dashboard/product", icon: BarChart3 },
+      { label: "Analytiques", href: "/admin/analytics", icon: BarChart3 },
+      { label: "Rapport éditorial", href: "/admin/editorial", icon: BarChart3 },
+      { label: "Métriques produit", href: "/admin/product", icon: BarChart3 },
     ],
   },
   {
@@ -233,31 +208,26 @@ const adminNav: NavGroup[] = [
         label: "Auteurs",
         href: "/admin/authors",
         icon: UserCheck,
-        alsoActiveFor: ["/dashboard/authors"],
       },
       {
         label: "Rubriques",
         href: "/admin/sections",
         icon: FolderTree,
-        alsoActiveFor: ["/dashboard/categories"],
       },
       {
         label: "Médiathèque",
         href: "/admin/media",
         icon: ImageIcon,
-        alsoActiveFor: ["/dashboard/media"],
       },
       {
         label: "Utilisateurs",
         href: "/admin/users",
         icon: Users,
-        alsoActiveFor: ["/dashboard/users"],
       },
       {
         label: "Paramètres",
         href: "/admin/settings",
         icon: Settings,
-        alsoActiveFor: ["/dashboard/settings"],
       },
       { label: "Journal d'audit", href: "/admin/audit", icon: BarChart3 },
     ],
