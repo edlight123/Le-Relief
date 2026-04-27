@@ -247,13 +247,17 @@ export async function getHomepageContent(): Promise<HomepageContent> {
   };
 }
 
-export async function getPublicArticleBySlug(slug: string) {
-  const rawArticle = await articlesRepo.findBySlug(slug);
+export async function getPublicArticleBySlug(slug: string, locale?: EditorialLanguage) {
+  const rawArticle = locale
+    ? await articlesRepo.findBySlug(slug, locale)
+    : await articlesRepo.findBySlug(slug);
   if (!rawArticle || rawArticle.status !== "published") return null;
+  if (locale && rawArticle.language !== locale) return null;
   return hydrateArticle(rawArticle);
 }
 
-export async function getRelatedArticles(article: PublicArticle, take = 3) {
+export async function getRelatedArticles(article: PublicArticle, take = 3, locale?: EditorialLanguage) {
+  const targetLanguage = locale || article.language;
   const poolSize = Math.min(Math.max(take * 4, 8), 24);
   const unique = new Map<string, PublicArticle>();
 
@@ -273,7 +277,7 @@ export async function getRelatedArticles(article: PublicArticle, take = 3) {
         status: "published",
         categoryId: article.category.id,
         excludeId: article.id,
-        language: article.language,
+        language: targetLanguage,
         take: poolSize,
       });
       collect(await hydrateArticles(articles));
@@ -283,7 +287,7 @@ export async function getRelatedArticles(article: PublicArticle, take = 3) {
       const { articles } = await articlesRepo.getArticles({
         status: "published",
         excludeId: article.id,
-        language: article.language,
+        language: targetLanguage,
         take: poolSize,
       });
       collect(await hydrateArticles(articles));

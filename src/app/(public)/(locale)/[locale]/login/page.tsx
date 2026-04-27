@@ -7,6 +7,7 @@ import Link from "next/link";
 import Input from "@/components/ui/Input";
 import Button from "@/components/ui/Button";
 import { useLocaleContext } from "@/hooks/useLocaleContext";
+import { hrefForLocale } from "@/lib/locale-routing";
 
 export default function LocalizedLoginPage() {
   const locale = useLocaleContext();
@@ -77,8 +78,15 @@ export default function LocalizedLoginPage() {
 
         <p className="mt-8 text-center font-body text-base text-muted">
           {locale === "fr" ? "Pas encore de compte ?" : "No account yet?"}{" "}
-          <Link href="/signup" className="ink-link font-label font-bold text-primary">
+          <Link href={hrefForLocale("/signup", locale)} className="ink-link font-label font-bold text-primary">
             {locale === "fr" ? "S'inscrire" : "Sign up"}
+          </Link>
+        </p>
+
+        <p className="mt-3 text-center font-body text-sm text-muted">
+          {locale === "fr" ? "Invitation reçue ?" : "Got an invite?"}{" "}
+          <Link href={hrefForLocale("/setup-account", locale)} className="ink-link font-label font-bold text-primary">
+            {locale === "fr" ? "Activer mon compte" : "Activate my account"}
           </Link>
         </p>
       </div>

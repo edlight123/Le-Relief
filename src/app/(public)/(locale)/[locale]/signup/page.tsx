@@ -7,6 +7,7 @@ import { signIn } from "next-auth/react";
 import Input from "@/components/ui/Input";
 import Button from "@/components/ui/Button";
 import { useLocaleContext } from "@/hooks/useLocaleContext";
+import { hrefForLocale } from "@/lib/locale-routing";
 
 export default function LocalizedSignupPage() {
   const locale = useLocaleContext();
@@ -72,7 +73,7 @@ export default function LocalizedSignupPage() {
 
         <p className="mt-8 text-center font-body text-base text-muted">
           {locale === "fr" ? "Déjà un compte ?" : "Already have an account?"}{" "}
-          <Link href="/login" className="ink-link font-label font-bold text-primary">
+          <Link href={hrefForLocale("/login", locale)} className="ink-link font-label font-bold text-primary">
             {locale === "fr" ? "Se connecter" : "Sign in"}
           </Link>
         </p>

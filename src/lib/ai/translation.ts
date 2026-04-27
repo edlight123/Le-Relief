@@ -10,6 +10,8 @@ import type {
 const OPENAI_DEFAULT_BASE_URL = "https://api.openai.com/v1";
 const OPENAI_DEFAULT_MODEL = "gpt-4.1-mini";
 const GEMINI_DEFAULT_MODEL = "gemini-2.0-flash";
+const DEEPSEEK_DEFAULT_BASE_URL = "https://api.deepseek.com/v1";
+const DEEPSEEK_DEFAULT_MODEL = "deepseek-chat";
 
 const REQUIRED_OUTPUT_KEYS: Array<keyof TranslationModelJson> = [
   "titleEn",
@@ -42,13 +44,13 @@ function getProviderFromEnv(): TranslationProvider {
 
   if (!provider) {
     throw new Error(
-      "Missing TRANSLATION_PROVIDER. Set TRANSLATION_PROVIDER=openai or TRANSLATION_PROVIDER=gemini.",
+      "Missing TRANSLATION_PROVIDER. Set TRANSLATION_PROVIDER=openai, gemini, or deepseek.",
     );
   }
 
-  if (provider !== "openai" && provider !== "gemini") {
+  if (provider !== "openai" && provider !== "gemini" && provider !== "deepseek") {
     throw new Error(
-      `Unsupported TRANSLATION_PROVIDER=\"${provider}\". Allowed values: openai, gemini.`,
+      `Unsupported TRANSLATION_PROVIDER=\"${provider}\". Allowed values: openai, gemini, deepseek.`,
     );
   }
 
@@ -239,6 +241,58 @@ async function callGeminiCompatible(
   return { model, text, rawResponse };
 }
 
+async function callDeepSeekCompatible(
+  systemPrompt: string,
+  userPrompt: string,
+): Promise<{ model: string; text: string; rawResponse: string }> {
+  const apiKey = process.env.DEEPSEEK_API_KEY?.trim();
+  if (!apiKey) {
+    throw new Error("Missing DEEPSEEK_API_KEY for TRANSLATION_PROVIDER=deepseek.");
+  }
+
+  const model = process.env.DEEPSEEK_MODEL?.trim() || DEEPSEEK_DEFAULT_MODEL;
+  const baseUrl =
+    (process.env.DEEPSEEK_BASE_URL?.trim() || DEEPSEEK_DEFAULT_BASE_URL).replace(/\/$/, "");
+  const url = `${baseUrl}/chat/completions`;
+
+  const response = await fetch(url, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${apiKey}`,
+    },
+    body: JSON.stringify({
+      model,
+      temperature: 0.2,
+      messages: [
+        { role: "system", content: systemPrompt },
+        { role: "user", content: userPrompt },
+      ],
+    }),
+  });
+
+  const rawResponse = await response.text();
+  if (!response.ok) {
+    throw new Error(
+      `DeepSeek translation request failed (${response.status}): ${rawResponse}`,
+    );
+  }
+
+  let parsed: OpenAiChatResponse;
+  try {
+    parsed = JSON.parse(rawResponse) as OpenAiChatResponse;
+  } catch {
+    throw new Error("DeepSeek provider returned non-JSON HTTP response.");
+  }
+
+  const text = extractTextFromOpenAiContent(parsed.choices?.[0]?.message?.content);
+  if (!text) {
+    throw new Error("DeepSeek provider returned no message content.");
+  }
+
+  return { model, text, rawResponse };
+}
+
 export async function translateFrenchArticleToEnglish(
   input: TranslationInput,
   options: TranslationPromptOptions = {},
@@ -250,7 +304,9 @@ export async function translateFrenchArticleToEnglish(
   const providerResult =
     provider === "openai"
       ? await callOpenAiCompatible(systemPrompt, userPrompt)
-      : await callGeminiCompatible(systemPrompt, userPrompt);
+      : provider === "gemini"
+        ? await callGeminiCompatible(systemPrompt, userPrompt)
+        : await callDeepSeekCompatible(systemPrompt, userPrompt);
 
   const parsed = parseTranslationJson(providerResult.text);
 

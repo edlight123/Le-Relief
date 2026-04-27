@@ -52,6 +52,40 @@ const nextConfig: NextConfig = {
     imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
     formats: ["image/webp", "image/avif"],
   },
+  async redirects() {
+    return [
+      // Writer: workspace
+      { source: "/dashboard", destination: "/admin/workspace", permanent: true },
+      // Writer: new article
+      { source: "/dashboard/articles/new", destination: "/admin/articles/new", permanent: true },
+      // Writer: drafts
+      { source: "/dashboard/my-drafts", destination: "/admin/drafts", permanent: true },
+      // Writer: revisions
+      { source: "/dashboard/revisions", destination: "/admin/revisions", permanent: true },
+      // Editor: review
+      { source: "/dashboard/review", destination: "/admin/review", permanent: true },
+      // Publisher: approved → ready
+      { source: "/dashboard/approved", destination: "/admin/publishing/ready", permanent: true },
+      // Publisher: scheduled
+      { source: "/dashboard/scheduled", destination: "/admin/publishing/scheduled", permanent: true },
+      // Publisher: published
+      { source: "/dashboard/published", destination: "/admin/publishing/published", permanent: true },
+      // Publisher: homepage
+      { source: "/dashboard/homepage", destination: "/admin/homepage", permanent: true },
+      // Publisher: media
+      { source: "/dashboard/media", destination: "/admin/media", permanent: true },
+      // Admin: articles
+      { source: "/dashboard/articles", destination: "/admin/articles", permanent: true },
+      // Admin: categories → sections
+      { source: "/dashboard/categories", destination: "/admin/sections", permanent: true },
+      // Admin: users
+      { source: "/dashboard/users", destination: "/admin/users", permanent: true },
+      // Admin: authors
+      { source: "/dashboard/authors", destination: "/admin/authors", permanent: true },
+      // Admin: settings
+      { source: "/dashboard/settings", destination: "/admin/settings", permanent: true },
+    ];
+  },
   async headers() {
     return [
       {

@@ -5,16 +5,11 @@ import Link from "next/link";
 import Card from "@/components/ui/Card";
 import Badge from "@/components/ui/Badge";
 import PageHeader from "@/components/ui/PageHeader";
-import { LayoutDashboard, Users, FileText, ClipboardCheck, CheckCircle2, CalendarClock } from "lucide-react";
+import StatsCards from "@/components/dashboard/StatsCards";
+import { LayoutDashboard, Users, FileText, ClipboardCheck, CheckCircle2, CalendarClock, PenSquare, Send, RotateCcw, Rocket, CheckCircle } from "lucide-react";
+import type { Stat } from "@/components/dashboard/StatsCards";
 
 type StatusKey = "draft" | "in_review" | "approved" | "scheduled" | "published";
-
-interface StatusCount {
-  key: StatusKey;
-  label: string;
-  value: number;
-  href: string;
-}
 
 export default function AdminDashboardPage() {
   const [counts, setCounts] = useState<Record<StatusKey, number>>({
@@ -55,15 +50,15 @@ export default function AdminDashboardPage() {
     load();
   }, []);
 
-  const tiles: StatusCount[] = useMemo(
+  const stats: Stat[] = useMemo(
     () => [
-      { key: "draft", label: "Brouillons", value: counts.draft, href: "/admin/articles" },
-      { key: "in_review", label: "En review", value: counts.in_review, href: "/admin/review" },
-      { key: "approved", label: "Approuvés", value: counts.approved, href: "/admin/publishing/ready" },
-      { key: "scheduled", label: "Programmés", value: counts.scheduled, href: "/admin/publishing/scheduled" },
-      { key: "published", label: "Publiés", value: counts.published, href: "/admin/publishing/published" },
+      { label: "Brouillons", value: loading ? "—" : counts.draft, icon: PenSquare, color: "amber" },
+      { label: "En review", value: loading ? "—" : counts.in_review, icon: Send, color: "blue" },
+      { label: "Approuvés", value: loading ? "—" : counts.approved, icon: CheckCircle, color: "teal" },
+      { label: "Programmés", value: loading ? "—" : counts.scheduled, icon: CalendarClock, color: "amber" },
+      { label: "Publiés", value: loading ? "—" : counts.published, icon: Rocket, color: "red" },
     ],
-    [counts],
+    [counts, loading],
   );
 
   return (
@@ -86,20 +81,7 @@ export default function AdminDashboardPage() {
         }
       />
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
-        {tiles.map((tile) => (
-          <Link key={tile.key} href={tile.href}>
-            <Card>
-              <div className="space-y-2 px-5 py-4">
-                <p className="font-label text-[11px] font-extrabold uppercase tracking-wider text-muted">{tile.label}</p>
-                <p className="font-headline text-3xl font-extrabold text-foreground">
-                  {loading ? "—" : tile.value}
-                </p>
-              </div>
-            </Card>
-          </Link>
-        ))}
-      </div>
+      <StatsCards stats={stats} />
 
       <div className="grid gap-4 lg:grid-cols-2">
         <Card>

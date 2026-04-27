@@ -19,6 +19,7 @@ import { siteConfig } from "@/config/site.config";
 import { getPublicArticleBySlug, getRelatedArticles } from "@/lib/editorial";
 import * as articlesRepo from "@/lib/repositories/articles";
 import { validateLocale } from "@/lib/locale";
+import { hrefForLocale } from "@/lib/locale-routing";
 import {
   buildArticleImageAlt,
   buildBreadcrumbJsonLd,
@@ -255,7 +256,7 @@ export default async function LocalizedArticlePage({ params }: Props) {
           <div className="flex flex-wrap items-center gap-3 font-label text-xs font-extrabold uppercase">
             {article.category ? (
               <Link
-                href={`/categories/${article.category.slug}`}
+                href={hrefForLocale(`/categories/${article.category.slug}`, locale)}
                 className="text-primary transition-colors hover:text-foreground"
               >
                 {article.category.name}
@@ -281,7 +282,7 @@ export default async function LocalizedArticlePage({ params }: Props) {
               <>
                 {locale === "fr" ? "Par " : "By "}
                 <Link
-                  href={`/auteurs/${article.author.id}`}
+                  href={hrefForLocale(`/auteurs/${article.author.id}`, locale)}
                   className="name transition-colors hover:text-primary"
                 >
                   {article.author.name}
@@ -406,7 +407,7 @@ export default async function LocalizedArticlePage({ params }: Props) {
                       : `Journalist at Le Relief${article.category?.name ? `, covers ${article.category.name}` : ""}.`}
                   </p>
                   <Link
-                    href={`/${locale}/auteurs/${article.author.id}`}
+                    href={hrefForLocale(`/auteurs/${article.author.id}`, locale)}
                     className="author-bio-link"
                   >
                     {locale === "fr"
@@ -424,7 +425,7 @@ export default async function LocalizedArticlePage({ params }: Props) {
 
             <div className="mt-10 border-t border-border-subtle pt-4">
               <Link
-                href="/corrections"
+                href={hrefForLocale("/corrections", locale)}
                 className="font-label text-[11px] font-bold uppercase text-muted transition-colors hover:text-primary"
               >
                 {locale === "fr"
@@ -451,7 +452,7 @@ export default async function LocalizedArticlePage({ params }: Props) {
                 {locale === "fr" ? "Recevez la prochaine édition." : "Get the next edition."}
               </h2>
               <div className="mt-5">
-                <NewsletterSignup context="article-sidebar" />
+                <NewsletterSignup context="article-sidebar" locale={locale} />
               </div>
             </section>
           </aside>

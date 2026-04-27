@@ -15,6 +15,7 @@ import { canTransitionStatus, normalizeWorkflowRole } from "@/lib/editorial-work
 import { useSession } from "next-auth/react";
 import CommentsPanel from "@/components/dashboard/editorial/CommentsPanel";
 import HistoryPanel from "@/components/dashboard/editorial/HistoryPanel";
+import NovelEditor from "@/components/dashboard/NovelEditor";
 
 type TranslationLink = {
   id: string;
@@ -592,38 +593,17 @@ export default function ArticleEditor({
             />
 
             <div>
-              <label
-                htmlFor="excerpt"
-                className="mb-2 block font-label text-xs font-extrabold uppercase text-foreground"
-              >
-                Extrait / chapô
+              <label className="mb-2 block font-label text-xs font-extrabold uppercase text-foreground">
+                Corps de l'article
               </label>
-              <textarea
-                id="excerpt"
-                rows={3}
-                placeholder="Courte description..."
-                value={excerpt}
-                onChange={(e) => setExcerpt(e.target.value)}
-                className="w-full resize-none border border-border-subtle bg-surface px-4 py-3 font-label text-sm text-foreground focus:border-primary focus:outline-none"
+              <NovelEditor
+                value={body}
+                onChange={setBody}
+                locale={language as "fr" | "en"}
+                placeholder={language === "fr" ? "Écrivez le contenu de votre article..." : "Write your article content..."}
               />
             </div>
 
-            <div>
-              <label
-                htmlFor="body"
-                className="mb-2 block font-label text-xs font-extrabold uppercase text-foreground"
-              >
-                Corps de l&apos;article
-              </label>
-              <textarea
-                id="body"
-                rows={20}
-                placeholder="Écrivez le contenu de votre article..."
-                value={body}
-                onChange={(e) => setBody(e.target.value)}
-                className="w-full resize-y border border-border-subtle bg-surface px-4 py-3 font-mono text-sm leading-relaxed text-foreground focus:border-primary focus:outline-none"
-              />
-            </div>
           </section>
 
           <section className="space-y-4 border border-border-subtle p-4">

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { Locale } from "@/lib/i18n";
 import { t } from "@/lib/i18n";
+import { hrefForLocale } from "@/lib/locale-routing";
 
 interface Crumb {
   label: string;
@@ -17,7 +18,7 @@ export default function Breadcrumb({ crumbs, locale = "fr" }: { crumbs: Crumb[];
             <li key={index} className="flex items-center gap-1">
               {index > 0 && <span className="text-border-subtle" aria-hidden="true">/</span>}
               {crumb.href && !isLast ? (
-                <Link href={crumb.href} className="transition-colors hover:text-primary">
+                <Link href={hrefForLocale(crumb.href, locale)} className="transition-colors hover:text-primary">
                   {crumb.label}
                 </Link>
               ) : (

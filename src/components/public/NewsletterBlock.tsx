@@ -59,7 +59,7 @@ export default function NewsletterBlock({
               {descLabel}
             </p>
             <div className="mx-auto mt-8 max-w-md">
-              <NewsletterSignup context={ctxKey} />
+              <NewsletterSignup context={ctxKey} locale={locale} />
             </div>
           </div>
         </div>
@@ -82,7 +82,7 @@ export default function NewsletterBlock({
               </p>
             </div>
             <div>
-              <NewsletterSignup context={ctxKey} />
+              <NewsletterSignup context={ctxKey} locale={locale} />
               <p className="mt-3 font-label text-[10px] uppercase tracking-[1.2px] text-muted">
                 {locale === "fr"
                   ? "Désinscription en un clic. Politique de confidentialité respectée."
@@ -106,7 +106,7 @@ export default function NewsletterBlock({
         {descLabel}
       </p>
       <div className="mt-5">
-        <NewsletterSignup context={ctxKey} />
+        <NewsletterSignup context={ctxKey} locale={locale} />
       </div>
     </section>
   );

@@ -1,6 +1,12 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+This is a Next.js project for Le Relief.
 
 ## Getting Started
+
+Copy the environment template first:
+
+```bash
+cp .env.example .env.local
+```
 
 First, run the development server:
 
@@ -16,9 +22,28 @@ bun dev
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## AI Translation
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+The French → English translation flow supports `openai`, `gemini`, and `deepseek`.
+
+Example DeepSeek setup in `.env.local`:
+
+```dotenv
+TRANSLATION_PROVIDER=deepseek
+DEEPSEEK_API_KEY=your_key_here
+DEEPSEEK_MODEL=deepseek-chat
+DEEPSEEK_BASE_URL=https://api.deepseek.com/v1
+```
+
+Optional cron protection for the translation route:
+
+```dotenv
+CRON_SECRET=your_secret_here
+```
+
+The translation endpoint is available at `/api/cron/translate-published-fr`.
+
+If `CRON_SECRET` is set, send it as `Authorization: Bearer <secret>`.
 
 ## Learn More
 

@@ -1,5 +1,5 @@
-import { redirect } from "next/navigation";
+import { localeRedirect } from "@/lib/redirect-locale";
 
 export default function Page() {
-  redirect("/fr/about");
+  return localeRedirect("/about");
 }

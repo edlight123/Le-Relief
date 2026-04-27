@@ -5,6 +5,22 @@ import bcrypt from "bcryptjs";
 import * as usersRepo from "@/lib/repositories/users";
 import type { Role } from "@/types/user";
 
+/**
+ * Optional: restrict which email domains can sign up via OAuth.
+ * Set AUTH_ALLOWED_DOMAINS to a comma-separated list (e.g. "lerelief.ht,gmail.com").
+ * Leave empty to allow any domain.
+ */
+function isDomainAllowed(email: string): boolean {
+  const allowed = process.env.AUTH_ALLOWED_DOMAINS?.trim();
+  if (!allowed) return true; // No restriction configured
+  const domain = email.split("@").pop()?.toLowerCase();
+  if (!domain) return false;
+  return allowed
+    .split(",")
+    .map((d) => d.trim().toLowerCase())
+    .some((d) => domain === d || domain.endsWith(`.${d}`));
+}
+
 export const { handlers, auth, signIn, signOut } = NextAuth({
   trustHost: true,
   session: { strategy: "jwt" },
@@ -73,6 +89,12 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     async signIn({ user, account }) {
       // For OAuth providers, create or find user in Firestore
       if (account?.provider !== "credentials" && user.email) {
+        // Domain validation for OAuth signups
+        if (!isDomainAllowed(user.email)) {
+          console.warn(`[auth] OAuth sign-in blocked for email domain: ${user.email.split("@").pop()}`);
+          return false;
+        }
+
         const existing = await usersRepo.findByEmail(user.email);
         if (!existing) {
           const newUser = await usersRepo.createUser({

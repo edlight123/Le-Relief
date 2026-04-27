@@ -11,7 +11,12 @@ function getInitialLocale(): Locale {
   return stored === "fr" || stored === "en" ? stored : "fr";
 }
 
+function getServerSnapshot(): Locale {
+  return "fr";
+}
+
 function subscribe(callback: () => void) {
+  if (typeof window === "undefined") return () => {};
   window.addEventListener("storage", callback);
   window.addEventListener(LOCALE_EVENT, callback);
   return () => {
@@ -21,10 +26,12 @@ function subscribe(callback: () => void) {
 }
 
 export function useLocale() {
-  const locale = useSyncExternalStore(subscribe, getInitialLocale, () => "fr");
+  const locale = useSyncExternalStore(subscribe, getInitialLocale, getServerSnapshot);
 
   useEffect(() => {
-    localStorage.setItem("le-relief-locale", locale);
+    if (typeof window !== "undefined") {
+      localStorage.setItem("le-relief-locale", locale);
+    }
   }, [locale]);
 
   const setLocale = useCallback((l: Locale) => {

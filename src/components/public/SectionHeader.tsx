@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { Locale } from "@/lib/i18n";
+import { hrefForLocale } from "@/lib/locale-routing";
 
 interface SectionHeaderProps {
   kicker: string;
@@ -23,6 +24,7 @@ export default function SectionHeader({
   variant = "default",
 }: SectionHeaderProps) {
   const cta = ctaLabel || (locale === "fr" ? "Tout voir" : "See all");
+  const localizedHref = href ? hrefForLocale(href, locale) : null;
   return (
     <div
       className={`mb-4 flex items-end justify-between pt-2 sm:mb-5 ${
@@ -37,9 +39,9 @@ export default function SectionHeader({
           {title}
         </h2>
       </div>
-      {href ? (
+      {localizedHref ? (
         <Link
-          href={href}
+          href={localizedHref}
           className="hidden items-center gap-2 font-label text-xs font-extrabold uppercase text-foreground transition-colors hover:text-primary sm:inline-flex"
         >
           {cta}

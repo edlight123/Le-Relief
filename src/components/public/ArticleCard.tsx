@@ -118,7 +118,7 @@ export default function ArticleCard({
               author={article.author?.name ? { name: article.author.name, id: article.author?.id } : null}
               date={date}
               readingTime={article.readingTime}
-              language={article.language}
+              language={resolvedLocale}
               className="mt-3"
             />
           </div>
@@ -152,6 +152,7 @@ export default function ArticleCard({
             author={article.author?.name ? { name: article.author.name, id: article.author?.id } : null}
             date={date}
             readingTime={article.readingTime}
+            language={resolvedLocale}
             className="mt-auto pt-4"
           />
         </div>
@@ -195,7 +196,7 @@ export default function ArticleCard({
           author={article.author?.name ? { name: article.author.name, id: article.author?.id } : null}
           date={date}
           readingTime={article.readingTime}
-          language={article.language}
+          language={resolvedLocale}
           className="mt-2"
         />
       </div>

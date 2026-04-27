@@ -30,6 +30,7 @@ const sectionLabels: Record<string, string> = {
   "/dashboard/authors": "Auteurs",
   // Canonical /admin routes
   "/admin/workspace": "Espace de travail",
+  "/admin/articles/new": "Nouvel article",
   "/admin/drafts": "Mes brouillons",
   "/admin/revisions": "Révisions demandées",
   "/admin/submitted": "Soumis",
@@ -46,6 +47,10 @@ const sectionLabels: Record<string, string> = {
   "/admin/articles": "Articles",
   "/admin/dashboard": "Tableau de bord",
   "/admin/users": "Utilisateurs",
+  "/admin/authors": "Auteurs",
+  "/admin/sections": "Rubriques",
+  "/admin/media": "Médiathèque",
+  "/admin/social": "Réseaux sociaux",
   "/admin/settings": "Paramètres",
   "/admin/audit": "Journal d'audit",
 };

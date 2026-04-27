@@ -21,6 +21,8 @@ export default function UsersPage() {
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
+  const [sendingLinkFor, setSendingLinkFor] = useState<string | null>(null);
+  const [statusMessage, setStatusMessage] = useState("");
 
   useEffect(() => {
     fetch("/api/users")
@@ -38,6 +40,28 @@ export default function UsersPage() {
     setUsers((prev) =>
       prev.map((u) => (u.id === userId ? { ...u, role } : u))
     );
+  }
+
+  async function handleSendSetupLink(userId: string) {
+    setStatusMessage("");
+    setSendingLinkFor(userId);
+
+    try {
+      const res = await fetch(`/api/users/${userId}/setup-link`, {
+        method: "POST",
+      });
+
+      const payload = (await res.json()) as { error?: string };
+      if (!res.ok) {
+        setStatusMessage(payload.error || "Impossible d'envoyer le lien");
+      } else {
+        setStatusMessage("Lien d'activation envoyé.");
+      }
+    } catch {
+      setStatusMessage("Une erreur est survenue lors de l'envoi.");
+    } finally {
+      setSendingLinkFor(null);
+    }
   }
 
   const filteredUsers = users.filter((user) => {
@@ -75,6 +99,11 @@ export default function UsersPage() {
       </FilterBar>
 
       <div className="overflow-hidden border border-border-subtle bg-surface">
+        {statusMessage && (
+          <p className="border-b border-border-subtle px-4 py-3 font-label text-sm text-foreground">
+            {statusMessage}
+          </p>
+        )}
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-border-strong bg-surface-newsprint">
@@ -134,19 +163,30 @@ export default function UsersPage() {
                     {format(new Date(user.createdAt), "d MMM yyyy", { locale: fr })}
                   </td>
                   <td className="px-4 py-3 text-right">
-                    <select
-                      value={user.role}
-                      onChange={(e) =>
-                        handleRoleChange(user.id, e.target.value)
-                      }
-                      className="border border-border-subtle bg-surface px-3 py-2 font-label text-sm text-foreground focus:border-primary focus:outline-none"
-                    >
-                      <option value="reader">Lecteur (legacy)</option>
-                      <option value="writer">Rédacteur</option>
-                      <option value="editor">Éditeur</option>
-                      <option value="publisher">Publisher</option>
-                      <option value="admin">Admin</option>
-                    </select>
+                    <div className="flex items-center justify-end gap-2">
+                      <button
+                        type="button"
+                        onClick={() => handleSendSetupLink(user.id)}
+                        disabled={sendingLinkFor === user.id}
+                        className="border border-border-subtle bg-surface px-3 py-2 font-label text-xs font-bold uppercase tracking-wide text-foreground transition-colors hover:bg-surface-newsprint disabled:opacity-50"
+                      >
+                        {sendingLinkFor === user.id ? "Envoi..." : "Envoyer lien"}
+                      </button>
+
+                      <select
+                        value={user.role}
+                        onChange={(e) =>
+                          handleRoleChange(user.id, e.target.value)
+                        }
+                        className="border border-border-subtle bg-surface px-3 py-2 font-label text-sm text-foreground focus:border-primary focus:outline-none"
+                      >
+                        <option value="reader">Lecteur (legacy)</option>
+                        <option value="writer">Rédacteur</option>
+                        <option value="editor">Éditeur</option>
+                        <option value="publisher">Publisher</option>
+                        <option value="admin">Admin</option>
+                      </select>
+                    </div>
                   </td>
                 </tr>
               ))

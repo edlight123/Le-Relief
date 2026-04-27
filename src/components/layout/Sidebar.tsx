@@ -23,11 +23,27 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
   const roleLabel = ROLE_LABEL[role];
   const navGroups = NAV_BY_ROLE[role];
 
+  /** Collect all nav item hrefs across all groups to detect parent-child overlaps. */
+  const allItemHrefs = navGroups.flatMap((g) => g.items.map((it) => it.href));
+
   function isActive(href: string, exact = false, alsoActiveFor?: string[]) {
     if (exact) return pathname === href;
 
-    // Prevent /dashboard/articles from activating on /dashboard/articles/new
-    if (href === "/dashboard/articles" && pathname.startsWith("/dashboard/articles/new")) {
+    // If a DIFFERENT nav item is a more specific match for the current path,
+    // don't activate this parent item.
+    const hasMoreSpecificItem = allItemHrefs.some(
+      (other) =>
+        other !== href &&
+        other.startsWith(href + "/") &&
+        (pathname === other || pathname.startsWith(other + "/")),
+    );
+    if (hasMoreSpecificItem) {
+      if (pathname === href) return true;
+      if (alsoActiveFor) {
+        return alsoActiveFor.some(
+          (alt) => pathname === alt || pathname.startsWith(alt + "/"),
+        );
+      }
       return false;
     }
 

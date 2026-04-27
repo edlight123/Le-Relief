@@ -1,5 +1,6 @@
 import Link from "next/link";
 import clsx from "clsx";
+import { hrefForLocale } from "@/lib/locale-routing";
 
 interface MetadataRowProps {
   author?: { name: string; id?: string | null } | null;
@@ -29,6 +30,7 @@ export default function MetadataRow({
   );
 
   const Divider = () => <span className="text-border-subtle">/</span>;
+  const locale = language === "en" ? "en" : "fr";
 
   const items: React.ReactNode[] = [];
 
@@ -37,7 +39,7 @@ export default function MetadataRow({
       author.id ? (
         <Link
           key="author"
-          href={`/auteurs/${author.id}`}
+          href={hrefForLocale(`/auteurs/${author.id}`, locale)}
           className="transition-colors hover:text-primary"
         >
           {author.name}

@@ -23,6 +23,7 @@ function typeIcon(type: string): string {
   if (type === "article_submitted") return "📨";
   if (type === "article_published") return "🚀";
   if (type === "comment_added") return "💬";
+  if (type === "team_role_changed") return "👥";
   return "🔔";
 }
 

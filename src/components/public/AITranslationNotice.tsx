@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { Locale } from "@/lib/i18n";
+import { hrefForLocale } from "@/lib/locale-routing";
 
 interface AITranslationNoticeProps {
   locale: Locale;
@@ -38,7 +39,7 @@ export default function AITranslationNotice({
         {alternateLanguageSlug ? (
           <>
             <Link
-              href={`/fr/articles/${alternateLanguageSlug}`}
+              href={hrefForLocale(`/articles/${alternateLanguageSlug}`, "fr")}
               className="ink-link text-foreground"
             >
               Read the original
@@ -46,7 +47,7 @@ export default function AITranslationNotice({
             {" · "}
           </>
         ) : null}
-        <Link href="/en/traduction-ia" className="ink-link text-foreground">
+        <Link href={hrefForLocale("/traduction-ia", "en")} className="ink-link text-foreground">
           About our translation policy
         </Link>
       </p>
@@ -63,7 +64,7 @@ export default function AITranslationNotice({
         Version française originale
       </span>{" "}
       — source de référence du Relief.{" "}
-      <Link href="/fr/traduction-ia" className="ink-link text-foreground">
+      <Link href={hrefForLocale("/traduction-ia", "fr")} className="ink-link text-foreground">
         Notre politique de traduction
       </Link>
     </p>

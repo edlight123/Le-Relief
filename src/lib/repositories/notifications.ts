@@ -15,7 +15,8 @@ export interface NotificationData {
     | "article_rejected"
     | "revision_requested"
     | "article_published"
-    | "comment_added";
+    | "comment_added"
+    | "team_role_changed";
   articleId: string;
   articleTitle?: string;
   message: string;

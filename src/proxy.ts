@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { getToken } from "next-auth/jwt";
 import { validateLocale } from "@/lib/locale";
+import { LOCALE_COOKIE, LOCALE_REQUEST_HEADER } from "@/lib/locale-routing";
 import {
   canAccessRoleScopedRoute,
   isRoleScopedRoute,
@@ -14,7 +15,6 @@ import {
   resolveE2ERole,
 } from "@/lib/e2e-role";
 
-export const LOCALE_COOKIE = "NEXT_LOCALE";
 const DEFAULT_LOCALE = "fr";
 
 function getPreferredLocale(request: NextRequest): "fr" | "en" {
@@ -34,6 +34,12 @@ function withLocaleCookie(response: NextResponse, locale: "fr" | "en") {
     maxAge: 60 * 60 * 24 * 365,
   });
   return response;
+}
+
+function withLocaleRequestHeader(request: NextRequest, locale: "fr" | "en") {
+  const requestHeaders = new Headers(request.headers);
+  requestHeaders.set(LOCALE_REQUEST_HEADER, locale);
+  return requestHeaders;
 }
 
 function redirectToAccessDenied(request: NextRequest) {
@@ -124,7 +130,14 @@ export async function proxy(request: NextRequest) {
   const locale = getPreferredLocale(request);
   const url = request.nextUrl.clone();
   url.pathname = `/${locale}${pathname === "/" ? "" : pathname}`;
-  return withLocaleCookie(NextResponse.rewrite(url), locale);
+  return withLocaleCookie(
+    NextResponse.rewrite(url, {
+      request: {
+        headers: withLocaleRequestHeader(request, locale),
+      },
+    }),
+    locale,
+  );
 }
 
 export const config = {

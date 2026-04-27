@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { usePathname } from "next/navigation";
 import { useLocaleContext } from "@/hooks/useLocaleContext";
-import { t } from "@/lib/i18n";
+import { t, type Locale } from "@/lib/i18n";
 import {
   getEmailDomain,
   trackNewsletterEvent,
@@ -16,6 +16,7 @@ type NewsletterSignupStatus = "idle" | "saving" | "success" | "error" | "already
 
 interface NewsletterSignupProps {
   context?: string;
+  locale?: Locale;
   sourcePath?: string;
 }
 
@@ -69,8 +70,9 @@ function getContextualMessage(
   return messages[locale][type][bucket];
 }
 
-export default function NewsletterSignup({ context, sourcePath }: NewsletterSignupProps) {
-  const locale = useLocaleContext();
+export default function NewsletterSignup({ context, locale: localeOverride, sourcePath }: NewsletterSignupProps) {
+  const contextLocale = useLocaleContext();
+  const locale = localeOverride ?? contextLocale;
   const pathname = usePathname();
   const [email, setEmail] = useState("");
   const [status, setStatus] = useState<NewsletterSignupStatus>(

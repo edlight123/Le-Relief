@@ -6,17 +6,22 @@ import { usePathname } from "next/navigation";
 import { siteConfig } from "@/config/site.config";
 import SocialLinks from "@/components/public/SocialLinks";
 import NewsletterSignup from "@/components/public/NewsletterSignup";
+import { hrefForLocale } from "@/lib/locale-routing";
+import { useResolvedLocale } from "@/hooks/useResolvedLocale";
+import type { Locale } from "@/lib/locale";
 
-export default function Footer() {
+export default function Footer({ initialLocale = "fr" }: { initialLocale?: Locale }) {
   const pathname = usePathname();
-  const locale = pathname === "/en" || pathname.startsWith("/en/") ? "en" : "fr";
+  const locale = useResolvedLocale(initialLocale);
+  const withLocale = (href: string) => hrefForLocale(href, locale);
+  const sectionLinks = locale === "fr" ? siteConfig.nav.public : siteConfig.nav.publicEn;
 
   return (
     <footer className="mt-12 border-t-4 border-border-strong bg-surface-newsprint pb-6 pt-8 sm:mt-16 sm:pt-10">
       <div className="newspaper-shell">
         {/* Footer masthead */}
         <div className="mb-7 border-b border-border-strong pb-6 text-center">
-          <Link href="/" className="inline-flex items-center justify-center gap-3">
+          <Link href={withLocale("/")} className="inline-flex items-center justify-center gap-3">
             <Image
               src="/logo.png"
               alt="Le Relief"
@@ -27,7 +32,6 @@ export default function Footer() {
             />
             <span
               className="font-headline text-5xl font-extrabold leading-none text-foreground sm:text-6xl"
-              style={{ letterSpacing: "-0.02em" }}
             >
               {siteConfig.name}
             </span>
@@ -57,20 +61,12 @@ export default function Footer() {
 
           <div className="flex flex-col gap-3 md:border-r md:border-border-subtle md:pr-8">
             <h4 className="mb-1 font-label text-[11px] font-extrabold uppercase tracking-[1.4px] text-primary">
-              {locale === "fr" ? "Sections" : "Sections"}
+              {locale === "fr" ? "Rubriques" : "Sections"}
             </h4>
-            {(locale === "fr"
-              ? siteConfig.nav.public
-              : [
-                  { label: "Home", href: "/" },
-                  { label: "Categories", href: "/categories" },
-                  { label: "Search", href: "/search" },
-                  { label: "About", href: "/about" },
-                  { label: "Contact", href: "/contact" },
-                ]).map((item) => (
+            {sectionLinks.map((item) => (
               <Link
                 key={item.href}
-                href={item.href}
+                href={withLocale(item.href)}
                 className="ink-link font-body text-[15px] not-italic text-foreground"
               >
                 {item.label}
@@ -82,19 +78,19 @@ export default function Footer() {
             <h4 className="mb-1 font-label text-[11px] font-extrabold uppercase tracking-[1.4px] text-primary">
               {locale === "fr" ? "Institution" : "Institutional"}
             </h4>
-            <Link href={`/${locale}/about`} className="ink-link font-body text-[15px] text-foreground">
+            <Link href={withLocale("/about")} className="ink-link font-body text-[15px] text-foreground">
               {locale === "fr" ? "À propos" : "About"}
             </Link>
-            <Link href={`/${locale}/politique-editoriale`} className="ink-link font-body text-[15px] text-foreground">
+            <Link href={withLocale("/politique-editoriale")} className="ink-link font-body text-[15px] text-foreground">
               {locale === "fr" ? "Politique éditoriale" : "Editorial policy"}
             </Link>
-            <Link href={`/${locale}/corrections`} className="ink-link font-body text-[15px] text-foreground">
+            <Link href={withLocale("/corrections")} className="ink-link font-body text-[15px] text-foreground">
               Corrections
             </Link>
-            <Link href={`/${locale}/traduction-ia`} className="ink-link font-body text-[15px] text-foreground">
+            <Link href={withLocale("/traduction-ia")} className="ink-link font-body text-[15px] text-foreground">
               {locale === "fr" ? "Traduction IA" : "AI translation"}
             </Link>
-            <Link href={`/${locale}/privacy`} className="ink-link font-body text-[15px] text-foreground">
+            <Link href={withLocale("/privacy")} className="ink-link font-body text-[15px] text-foreground">
               {locale === "fr" ? "Confidentialité" : "Privacy"}
             </Link>
             <a
@@ -115,7 +111,7 @@ export default function Footer() {
                 ? "Les grands titres et analyses, chaque semaine."
                 : "Major headlines and analysis, every week."}
             </p>
-            <NewsletterSignup context="footer" />
+            <NewsletterSignup context="footer" locale={locale} />
           </div>
         </div>
 
@@ -128,11 +124,11 @@ export default function Footer() {
             {locale === "fr"
               ? "Lire en\u00a0:"
               : "Read in:"}{" "}
-            <Link href="/fr" className={`ink-link ${locale === "fr" ? "text-foreground" : "text-muted"}`}>
+            <Link href={hrefForLocale(pathname || "/", "fr")} className={`ink-link ${locale === "fr" ? "text-foreground" : "text-muted"}`}>
               Français
             </Link>
             {" · "}
-            <Link href="/en" className={`ink-link ${locale === "en" ? "text-foreground" : "text-muted"}`}>
+            <Link href={hrefForLocale(pathname || "/", "en")} className={`ink-link ${locale === "en" ? "text-foreground" : "text-muted"}`}>
               English
             </Link>
           </p>

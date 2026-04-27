@@ -121,6 +121,7 @@ export default async function LocalizedHomePage({
             <SectionHeader
               kicker={locale === "fr" ? "À la une" : "Top stories"}
               title={locale === "fr" ? "Les autres titres" : "More headlines"}
+              locale={locale}
             />
             <div
               className={`grid gap-0 ${
@@ -141,7 +142,7 @@ export default async function LocalizedHomePage({
                   }
                 >
                   <div className={index > 0 ? "md:pl-6" : ""}>
-                    <ArticleCard article={article} variant="text" />
+                    <ArticleCard article={article} variant="text" locale={locale} />
                   </div>
                 </div>
               ))}
@@ -157,6 +158,7 @@ export default async function LocalizedHomePage({
                   kicker={locale === "fr" ? "Dernières nouvelles" : "Latest"}
                   title={locale === "fr" ? "Le fil de la rédaction" : "Latest from the newsroom"}
                   href="/categories"
+                  locale={locale}
                 />
                 <LatestArticlesFeed initialArticles={latest} locale={locale} />
               </section>
@@ -171,10 +173,11 @@ export default async function LocalizedHomePage({
                       ? "Analyses, opinions et dossiers"
                       : "Analysis, opinion and explainers"
                   }
+                  locale={locale}
                 />
                 <div className="grid gap-7 md:grid-cols-2">
                   {editorial.map((article) => (
-                    <ArticleCard key={article.id} article={article} />
+                    <ArticleCard key={article.id} article={article} locale={locale} />
                   ))}
                 </div>
               </section>
@@ -209,6 +212,7 @@ export default async function LocalizedHomePage({
             kicker={locale === "fr" ? "Taxonomie" : "Taxonomy"}
             title={locale === "fr" ? "Rubriques principales" : "Main sections"}
             href="/categories"
+            locale={locale}
           />
           <CategoryGrid variant="grid" categories={categories} locale={locale} />
         </section>

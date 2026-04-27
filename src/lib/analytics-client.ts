@@ -28,7 +28,7 @@ class AnalyticsClient {
   private sessionId: string;
   private batchSize: number = 10;
   private batchTimeout: number = 30000; // 30 seconds
-  private timeoutId: NodeJS.Timeout | null = null;
+  private timeoutId: ReturnType<typeof setTimeout> | null = null;
   private isClient: boolean = typeof window !== "undefined";
 
   private constructor() {
@@ -245,7 +245,11 @@ export async function submitAnalyticsEvent(
     timestamp: Date;
   }
 ): Promise<Response> {
-  const res = await fetch("http://localhost:3000/api/analytics/events", {
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || process.env.VERCEL_URL
+    ? `https://${process.env.VERCEL_URL}`
+    : "http://localhost:3000";
+
+  const res = await fetch(`${baseUrl}/api/analytics/events`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",

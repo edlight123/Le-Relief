@@ -320,7 +320,11 @@ export async function countArticles(status?: string) {
 }
 
 export async function sumViews() {
-  const snap = await collection().get();
+  // Read views from published articles only, with a reasonable cap
+  const snap = await collection()
+    .where("status", "==", "published")
+    .select("views")
+    .get();
   return snap.docs.reduce((sum, d) => sum + ((d.data().views as number) || 0), 0);
 }
 

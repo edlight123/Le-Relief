@@ -1,22 +1,24 @@
+import { headers } from "next/headers";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
+import SkipToContent from "@/components/layout/SkipToContent";
+import { LOCALE_REQUEST_HEADER } from "@/lib/locale-routing";
+import { validateLocale, type Locale } from "@/lib/locale";
 
-export default function PublicLayout({
+export default async function PublicLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const headerLocale = (await headers()).get(LOCALE_REQUEST_HEADER);
+  const initialLocale: Locale = headerLocale && validateLocale(headerLocale) ? headerLocale : "fr";
+
   return (
     <>
-      <a
-        href="#main-content"
-        className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:bg-foreground focus:px-4 focus:py-2 focus:font-label focus:text-xs focus:font-bold focus:uppercase focus:text-background"
-      >
-        Aller au contenu
-      </a>
-      <Navbar />
+      <SkipToContent initialLocale={initialLocale} />
+      <Navbar initialLocale={initialLocale} />
       <main id="main-content" className="flex-1">{children}</main>
-      <Footer />
+      <Footer initialLocale={initialLocale} />
     </>
   );
 }

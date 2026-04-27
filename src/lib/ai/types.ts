@@ -1,6 +1,6 @@
 import type { ArticleContentType } from "@/types/article";
 
-export type TranslationProvider = "openai" | "gemini";
+export type TranslationProvider = "openai" | "gemini" | "deepseek";
 
 export interface TranslationInput {
   title: string;

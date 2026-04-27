@@ -1,30 +1,31 @@
 "use client";
 
-import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { analyticsClient } from "@/lib/analytics-client";
+import { hrefForLocale, LOCALE_COOKIE } from "@/lib/locale-routing";
+import type { Locale } from "@/lib/locale";
+import { notifyLocaleChanged, useResolvedLocale } from "@/hooks/useResolvedLocale";
 
-const LOCALE_COOKIE = "NEXT_LOCALE";
-
-function readLocaleCookie(): "fr" | "en" {
-  if (typeof document === "undefined") return "fr";
-  const match = document.cookie.match(/(?:^|;\s*)NEXT_LOCALE=([^;]*)/);
-  const val = match?.[1];
-  return val === "en" ? "en" : "fr";
+interface LanguageToggleProps {
+  locale?: Locale;
+  onSwitch?: () => void;
 }
 
-export default function LanguageToggle() {
+export default function LanguageToggle({ locale: controlledLocale, onSwitch }: LanguageToggleProps) {
   const router = useRouter();
-  const [locale, setLocaleState] = useState<"fr" | "en">(() =>
-    readLocaleCookie(),
-  );
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const resolvedLocale = useResolvedLocale(controlledLocale ?? "fr");
+  const locale = controlledLocale ?? resolvedLocale;
 
   const targetLocale = locale === "fr" ? "en" : "fr";
+  const queryString = searchParams.toString();
+  const currentHref = `${pathname || "/"}${queryString ? `?${queryString}` : ""}`;
+  const targetHref = hrefForLocale(currentHref, targetLocale);
 
   function handleSwitch() {
-    // Persist in cookie (1 year)
     document.cookie = `${LOCALE_COOKIE}=${targetLocale};path=/;max-age=${60 * 60 * 24 * 365};samesite=lax`;
-    setLocaleState(targetLocale);
+    notifyLocaleChanged();
     try {
       analyticsClient.trackLanguageSwitch({
         fromLocale: locale,
@@ -34,7 +35,8 @@ export default function LanguageToggle() {
     } catch {
       // non-fatal
     }
-    router.refresh();
+    onSwitch?.();
+    router.push(targetHref);
   }
 
   return (
@@ -42,8 +44,8 @@ export default function LanguageToggle() {
       type="button"
       onClick={handleSwitch}
       className="flex items-center gap-1 border border-border-subtle px-2 py-1.5 font-label text-[10px] font-bold uppercase transition-colors duration-200 hover:bg-surface-elevated sm:text-xs"
-      aria-label={locale === "fr" ? "Read the English selection" : "Lire en français"}
-      title={locale === "fr" ? "Read the English selection" : "Lire en français"}
+      aria-label={locale === "fr" ? "Read the English edition" : "Lire en français"}
+      title={locale === "fr" ? "Read the English edition" : "Lire en français"}
     >
       <span className="text-muted/50">{locale.toUpperCase()}</span>
       <span className="mx-0.5 text-muted/30">·</span>

@@ -1,7 +1,7 @@
 import { clsx } from "clsx";
 import { LucideIcon } from "lucide-react";
 
-interface Stat {
+export interface Stat {
   label: string;
   value: string | number;
   icon?: LucideIcon;

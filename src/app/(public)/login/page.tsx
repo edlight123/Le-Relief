@@ -106,6 +106,13 @@ export default function LoginPage() {
             S&apos;inscrire
           </Link>
         </p>
+
+        <p className="mt-3 text-center font-body text-sm text-muted">
+          Invitation reçue ?{" "}
+          <Link href="/setup-account" className="ink-link font-label font-bold text-primary">
+            Activer mon compte
+          </Link>
+        </p>
       </div>
     </div>
   );
