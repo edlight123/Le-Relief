@@ -1,12 +1,12 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useCallback } from "react";
 import Link from "next/link";
 import Card from "@/components/ui/Card";
 import Badge from "@/components/ui/Badge";
 import PageHeader from "@/components/ui/PageHeader";
 import StatsCards from "@/components/dashboard/StatsCards";
-import { LayoutDashboard, Users, FileText, ClipboardCheck, CheckCircle2, CalendarClock, PenSquare, Send, RotateCcw, Rocket, CheckCircle } from "lucide-react";
+import { LayoutDashboard, Users, FileText, ClipboardCheck, CheckCircle2, CalendarClock, PenSquare, Send, RotateCcw, Rocket, CheckCircle, AlertTriangle } from "lucide-react";
 import type { Stat } from "@/components/dashboard/StatsCards";
 
 type StatusKey = "draft" | "in_review" | "approved" | "scheduled" | "published";
@@ -20,14 +20,19 @@ export default function AdminDashboardPage() {
     published: 0,
   });
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    async function load() {
-      setLoading(true);
-      const statuses: StatusKey[] = ["draft", "in_review", "approved", "scheduled", "published"];
+  const load = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    const statuses: StatusKey[] = ["draft", "in_review", "approved", "scheduled", "published"];
+    try {
       const responses = await Promise.all(
         statuses.map((status) =>
-          fetch(`/api/articles?status=${status}&take=1`).then((r) => r.json()).catch(() => ({ total: 0 })),
+          fetch(`/api/articles?status=${status}&take=1`).then((r) => {
+            if (!r.ok) throw new Error(`HTTP ${r.status}`);
+            return r.json();
+          }),
         ),
       );
 
@@ -45,20 +50,28 @@ export default function AdminDashboardPage() {
       });
 
       setCounts(next);
+      setError(null);
+    } catch (err) {
+      console.error("Failed to load dashboard stats:", err);
+      setError("Impossible de charger les statistiques. Veuillez réessayer.");
+    } finally {
       setLoading(false);
     }
-    load();
   }, []);
+
+  useEffect(() => {
+    load();
+  }, [load]);
 
   const stats: Stat[] = useMemo(
     () => [
-      { label: "Brouillons", value: loading ? "—" : counts.draft, icon: PenSquare, color: "amber" },
-      { label: "En review", value: loading ? "—" : counts.in_review, icon: Send, color: "blue" },
-      { label: "Approuvés", value: loading ? "—" : counts.approved, icon: CheckCircle, color: "teal" },
-      { label: "Programmés", value: loading ? "—" : counts.scheduled, icon: CalendarClock, color: "amber" },
-      { label: "Publiés", value: loading ? "—" : counts.published, icon: Rocket, color: "red" },
+      { label: "Brouillons", value: counts.draft, icon: PenSquare, color: "amber" },
+      { label: "En review", value: counts.in_review, icon: Send, color: "blue" },
+      { label: "Approuvés", value: counts.approved, icon: CheckCircle, color: "teal" },
+      { label: "Programmés", value: counts.scheduled, icon: CalendarClock, color: "amber" },
+      { label: "Publiés", value: counts.published, icon: Rocket, color: "red" },
     ],
-    [counts, loading],
+    [counts],
   );
 
   return (
@@ -81,7 +94,28 @@ export default function AdminDashboardPage() {
         }
       />
 
-      <StatsCards stats={stats} />
+      {error ? (
+        <div
+          className="rounded-none border border-primary/20 bg-primary/5 p-5 flex items-start gap-4"
+          role="alert"
+        >
+          <AlertTriangle className="h-5 w-5 text-primary shrink-0 mt-0.5" aria-hidden="true" />
+          <div className="flex-1 min-w-0">
+            <p className="font-body text-sm font-semibold text-foreground">Erreur de chargement</p>
+            <p className="mt-1 font-body text-sm text-muted">{error}</p>
+            <button
+              type="button"
+              onClick={load}
+              className="mt-3 inline-flex items-center gap-1.5 font-label text-xs font-extrabold uppercase tracking-wider text-primary hover:text-primary/80 transition-colors"
+            >
+              <RotateCcw className="h-3 w-3" />
+              Réessayer
+            </button>
+          </div>
+        </div>
+      ) : null}
+
+      <StatsCards stats={stats} loading={loading} />
 
       <div className="grid gap-4 lg:grid-cols-2">
         <Card>

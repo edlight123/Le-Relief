@@ -11,6 +11,8 @@ export interface Stat {
 
 interface StatsCardsProps {
   stats: Stat[];
+  /** Show skeleton loading placeholders instead of values */
+  loading?: boolean;
 }
 
 const colorStyles: Record<string, { bg: string; icon: string }> = {
@@ -22,14 +24,49 @@ const colorStyles: Record<string, { bg: string; icon: string }> = {
 
 const defaultColors = ["blue", "teal", "amber", "red", "teal"];
 
-export default function StatsCards({ stats }: StatsCardsProps) {
+export default function StatsCards({ stats, loading = false }: StatsCardsProps) {
+  if (loading) {
+    return (
+      <div
+        className={clsx(
+          "grid gap-4",
+          stats.length >= 5
+            ? "grid-cols-2 lg:grid-cols-5"
+            : "grid-cols-2 lg:grid-cols-4",
+        )}
+        role="status"
+        aria-label="Chargement des statistiques"
+      >
+        {Array.from({ length: stats.length || 5 }).map((_, i) => (
+          <div
+            key={i}
+            className="rounded-none border border-border-subtle bg-surface p-5"
+          >
+            <div className="flex items-start justify-between">
+              <div className="flex-1 space-y-3">
+                <div className="h-3 w-20 animate-pulse rounded-none bg-surface-hover" />
+                <div className="h-10 w-16 animate-pulse rounded-none bg-surface-hover" />
+              </div>
+              <div className="h-10 w-10 animate-pulse rounded-sm bg-surface-hover" />
+            </div>
+          </div>
+        ))}
+        <span className="sr-only">Chargement en cours…</span>
+      </div>
+    );
+  }
+
   return (
-    <div className={clsx(
-      "grid gap-4",
-      stats.length >= 5
-        ? "grid-cols-2 lg:grid-cols-5"
-        : "grid-cols-2 lg:grid-cols-4",
-    )}>
+    <div
+      className={clsx(
+        "grid gap-4",
+        stats.length >= 5
+          ? "grid-cols-2 lg:grid-cols-5"
+          : "grid-cols-2 lg:grid-cols-4",
+      )}
+      role="region"
+      aria-label="Statistiques"
+    >
       {stats.map((stat, i) => {
         const colorKey = stat.color ?? defaultColors[i % defaultColors.length] ?? "blue";
         const colors = colorStyles[colorKey] ?? colorStyles.blue!;
@@ -38,6 +75,8 @@ export default function StatsCards({ stats }: StatsCardsProps) {
             key={stat.label}
             className="rounded-none border border-border-subtle bg-surface p-5 transition-shadow duration-200 hover:shadow-[var(--shadow-card-hover)]"
             style={{ boxShadow: "var(--shadow-dashboard)" }}
+            role="status"
+            aria-label={`${stat.label}: ${typeof stat.value === "number" ? stat.value.toLocaleString("fr-FR") : stat.value}`}
           >
             <div className="flex items-start justify-between">
               <div className="min-w-0 flex-1">
@@ -61,7 +100,7 @@ export default function StatsCards({ stats }: StatsCardsProps) {
               </div>
               {stat.icon ? (
                 <div className={clsx("flex h-10 w-10 shrink-0 items-center justify-center rounded-sm", colors.bg)}>
-                  <stat.icon className={clsx("h-4 w-4", colors.icon)} />
+                  <stat.icon className={clsx("h-4 w-4", colors.icon)} aria-hidden="true" />
                 </div>
               ) : null}
             </div>
