@@ -1,6 +1,6 @@
 "use client";
 
-import { useRole } from "@/hooks/useAuth";
+import { useAuth } from "@/hooks/useAuth";
 import { adminUiTokens } from "@/config/admin-ui.tokens";
 import { clsx } from "clsx";
 import { useState, useCallback, useEffect } from "react";
@@ -47,7 +47,8 @@ const roleTips: RoleTip[] = [
 const STORAGE_PREFIX = "onboarding-dismissed-";
 
 export default function OnboardingTip() {
-  const { role } = useRole();
+  const { user } = useAuth();
+  const role = user?.role ?? "reader";
   const [dismissedKeys, setDismissedKeys] = useState<Set<string>>(new Set());
 
   useEffect(() => {
