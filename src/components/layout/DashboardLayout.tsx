@@ -7,6 +7,8 @@ import RoleAwareSidebar from "@/components/layout/RoleAwareSidebar";
 import ThemeToggle from "@/components/public/ThemeToggle";
 import CommandPalette from "@/components/ui/CommandPalette";
 import NotificationsPanel from "@/components/notifications/NotificationsPanel";
+import AdminBreadcrumb from "@/components/layout/AdminBreadcrumb";
+import OnboardingTip from "@/components/dashboard/OnboardingTip";
 
 const sectionLabels: Record<string, string> = {
   // Legacy /dashboard routes
@@ -106,7 +108,12 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             <NotificationsPanel />
           </div>
         </header>
-        <main className="flex-1 overflow-y-auto p-6 sm:p-8">{children}</main>
+        <main className="flex-1 overflow-y-auto p-6 sm:p-8">
+          <AdminBreadcrumb />
+          <OnboardingTip />
+          <div className="mt-4" />
+          {children}
+        </main>
       </div>
     </div>
   );

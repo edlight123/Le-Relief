@@ -6,6 +6,8 @@ import { fr } from "date-fns/locale";
 import PageHeader from "@/components/ui/PageHeader";
 import Card, { CardContent, CardHeader } from "@/components/ui/Card";
 import Badge from "@/components/ui/Badge";
+import EmptyState from "@/components/ui/EmptyState";
+import { ClipboardCheck } from "lucide-react";
 import { getRecentEditorialEvents } from "@/lib/repositories/editorial/audit";
 import * as articlesRepo from "@/lib/repositories/articles";
 import * as usersRepo from "@/lib/repositories/users";
@@ -110,9 +112,7 @@ export default async function AdminAuditPage() {
         </CardHeader>
         <CardContent className="p-0">
           {events.length === 0 ? (
-            <div className="px-5 py-10 text-center font-body text-sm text-muted">
-              Aucun évènement enregistré.
-            </div>
+            <EmptyState icon={ClipboardCheck} title="Aucun évènement enregistré" description="Les évènements éditoriaux apparaîtront ici." />
           ) : (
             <div className="divide-y divide-border-subtle">
               {events.map((event) => {

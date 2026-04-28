@@ -3,6 +3,7 @@ import { clsx } from "clsx";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { useEffect, useMemo, useState } from "react";
+import { ArrowUpDown, ChevronDown, ChevronUp } from "lucide-react";
 
 interface Article {
   id: string;
@@ -362,9 +363,13 @@ export default function DataTable<TRow extends AnyRow>(
                         >
                           <span>{column.label}</span>
                           {isSorted ? (
-                            <span>{sortState?.direction === "asc" ? "▲" : "▼"}</span>
+                            sortState?.direction === "asc" ? (
+                              <ChevronUp className="h-3.5 w-3.5 text-primary" />
+                            ) : (
+                              <ChevronDown className="h-3.5 w-3.5 text-primary" />
+                            )
                           ) : (
-                            <span className="opacity-40">↕</span>
+                            <ArrowUpDown className="h-3 w-3 text-muted" />
                           )}
                         </button>
                       ) : (

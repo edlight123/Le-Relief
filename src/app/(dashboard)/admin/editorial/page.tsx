@@ -27,6 +27,7 @@ import {
   Timer,
 } from "lucide-react";
 import Badge from "@/components/ui/Badge";
+import EmptyState from "@/components/ui/EmptyState";
 import Link from "next/link";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
@@ -334,9 +335,7 @@ export default async function EditorialDashboardPage() {
           </CardHeader>
           <CardContent>
             {timingStats.totalArticlesSubmitted === 0 ? (
-              <p className="py-6 text-center font-label text-xs text-muted">
-                Pas encore de données de pipeline disponibles.
-              </p>
+              <EmptyState icon={Timer} title="Pas encore de données" description="Les délais du pipeline apparaîtront une fois les premiers articles soumis." />
             ) : (
               <>
                 <PipelineTimingChart data={pipelineChartData} />
@@ -426,10 +425,7 @@ export default async function EditorialDashboardPage() {
           </CardHeader>
           <CardContent>
             {blockedArticles.length === 0 ? (
-              <div className="flex items-center gap-2 py-6 text-accent-teal">
-                <CheckCircle className="h-4 w-4" />
-                <span className="font-label text-xs">Aucun article bloqué</span>
-              </div>
+              <EmptyState icon={CheckCircle} title="Aucun article bloqué" description="Tous les articles en attente de traduction sont à jour." />
             ) : (
               <ul className="divide-y divide-border-subtle">
                 {blockedArticles.map((a) => (
@@ -743,10 +739,7 @@ export default async function EditorialDashboardPage() {
           </CardHeader>
           <CardContent>
             {pendingArticles.length === 0 ? (
-              <div className="flex items-center gap-2 py-4 text-muted">
-                <CheckCircle className="h-4 w-4 text-accent-teal" />
-                <span className="font-label text-xs">Aucun article en attente</span>
-              </div>
+              <EmptyState icon={CheckCircle} title="Aucun article en attente" description="Aucune review ni révision n'est en souffrance." />
             ) : (
               <ul className="divide-y divide-border-subtle">
                 {pendingArticles.map((a) => (
@@ -805,7 +798,7 @@ export default async function EditorialDashboardPage() {
                 </Link>
               </div>
             ) : (
-              <p className="py-4 font-label text-xs text-muted">Aucun article mis en avant</p>
+              <EmptyState icon={Star} title="Aucun article en avant" description="Sélectionnez un article à épingler depuis sa fiche." />
             )}
           </CardContent>
         </Card>

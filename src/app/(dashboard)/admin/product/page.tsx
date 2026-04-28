@@ -5,6 +5,7 @@ import StatsCards from "@/components/dashboard/StatsCards";
 import { TrafficLanguageBar } from "@/components/dashboard/EditorialCharts";
 import Card, { CardHeader, CardContent } from "@/components/ui/Card";
 import { Eye, Users, TrendingUp, BookOpen, Mail } from "lucide-react";
+import EmptyState from "@/components/ui/EmptyState";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 
@@ -170,40 +171,48 @@ export default async function ProductDashboardPage() {
           </h3>
         </CardHeader>
         <CardContent>
-          <div className="overflow-x-auto">
-            <table className="w-full text-left">
-              <thead>
-                <tr className="border-b border-border-subtle">
-                  <th className="pb-2 font-label text-[11px] font-extrabold uppercase text-muted">Titre</th>
-                  <th className="pb-2 pr-4 text-right font-label text-[11px] font-extrabold uppercase text-muted">Vues</th>
-                  <th className="pb-2 pr-4 text-right font-label text-[11px] font-extrabold uppercase text-muted">Langue</th>
-                  <th className="pb-2 text-right font-label text-[11px] font-extrabold uppercase text-muted">Publié le</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-border-subtle">
-                {topArticles.map((a) => (
-                  <tr key={a.id as string}>
-                    <td className="py-2.5 font-body text-sm text-foreground">
-                      <span className="line-clamp-1 max-w-xs">{a.title as string}</span>
-                    </td>
-                    <td className="py-2.5 pr-4 text-right font-label text-sm tabular-nums text-foreground">
-                      {((a.views as number) || 0).toLocaleString("fr-FR")}
-                    </td>
-                    <td className="py-2.5 pr-4 text-right">
-                      <span className={`rounded px-1.5 py-0.5 font-label text-[10px] font-bold uppercase ${a.language === "fr" ? "bg-accent-teal/10 text-accent-teal" : "bg-accent-blue/10 text-accent-blue"}`}>
-                        {a.language as string}
-                      </span>
-                    </td>
-                    <td className="py-2.5 text-right font-label text-xs text-muted">
-                      {a.publishedAt
-                        ? format(new Date(a.publishedAt as string), "d MMM yyyy", { locale: fr })
-                        : "—"}
-                    </td>
+          {topArticles.length === 0 ? (
+            <EmptyState
+              icon={BookOpen}
+              title="Aucun article publié"
+              description="Les articles publiés apparaîtront ici avec leurs métriques de vues."
+            />
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full text-left">
+                <thead>
+                  <tr className="border-b border-border-subtle">
+                    <th className="pb-2 font-label text-[11px] font-extrabold uppercase text-muted">Titre</th>
+                    <th className="pb-2 pr-4 text-right font-label text-[11px] font-extrabold uppercase text-muted">Vues</th>
+                    <th className="pb-2 pr-4 text-right font-label text-[11px] font-extrabold uppercase text-muted">Langue</th>
+                    <th className="pb-2 text-right font-label text-[11px] font-extrabold uppercase text-muted">Publié le</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                </thead>
+                <tbody className="divide-y divide-border-subtle">
+                  {topArticles.map((a) => (
+                    <tr key={a.id as string}>
+                      <td className="py-2.5 font-body text-sm text-foreground">
+                        <span className="line-clamp-1 max-w-xs">{a.title as string}</span>
+                      </td>
+                      <td className="py-2.5 pr-4 text-right font-label text-sm tabular-nums text-foreground">
+                        {((a.views as number) || 0).toLocaleString("fr-FR")}
+                      </td>
+                      <td className="py-2.5 pr-4 text-right">
+                        <span className={`rounded px-1.5 py-0.5 font-label text-[10px] font-bold uppercase ${a.language === "fr" ? "bg-accent-teal/10 text-accent-teal" : "bg-accent-blue/10 text-accent-blue"}`}>
+                          {a.language as string}
+                        </span>
+                      </td>
+                      <td className="py-2.5 text-right font-label text-xs text-muted">
+                        {a.publishedAt
+                          ? format(new Date(a.publishedAt as string), "d MMM yyyy", { locale: fr })
+                          : "—"}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
         </CardContent>
       </Card>
 
@@ -216,29 +225,37 @@ export default async function ProductDashboardPage() {
           </h3>
         </CardHeader>
         <CardContent>
-          <div className="space-y-3">
-            {categoryRanking.map((cat, i) => {
-              const pct = categoryRanking[0]?.views ? Math.round((cat.views / categoryRanking[0].views) * 100) : 0;
-              return (
-                <div key={cat.name} className="space-y-1">
-                  <div className="flex items-center justify-between">
-                    <span className="font-label text-xs text-foreground">
-                      {i + 1}. {cat.name}
-                    </span>
-                    <span className="font-label text-xs tabular-nums text-muted">
-                      {cat.views.toLocaleString("fr-FR")} vues · {cat.count} articles
-                    </span>
+          {categoryRanking.length === 0 ? (
+            <EmptyState
+              icon={Users}
+              title="Aucune donnée catégorie"
+              description="Publiez des articles dans des catégories pour voir leur performance."
+            />
+          ) : (
+            <div className="space-y-3">
+              {categoryRanking.map((cat, i) => {
+                const pct = categoryRanking[0]?.views ? Math.round((cat.views / categoryRanking[0].views) * 100) : 0;
+                return (
+                  <div key={cat.name} className="space-y-1">
+                    <div className="flex items-center justify-between">
+                      <span className="font-label text-xs text-foreground">
+                        {i + 1}. {cat.name}
+                      </span>
+                      <span className="font-label text-xs tabular-nums text-muted">
+                        {cat.views.toLocaleString("fr-FR")} vues · {cat.count} articles
+                      </span>
+                    </div>
+                    <div className="h-1.5 w-full rounded-full bg-surface-elevated">
+                      <div
+                        className="h-1.5 rounded-full bg-primary"
+                        style={{ width: `${pct}%` }}
+                      />
+                    </div>
                   </div>
-                  <div className="h-1.5 w-full rounded-full bg-surface-elevated">
-                    <div
-                      className="h-1.5 rounded-full bg-primary"
-                      style={{ width: `${pct}%` }}
-                    />
-                  </div>
-                </div>
-              );
-            })}
-          </div>
+                );
+              })}
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>
