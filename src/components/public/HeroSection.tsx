@@ -30,13 +30,16 @@ export default function HeroSection({ article, locale }: HeroSectionProps) {
     return (
       <section className="newspaper-shell py-6 sm:py-10">
         <div className="border-t-2 border-border-strong py-8 text-center sm:py-12">
-          <p className="page-kicker mb-5" style={{ letterSpacing: "1.2px" }}>Journalisme indépendant</p>
+          <p className="page-kicker mb-5" style={{ letterSpacing: "1.2px" }}>
+            {resolvedLocale === "fr" ? "Journalisme indépendant" : "Independent journalism"}
+          </p>
           <h1 className="editorial-title mx-auto max-w-4xl text-5xl text-foreground sm:text-7xl md:text-8xl tracking-tight sm:tracking-[-0.5px] md:tracking-[-1px]">
             Le Relief Haïti
           </h1>
           <p className="editorial-deck mx-auto mt-6 max-w-2xl font-body text-xl sm:text-2xl">
-            Une publication numérique haïtienne pour lire l&apos;actualité avec contexte,
-            méthode et responsabilité éditoriale.
+            {resolvedLocale === "fr"
+              ? "Une publication numérique haïtienne pour lire l'actualité avec contexte, méthode et responsabilité éditoriale."
+              : "A Haitian digital publication to read the news with context, method and editorial responsibility."}
           </p>
           <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
             <Link
