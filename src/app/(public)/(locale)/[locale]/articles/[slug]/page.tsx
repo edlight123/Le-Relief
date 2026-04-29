@@ -15,6 +15,7 @@ import ArticleKeyPoints from "@/components/public/ArticleKeyPoints";
 import ArticleContextBox from "@/components/public/ArticleContextBox";
 import SourceAttribution from "@/components/public/SourceAttribution";
 import RelatedDossier from "@/components/public/RelatedDossier";
+import ArticlePrevNext from "@/components/public/ArticlePrevNext";
 import { siteConfig } from "@/config/site.config";
 import { getPublicArticleBySlug, getRelatedArticles } from "@/lib/editorial";
 import * as articlesRepo from "@/lib/repositories/articles";
@@ -174,7 +175,12 @@ export default async function LocalizedArticlePage({ params }: Props) {
     // no-op
   }
 
-  const related = await getRelatedArticles(article, 4, locale);
+  const [related, adjacent] = await Promise.all([
+    getRelatedArticles(article, 4, locale),
+    article.publishedAt
+      ? articlesRepo.getAdjacentArticles(article.publishedAt, locale)
+      : Promise.resolve({ prev: null, next: null }),
+  ]);
   const bodyHasHtml = /<\/?[a-z][\s\S]*>/i.test(article.body);
   const firstBodyParagraph = (bodyHasHtml ? stripHtml(article.body) : article.body)
     .split(/\n+/)
@@ -458,6 +464,12 @@ export default async function LocalizedArticlePage({ params }: Props) {
             </div>
 
             <RelatedDossier articles={related} locale={locale as "fr" | "en"} />
+
+            <ArticlePrevNext
+              prev={adjacent.prev as { slug: string; title: string; category?: { name: string } | null } | null}
+              next={adjacent.next as { slug: string; title: string; category?: { name: string } | null } | null}
+              locale={locale as "fr" | "en"}
+            />
           </div>
 
           <aside className="space-y-8 border-t-2 border-border-strong pt-4 lg:sticky lg:top-28 lg:h-fit lg:border-l lg:border-t-0 lg:pl-8" data-print-hide>

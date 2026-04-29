@@ -66,3 +66,30 @@ export function formatArticleDate(date: Date | string, locale: Locale): string {
     locale: locale === "en" ? enUS : fr,
   });
 }
+
+/**
+ * Returns a short relative time string for recent content (< 7 days),
+ * falling back to the full formatted date for older articles.
+ * e.g. "il y a 2h", "3d ago", "12 avr. 2026"
+ */
+export function formatRelativeDate(
+  date: Date | string,
+  locale: Locale,
+): string {
+  const value = typeof date === "string" ? new Date(date) : date;
+  const now = new Date();
+  const diffMs = now.getTime() - value.getTime();
+  const diffMins = Math.floor(diffMs / 60_000);
+  const diffHours = Math.floor(diffMs / 3_600_000);
+  const diffDays = Math.floor(diffMs / 86_400_000);
+
+  if (diffMins < 1) return locale === "en" ? "just now" : "à l'instant";
+  if (diffMins < 60)
+    return locale === "en" ? `${diffMins}m ago` : `il y a ${diffMins}m`;
+  if (diffHours < 24)
+    return locale === "en" ? `${diffHours}h ago` : `il y a ${diffHours}h`;
+  if (diffDays < 7)
+    return locale === "en" ? `${diffDays}d ago` : `il y a ${diffDays}j`;
+
+  return formatArticleDate(value, locale);
+}

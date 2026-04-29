@@ -371,3 +371,41 @@ export async function getTopArticlesByViews(take: number = 10) {
   const docs = snap.docs.map((d) => serializeTimestamps({ id: d.id, ...d.data() } as Record<string, unknown>));
   return docs.filter((d) => d.status === "published").slice(0, take);
 }
+
+/**
+ * Returns the article published immediately before and after the given article.
+ * Used for prev/next navigation at the bottom of article pages.
+ */
+export async function getAdjacentArticles(
+  publishedAt: string,
+  language: string,
+): Promise<{
+  prev: Record<string, unknown> | null;
+  next: Record<string, unknown> | null;
+}> {
+  const date = new Date(publishedAt);
+
+  const [prevSnap, nextSnap] = await Promise.all([
+    collection()
+      .where("status", "==", "published")
+      .where("language", "==", language)
+      .where("publishedAt", "<", date)
+      .orderBy("publishedAt", "desc")
+      .limit(1)
+      .get(),
+    collection()
+      .where("status", "==", "published")
+      .where("language", "==", language)
+      .where("publishedAt", ">", date)
+      .orderBy("publishedAt", "asc")
+      .limit(1)
+      .get(),
+  ]);
+
+  const toDoc = (snap: FirebaseFirestore.QuerySnapshot) =>
+    snap.empty
+      ? null
+      : (serializeTimestamps({ id: snap.docs[0].id, ...snap.docs[0].data() } as Record<string, unknown>));
+
+  return { prev: toDoc(prevSnap), next: toDoc(nextSnap) };
+}

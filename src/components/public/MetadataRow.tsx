@@ -1,10 +1,13 @@
 import Link from "next/link";
 import clsx from "clsx";
 import { hrefForLocale } from "@/lib/locale-routing";
+import { formatRelativeDate } from "@/lib/i18n";
 
 interface MetadataRowProps {
   author?: { name: string; id?: string | null } | null;
   date?: string | null;
+  /** Raw ISO date string — used to compute relative time label */
+  rawDate?: Date | string | null;
   readingTime?: number | null;
   language?: "fr" | "en" | null;
   size?: "sm" | "md";
@@ -15,6 +18,7 @@ interface MetadataRowProps {
 export default function MetadataRow({
   author,
   date,
+  rawDate,
   readingTime,
   language,
   size = "sm",
@@ -50,11 +54,20 @@ export default function MetadataRow({
     );
   }
 
-  if (date) {
+  if (date || rawDate) {
+    const locale = language === "en" ? "en" : "fr";
+    const displayDate =
+      rawDate ? formatRelativeDate(rawDate, locale) : date;
+    const fullDate = date ?? displayDate;
     items.push(
-      <span key="date" className="font-[family-name:var(--font-mono)]">
-        {date}
-      </span>,
+      <time
+        key="date"
+        dateTime={rawDate ? new Date(rawDate).toISOString() : undefined}
+        title={rawDate && displayDate !== fullDate ? fullDate ?? undefined : undefined}
+        className="font-[family-name:var(--font-mono)]"
+      >
+        {displayDate}
+      </time>,
     );
   }
 

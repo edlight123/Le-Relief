@@ -74,7 +74,7 @@ export default function ArticleCard({
             <h3 className="font-headline text-base font-bold leading-snug text-foreground transition-colors group-hover:text-primary">
               {displayTitle}
             </h3>
-            <MetadataRow date={date} className="mt-2" />
+            <MetadataRow date={date} rawDate={article.publishedAt} className="mt-2" />
           </div>
         </div>
       </Link>
@@ -123,6 +123,7 @@ export default function ArticleCard({
             <MetadataRow
               author={article.author?.name ? { name: article.author.name, id: article.author?.id } : null}
               date={date}
+              rawDate={article.publishedAt}
               readingTime={article.readingTime}
               language={resolvedLocale}
               className="mt-3"
@@ -157,6 +158,7 @@ export default function ArticleCard({
           <MetadataRow
             author={article.author?.name ? { name: article.author.name, id: article.author?.id } : null}
             date={date}
+            rawDate={article.publishedAt}
             readingTime={article.readingTime}
             language={resolvedLocale}
             className="mt-auto pt-4"
@@ -201,6 +203,7 @@ export default function ArticleCard({
         <MetadataRow
           author={article.author?.name ? { name: article.author.name, id: article.author?.id } : null}
           date={date}
+          rawDate={article.publishedAt}
           readingTime={article.readingTime}
           language={resolvedLocale}
           className="mt-2"
