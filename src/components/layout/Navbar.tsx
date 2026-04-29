@@ -121,6 +121,7 @@ export default function Navbar({ initialLocale = "fr" }: { initialLocale?: Local
                 <Link
                   key={item.href}
                   href={href}
+                  prefetch={true}
                   className={`relative font-label text-xs font-bold uppercase tracking-[1px] transition-colors ${
                     isActive
                       ? "text-primary"
@@ -157,6 +158,7 @@ export default function Navbar({ initialLocale = "fr" }: { initialLocale?: Local
                   key={item.href}
                   href={href}
                   onClick={() => setMobileOpen(false)}
+                  prefetch={true}
                   className={`block border-b border-border-subtle px-1 py-3 font-label text-sm font-bold uppercase transition-colors ${
                     isActive
                       ? "text-primary"

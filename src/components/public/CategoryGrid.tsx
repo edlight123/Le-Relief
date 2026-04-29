@@ -32,6 +32,7 @@ export default function CategoryGrid({
           <Link
             key={cat.slug}
             href={hrefForLocale(`/categories/${cat.slug}`, locale)}
+            prefetch={true}
             className="group flex items-center gap-4 border-b border-border-subtle py-3 text-muted transition-colors hover:text-primary"
           >
             <span className="font-label text-[10px] font-extrabold uppercase text-muted/70">
@@ -63,6 +64,7 @@ export default function CategoryGrid({
         <Link
           key={cat.slug}
           href={hrefForLocale(`/categories/${cat.slug}`, locale)}
+          prefetch={true}
           className="group border-b border-border-subtle px-0 py-6 transition-colors hover:bg-surface-newsprint sm:px-5"
         >
           <div className="flex items-start gap-4">

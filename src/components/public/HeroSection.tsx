@@ -103,7 +103,7 @@ export default function HeroSection({ article, locale }: HeroSectionProps) {
   if (!imageSrc) {
     return (
       <section className="newspaper-shell py-4 sm:py-7">
-        <Link href={`/${resolvedLocale}/articles/${article.slug}`} className="group block">
+        <Link href={`/${resolvedLocale}/articles/${article.slug}`} prefetch={true} className="group block">
           <div className="border-t-2 border-border-strong pt-4">
             <div className="flex items-center justify-between border-b border-border-subtle pb-2">
               <p className="font-label text-[11px] font-bold uppercase text-muted">{featuredLabel}</p>
@@ -137,7 +137,7 @@ export default function HeroSection({ article, locale }: HeroSectionProps) {
   /* With cover image — 2-column, text bottom-aligned */
   return (
     <section className="newspaper-shell py-4 sm:py-7">
-      <Link href={`/${resolvedLocale}/articles/${article.slug}`} className="group block">
+      <Link href={`/${resolvedLocale}/articles/${article.slug}`} prefetch={true} className="group block">
         <div className="border-t-2 border-border-strong pt-4">
           <div className="grid gap-0 lg:grid-cols-[1fr_1.4fr]">
 
