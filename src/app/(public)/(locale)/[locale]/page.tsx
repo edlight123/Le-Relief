@@ -157,7 +157,6 @@ export default async function LocalizedHomePage({
                 <SectionHeader
                   kicker={locale === "fr" ? "Dernières nouvelles" : "Latest"}
                   title={locale === "fr" ? "Le fil de la rédaction" : "Latest from the newsroom"}
-                  href="/categories"
                   locale={locale}
                 />
                 <LatestArticlesFeed initialArticles={latest} locale={locale} />

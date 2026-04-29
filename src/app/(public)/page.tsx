@@ -76,7 +76,6 @@ export default async function HomePage() {
                 <SectionHeader
                   kicker="Dernières nouvelles"
                   title="Le fil de la rédaction"
-                  href="/categories"
                 />
                 <LatestArticlesFeed initialArticles={latest} />
               </section>
