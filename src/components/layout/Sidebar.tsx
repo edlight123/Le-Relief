@@ -139,7 +139,7 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
             Voir le site
           </Link>
           <button
-            onClick={() => signOut({ callbackUrl: "/" })}
+            onClick={() => signOut({ redirectTo: "/" })}
             className="flex w-full items-center gap-2.5 rounded-sm px-2 py-2 font-label text-sm font-bold text-muted transition-colors hover:bg-surface-elevated hover:text-foreground"
           >
             <LogOut className="h-4 w-4 shrink-0" />
