@@ -76,6 +76,9 @@ export interface PublicArticle {
   sourceArticleId: string | null;
   alternateLanguageSlug: string | null;
   toc: TocEntry[];
+  isBreaking: boolean;
+  correction: string | null;
+  correctionDate: string | null;
 }
 
 const CONTENT_TYPE_LABELS: Record<ContentType, string> = {
@@ -475,6 +478,9 @@ export function normalizeArticle(
     sourceArticleId: asOptionalString(article.sourceArticleId),
     alternateLanguageSlug: asOptionalString(article.alternateLanguageSlug),
     toc,
+    isBreaking: asBoolean(article.isBreaking),
+    correction: asOptionalString(article.correction) ?? null,
+    correctionDate: asOptionalString(article.correctionDate) ?? null,
   };
 }
 

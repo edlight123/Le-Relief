@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { startTransition, useCallback, useEffect, useRef, useState } from "react";
 import { useEditor, EditorContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import Placeholder from "@tiptap/extension-placeholder";
@@ -35,6 +35,34 @@ import {
 
 const lowlight = createLowlight(all);
 
+interface ToolbarButtonProps {
+  onClick: () => void;
+  active?: boolean;
+  children: React.ReactNode;
+  title?: string;
+}
+
+function ToolbarButton({ onClick, active, children, title }: ToolbarButtonProps) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      title={title}
+      className={`flex h-8 w-8 items-center justify-center rounded-sm text-xs transition-colors ${
+        active
+          ? "bg-foreground text-background"
+          : "text-muted hover:bg-surface-elevated hover:text-foreground"
+      }`}
+    >
+      {children}
+    </button>
+  );
+}
+
+function ToolbarDivider() {
+  return <span className="mx-0.5 h-5 w-px bg-border-subtle" />;
+}
+
 interface NovelEditorProps {
   value: string;
   onChange: (html: string) => void;
@@ -56,7 +84,7 @@ export default function NovelEditor({
   const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
-    setIsMounted(true);
+    startTransition(() => setIsMounted(true));
   }, []);
 
   const editor = useEditor({
@@ -153,34 +181,7 @@ export default function NovelEditor({
     [editor],
   );
 
-  const ToolbarButton = ({
-    onClick,
-    active,
-    children,
-    title,
-  }: {
-    onClick: () => void;
-    active?: boolean;
-    children: React.ReactNode;
-    title?: string;
-  }) => (
-    <button
-      type="button"
-      onClick={onClick}
-      title={title}
-      className={`flex h-8 w-8 items-center justify-center rounded-sm text-xs transition-colors ${
-        active
-          ? "bg-foreground text-background"
-          : "text-muted hover:bg-surface-elevated hover:text-foreground"
-      }`}
-    >
-      {children}
-    </button>
-  );
-
-  const Divider = () => (
-    <span className="mx-0.5 h-5 w-px bg-border-subtle" />
-  );
+  // ToolbarButton and ToolbarDivider are defined at module level
 
   if (!isMounted) {
     return (
@@ -235,7 +236,7 @@ export default function NovelEditor({
           <Strikethrough className="h-3.5 w-3.5" />
         </ToolbarButton>
 
-        <Divider />
+        <ToolbarDivider />
 
         <ToolbarButton
           onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()}
@@ -259,7 +260,7 @@ export default function NovelEditor({
           <Heading3 className="h-3.5 w-3.5" />
         </ToolbarButton>
 
-        <Divider />
+        <ToolbarDivider />
 
         <ToolbarButton
           onClick={() => editor.chain().focus().toggleBulletList().run()}
@@ -290,7 +291,7 @@ export default function NovelEditor({
           <Code className="h-3.5 w-3.5" />
         </ToolbarButton>
 
-        <Divider />
+        <ToolbarDivider />
 
         <ToolbarButton
           onClick={() => {
@@ -322,7 +323,7 @@ export default function NovelEditor({
           <Highlighter className="h-3.5 w-3.5" />
         </ToolbarButton>
 
-        <Divider />
+        <ToolbarDivider />
 
         <ToolbarButton
           onClick={() => editor.chain().focus().setHorizontalRule().run()}

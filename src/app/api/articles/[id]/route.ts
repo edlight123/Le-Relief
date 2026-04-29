@@ -23,6 +23,19 @@ export async function GET(req: NextRequest, { params }: RouteParams) {
     return NextResponse.json({ error: "Introuvable" }, { status: 404 });
   }
 
+  // Only allow non-published articles for authenticated admin/editor users
+  if (article.status !== "published") {
+    const session = await auth();
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: "Introuvable" }, { status: 404 });
+    }
+    const sessionRole = ((session.user as { role?: string }).role || "writer").toString();
+    const normalizedRole = normalizeWorkflowRole(sessionRole);
+    if (!hasRole(normalizedRole, "editor")) {
+      return NextResponse.json({ error: "Introuvable" }, { status: 404 });
+    }
+  }
+
   const author = article.authorId
     ? await usersRepo.getUser(article.authorId as string)
     : null;
@@ -99,6 +112,8 @@ export async function PATCH(req: NextRequest, { params }: RouteParams) {
   if (body.featured !== undefined) data.featured = body.featured;
   if (body.priorityLevel !== undefined) data.priorityLevel = body.priorityLevel || null;
   if (body.isBreaking !== undefined) data.isBreaking = Boolean(body.isBreaking);
+  if (body.correction !== undefined) data.correction = body.correction || null;
+  if (body.correctionDate !== undefined) data.correctionDate = body.correctionDate || null;
   if (body.isHomepagePinned !== undefined) data.isHomepagePinned = Boolean(body.isHomepagePinned);
   if (body.status !== undefined) {
     const canPublish = hasRole(normalizedRole, "publisher");

@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { startTransition, useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import Badge from "@/components/ui/Badge";
 import Card from "@/components/ui/Card";
@@ -37,7 +37,6 @@ export default function AdminSubmittedPage() {
   }, []);
 
   const load = useCallback(async (uid: string) => {
-    setLoading(true);
     const res = await fetch(`/api/articles?status=in_review&authorId=${uid}&take=100`).then((r) => r.json());
     const sorted: SubmittedArticle[] = (res.articles || []).sort((a: SubmittedArticle, b: SubmittedArticle) => {
       const aDate = new Date(a.submittedForReviewAt || a.updatedAt).getTime();
@@ -50,17 +49,19 @@ export default function AdminSubmittedPage() {
 
   useEffect(() => {
     if (!authorId) return;
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     load(authorId);
   }, [authorId, load]);
 
+  const [now] = useState(() => Date.now());
   const waitingLongCount = useMemo(
     () =>
       articles.filter((a) => {
         const base = a.submittedForReviewAt || a.updatedAt;
-        const ageMs = Date.now() - new Date(base).getTime();
+        const ageMs = now - new Date(base).getTime();
         return ageMs > 1000 * 60 * 60 * 48;
       }).length,
-    [articles],
+    [articles, now],
   );
 
   return (

@@ -3,7 +3,7 @@
 import { useAuth } from "@/hooks/useAuth";
 import { adminUiTokens } from "@/config/admin-ui.tokens";
 import { clsx } from "clsx";
-import { useState, useCallback, useEffect } from "react";
+import { startTransition, useState, useCallback, useEffect } from "react";
 import { X } from "lucide-react";
 
 interface RoleTip {
@@ -58,7 +58,7 @@ export default function OnboardingTip() {
         stored.add(tip.key);
       }
     }
-    setDismissedKeys(stored);
+    startTransition(() => setDismissedKeys(stored));
   }, []);
 
   const relevantTip = roleTips.find(

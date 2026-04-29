@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState, useCallback } from "react";
+import { startTransition, useEffect, useMemo, useState, useCallback } from "react";
 import Link from "next/link";
 import Card from "@/components/ui/Card";
 import Badge from "@/components/ui/Badge";
@@ -23,8 +23,9 @@ export default function AdminDashboardPage() {
   const [error, setError] = useState<string | null>(null);
 
   const load = useCallback(async () => {
-    setLoading(true);
-    setError(null);
+    startTransition(() => {
+      setError(null);
+    });
     const statuses: StatusKey[] = ["draft", "in_review", "approved", "scheduled", "published"];
     try {
       const responses = await Promise.all(
@@ -60,6 +61,7 @@ export default function AdminDashboardPage() {
   }, []);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     load();
   }, [load]);
 

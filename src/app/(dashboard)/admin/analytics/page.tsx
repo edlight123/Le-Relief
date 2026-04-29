@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
+import { startTransition, useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
 import {
   CartesianGrid,
   Cell,
@@ -172,7 +172,6 @@ export default function AnalyticsPage() {
   const [editorialKpis, setEditorialKpis] = useState<EditorialKpis | null>(null);
 
   const fetchData = useCallback(async () => {
-    setLoading(true);
     setError("");
 
     try {
@@ -215,6 +214,7 @@ export default function AnalyticsPage() {
   }, [days, language]);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     void fetchData();
   }, [fetchData]);
 

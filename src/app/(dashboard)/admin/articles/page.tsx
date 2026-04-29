@@ -1,5 +1,13 @@
-import { redirect } from "next/navigation";
+import WorkflowQueueTable from "@/components/dashboard/WorkflowQueueTable";
 
 export default function AdminArticlesPage() {
-  redirect("/dashboard/articles");
+  return (
+    <WorkflowQueueTable
+      title="Tous les articles"
+      subtitle="Vue complète de tous les articles de la rédaction, tous statuts confondus."
+      statuses={["draft", "in_review", "revisions_requested", "approved", "scheduled", "published"]}
+      dateField="updatedAt"
+      emptyMessage="Aucun article trouvé."
+    />
+  );
 }

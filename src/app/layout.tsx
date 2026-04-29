@@ -47,6 +47,12 @@ export const metadata: Metadata = {
     "analyse",
   ],
   alternates: {
+    canonical: siteConfig.url,
+    languages: {
+      "fr": `${siteConfig.url}/fr`,
+      "en": `${siteConfig.url}/en`,
+      "x-default": siteConfig.url,
+    },
     types: {
       "application/rss+xml": `${siteConfig.url}/feed.xml`,
     },
@@ -54,7 +60,7 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     locale: "fr_FR",
-    url: `${siteConfig.url}/fr`,
+    url: siteConfig.url,
     siteName: siteConfig.name,
     title: "Le Relief — Média numérique haïtien",
     description:

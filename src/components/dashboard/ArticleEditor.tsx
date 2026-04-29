@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { startTransition, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import Input from "@/components/ui/Input";
 import Button from "@/components/ui/Button";
@@ -54,6 +54,8 @@ interface ArticleEditorProps {
     priorityLevel?: string;
     isBreaking?: boolean;
     isHomepagePinned?: boolean;
+    correction?: string;
+    correctionDate?: string;
     slug?: string;
     seoTitle?: string;
     metaDescription?: string;
@@ -81,6 +83,8 @@ interface ArticleEditorProps {
     priorityLevel: string;
     isBreaking: boolean;
     isHomepagePinned: boolean;
+    correction: string;
+    correctionDate: string;
     slug: string;
     seoTitle: string;
     metaDescription: string;
@@ -139,6 +143,8 @@ export default function ArticleEditor({
   const [priorityLevel, setPriorityLevel] = useState(initial?.priorityLevel || "");
   const [isBreaking, setIsBreaking] = useState(Boolean(initial?.isBreaking));
   const [isHomepagePinned, setIsHomepagePinned] = useState(Boolean(initial?.isHomepagePinned));
+  const [correction, setCorrection] = useState(initial?.correction || "");
+  const [correctionDate, setCorrectionDate] = useState(initial?.correctionDate || "");
   const [status, setStatus] = useState(initial?.status || "draft");
   const [categoryId, setCategoryId] = useState(initial?.categoryId || "");
   const [contentType, setContentType] = useState(initial?.contentType || "actualite");
@@ -174,6 +180,7 @@ export default function ArticleEditor({
     seo: role !== "writer",
     translation: role !== "writer",
     quality: true,
+    correction: false,
   }));
   const lastAutosavedPayloadRef = useRef<string>("");
   const autosaveTimerRef = useRef<number | null>(null);
@@ -209,6 +216,8 @@ export default function ArticleEditor({
       priorityLevel,
       isBreaking,
       isHomepagePinned,
+      correction,
+      correctionDate,
       slug,
       seoTitle,
       metaDescription,
@@ -234,6 +243,8 @@ export default function ArticleEditor({
       priorityLevel,
       isBreaking,
       isHomepagePinned,
+      correction,
+      correctionDate,
       slug,
       seoTitle,
       metaDescription,
@@ -265,7 +276,7 @@ export default function ArticleEditor({
     } catch {
       setAutosaveState("error");
     }
-  }, [autosavePayload, initial?.id, isExistingArticle]);
+  }, [autosavePayload, initial, isExistingArticle]);
 
   useEffect(() => {
     if (isExistingArticle || typeof window === "undefined") return;
@@ -273,28 +284,30 @@ export default function ArticleEditor({
     if (!raw) return;
     try {
       const parsed = JSON.parse(raw) as Partial<typeof payloadForSave>;
-      if (parsed.title && !title) setTitle(parsed.title);
-      if (parsed.subtitle && !subtitle) setSubtitle(parsed.subtitle);
-      if (parsed.body && !body) setBody(parsed.body);
-      if (parsed.excerpt && !excerpt) setExcerpt(parsed.excerpt);
-      if (parsed.coverImage && !coverImage) setCoverImage(parsed.coverImage);
-      if (parsed.coverImageCaption && !coverImageCaption) setCoverImageCaption(parsed.coverImageCaption);
-      if (parsed.categoryId && !categoryId) setCategoryId(parsed.categoryId);
-      if (parsed.contentType && !contentType) setContentType(parsed.contentType);
-      if (parsed.language && !language) setLanguage(parsed.language);
-      if (parsed.translationStatus && !translationStatus) setTranslationStatus(parsed.translationStatus);
-      if (parsed.sourceArticleId && !sourceArticleId) setSourceArticleId(parsed.sourceArticleId);
-      if (parsed.alternateLanguageSlug && !alternateLanguageSlug) setAlternateLanguageSlug(parsed.alternateLanguageSlug);
-      if (parsed.translationPriority && !translationPriority) setTranslationPriority(parsed.translationPriority);
-      if (parsed.priorityLevel && !priorityLevel) setPriorityLevel(parsed.priorityLevel);
-      if (typeof parsed.isBreaking === "boolean") setIsBreaking(parsed.isBreaking);
-      if (typeof parsed.isHomepagePinned === "boolean") setIsHomepagePinned(parsed.isHomepagePinned);
-      if (parsed.slug && !slug) setSlug(parsed.slug);
-      if (parsed.seoTitle && !seoTitle) setSeoTitle(parsed.seoTitle);
-      if (parsed.metaDescription && !metaDescription) setMetaDescription(parsed.metaDescription);
-      if (Array.isArray(parsed.tags) && tagsInput.length === 0) {
-        setTagsInput(parsed.tags.join(", "));
-      }
+      startTransition(() => {
+        if (parsed.title && !title) setTitle(parsed.title);
+        if (parsed.subtitle && !subtitle) setSubtitle(parsed.subtitle);
+        if (parsed.body && !body) setBody(parsed.body);
+        if (parsed.excerpt && !excerpt) setExcerpt(parsed.excerpt);
+        if (parsed.coverImage && !coverImage) setCoverImage(parsed.coverImage);
+        if (parsed.coverImageCaption && !coverImageCaption) setCoverImageCaption(parsed.coverImageCaption);
+        if (parsed.categoryId && !categoryId) setCategoryId(parsed.categoryId);
+        if (parsed.contentType && !contentType) setContentType(parsed.contentType);
+        if (parsed.language && !language) setLanguage(parsed.language);
+        if (parsed.translationStatus && !translationStatus) setTranslationStatus(parsed.translationStatus);
+        if (parsed.sourceArticleId && !sourceArticleId) setSourceArticleId(parsed.sourceArticleId);
+        if (parsed.alternateLanguageSlug && !alternateLanguageSlug) setAlternateLanguageSlug(parsed.alternateLanguageSlug);
+        if (parsed.translationPriority && !translationPriority) setTranslationPriority(parsed.translationPriority);
+        if (parsed.priorityLevel && !priorityLevel) setPriorityLevel(parsed.priorityLevel);
+        if (typeof parsed.isBreaking === "boolean") setIsBreaking(parsed.isBreaking);
+        if (typeof parsed.isHomepagePinned === "boolean") setIsHomepagePinned(parsed.isHomepagePinned);
+        if (parsed.slug && !slug) setSlug(parsed.slug);
+        if (parsed.seoTitle && !seoTitle) setSeoTitle(parsed.seoTitle);
+        if (parsed.metaDescription && !metaDescription) setMetaDescription(parsed.metaDescription);
+        if (Array.isArray(parsed.tags) && tagsInput.length === 0) {
+          setTagsInput(parsed.tags.join(", "));
+        }
+      });
     } catch {
       // ignore invalid local draft
     }
@@ -594,7 +607,7 @@ export default function ArticleEditor({
 
             <div>
               <label className="mb-2 block font-label text-xs font-extrabold uppercase text-foreground">
-                Corps de l'article
+                Corps de l&apos;article
               </label>
               <NovelEditor
                 value={body}
@@ -983,6 +996,36 @@ export default function ArticleEditor({
                 )}
               </div>
             )}
+          </EditorSection>
+
+          <EditorSection title="Correction" open={openSections.correction} onToggle={() => toggleSection("correction")}>
+            <div className="space-y-3">
+              <div>
+                <label htmlFor="correctionDate" className="mb-1 block font-label text-xs font-extrabold uppercase text-foreground">
+                  Date de correction
+                </label>
+                <input
+                  id="correctionDate"
+                  type="date"
+                  value={correctionDate}
+                  onChange={(e) => setCorrectionDate(e.target.value)}
+                  className="w-full border border-border-subtle bg-background px-3 py-2 font-body text-sm"
+                />
+              </div>
+              <div>
+                <label htmlFor="correction" className="mb-1 block font-label text-xs font-extrabold uppercase text-foreground">
+                  Texte de correction
+                </label>
+                <textarea
+                  id="correction"
+                  rows={3}
+                  value={correction}
+                  onChange={(e) => setCorrection(e.target.value)}
+                  placeholder="Décrire la correction apportée à cet article…"
+                  className="w-full resize-none border border-border-subtle bg-background px-3 py-2 font-body text-sm"
+                />
+              </div>
+            </div>
           </EditorSection>
         </aside>
       </div>

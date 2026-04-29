@@ -22,6 +22,7 @@ interface ArticleCardProps {
     contentTypeLabel?: string;
     readingTime?: number;
     language?: "fr" | "en";
+    isBreaking?: boolean;
   };
   variant?: "default" | "compact" | "list" | "text";
   rank?: number;
@@ -99,6 +100,11 @@ export default function ArticleCard({
           )}
           <div className="flex flex-col justify-center md:pr-4">
             <div className="mb-2 flex flex-wrap items-center gap-2">
+              {article.isBreaking && (
+                <span className="inline-block bg-red-600 px-2 py-0.5 font-label text-xs font-extrabold uppercase tracking-wider text-white">
+                  {resolvedLocale === "en" ? "Breaking" : "Urgent"}
+                </span>
+              )}
               {article.contentTypeLabel && (
                 <SectionLabel label={article.contentTypeLabel} variant="kicker" />
               )}

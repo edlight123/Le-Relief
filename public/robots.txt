@@ -1,9 +1,0 @@
-User-agent: *
-Allow: /fr/
-Allow: /en/
-Disallow: /dashboard/
-Disallow: /api/
-
-Sitemap: https://www.lereliefhaiti.com/sitemap.xml
-Sitemap: https://www.lereliefhaiti.com/sitemap-fr.xml
-Sitemap: https://www.lereliefhaiti.com/sitemap-en.xml

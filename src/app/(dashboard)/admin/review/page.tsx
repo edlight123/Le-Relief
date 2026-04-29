@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Badge from "@/components/ui/Badge";
 import Card from "@/components/ui/Card";
@@ -9,6 +10,7 @@ import EmptyState from "@/components/ui/EmptyState";
 import { differenceInHours, formatDistanceToNow } from "date-fns";
 import { fr } from "date-fns/locale";
 import { ClipboardCheck, Clock, AlertTriangle, ChevronRight } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
 
 interface ReviewArticle {
   id: string;
@@ -22,8 +24,16 @@ interface ReviewArticle {
 }
 
 export default function AdminReviewPage() {
+  const { user, isLoading: authLoading } = useAuth();
+  const router = useRouter();
   const [articles, setArticles] = useState<ReviewArticle[]>([]);
   const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (!authLoading && user && user.role !== "admin" && user.role !== "publisher" && user.role !== "editor") {
+      router.replace("/admin/access-denied");
+    }
+  }, [authLoading, user, router]);
 
   useEffect(() => {
     async function load() {
@@ -63,7 +73,7 @@ export default function AdminReviewPage() {
             href="/admin/review/attention"
             className="inline-flex items-center gap-2 rounded-sm bg-primary px-4 py-2 font-label text-xs font-extrabold uppercase tracking-wide text-white transition-colors hover:bg-primary-dark"
           >
-            Besoin d'attention
+            Besoin d&apos;attention
             <ChevronRight className="h-3.5 w-3.5" />
           </Link>
         }
@@ -108,7 +118,7 @@ export default function AdminReviewPage() {
                 <div className="min-w-0 flex-1">
                   <div className="mb-1 flex flex-wrap items-center gap-2">
                     <Badge variant="info">En review</Badge>
-                    {article.isBreaking ? <Badge variant="danger">Breaking</Badge> : null}
+                    {article.isBreaking ? <Badge variant="danger">Urgent</Badge> : null}
                   </div>
                   <h3 className="font-headline text-base font-extrabold leading-snug text-foreground">{article.title}</h3>
                   <p className="mt-0.5 font-label text-xs text-muted">

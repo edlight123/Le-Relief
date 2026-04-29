@@ -2,7 +2,7 @@ import Badge from "@/components/ui/Badge";
 import { clsx } from "clsx";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
-import { useEffect, useMemo, useState } from "react";
+import { startTransition, useEffect, useMemo, useState } from "react";
 import { ArrowUpDown, ChevronDown, ChevronUp } from "lucide-react";
 
 interface Article {
@@ -231,20 +231,22 @@ export default function DataTable<TRow extends AnyRow>(
     }, [columns, filterValues, props.filters, props.sort?.compareFns, rows, sortState]);
 
     useEffect(() => {
-      setSelectedIds((previous) => {
-        if (!previous.size) {
-          return previous;
-        }
+      startTransition(() => {
+        setSelectedIds((previous) => {
+          if (!previous.size) {
+            return previous;
+          }
 
-        const visibleIds = new Set(
-          processedRows.map((row, index) => getRowId(row, index))
-        );
+          const visibleIds = new Set(
+            processedRows.map((row, index) => getRowId(row, index))
+          );
 
-        const next = new Set(
-          [...previous].filter((id) => visibleIds.has(id))
-        );
+          const next = new Set(
+            [...previous].filter((id) => visibleIds.has(id))
+          );
 
-        return next.size === previous.size ? previous : next;
+          return next.size === previous.size ? previous : next;
+        });
       });
     }, [getRowId, processedRows]);
 

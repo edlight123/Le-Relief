@@ -267,7 +267,7 @@ export default async function EditorialDashboardPage() {
     { label: "En revue", value: byStatus["in_review"] || 0, icon: Clock, color: "amber" as const },
     { label: "Approuvés", value: byStatus["approved"] || 0, icon: CheckCircle, color: "teal" as const },
     { label: "Programmés", value: byStatus["scheduled"] || 0, icon: Timer, color: "blue" as const },
-    { label: "Breaking", value: breakingCount, icon: Zap, color: "red" as const },
+    { label: "Urgent", value: breakingCount, icon: Zap, color: "red" as const },
     { label: "Homepage épingé", value: homepagePinnedCount, icon: Home, color: "blue" as const },
   ];
 

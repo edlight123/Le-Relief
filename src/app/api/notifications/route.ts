@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import * as notificationsRepo from "@/lib/repositories/notifications";
+import { getDb } from "@/lib/firebase";
 
 export const dynamic = "force-dynamic";
 
@@ -54,6 +55,11 @@ export async function PATCH(req: NextRequest) {
     }
 
     if (body.id) {
+      // Verify the notification belongs to the authenticated user
+      const notifDoc = await getDb().collection("notifications").doc(body.id).get();
+      if (!notifDoc.exists || notifDoc.data()?.userId !== session.user.id) {
+        return NextResponse.json({ error: "Notification not found" }, { status: 404 });
+      }
       await notificationsRepo.markAsRead(body.id);
       return NextResponse.json({ ok: true });
     }

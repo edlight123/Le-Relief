@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { useSearchParams } from "next/navigation";
 import { Plug, CheckCircle2, AlertTriangle, XCircle } from "lucide-react";
 import PageHeader from "@/components/ui/PageHeader";
@@ -8,6 +9,7 @@ import Card, { CardContent, CardHeader } from "@/components/ui/Card";
 import Button from "@/components/ui/Button";
 import Badge from "@/components/ui/Badge";
 import type { ConnectionPlatform, SocialConnection } from "@/types/social";
+import { useAuth } from "@/hooks/useAuth";
 
 interface ConnDef {
   platform: ConnectionPlatform;
@@ -63,12 +65,20 @@ const CONNECTIONS: ConnDef[] = [
 ];
 
 export default function ConnectionsPage() {
+  const { user, isLoading: authLoading } = useAuth();
+  const router = useRouter();
   const params = useSearchParams();
   const [conns, setConns] = useState<SocialConnection[]>([]);
   const [loading, setLoading] = useState(true);
   const flash = params.get("connected")
     ? `${params.get("connected")} connecté avec succès.`
     : params.get("error") ?? null;
+
+  useEffect(() => {
+    if (!authLoading && user && user.role !== "admin") {
+      router.replace("/admin/access-denied");
+    }
+  }, [authLoading, user, router]);
 
   async function reload() {
     const r = await fetch("/api/admin/social/connections");

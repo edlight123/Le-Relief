@@ -1,6 +1,7 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { startTransition, useCallback, useEffect, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Badge from "@/components/ui/Badge";
 import Card from "@/components/ui/Card";
@@ -9,6 +10,7 @@ import EmptyState from "@/components/ui/EmptyState";
 import { differenceInHours, formatDistanceToNow } from "date-fns";
 import { fr } from "date-fns/locale";
 import { AlertTriangle, Clock, ClipboardCheck, Zap } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
 
 interface AttentionArticle {
   id: string;
@@ -39,11 +41,19 @@ function qualityFlags(a: AttentionArticle): string[] {
 }
 
 export default function AdminReviewAttentionPage() {
+  const { user, isLoading: authLoading } = useAuth();
+  const router = useRouter();
   const [articles, setArticles] = useState<AttentionArticle[]>([]);
   const [loading, setLoading] = useState(true);
 
+  useEffect(() => {
+    if (!authLoading && user && user.role !== "admin" && user.role !== "publisher" && user.role !== "editor") {
+      router.replace("/admin/access-denied");
+    }
+  }, [authLoading, user, router]);
+
+
   const load = useCallback(async () => {
-    setLoading(true);
     const res = await fetch("/api/articles?status=in_review&take=150").then((r) => r.json());
     const rows: AttentionArticle[] = (res.articles || []).sort((a: AttentionArticle, b: AttentionArticle) => {
       const aDate = new Date(a.submittedForReviewAt || a.updatedAt).getTime();
@@ -55,6 +65,7 @@ export default function AdminReviewAttentionPage() {
   }, []);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     load();
   }, [load]);
 

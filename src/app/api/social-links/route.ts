@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import * as socialLinksRepo from "@/lib/repositories/social-links";
 import { auth } from "@/lib/auth";
+import { hasRole } from "@/lib/permissions";
 
 export async function GET() {
   const links = await socialLinksRepo.getSocialLinks();
@@ -9,8 +10,13 @@ export async function GET() {
 
 export async function PUT(req: NextRequest) {
   const session = await auth();
-  if (!session?.user) {
+  if (!session?.user?.id) {
     return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
+  }
+
+  const sessionRole = ((session.user as { role?: string }).role || "writer").toString();
+  if (!hasRole(sessionRole as import("@/types/user").Role, "admin")) {
+    return NextResponse.json({ error: "Admin role required" }, { status: 403 });
   }
 
   const body = await req.json();

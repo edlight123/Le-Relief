@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Newspaper } from "lucide-react";
 import PageHeader from "@/components/ui/PageHeader";
@@ -8,6 +9,7 @@ import Card, { CardContent } from "@/components/ui/Card";
 import EmptyState from "@/components/ui/EmptyState";
 import Badge from "@/components/ui/Badge";
 import type { SocialPost } from "@/types/social";
+import { useAuth } from "@/hooks/useAuth";
 
 interface ArticleLite {
   id: string;
@@ -19,9 +21,18 @@ interface ArticleLite {
 }
 
 export default function SocialListPage() {
+  const { user, isLoading: authLoading } = useAuth();
+  const router = useRouter();
   const [posts, setPosts] = useState<SocialPost[]>([]);
   const [articles, setArticles] = useState<ArticleLite[]>([]);
   const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (!authLoading && user && user.role !== "admin") {
+      router.replace("/admin/access-denied");
+    }
+  }, [authLoading, user, router]);
+
 
   useEffect(() => {
     async function load() {

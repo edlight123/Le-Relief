@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { format, formatDistanceToNow, isToday } from "date-fns";
 import { fr } from "date-fns/locale";
@@ -12,6 +13,7 @@ import {
   AlertTriangle,
   Zap,
 } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
 
 import PageHeader from "@/components/ui/PageHeader";
 import Badge from "@/components/ui/Badge";
@@ -41,12 +43,20 @@ interface DashboardState {
 }
 
 export default function AdminPublishingPage() {
+  const { user, isLoading: authLoading } = useAuth();
+  const router = useRouter();
   const [state, setState] = useState<DashboardState>({
     approved: [],
     scheduled: [],
     loading: true,
     error: null,
   });
+
+  useEffect(() => {
+    if (!authLoading && user && user.role !== "admin" && user.role !== "publisher") {
+      router.replace("/admin/access-denied");
+    }
+  }, [authLoading, user, router]);
 
   useEffect(() => {
     async function fetchData() {

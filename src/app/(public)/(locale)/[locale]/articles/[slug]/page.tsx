@@ -268,6 +268,11 @@ export default async function LocalizedArticlePage({ params }: Props) {
           </div>
 
           <h1 className="editorial-title mt-3 max-w-5xl text-4xl text-foreground sm:text-5xl lg:text-6xl">
+            {article.isBreaking && (
+              <span className="mb-3 inline-flex items-center bg-red-600 px-2 py-0.5 font-label text-sm font-extrabold uppercase tracking-wider text-white align-middle mr-3">
+                {locale === "en" ? "Breaking" : "Urgent"}
+              </span>
+            )}
             {displayTitle}
           </h1>
 
@@ -393,6 +398,24 @@ export default async function LocalizedArticlePage({ params }: Props) {
             )}
 
             <hr className="end-of-article" aria-hidden="true" />
+
+            {article.correction && (
+              <aside
+                role="note"
+                aria-label={locale === "fr" ? "Correction" : "Correction"}
+                className="my-6 rounded border-l-4 border-amber-500 bg-amber-50 px-5 py-4 font-body text-sm text-amber-900 dark:border-amber-600 dark:bg-amber-950 dark:text-amber-200"
+              >
+                <p className="mb-1 font-label text-xs font-extrabold uppercase tracking-wider">
+                  {locale === "fr" ? "Correction" : "Correction"}
+                  {article.correctionDate && (
+                    <span className="ml-2 font-normal normal-case">
+                      — {new Date(article.correctionDate).toLocaleDateString(locale === "fr" ? "fr-FR" : "en-CA", { dateStyle: "long" })}
+                    </span>
+                  )}
+                </p>
+                <p>{article.correction}</p>
+              </aside>
+            )}
 
             {article.author?.name ? (
               <aside className="author-bio" aria-label={locale === "fr" ? "À propos de l’auteur" : "About the author"}>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { startTransition, useEffect, useState, useCallback } from "react";
 import Link from "next/link";
 import { format, formatDistanceToNow, differenceInHours } from "date-fns";
 import { fr } from "date-fns/locale";
@@ -333,7 +333,6 @@ export default function WriterWorkspacePage() {
 
   // Step 2: fetch articles once authorId is known
   const loadArticles = useCallback(async (id: string) => {
-    setLoadingArticles(true);
     try {
       const [drafts, writing, revisionsData, inReview] = await Promise.all([
         fetchArticlesByStatus("draft", id),
