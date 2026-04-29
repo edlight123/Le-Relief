@@ -176,7 +176,7 @@ export default function HeroSection({ article, locale }: HeroSectionProps) {
                   fill
                   sizes="(min-width: 1024px) 58vw, 100vw"
                   quality={92}
-                  className="object-cover"
+                  className="object-cover transition-all duration-700 ease-out group-hover:scale-[1.03]"
                   priority
                 />
               </div>

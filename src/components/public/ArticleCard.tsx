@@ -63,7 +63,7 @@ export default function ArticleCard({
                 fill
                 sizes="160px"
                 quality={90}
-                className="object-cover transition-opacity duration-300 group-hover:opacity-90"
+                className="object-cover transition-all duration-500 ease-out group-hover:scale-105"
               />
             </div>
           )}
@@ -94,7 +94,7 @@ export default function ArticleCard({
                 fill
                 sizes="(min-width: 640px) 384px, 100vw"
                 quality={90}
-                className="object-cover transition-opacity duration-300 group-hover:opacity-90"
+                className="object-cover transition-all duration-500 ease-out group-hover:scale-105"
               />
             </div>
           )}
@@ -185,7 +185,7 @@ export default function ArticleCard({
               fill
               sizes="(min-width: 1024px) 480px, (min-width: 768px) 50vw, 100vw"
               quality={90}
-              className="object-cover transition-opacity duration-300 group-hover:opacity-90"
+              className="object-cover transition-all duration-500 ease-out group-hover:scale-105"
             />
           </div>
         ) : null}

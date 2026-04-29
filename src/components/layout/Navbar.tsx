@@ -130,7 +130,7 @@ export default function Navbar({ initialLocale = "fr" }: { initialLocale?: Local
                   {item.label}
                   {isActive ? (
                     <span
-                      className="absolute -bottom-[10px] left-0 right-0 mx-auto h-[2px] w-6 bg-primary"
+                      className="absolute -bottom-[10px] left-0 right-0 h-[2px] w-full bg-primary"
                       aria-hidden
                     />
                   ) : null}

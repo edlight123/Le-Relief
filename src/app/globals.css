@@ -36,10 +36,10 @@
 }
 
 .dark {
-  --background: #101010;
-  --foreground: #F4F4F4;
-  --tooltip-bg: #181818;
-  --tooltip-border: #333333;
+  --background: #0F1013;
+  --foreground: #F0F0EE;
+  --tooltip-bg: #1A1A1F;
+  --tooltip-border: #2E2E35;
 
   --primary: #E34859;
   --primary-light: #F06675;
@@ -52,12 +52,12 @@
   --accent-coral: #E34859;
   --accent-blue: #77A8C4;
 
-  --surface: #151515;
-  --surface-elevated: #1E1E1E;
-  --surface-newsprint: #141414;
-  --border-subtle: #333333;
-  --border-strong: #F4F4F4;
-  --muted: #A0A0A0;
+  --surface: #16161B;
+  --surface-elevated: #1E1E25;
+  --surface-newsprint: #13131A;
+  --border-subtle: #2A2A32;
+  --border-strong: #E8E8E4;
+  --muted: #9A9A94;
 }
 
 @theme inline {
@@ -220,8 +220,8 @@ html {
 .editorial-title {
   font-family: var(--font-headline);
   font-weight: 800;
-  line-height: 0.98;
-  letter-spacing: -0.015em;
+  line-height: 1.04;
+  letter-spacing: -0.02em;
   text-wrap: balance;
   font-feature-settings: "lnum", "kern", "liga", "ss01";
 }
@@ -387,8 +387,19 @@ html {
   transition: color 0.2s ease, background 0.2s ease, border-color 0.2s ease;
 }
 .article-card:hover {
-  /* editorial hover: text color only, no lift */
+  border-color: var(--border-strong);
 }
+
+/* Smooth link color transitions globally */
+a {
+  transition: color 0.18s ease;
+}
+
+/* Custom scrollbar — webkit */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border-subtle); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--muted); }
 
 /* Clean underline effect */
 .hover-underline {
@@ -428,12 +439,14 @@ html {
 
 /* Glass overlay for hero */
 .glass-overlay {
-  background: rgba(255, 255, 255, 0.94);
-  backdrop-filter: none;
+  background: rgba(248, 245, 239, 0.92);
+  backdrop-filter: blur(12px) saturate(1.2);
+  -webkit-backdrop-filter: blur(12px) saturate(1.2);
 }
 .dark .glass-overlay {
-  background: rgba(16, 16, 16, 0.94);
-  backdrop-filter: none;
+  background: rgba(15, 16, 19, 0.92);
+  backdrop-filter: blur(12px) saturate(1.2);
+  -webkit-backdrop-filter: blur(12px) saturate(1.2);
 }
 
 /* Reading progress bar */
