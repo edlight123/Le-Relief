@@ -178,7 +178,7 @@ export default async function LocalizedArticlePage({ params }: Props) {
   const [related, adjacent] = await Promise.all([
     getRelatedArticles(article, 4, locale),
     article.publishedAt
-      ? articlesRepo.getAdjacentArticles(article.publishedAt, locale)
+      ? articlesRepo.getAdjacentArticles(article.publishedAt, locale).catch(() => ({ prev: null, next: null }))
       : Promise.resolve({ prev: null, next: null }),
   ]);
   const bodyHasHtml = /<\/?[a-z][\s\S]*>/i.test(article.body);
