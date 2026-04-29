@@ -1,7 +1,7 @@
 import Link from "next/link";
 import clsx from "clsx";
 import { hrefForLocale } from "@/lib/locale-routing";
-import { formatRelativeDate } from "@/lib/i18n";
+import RelativeDate from "@/components/public/RelativeDate";
 
 interface MetadataRowProps {
   author?: { name: string; id?: string | null } | null;
@@ -55,20 +55,27 @@ export default function MetadataRow({
   }
 
   if (date || rawDate) {
-    const locale = language === "en" ? "en" : "fr";
-    const displayDate =
-      rawDate ? formatRelativeDate(rawDate, locale) : date;
-    const fullDate = date ?? displayDate;
-    items.push(
-      <time
-        key="date"
-        dateTime={rawDate ? new Date(rawDate).toISOString() : undefined}
-        title={rawDate && displayDate !== fullDate ? fullDate ?? undefined : undefined}
-        className="font-[family-name:var(--font-mono)]"
-      >
-        {displayDate}
-      </time>,
-    );
+    const dateLocale = language === "en" ? "en" : "fr";
+    if (rawDate && date) {
+      items.push(
+        <RelativeDate
+          key="date"
+          rawDate={rawDate}
+          staticDate={date}
+          locale={dateLocale}
+          className="font-[family-name:var(--font-mono)]"
+        />,
+      );
+    } else {
+      items.push(
+        <time
+          key="date"
+          className="font-[family-name:var(--font-mono)]"
+        >
+          {date}
+        </time>,
+      );
+    }
   }
 
   if (readingTime) {
