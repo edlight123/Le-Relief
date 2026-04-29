@@ -828,122 +828,133 @@ export const getHomepageContent = unstable_cache(
   { revalidate: 60, tags: ["homepage", "articles"] },
 );
 
-export async function getPublicArticleBySlug(
-  slug: string,
-  locale?: EditorialLanguage,
-) {
-  const rawArticle = await articlesRepo.findBySlug(slug, locale);
-  if (!rawArticle || rawArticle.status !== "published") return null;
-  if (locale && rawArticle.language !== locale) return null;
-  return hydrateArticle(rawArticle);
-}
+export const getPublicArticleBySlug = unstable_cache(
+  async (slug: string, locale?: EditorialLanguage) => {
+    const rawArticle = await articlesRepo.findBySlug(slug, locale);
+    if (!rawArticle || rawArticle.status !== "published") return null;
+    if (locale && rawArticle.language !== locale) return null;
+    return hydrateArticle(rawArticle);
+  },
+  ["article-by-slug"],
+  { revalidate: 300, tags: ["articles"] },
+);
 
-export async function getRelatedArticles(
+const _getRelatedArticles = unstable_cache(
+  async (
+    articleId: string,
+    categoryId: string | null,
+    targetLanguage: EditorialLanguage,
+    take: number,
+  ): Promise<PublicArticle[]> => {
+    const poolSize = Math.min(Math.max(take * 4, 8), 24);
+    const unique = new Map<string, PublicArticle>();
+
+    function collect(items: PublicArticle[]) {
+      for (const item of items) {
+        if (item.id === articleId) continue;
+        if (!unique.has(item.id)) unique.set(item.id, item);
+        if (unique.size >= take) break;
+      }
+    }
+
+    try {
+      if (categoryId) {
+        const { articles } = await articlesRepo.getArticles({
+          status: "published",
+          categoryId,
+          excludeId: articleId,
+          language: targetLanguage,
+          take: poolSize,
+        });
+        collect(await hydrateArticles(articles));
+      }
+
+      if (unique.size < take) {
+        const { articles } = await articlesRepo.getArticles({
+          status: "published",
+          excludeId: articleId,
+          language: targetLanguage,
+          take: poolSize,
+        });
+        collect(await hydrateArticles(articles));
+      }
+
+      return Array.from(unique.values()).slice(0, take);
+    } catch {
+      return [];
+    }
+  },
+  ["related-articles"],
+  { revalidate: 300, tags: ["articles"] },
+);
+
+export function getRelatedArticles(
   article: PublicArticle,
   take = 3,
   locale?: EditorialLanguage,
-) {
-  const targetLanguage = locale || article.language;
-  const poolSize = Math.min(Math.max(take * 4, 8), 24);
+): Promise<PublicArticle[]> {
+  return _getRelatedArticles(
+    article.id,
+    article.category?.id ?? null,
+    (locale || article.language) as EditorialLanguage,
+    take,
+  );
+}
 
-  const unique = new Map<string, PublicArticle>();
+export const getCategoryPageContent = unstable_cache(
+  async (slug: string, locale: EditorialLanguage) => {
+    const rawCategory = await categoriesRepo.findBySlug(slug);
+    if (!rawCategory) return null;
 
-  function collect(items: PublicArticle[]) {
-    for (const item of items) {
-      if (item.id === article.id) continue;
-      if (!unique.has(item.id)) {
-        unique.set(item.id, item);
-      }
-      if (unique.size >= take) break;
-    }
-  }
+    const category = normalizeCategory(rawCategory);
+    if (!category) return null;
 
-  try {
-    if (article.category?.id) {
-      const { articles } = await articlesRepo.getArticles({
+    let articles: PublicArticle[] = [];
+    try {
+      const result = await articlesRepo.getArticles({
         status: "published",
-        categoryId: article.category.id,
-        excludeId: article.id,
-        language: targetLanguage,
-        take: poolSize,
+        categoryId: category.id,
+        language: locale,
+        take: 11,
       });
-      collect(await hydrateArticles(articles));
+      articles = await hydrateArticles(result.articles);
+    } catch {
+      articles = [];
     }
 
-    if (unique.size < take) {
-      const { articles } = await articlesRepo.getArticles({
+    return {
+      category: { ...category, count: articles.length },
+      featured: articles[0] || null,
+      articles: articles.slice(1),
+    };
+  },
+  ["category-page-content"],
+  { revalidate: 120, tags: ["articles", "categories"] },
+);
+
+export const getAuthorPageContent = unstable_cache(
+  async (id: string, locale: EditorialLanguage) => {
+    const rawAuthor = await usersRepo.getUser(id);
+    if (!rawAuthor) return null;
+
+    let articles: PublicArticle[] = [];
+    try {
+      const result = await articlesRepo.getArticles({
         status: "published",
-        excludeId: article.id,
-        language: targetLanguage,
-        take: poolSize,
+        authorId: id,
+        language: locale,
+        take: 12,
       });
-      collect(await hydrateArticles(articles));
+      articles = await hydrateArticles(result.articles);
+    } catch {
+      articles = [];
     }
 
-    return Array.from(unique.values()).slice(0, take);
-  } catch {
-    return [];
-  }
-}
-
-export async function getCategoryPageContent(
-  slug: string,
-  locale: EditorialLanguage,
-) {
-  const rawCategory = await categoriesRepo.findBySlug(slug);
-  if (!rawCategory) return null;
-
-  const category = normalizeCategory(rawCategory);
-  if (!category) return null;
-
-  let articles: PublicArticle[] = [];
-  try {
-    const result = await articlesRepo.getArticles({
-      status: "published",
-      categoryId: category.id,
-      language: locale,
-      take: 11,
-    });
-    articles = await hydrateArticles(result.articles);
-  } catch {
-    articles = [];
-  }
-
-  return {
-    category: {
-      ...category,
-      count: articles.length,
-    },
-    featured: articles[0] || null,
-    articles: articles.slice(1),
-  };
-}
-
-export async function getAuthorPageContent(
-  id: string,
-  locale: EditorialLanguage,
-) {
-  const rawAuthor = await usersRepo.getUser(id);
-  if (!rawAuthor) return null;
-
-  let articles: PublicArticle[] = [];
-  try {
-    const result = await articlesRepo.getArticles({
-      status: "published",
-      authorId: id,
-      language: locale,
-      take: 12,
-    });
-    articles = await hydrateArticles(result.articles);
-  } catch {
-    articles = [];
-  }
-
-  return {
-    author: rawAuthor,
-    articles,
-  };
-}
+    return { author: rawAuthor, articles };
+  },
+  ["author-page-content"],
+  { revalidate: 300, tags: ["articles"] },
+);
 
 export async function getEnglishSelection() {
   try {
