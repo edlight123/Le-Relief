@@ -65,14 +65,109 @@ const app = getApps().length === 0
 const db = getFirestore(app);
 
 // ── WordPress API ────────────────────────────────────────────────
-const WP_BASE = "https://lereliefhaiti.com/wp-json/wp/v2";
+const WP_BASE = process.env.WP_BASE_URL || "https://lereliefhaiti.com/wp-json/wp/v2";
+
+function parseWrappedJson<T>(raw: string): T {
+  const sanitizeJsonLike = (input: string): string => {
+    let out = "";
+    let inString = false;
+    let backslashes = 0;
+
+    const isValidEscapeChar = (c: string | undefined): boolean => {
+      return c !== undefined && "\"\\/bfnrtu".includes(c);
+    };
+
+    for (let i = 0; i < input.length; i++) {
+      const ch = input[i]!;
+      const escaped = backslashes % 2 === 1;
+
+      if (ch === "\\") {
+        if (inString) {
+          const next = input[i + 1];
+          if (!isValidEscapeChar(next)) {
+            // Preserve a literal backslash if proxy emitted an invalid escape.
+            out += "\\\\";
+            backslashes = 0;
+            continue;
+          }
+        }
+
+        out += ch;
+        backslashes++;
+        continue;
+      }
+
+      if (ch === '"' && !escaped) {
+        inString = !inString;
+        out += ch;
+        backslashes = 0;
+        continue;
+      }
+
+      if (inString) {
+        if (ch === "\n") {
+          out += "\\n";
+        } else if (ch === "\r") {
+          out += "\\r";
+        } else if (ch === "\t") {
+          out += "\\t";
+        } else {
+          const code = ch.charCodeAt(0);
+          if (code < 0x20) {
+            out += " ";
+          } else {
+            out += ch;
+          }
+        }
+      } else {
+        out += ch;
+      }
+
+      backslashes = 0;
+    }
+
+    return out;
+  };
+
+  try {
+    return JSON.parse(raw) as T;
+  } catch {
+    // Fallback for proxy wrappers (e.g. r.jina.ai) that prepend text before JSON.
+    const arrayStart = raw.indexOf("[");
+    const objectStart = raw.indexOf("{");
+    const start = arrayStart === -1
+      ? objectStart
+      : objectStart === -1
+      ? arrayStart
+      : Math.min(arrayStart, objectStart);
+    if (start === -1) {
+      throw new Error("Unable to locate JSON payload in response");
+    }
+
+    const arrayEnd = raw.lastIndexOf("]");
+    const objectEnd = raw.lastIndexOf("}");
+    const end = Math.max(arrayEnd, objectEnd);
+    if (end === -1 || end <= start) {
+      throw new Error("Unable to detect JSON end in response");
+    }
+
+    const candidate = raw.slice(start, end + 1);
+
+    try {
+      return JSON.parse(candidate) as T;
+    } catch {
+      return JSON.parse(sanitizeJsonLike(candidate)) as T;
+    }
+  }
+}
 
 async function wpFetch<T>(endpoint: string): Promise<T> {
   const res = await fetch(`${WP_BASE}${endpoint}`, {
     headers: { "User-Agent": "LeRelief-Importer/1.0" },
   });
   if (!res.ok) throw new Error(`WP API error ${res.status}: ${endpoint}`);
-  return res.json() as Promise<T>;
+  const text = await res.text();
+  return parseWrappedJson<T>(text);
 }
 
 // ── Types ────────────────────────────────────────────────────────
@@ -220,13 +315,23 @@ async function main() {
   }
 
   // 3) Get total post count
-  const headRes = await fetch(`${WP_BASE}/posts?per_page=1`, {
-    method: "HEAD",
-    headers: { "User-Agent": "LeRelief-Importer/1.0" },
-  });
-  const totalPosts = parseInt(headRes.headers.get("x-wp-total") || "0", 10);
-  const totalPages = parseInt(headRes.headers.get("x-wp-totalpages") || "0", 10);
-  console.log(`\n📰 Total posts to import: ${totalPosts} (${totalPages} pages of 100)`);
+  let totalPosts = 0;
+  let totalPages = 0;
+  try {
+    const headRes = await fetch(`${WP_BASE}/posts?per_page=1`, {
+      method: "HEAD",
+      headers: { "User-Agent": "LeRelief-Importer/1.0" },
+    });
+    totalPosts = parseInt(headRes.headers.get("x-wp-total") || "0", 10);
+    totalPages = parseInt(headRes.headers.get("x-wp-totalpages") || "0", 10);
+  } catch (e) {
+    console.warn(`⚠ Could not read WP pagination headers: ${e}`);
+  }
+  if (totalPages > 0) {
+    console.log(`\n📰 Total posts to import: ${totalPosts} (${totalPages} pages of 100)`);
+  } else {
+    console.log("\n📰 Total posts unknown from headers (proxy mode) — paginating until empty page...");
+  }
 
   // 4) Check existing articles to skip duplicates
   console.log("🔍 Checking existing articles...");
@@ -251,12 +356,17 @@ async function main() {
   // be already in Firestore once we cross that boundary).
   const STOP_ON_FULL_KNOWN_PAGE = process.env.IMPORT_FULL !== "1";
 
-  for (let page = 1; page <= totalPages; page++) {
-    console.log(`📄 Page ${page}/${totalPages}...`);
+  for (let page = 1; totalPages === 0 || page <= totalPages; page++) {
+    console.log(totalPages > 0 ? `📄 Page ${page}/${totalPages}...` : `📄 Page ${page}...`);
 
     const posts = await wpFetch<WPPost[]>(
       `/posts?per_page=100&page=${page}&_fields=id,date,slug,title,content,excerpt,featured_media,categories,author`
     );
+
+    if (posts.length === 0) {
+      console.log("   ✓ Reached empty page — stopping pagination.");
+      break;
+    }
 
     if (
       STOP_ON_FULL_KNOWN_PAGE &&
@@ -325,12 +435,17 @@ async function main() {
           coverImage,
           status: "published",
           featured: false,
+          isBreaking: false,
           views: 0,
           authorId,
           categoryId,
           publishedAt: Timestamp.fromDate(publishedAt),
           createdAt: Timestamp.fromDate(publishedAt),
           updatedAt: Timestamp.fromDate(publishedAt),
+          language: "fr",
+          translationStatus: "not_started",
+          alternateLanguageSlug: null,
+          sourceArticleId: null,
         });
 
         batchCount++;
