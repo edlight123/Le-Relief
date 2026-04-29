@@ -75,7 +75,7 @@ export default function Navbar({ initialLocale = "fr" }: { initialLocale?: Local
             )}
           </button>
 
-          <Link href={withLocale("/")} className="flex min-w-0 items-center justify-center gap-2 sm:gap-3">
+          <Link href={withLocale("/")} prefetch={true} className="flex min-w-0 items-center justify-center gap-2 sm:gap-3">
             <Image
               src="/logo.png"
               alt="Le Relief"

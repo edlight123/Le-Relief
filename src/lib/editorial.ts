@@ -1,3 +1,4 @@
+import { unstable_cache } from "next/cache";
 import * as articlesRepo from "@/lib/repositories/articles";
 import * as categoriesRepo from "@/lib/repositories/categories";
 import * as homepageRepo from "@/lib/repositories/homepage";
@@ -662,7 +663,7 @@ export async function getPublicCategories(
   );
 }
 
-export async function getHomepageContent(
+async function _getHomepageContent(
   locale: EditorialLanguage = "fr",
 ): Promise<HomepageContent> {
   // For EN, we derive the editorial selection from FR (so the same stories are
@@ -816,6 +817,16 @@ export async function getHomepageContent(
     showNewsletter: settings.showNewsletter,
   };
 }
+
+/**
+ * Cached wrapper — results live in Next.js Data Cache for 60s.
+ * Subsequent RSC renders within that window skip Firestore entirely.
+ */
+export const getHomepageContent = unstable_cache(
+  _getHomepageContent,
+  ["homepage-content"],
+  { revalidate: 60, tags: ["homepage", "articles"] },
+);
 
 export async function getPublicArticleBySlug(
   slug: string,
