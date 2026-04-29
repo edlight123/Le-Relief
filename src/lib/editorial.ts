@@ -525,6 +525,51 @@ async function hydratePublishedArticleById(id: string) {
   return hydrateArticle(article);
 }
 
+/**
+ * Given a list of articles (typically FR canonical), swap each one for its
+ * published EN translation when available. Articles with no EN translation
+ * are kept as-is so the layout always mirrors the FR editorial selection.
+ */
+async function swapArticlesToLocale(
+  articles: PublicArticle[],
+  targetLocale: EditorialLanguage,
+): Promise<PublicArticle[]> {
+  if (targetLocale === "fr") return articles;
+  return Promise.all(
+    articles.map(async (article) => {
+      if (!article.alternateLanguageSlug) return article;
+      try {
+        const raw = await articlesRepo.findBySlug(
+          article.alternateLanguageSlug,
+          targetLocale,
+        );
+        if (!raw || raw.status !== "published") return article;
+        return hydrateArticle(raw);
+      } catch {
+        return article;
+      }
+    }),
+  );
+}
+
+async function swapArticleToLocale(
+  article: PublicArticle | null,
+  targetLocale: EditorialLanguage,
+): Promise<PublicArticle | null> {
+  if (!article || targetLocale === "fr") return article;
+  if (!article.alternateLanguageSlug) return article;
+  try {
+    const raw = await articlesRepo.findBySlug(
+      article.alternateLanguageSlug,
+      targetLocale,
+    );
+    if (!raw || raw.status !== "published") return article;
+    return hydrateArticle(raw);
+  } catch {
+    return article;
+  }
+}
+
 function uniqueById(articles: PublicArticle[]) {
   const seen = new Set<string>();
   return articles.filter((article) => {
@@ -620,6 +665,31 @@ export async function getPublicCategories(
 export async function getHomepageContent(
   locale: EditorialLanguage = "fr",
 ): Promise<HomepageContent> {
+  // For EN, we derive the editorial selection from FR (so the same stories are
+  // featured) and then swap each article for its EN translation where available.
+  if (locale === "en") {
+    const frContent = await getHomepageContent("fr");
+    const [hero, secondary, latest, editorial, mostRead, englishSelection] =
+      await Promise.all([
+        swapArticleToLocale(frContent.hero, "en"),
+        swapArticlesToLocale(frContent.secondary, "en"),
+        swapArticlesToLocale(frContent.latest, "en"),
+        swapArticlesToLocale(frContent.editorial, "en"),
+        swapArticlesToLocale(frContent.mostRead, "en"),
+        swapArticlesToLocale(frContent.englishSelection, "en"),
+      ]);
+    return {
+      hero,
+      secondary,
+      latest,
+      editorial,
+      mostRead,
+      categories: frContent.categories,
+      englishSelection,
+      showNewsletter: frContent.showNewsletter,
+    };
+  }
+
   let settings = homepageRepo.DEFAULT_HOMEPAGE_SETTINGS;
   let curatedHero: PublicArticle | null = null;
   let curatedSecondary: PublicArticle[] = [];
