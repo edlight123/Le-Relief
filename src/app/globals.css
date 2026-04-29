@@ -145,6 +145,13 @@ html {
   max-width: 720px;
 }
 
+/* Smooth anchor scroll — clears sticky header (~7rem) */
+.prose h2,
+.prose h3,
+.prose h4 {
+  scroll-margin-top: 7rem;
+}
+
 /* Editorial callout boxes (key points, context, sources) */
 .editorial-callout {
   background: var(--surface-newsprint);

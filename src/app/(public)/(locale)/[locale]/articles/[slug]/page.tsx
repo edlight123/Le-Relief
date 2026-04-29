@@ -230,7 +230,7 @@ export default async function LocalizedArticlePage({ params }: Props) {
         readingTime={article.readingTime}
       />
       <ReadingProgress />
-      <article className="newspaper-shell py-6 sm:py-10" data-print-hide="false">
+      <article className="newspaper-shell py-6 sm:py-10 animate-fade-in" data-print-hide="false">
         <Breadcrumb
           locale={locale}
           crumbs={[
@@ -386,11 +386,11 @@ export default async function LocalizedArticlePage({ params }: Props) {
 
             {bodyHasHtml ? (
               <div
-                className="prose prose-lg max-w-none font-body leading-relaxed dark:prose-invert prose-headings:font-headline prose-a:text-primary"
+                className="prose prose-lg reading-column font-body leading-relaxed dark:prose-invert prose-headings:font-headline prose-a:text-primary animate-fade-in-up"
                 dangerouslySetInnerHTML={{ __html: article.body }}
               />
             ) : (
-              <div className="prose prose-lg max-w-none font-body leading-relaxed dark:prose-invert prose-headings:font-headline prose-a:text-primary">
+              <div className="prose prose-lg reading-column font-body leading-relaxed dark:prose-invert prose-headings:font-headline prose-a:text-primary animate-fade-in-up">
                 {article.body.split("\n").map((paragraph, index) =>
                   paragraph.trim() ? <p key={index}>{paragraph}</p> : null,
                 )}
