@@ -2,7 +2,12 @@
 
 import Link from "next/link";
 import { startTransition, useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { ChevronDown, ChevronUp } from "lucide-react";
+import {
+  ChevronDown, ChevronUp, Check, X, CircleDot,
+  Tag, Globe, SearchCode, GitBranch, ShieldCheck,
+  Image as ImageIcon, Monitor, Smartphone, Share2,
+  Newspaper, Clock, Zap, BookOpen, ArrowUpRight, AlignLeft,
+} from "lucide-react";
 import Input from "@/components/ui/Input";
 import Button from "@/components/ui/Button";
 import MediaUploader from "@/components/dashboard/MediaUploader";
@@ -92,32 +97,49 @@ interface ArticleEditorProps {
   submitLabel?: string;
 }
 
+const SECTION_ICONS: Record<string, React.ReactNode> = {
+  workflow: <Clock className="h-3.5 w-3.5" />,
+  metadata: <Tag className="h-3.5 w-3.5" />,
+  seo: <SearchCode className="h-3.5 w-3.5" />,
+  translation: <Globe className="h-3.5 w-3.5" />,
+  quality: <ShieldCheck className="h-3.5 w-3.5" />,
+  correction: <BookOpen className="h-3.5 w-3.5" />,
+};
+
 function EditorSection({
   title,
+  id,
   open,
   onToggle,
   children,
 }: {
   title: string;
+  id?: string;
   open: boolean;
   onToggle: () => void;
   children: React.ReactNode;
 }) {
+  const icon = id ? SECTION_ICONS[id] : null;
   return (
-    <section className="border border-border-subtle bg-surface">
+    <section id={id} className="scroll-mt-28 overflow-hidden border border-border-subtle bg-surface">
       <button
         type="button"
         onClick={onToggle}
-        className="flex w-full items-center justify-between px-4 py-3 text-left hover:bg-surface-elevated"
+        className="flex w-full items-center justify-between px-4 py-3.5 text-left transition-colors hover:bg-surface-elevated"
       >
-        <p className="font-label text-sm font-extrabold uppercase tracking-wide text-foreground">{title}</p>
-        {open ? (
-          <ChevronUp className="h-4 w-4 text-muted" />
-        ) : (
+        <span className="flex items-center gap-2 font-label text-sm font-extrabold uppercase tracking-wide text-foreground">
+          {icon && <span className="text-muted">{icon}</span>}
+          {title}
+        </span>
+        <span className={`transition-transform duration-200 ${open ? "rotate-0" : "-rotate-90"}`}>
           <ChevronDown className="h-4 w-4 text-muted" />
-        )}
+        </span>
       </button>
-      {open ? <div className="space-y-4 border-t border-border-subtle p-4">{children}</div> : null}
+      {open ? (
+        <div className="space-y-4 border-t border-border-subtle px-4 py-5">
+          {children}
+        </div>
+      ) : null}
     </section>
   );
 }
@@ -424,8 +446,24 @@ export default function ArticleEditor({
     isOwner,
   }).allowed;
 
+  const autosaveLabel =
+    autosaveState === "saved"
+      ? "Sauvegardé"
+      : autosaveState === "saving"
+      ? "Enregistrement…"
+      : autosaveState === "error"
+      ? "Erreur autosave"
+      : "Prêt";
+
   function toggleSection(section: keyof typeof openSections) {
     setOpenSections((current) => ({ ...current, [section]: !current[section] }));
+  }
+
+  function scrollToSection(sectionId: string) {
+    if (typeof document === "undefined") return;
+    const section = document.getElementById(sectionId);
+    if (!section) return;
+    section.scrollIntoView({ behavior: "smooth", block: "start" });
   }
 
   async function uploadFile(file: File): Promise<string> {
@@ -437,138 +475,98 @@ export default function ArticleEditor({
   }
 
   return (
-    <div className="space-y-6 border-t-2 border-border-strong pt-5">
-      <div className="sticky top-0 z-20 border border-border-subtle bg-surface shadow-sm backdrop-blur supports-[backdrop-filter]:bg-surface/95">
-        <div className="flex flex-wrap items-center justify-between gap-3 px-4 py-3">
-          {/* Left: title + status */}
-          <div className="flex min-w-0 flex-1 items-center gap-3">
-            <div className="min-w-0">
-              <div className="flex flex-wrap items-center gap-2">
-                <StatusChip status={normalizedStatus} />
-                {isBreaking ? <PriorityFlag kind="breaking" /> : null}
-                {isHomepagePinned ? <PriorityFlag kind="homepage" /> : null}
-                <Badge
-                  variant={autosaveState === "saved" ? "success" : autosaveState === "saving" ? "info" : autosaveState === "error" ? "danger" : "default"}
-                >
-                  {autosaveState === "saved"
-                    ? "Sauvegardé"
-                    : autosaveState === "saving"
-                    ? "Enregistrement…"
-                    : autosaveState === "error"
-                    ? "Erreur autosave"
-                    : "Prêt"}
-                </Badge>
-                <Badge variant={completionVariant}>{completionScore}% complété</Badge>
-              </div>
-              <h1 className="mt-0.5 truncate font-headline text-lg font-extrabold text-foreground">
-                {title || "Nouvel article"}
-              </h1>
-            </div>
+    <div className="space-y-8 pt-1">
+      {/* ── Masthead ──────────────────────────────────────────────────────── */}
+      <div className="border border-border-subtle bg-surface">
+        {/* Top meta bar */}
+        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border-subtle px-6 py-3">
+          <div className="flex items-center gap-2">
+            <Newspaper className="h-3.5 w-3.5 text-muted" />
+            <span className="font-label text-[11px] font-extrabold uppercase tracking-[0.22em] text-muted">
+              Le Relief · Édition
+            </span>
+            {role === "writer" && <span className="ml-2 font-label text-[11px] uppercase tracking-wide text-muted">— Mode rédaction</span>}
+            {role === "editor" && <span className="ml-2 font-label text-[11px] uppercase tracking-wide text-accent-blue">— Révision éditoriale</span>}
+            {role === "publisher" && <span className="ml-2 font-label text-[11px] uppercase tracking-wide text-accent-amber">— Publication</span>}
+            {role === "admin" && <span className="ml-2 font-label text-[11px] uppercase tracking-wide text-accent-coral">— Administration</span>}
           </div>
-
-          {/* Right: preview mode + actions */}
           <div className="flex flex-wrap items-center gap-2">
-            {/* Preview mode toggles */}
-            <div className="flex items-center gap-1 border border-border-subtle p-0.5">
-              {(["desktop", "mobile", "social"] as const).map((mode) => (
-                <button
-                  key={mode}
-                  type="button"
-                  onClick={() => setPreviewMode(mode)}
-                  className={`px-2.5 py-1 font-label text-[11px] font-bold uppercase ${
-                    previewMode === mode
-                      ? "bg-foreground text-background"
-                      : "text-muted hover:text-foreground"
-                  }`}
-                >
-                  {mode}
-                </button>
-              ))}
-            </div>
+            {isBreaking ? <PriorityFlag kind="breaking" /> : null}
+            {isHomepagePinned ? <PriorityFlag kind="homepage" /> : null}
+            <StatusChip status={normalizedStatus} />
+            <Badge
+              variant={autosaveState === "saved" ? "success" : autosaveState === "saving" ? "info" : autosaveState === "error" ? "danger" : "default"}
+            >
+              {autosaveLabel}
+            </Badge>
+          </div>
+        </div>
 
-            {/* Workflow action buttons */}
-            {canSaveDraft ? (
-              <Button
-                variant="outline"
-                onClick={() => handleSubmit("draft")}
-                disabled={saving || !title}
+        {/* Title + subtitle display */}
+        <div className="px-6 py-6">
+          <h1 className="font-headline text-3xl font-extrabold leading-tight text-foreground md:text-4xl">
+            {title || <span className="text-muted/50">Nouvel article…</span>}
+          </h1>
+          {subtitle && (
+            <p className="mt-2 font-body text-lg text-muted">{subtitle}</p>
+          )}
+          {excerpt && (
+            <p className="mt-3 max-w-3xl border-l-2 border-border-strong pl-4 font-body text-sm text-muted italic">
+              {excerpt}
+            </p>
+          )}
+        </div>
+
+        {/* Progress bar */}
+        <div className="relative border-t border-border-subtle">
+          <div
+            className="h-0.5 bg-primary transition-all duration-500"
+            style={{ width: `${completionScore}%` }}
+          />
+        </div>
+
+        {/* Quick navigation */}
+        <div className="flex flex-wrap items-center justify-between gap-3 px-4 py-2.5">
+          <div className="flex flex-wrap gap-1">
+            {[
+              ["content", "Contenu", <AlignLeft key="c" className="h-3 w-3" />],
+              ["media", "Image", <ImageIcon key="m" className="h-3 w-3" />],
+              ["preview", "Aperçu", <Monitor key="p" className="h-3 w-3" />],
+              ["workflow", "Workflow", <Clock key="w" className="h-3 w-3" />],
+              ["metadata", "Métadonnées", <Tag key="mt" className="h-3 w-3" />],
+              ["seo", "SEO", <SearchCode key="s" className="h-3 w-3" />],
+              ["quality", "Qualité", <ShieldCheck key="q" className="h-3 w-3" />],
+            ].map(([id, label, icon]) => (
+              <button
+                key={id as string}
+                type="button"
+                onClick={() => scrollToSection(id as string)}
+                className="flex items-center gap-1.5 rounded-sm px-2.5 py-1.5 font-label text-[11px] font-bold uppercase tracking-wide text-muted transition-colors hover:bg-surface-elevated hover:text-foreground"
               >
-                Brouillon
-              </Button>
-            ) : null}
-            {scheduledAt && role !== "writer" ? (
-              <Button
-                variant="outline"
-                onClick={() => handleSubmit("scheduled")}
-                disabled={saving || !title || !body}
-              >
-                Programmer
-              </Button>
-            ) : null}
-            {canRequestReview ? (
-              <Button
-                variant="outline"
-                onClick={() => handleSubmit("in_review")}
-                disabled={saving || !title || !body}
-              >
-                Soumettre en revue
-              </Button>
-            ) : null}
-            {canApprove && role !== "writer" ? (
-              <Button
-                variant="outline"
-                onClick={() => handleSubmit("approved")}
-                disabled={saving || !title || !body}
-              >
-                Approuver
-              </Button>
-            ) : null}
-            {canPublish && role !== "writer" ? (
-              <Button
-                variant="outline"
-                onClick={() => handleSubmit("published")}
-                disabled={saving || !title || !body}
-              >
-                Publier
-              </Button>
-            ) : null}
-            <Button onClick={() => handleSubmit(status)} disabled={saving || !title || !body}>
-              {saving ? "Enregistrement..." : submitLabel}
-            </Button>
+                {icon}
+                {label}
+              </button>
+            ))}
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="font-label text-[11px] text-muted">
+              {completionScore}% complété
+              {missingChecks.length > 0 && (
+                <span className="ml-1 text-accent-amber">
+                  · {missingChecks.length} manquant{missingChecks.length > 1 ? "s" : ""}
+                </span>
+              )}
+            </span>
           </div>
         </div>
       </div>
 
-      {/* Role context bar */}
-      <div className="flex flex-wrap items-center gap-2 border border-border-subtle bg-surface-elevated px-4 py-2">
-        <span className="font-label text-xs text-muted">Mode :</span>
-        {role === "writer" && <Badge variant="default">Rédaction</Badge>}
-        {role === "editor" && <Badge variant="info">Révision éditoriale</Badge>}
-        {role === "publisher" && <Badge variant="warning">Publication</Badge>}
-        {role === "admin" && <Badge variant="danger">Admin</Badge>}
-        <span className="mx-1 text-border-subtle">·</span>
-        <Badge variant="default">{language === "fr" ? "Français" : "English"}</Badge>
-        <Badge variant="default">{contentType || "Type non défini"}</Badge>
-        {translationStatus && translationStatus !== "not_applicable" && (
-          <Badge variant={statusVariant}>Traduction : {translationStatus}</Badge>
-        )}
-      </div>
-
-      {missingChecks.length > 0 ? (
-        <AlertBanner variant="warning" title="Points à compléter avant publication">
-          <p>
-            Champs manquants : {missingChecks.map((check) => check.label).join(", ")}.
-          </p>
-        </AlertBanner>
-      ) : null}
-
+      {/* ── Role banners ──────────────────────────────────────────────────── */}
       {autosaveState === "error" ? (
         <AlertBanner variant="danger" title="Autosave échoué">
-          Réessayez ou enregistrez manuellement avant de quitter l’éditeur.
+          Réessayez ou enregistrez manuellement avant de quitter l&apos;éditeur.
         </AlertBanner>
       ) : null}
-
-
       {role === "editor" && (
         <AlertBanner variant="info" title="Mode révision éditoriale">
           Examinez le contenu, les métadonnées et les commentaires. Utilisez les contrôles qualité pour valider avant d&apos;approuver ou de demander des révisions.
@@ -579,110 +577,329 @@ export default function ArticleEditor({
           Vérifiez l&apos;état de préparation avant de publier ou de programmer. Activez les signaux de diffusion si nécessaire.
         </AlertBanner>
       )}
-      <div className="grid gap-6 xl:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">
-        <div className="space-y-6">
-          <section className="space-y-5 border border-border-subtle p-5">
-            <div className="flex items-center justify-between border-b border-border-subtle pb-3">
+
+      {/* ── Main grid ─────────────────────────────────────────────────────── */}
+      <div className="grid gap-8 xl:grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)]">
+
+        {/* ── Left column ─────────────────────────────────────────────────── */}
+        <div className="space-y-8">
+
+          {/* Content section */}
+          <section id="content" className="scroll-mt-20 space-y-0 border border-border-subtle bg-surface">
+            <div className="flex items-center gap-2 border-b border-border-subtle px-5 py-3.5">
+              <Newspaper className="h-3.5 w-3.5 text-muted" />
               <h2 className="font-label text-sm font-extrabold uppercase tracking-widest text-foreground">Contenu</h2>
-              <span className="font-label text-xs text-muted">Langue : <span className="font-bold text-foreground">{language === "fr" ? "Français" : "English"}</span></span>
+              <span className="ml-auto font-label text-xs text-muted">
+                {language === "fr" ? "🇫🇷 Français" : "🇺🇸 English"}
+              </span>
             </div>
 
-            <Input
-              label="Titre *"
-              id="title"
-              placeholder="Titre de l'article"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-            />
+            <div className="space-y-0 divide-y divide-border-subtle">
+              {/* Title — editorial-style large input */}
+              <div className="px-5 py-4">
+                <label htmlFor="title" className="mb-2 block font-label text-[10px] font-extrabold uppercase tracking-[0.2em] text-muted">
+                  Titre <span className="text-accent-coral">*</span>
+                </label>
+                <input
+                  id="title"
+                  type="text"
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                  placeholder={language === "fr" ? "Donnez un titre fort à votre article…" : "Give your article a strong title…"}
+                  className="w-full bg-transparent font-headline text-2xl font-extrabold text-foreground placeholder:text-muted/40 focus:outline-none md:text-3xl"
+                />
+              </div>
 
-            <Input
-              label="Sous-titre"
-              id="subtitle"
-              placeholder="Sous-titre optionnel"
-              value={subtitle}
-              onChange={(e) => setSubtitle(e.target.value)}
-            />
+              {/* Subtitle */}
+              <div className="px-5 py-4">
+                <label htmlFor="subtitle" className="mb-2 block font-label text-[10px] font-extrabold uppercase tracking-[0.2em] text-muted">
+                  Sous-titre
+                </label>
+                <input
+                  id="subtitle"
+                  type="text"
+                  value={subtitle}
+                  onChange={(e) => setSubtitle(e.target.value)}
+                  placeholder="Sous-titre optionnel…"
+                  className="w-full bg-transparent font-body text-lg text-foreground placeholder:text-muted/40 focus:outline-none"
+                />
+              </div>
 
-            <div>
-              <label htmlFor="excerpt" className="mb-1 block font-label text-xs font-extrabold uppercase text-foreground">
-                Chapô / Résumé *
-              </label>
-              <p className="mb-2 font-body text-xs text-muted">Accroche courte affichée en page d&apos;accueil et dans les résultats de recherche.</p>
-              <textarea
-                id="excerpt"
-                rows={3}
-                value={excerpt}
-                onChange={(e) => setExcerpt(e.target.value)}
-                placeholder={language === "fr" ? "Rédigez un résumé accrocheur (2–3 phrases)…" : "Write a short compelling summary (2–3 sentences)…"}
-                className="w-full resize-none border border-border-subtle bg-surface px-4 py-3 font-body text-sm text-foreground focus:border-primary focus:outline-none"
-              />
-              <p className="mt-1 text-right font-label text-[11px] text-muted">{excerpt.length} car.</p>
+              {/* Excerpt / Chapô */}
+              <div className="px-5 py-4">
+                <div className="mb-2 flex items-center justify-between">
+                  <label htmlFor="excerpt" className="font-label text-[10px] font-extrabold uppercase tracking-[0.2em] text-muted">
+                    Chapô <span className="text-accent-coral">*</span>
+                  </label>
+                  <span className="font-label text-[11px] text-muted">{excerpt.length} car.</span>
+                </div>
+                <p className="mb-3 font-body text-xs text-muted">Accroche affichée en page d&apos;accueil et dans les résultats de recherche.</p>
+                <textarea
+                  id="excerpt"
+                  rows={3}
+                  value={excerpt}
+                  onChange={(e) => setExcerpt(e.target.value)}
+                  placeholder={language === "fr" ? "Rédigez une accroche percutante (2–3 phrases)…" : "Write a compelling hook (2–3 sentences)…"}
+                  className="w-full resize-none bg-transparent font-body text-sm text-foreground placeholder:text-muted/40 focus:outline-none"
+                />
+              </div>
+
+              {/* Body */}
+              <div className="px-5 py-4">
+                <label className="mb-3 block font-label text-[10px] font-extrabold uppercase tracking-[0.2em] text-muted">
+                  Corps de l&apos;article <span className="text-accent-coral">*</span>
+                </label>
+                <NovelEditor
+                  value={body}
+                  onChange={setBody}
+                  locale={language as "fr" | "en"}
+                  placeholder={language === "fr" ? "Écrivez le contenu de votre article…" : "Write your article content…"}
+                />
+              </div>
             </div>
-
-            <div>
-              <label className="mb-2 block font-label text-xs font-extrabold uppercase text-foreground">
-                Corps de l&apos;article *
-              </label>
-              <NovelEditor
-                value={body}
-                onChange={setBody}
-                locale={language as "fr" | "en"}
-                placeholder={language === "fr" ? "Écrivez le contenu de votre article..." : "Write your article content..."}
-              />
-            </div>
-
           </section>
 
-          <section className="space-y-4 border border-border-subtle p-5">
-            <h2 className="border-b border-border-subtle pb-3 font-label text-sm font-extrabold uppercase tracking-widest text-foreground">Image principale</h2>
-            <MediaUploader onUpload={uploadFile} value={coverImage} onChange={setCoverImage} />
-            <Input
-              label="Crédit photo"
-              id="coverImageCaption"
-              placeholder="Photo : AFP / Le Relief Haïti"
-              value={coverImageCaption}
-              onChange={(e) => setCoverImageCaption(e.target.value)}
-            />
+          {/* Cover image */}
+          <section id="media" className="scroll-mt-20 border border-border-subtle bg-surface">
+            <div className="flex items-center gap-2 border-b border-border-subtle px-5 py-3.5">
+              <ImageIcon className="h-3.5 w-3.5 text-muted" />
+              <h2 className="font-label text-sm font-extrabold uppercase tracking-widest text-foreground">Image principale</h2>
+            </div>
+            <div className="space-y-4 px-5 py-5">
+              <MediaUploader onUpload={uploadFile} value={coverImage} onChange={setCoverImage} />
+              <Input
+                label="Crédit photo"
+                id="coverImageCaption"
+                placeholder="Photo : AFP / Le Relief Haïti"
+                value={coverImageCaption}
+                onChange={(e) => setCoverImageCaption(e.target.value)}
+              />
+            </div>
           </section>
 
-          <section className="space-y-4 border border-border-subtle p-4">
-            <p className="font-label text-xs font-extrabold uppercase text-muted">Prévisualisation</p>
-            {previewMode === "desktop" && (
-              <article className="border border-border-subtle bg-surface p-5">
-                <p className="page-kicker">Desktop</p>
-                <h2 className="mt-2 font-headline text-3xl font-extrabold leading-tight text-foreground">
-                  {title || "Titre de prévisualisation"}
-                </h2>
-                {subtitle ? <p className="mt-2 font-body text-muted">{subtitle}</p> : null}
-                {excerpt ? <p className="mt-4 font-body text-base text-foreground">{excerpt}</p> : null}
-              </article>
-            )}
-            {previewMode === "mobile" && (
-              <article className="mx-auto max-w-[360px] border border-border-subtle bg-surface p-4">
-                <p className="page-kicker">Mobile</p>
-                <h2 className="mt-2 font-headline text-xl font-extrabold leading-snug text-foreground">
-                  {title || "Titre mobile"}
-                </h2>
-                {excerpt ? <p className="mt-3 font-body text-sm text-muted">{excerpt}</p> : null}
-              </article>
-            )}
-            {previewMode === "social" && (
-              <article className="max-w-xl border border-border-subtle bg-surface p-4">
-                <p className="page-kicker">Social card</p>
-                <p className="mt-2 font-label text-xs uppercase text-muted">{slug || "votre-slug"}</p>
-                <h2 className="mt-1 font-headline text-lg font-extrabold text-foreground">
-                  {seoTitle || title || "SEO title"}
-                </h2>
-                <p className="mt-2 font-body text-sm text-muted">
-                  {metaDescription || excerpt || "Meta description"}
-                </p>
-              </article>
-            )}
+          {/* Preview */}
+          <section id="preview" className="scroll-mt-20 border border-border-subtle bg-surface">
+            <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border-subtle px-5 py-3.5">
+              <div className="flex items-center gap-2">
+                <Monitor className="h-3.5 w-3.5 text-muted" />
+                <h2 className="font-label text-sm font-extrabold uppercase tracking-widest text-foreground">Aperçu</h2>
+              </div>
+              <div className="flex items-center overflow-hidden border border-border-subtle">
+                {(["desktop", "mobile", "social"] as const).map((mode) => {
+                  const icons = {
+                    desktop: <Monitor className="h-3.5 w-3.5" />,
+                    mobile: <Smartphone className="h-3.5 w-3.5" />,
+                    social: <Share2 className="h-3.5 w-3.5" />,
+                  };
+                  return (
+                    <button
+                      key={mode}
+                      type="button"
+                      onClick={() => setPreviewMode(mode)}
+                      title={mode}
+                      className={`flex items-center gap-1.5 px-3 py-1.5 font-label text-[11px] font-bold uppercase transition-colors ${
+                        previewMode === mode
+                          ? "bg-foreground text-background"
+                          : "text-muted hover:bg-surface-elevated hover:text-foreground"
+                      }`}
+                    >
+                      {icons[mode]}
+                      <span className="hidden sm:inline">{mode}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+            <div className="p-5">
+              {previewMode === "desktop" && (
+                <article className="border border-border-subtle bg-surface-elevated p-6">
+                  <p className="page-kicker mb-3">Bureau — aperçu éditorial</p>
+                  <h2 className="font-headline text-3xl font-extrabold leading-tight text-foreground">
+                    {title || <span className="text-muted/50">Titre de prévisualisation</span>}
+                  </h2>
+                  {subtitle ? <p className="mt-2 font-body text-base text-muted">{subtitle}</p> : null}
+                  {coverImage ? (
+                    <div className="my-4 aspect-video w-full overflow-hidden bg-surface">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src={coverImage} alt={coverImageCaption || title} className="h-full w-full object-cover" />
+                    </div>
+                  ) : (
+                    <div className="my-4 flex aspect-video w-full items-center justify-center bg-surface text-muted">
+                      <ImageIcon className="h-8 w-8" />
+                    </div>
+                  )}
+                  {excerpt ? <p className="font-body text-base leading-relaxed text-foreground">{excerpt}</p> : null}
+                </article>
+              )}
+              {previewMode === "mobile" && (
+                <div className="mx-auto max-w-[390px]">
+                  <article className="border border-border-subtle bg-surface-elevated p-4">
+                    <p className="page-kicker mb-2">Mobile — aperçu</p>
+                    <h2 className="font-headline text-xl font-extrabold leading-snug text-foreground">
+                      {title || <span className="text-muted/50">Titre mobile</span>}
+                    </h2>
+                    {coverImage ? (
+                      <div className="my-3 aspect-video w-full overflow-hidden bg-surface">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img src={coverImage} alt={coverImageCaption || title} className="h-full w-full object-cover" />
+                      </div>
+                    ) : null}
+                    {excerpt ? <p className="mt-2 font-body text-sm leading-relaxed text-muted">{excerpt}</p> : null}
+                  </article>
+                </div>
+              )}
+              {previewMode === "social" && (
+                <div className="mx-auto max-w-[500px]">
+                  <article className="overflow-hidden border border-border-subtle bg-surface-elevated">
+                    {coverImage ? (
+                      <div className="aspect-[1.91/1] w-full overflow-hidden">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img src={coverImage} alt={title} className="h-full w-full object-cover" />
+                      </div>
+                    ) : (
+                      <div className="flex aspect-[1.91/1] w-full items-center justify-center bg-surface text-muted">
+                        <ImageIcon className="h-10 w-10" />
+                      </div>
+                    )}
+                    <div className="p-4">
+                      <p className="font-label text-[10px] uppercase tracking-widest text-muted">le-relief.com · {slug || "votre-slug"}</p>
+                      <h2 className="mt-1 font-headline text-lg font-extrabold leading-snug text-foreground">
+                        {seoTitle || title || <span className="text-muted/50">SEO title</span>}
+                      </h2>
+                      <p className="mt-1 font-body text-sm text-muted">
+                        {metaDescription || excerpt || <span className="italic">Meta description manquante</span>}
+                      </p>
+                    </div>
+                  </article>
+                </div>
+              )}
+            </div>
           </section>
         </div>
 
+        {/* ── Sidebar ───────────────────────────────────────────────────────── */}
         <aside className="space-y-6">
+
+          {/* Action panel — sticky */}
+          <div className="xl:sticky xl:top-20 space-y-4">
+            <section className="border border-border-subtle bg-surface">
+              <div className="border-b border-border-subtle px-4 py-3.5">
+                <div className="flex items-center justify-between">
+                  <p className="font-label text-sm font-extrabold uppercase tracking-wide text-foreground">Publication</p>
+                  <Badge
+                    variant={autosaveState === "saved" ? "success" : autosaveState === "saving" ? "info" : autosaveState === "error" ? "danger" : "default"}
+                  >
+                    {autosaveLabel}
+                  </Badge>
+                </div>
+              </div>
+
+              {/* Status + completion summary */}
+              <div className="grid grid-cols-2 divide-x divide-border-subtle border-b border-border-subtle">
+                <div className="px-4 py-3">
+                  <p className="font-label text-[10px] font-extrabold uppercase tracking-[0.18em] text-muted">Statut</p>
+                  <div className="mt-2">
+                    <StatusChip status={normalizedStatus} />
+                  </div>
+                </div>
+                <div className="px-4 py-3">
+                  <p className="font-label text-[10px] font-extrabold uppercase tracking-[0.18em] text-muted">Complétude</p>
+                  <div className="mt-2 flex items-center gap-2">
+                    <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-surface-elevated">
+                      <div
+                        className={`h-1.5 rounded-full transition-all duration-500 ${
+                          completionScore >= 90 ? "bg-accent-teal" : completionScore >= 70 ? "bg-accent-blue" : "bg-accent-amber"
+                        }`}
+                        style={{ width: `${completionScore}%` }}
+                      />
+                    </div>
+                    <span className="font-label text-xs font-bold text-foreground">{completionScore}%</span>
+                  </div>
+                  {missingChecks.length > 0 && (
+                    <p className="mt-1 font-label text-[11px] text-muted">
+                      {missingChecks.map((c) => c.label).join(", ")}
+                    </p>
+                  )}
+                </div>
+              </div>
+
+              {/* CTA buttons */}
+              <div className="space-y-2 p-4">
+                {/* Primary action — always full width, prominent */}
+                <Button
+                  onClick={() => handleSubmit(status)}
+                  disabled={saving || !title || !body}
+                  className="w-full justify-center"
+                  size="lg"
+                >
+                  {saving ? "Enregistrement…" : submitLabel}
+                </Button>
+
+                {/* Secondary workflow actions */}
+                <div className="flex flex-col gap-1.5 pt-1">
+                  {canSaveDraft ? (
+                    <button
+                      type="button"
+                      onClick={() => handleSubmit("draft")}
+                      disabled={saving || !title}
+                      className="flex w-full items-center justify-between px-3 py-2 font-label text-xs font-bold uppercase tracking-wide text-foreground transition-colors hover:bg-surface-elevated disabled:cursor-not-allowed disabled:opacity-40"
+                    >
+                      <span>Enregistrer brouillon</span>
+                      <ArrowUpRight className="h-3.5 w-3.5 text-muted" />
+                    </button>
+                  ) : null}
+                  {canRequestReview ? (
+                    <button
+                      type="button"
+                      onClick={() => handleSubmit("in_review")}
+                      disabled={saving || !title || !body}
+                      className="flex w-full items-center justify-between px-3 py-2 font-label text-xs font-bold uppercase tracking-wide text-foreground transition-colors hover:bg-surface-elevated disabled:cursor-not-allowed disabled:opacity-40"
+                    >
+                      <span>Soumettre en revue</span>
+                      <ArrowUpRight className="h-3.5 w-3.5 text-muted" />
+                    </button>
+                  ) : null}
+                  {canApprove && role !== "writer" ? (
+                    <button
+                      type="button"
+                      onClick={() => handleSubmit("approved")}
+                      disabled={saving || !title || !body}
+                      className="flex w-full items-center justify-between px-3 py-2 font-label text-xs font-bold uppercase tracking-wide text-accent-teal transition-colors hover:bg-surface-elevated disabled:cursor-not-allowed disabled:opacity-40"
+                    >
+                      <span>Approuver</span>
+                      <Check className="h-3.5 w-3.5" />
+                    </button>
+                  ) : null}
+                  {scheduledAt && role !== "writer" ? (
+                    <button
+                      type="button"
+                      onClick={() => handleSubmit("scheduled")}
+                      disabled={saving || !title || !body}
+                      className="flex w-full items-center justify-between px-3 py-2 font-label text-xs font-bold uppercase tracking-wide text-accent-amber transition-colors hover:bg-surface-elevated disabled:cursor-not-allowed disabled:opacity-40"
+                    >
+                      <span>Programmer</span>
+                      <Clock className="h-3.5 w-3.5" />
+                    </button>
+                  ) : null}
+                  {canPublish && role !== "writer" ? (
+                    <button
+                      type="button"
+                      onClick={() => handleSubmit("published")}
+                      disabled={saving || !title || !body}
+                      className="flex w-full items-center justify-between border-t border-border-subtle px-3 py-2 font-label text-xs font-bold uppercase tracking-wide text-primary transition-colors hover:bg-surface-elevated disabled:cursor-not-allowed disabled:opacity-40"
+                    >
+                      <span>Publier maintenant</span>
+                      <Zap className="h-3.5 w-3.5" />
+                    </button>
+                  ) : null}
+                </div>
+              </div>
+            </section>
+          </div>
+
+          {/* Workflow section */}
           <EditorSection
+            id="workflow"
             title="Workflow & publication"
             open={openSections.workflow}
             onToggle={() => toggleSection("workflow")}
@@ -703,7 +920,6 @@ export default function ArticleEditor({
                     toStatus: option.value,
                     isOwner,
                   }).allowed;
-
                   return (
                     <option key={option.value} value={option.value} disabled={!allowed && option.value !== status}>
                       {option.label}
@@ -711,11 +927,14 @@ export default function ArticleEditor({
                   );
                 })}
               </select>
+              <p className="mt-2 font-body text-xs text-muted">
+                Les statuts disponibles dépendent de votre rôle et de l&apos;état actuel de l&apos;article.
+              </p>
             </div>
 
             {role !== "writer" && (
-              <div className="grid gap-3 border-t border-border-subtle pt-4 md:grid-cols-2">
-                <div className="space-y-3 md:col-span-2">
+              <div className="grid gap-4 border-t border-border-subtle pt-4 md:grid-cols-2">
+                <div className="md:col-span-2">
                   <label className="mb-2 block font-label text-xs font-extrabold uppercase text-foreground">
                     Publication programmée
                   </label>
@@ -735,43 +954,42 @@ export default function ArticleEditor({
                   onChange={(e) => setPriorityLevel(e.target.value)}
                 />
 
-                <div className="space-y-2 border border-border-subtle p-3">
-                  <p className="font-label text-[11px] font-extrabold uppercase tracking-[0.18em] text-muted">
+                <div className="space-y-3 border border-border-subtle p-3">
+                  <p className="font-label text-[10px] font-extrabold uppercase tracking-[0.2em] text-muted">
                     Signaux de diffusion
                   </p>
-                  <label className="flex items-center gap-2 font-label text-xs font-extrabold uppercase text-foreground">
+                  <label className="flex cursor-pointer items-center gap-2.5 font-label text-sm font-bold text-foreground">
                     <input
                       type="checkbox"
                       checked={isBreaking}
                       onChange={(e) => setIsBreaking(e.target.checked)}
                       className="h-4 w-4 accent-primary"
                     />
-                    Marquer Breaking
+                    Breaking news
                   </label>
-
-                  <label className="flex items-center gap-2 font-label text-xs font-extrabold uppercase text-foreground">
+                  <label className="flex cursor-pointer items-center gap-2.5 font-label text-sm font-bold text-foreground">
                     <input
                       type="checkbox"
                       checked={isHomepagePinned}
                       onChange={(e) => setIsHomepagePinned(e.target.checked)}
                       className="h-4 w-4 accent-primary"
                     />
-                    Épingler homepage
+                    Épingler en Une
                   </label>
                 </div>
               </div>
             )}
           </EditorSection>
 
+          {/* Metadata */}
           <EditorSection
+            id="metadata"
             title="Métadonnées"
             open={openSections.metadata}
             onToggle={() => toggleSection("metadata")}
           >
             <div>
-              <label className="mb-2 block font-label text-xs font-extrabold uppercase text-foreground">
-                Catégorie
-              </label>
+              <label className="mb-2 block font-label text-xs font-extrabold uppercase text-foreground">Catégorie</label>
               <select
                 value={categoryId}
                 onChange={(e) => setCategoryId(e.target.value)}
@@ -779,17 +997,13 @@ export default function ArticleEditor({
               >
                 <option value="">Sélectionner une catégorie</option>
                 {categories.map((cat) => (
-                  <option key={cat.id} value={cat.id}>
-                    {cat.name}
-                  </option>
+                  <option key={cat.id} value={cat.id}>{cat.name}</option>
                 ))}
               </select>
             </div>
 
             <div>
-              <label className="mb-2 block font-label text-xs font-extrabold uppercase text-foreground">
-                Type de contenu
-              </label>
+              <label className="mb-2 block font-label text-xs font-extrabold uppercase text-foreground">Type de contenu</label>
               <select
                 value={contentType}
                 onChange={(e) => setContentType(e.target.value)}
@@ -807,9 +1021,7 @@ export default function ArticleEditor({
             </div>
 
             <div>
-              <label className="mb-2 block font-label text-xs font-extrabold uppercase text-foreground">
-                Langue
-              </label>
+              <label className="mb-2 block font-label text-xs font-extrabold uppercase text-foreground">Langue</label>
               <select
                 value={language}
                 onChange={(e) => {
@@ -827,16 +1039,13 @@ export default function ArticleEditor({
                 }}
                 className="w-full border border-border-subtle bg-surface px-4 py-3 font-label text-sm text-foreground focus:border-primary focus:outline-none"
               >
-                <option value="fr">Français</option>
-                <option value="en">English</option>
+                <option value="fr">🇫🇷 Français</option>
+                <option value="en">🇺🇸 English</option>
               </select>
             </div>
 
             <div>
-              <label
-                htmlFor="tags"
-                className="mb-2 block font-label text-xs font-extrabold uppercase text-foreground"
-              >
+              <label htmlFor="tags" className="mb-2 block font-label text-xs font-extrabold uppercase text-foreground">
                 Tags
               </label>
               <input
@@ -847,10 +1056,13 @@ export default function ArticleEditor({
                 onChange={(e) => setTagsInput(e.target.value)}
                 className="w-full border border-border-subtle bg-surface px-4 py-3 font-label text-sm text-foreground focus:border-primary focus:outline-none"
               />
+              <p className="mt-1.5 font-body text-xs text-muted">Séparez les tags par des virgules.</p>
             </div>
           </EditorSection>
 
+          {/* SEO */}
           <EditorSection
+            id="seo"
             title="SEO"
             open={openSections.seo}
             onToggle={() => toggleSection("seo")}
@@ -858,7 +1070,7 @@ export default function ArticleEditor({
             <Input
               label="Slug"
               id="slug"
-              placeholder="titre-article"
+              placeholder="titre-article-en-minuscules"
               value={slug}
               onChange={(e) => setSlug(e.target.value)}
             />
@@ -867,38 +1079,54 @@ export default function ArticleEditor({
               <Input
                 label="SEO title"
                 id="seoTitle"
-                placeholder="Titre optimisé SEO"
+                placeholder="Titre optimisé pour Google (60 car. max)"
                 value={seoTitle}
                 onChange={(e) => setSeoTitle(e.target.value)}
               />
-              <p className={`mt-1 text-right font-label text-[11px] ${seoTitle.length > 60 ? "text-danger" : "text-muted"}`}>
-                {seoTitle.length}/60
-              </p>
+              <div className="mt-1.5 flex items-center justify-between">
+                <div className="h-1 flex-1 overflow-hidden rounded-full bg-surface-elevated mr-3">
+                  <div
+                    className={`h-1 rounded-full transition-all ${seoTitle.length > 60 ? "bg-accent-coral" : seoTitle.length > 50 ? "bg-accent-amber" : "bg-accent-teal"}`}
+                    style={{ width: `${Math.min((seoTitle.length / 60) * 100, 100)}%` }}
+                  />
+                </div>
+                <span className={`shrink-0 font-label text-[11px] ${seoTitle.length > 60 ? "text-accent-coral" : "text-muted"}`}>
+                  {seoTitle.length}/60
+                </span>
+              </div>
             </div>
 
             <div>
               <Input
                 label="Meta description"
                 id="metaDescription"
-                placeholder="Résumé SEO (155 caractères max)"
+                placeholder="Résumé pour Google (155 car. max)"
                 value={metaDescription}
                 onChange={(e) => setMetaDescription(e.target.value)}
               />
-              <p className={`mt-1 text-right font-label text-[11px] ${metaDescription.length > 155 ? "text-danger" : "text-muted"}`}>
-                {metaDescription.length}/155
-              </p>
+              <div className="mt-1.5 flex items-center justify-between">
+                <div className="h-1 flex-1 overflow-hidden rounded-full bg-surface-elevated mr-3">
+                  <div
+                    className={`h-1 rounded-full transition-all ${metaDescription.length > 155 ? "bg-accent-coral" : metaDescription.length > 130 ? "bg-accent-amber" : "bg-accent-teal"}`}
+                    style={{ width: `${Math.min((metaDescription.length / 155) * 100, 100)}%` }}
+                  />
+                </div>
+                <span className={`shrink-0 font-label text-[11px] ${metaDescription.length > 155 ? "text-accent-coral" : "text-muted"}`}>
+                  {metaDescription.length}/155
+                </span>
+              </div>
             </div>
           </EditorSection>
 
+          {/* Translation */}
           <EditorSection
+            id="translation"
             title="Traduction"
             open={openSections.translation}
             onToggle={() => toggleSection("translation")}
           >
             <div>
-              <label className="mb-2 block font-label text-xs font-extrabold uppercase text-foreground">
-                Statut de traduction
-              </label>
+              <label className="mb-2 block font-label text-xs font-extrabold uppercase text-foreground">Statut de traduction</label>
               <select
                 value={translationStatus}
                 onChange={(e) => setTranslationStatus(e.target.value)}
@@ -924,7 +1152,7 @@ export default function ArticleEditor({
 
             {language === "fr" ? (
               <div className="space-y-3 border border-border-subtle p-3">
-                <label className="flex items-center gap-3 font-label text-xs font-extrabold uppercase text-foreground">
+                <label className="flex cursor-pointer items-center gap-3 font-label text-sm font-bold text-foreground">
                   <input
                     type="checkbox"
                     checked={allowTranslation}
@@ -952,75 +1180,88 @@ export default function ArticleEditor({
                 }}
                 onArticleSelected={(source) => {
                   setSourceArticlePreview(source);
-                  if (source?.slug) {
-                    setAlternateLanguageSlug(source.slug);
-                  }
+                  if (source?.slug) setAlternateLanguageSlug(source.slug);
                 }}
               />
             )}
+
+            {/* Translation links */}
+            {language === "fr" && translations.length > 0 && (
+              <div className="border-t border-border-subtle pt-3">
+                <p className="mb-2 font-label text-xs font-extrabold uppercase text-foreground">Versions EN existantes</p>
+                <ul className="space-y-1">
+                  {translations.map((translation) => (
+                    <li key={translation.id}>
+                      <Link
+                        href={`/admin/articles/${translation.id}/edit`}
+                        className="flex items-center gap-1.5 font-label text-xs text-accent-blue hover:underline"
+                      >
+                        <GitBranch className="h-3 w-3" />
+                        {translation.title}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+            {language === "en" && sourceArticlePreview?.id && (
+              <div className="border-t border-border-subtle pt-3">
+                <p className="mb-2 font-label text-xs font-extrabold uppercase text-foreground">Article source FR</p>
+                <Link
+                  href={`/admin/articles/${sourceArticlePreview.id}/edit`}
+                  className="flex items-center gap-1.5 font-label text-xs text-accent-blue hover:underline"
+                >
+                  <GitBranch className="h-3 w-3" />
+                  {sourceArticlePreview.title}
+                </Link>
+              </div>
+            )}
           </EditorSection>
 
+          {/* Quality checks */}
           <EditorSection
+            id="quality"
             title="Contrôle qualité"
             open={openSections.quality}
             onToggle={() => toggleSection("quality")}
           >
-            <ul className="space-y-1">
+            <ul className="space-y-0 divide-y divide-border-subtle">
               {qualityChecks.map((check) => (
-                <li key={check.label} className="flex items-center justify-between text-xs">
-                  <span className="font-label text-muted">{check.label}</span>
-                  <Badge variant={check.ok ? "success" : "warning"}>{check.ok ? "OK" : "Manquant"}</Badge>
+                <li key={check.label} className="flex items-center justify-between py-2.5">
+                  <span className="font-label text-sm text-foreground">{check.label}</span>
+                  {check.ok ? (
+                    <span className="flex items-center gap-1 font-label text-[11px] font-bold text-accent-teal">
+                      <Check className="h-3.5 w-3.5" />
+                      OK
+                    </span>
+                  ) : (
+                    <span className="flex items-center gap-1 font-label text-[11px] font-bold text-accent-amber">
+                      <CircleDot className="h-3.5 w-3.5" />
+                      À compléter
+                    </span>
+                  )}
                 </li>
               ))}
             </ul>
-            <div className="h-2 w-full rounded-full bg-surface-elevated">
-              <div className="h-2 rounded-full bg-primary" style={{ width: `${completionScore}%` }} />
-            </div>
-
-            <div className="flex items-center gap-2">
-              <span className="font-label text-xs font-extrabold uppercase text-foreground">Statut de traduction</span>
-              <Badge variant={statusVariant}>{translationStatus}</Badge>
-            </div>
-
-            {language === "fr" ? (
-              <div>
-                <p className="mb-2 font-label text-xs font-extrabold uppercase text-foreground">Traductions EN existantes</p>
-                {translations.length === 0 ? (
-                  <p className="font-label text-xs text-muted">Aucune traduction EN liée.</p>
-                ) : (
-                  <ul className="space-y-1">
-                    {translations.map((translation) => (
-                      <li key={translation.id}>
-                        <Link
-                          href={`/dashboard/articles/${translation.id}/edit`}
-                          className="font-label text-xs text-accent-blue underline"
-                        >
-                          {translation.title}
-                        </Link>
-                      </li>
-                    ))}
-                  </ul>
-                )}
+            <div className="pt-1">
+              <div className="flex items-center justify-between">
+                <span className="font-label text-xs text-muted">Progression globale</span>
+                <span className={`font-label text-xs font-bold ${completionScore >= 90 ? "text-accent-teal" : completionScore >= 70 ? "text-accent-blue" : "text-accent-amber"}`}>
+                  {completionScore}%
+                </span>
               </div>
-            ) : (
-              <div>
-                <p className="mb-2 font-label text-xs font-extrabold uppercase text-foreground">Article source FR</p>
-                {sourceArticlePreview?.id ? (
-                  <Link
-                    href={`/dashboard/articles/${sourceArticlePreview.id}/edit`}
-                    className="font-label text-xs text-accent-blue underline"
-                  >
-                    {sourceArticlePreview.title}
-                  </Link>
-                ) : (
-                  <p className="font-label text-xs text-muted">Aucune source FR sélectionnée.</p>
-                )}
+              <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-surface-elevated">
+                <div
+                  className={`h-1.5 rounded-full transition-all duration-700 ${completionScore >= 90 ? "bg-accent-teal" : completionScore >= 70 ? "bg-accent-blue" : "bg-accent-amber"}`}
+                  style={{ width: `${completionScore}%` }}
+                />
               </div>
-            )}
+            </div>
           </EditorSection>
 
-          <EditorSection title="Correction" open={openSections.correction} onToggle={() => toggleSection("correction")}>
-            <div className="space-y-3">
+          {/* Correction */}
+          <EditorSection id="correction" title="Correction" open={openSections.correction} onToggle={() => toggleSection("correction")}>
+            <div className="space-y-4">
               <div>
                 <label htmlFor="correctionDate" className="mb-1 block font-label text-xs font-extrabold uppercase text-foreground">
                   Date de correction
@@ -1030,7 +1271,7 @@ export default function ArticleEditor({
                   type="date"
                   value={correctionDate}
                   onChange={(e) => setCorrectionDate(e.target.value)}
-                  className="w-full border border-border-subtle bg-background px-3 py-2 font-body text-sm"
+                  className="w-full border border-border-subtle bg-surface px-4 py-3 font-body text-sm text-foreground focus:border-primary focus:outline-none"
                 />
               </div>
               <div>
@@ -1043,7 +1284,7 @@ export default function ArticleEditor({
                   value={correction}
                   onChange={(e) => setCorrection(e.target.value)}
                   placeholder="Décrire la correction apportée à cet article…"
-                  className="w-full resize-none border border-border-subtle bg-background px-3 py-2 font-body text-sm"
+                  className="w-full resize-none border border-border-subtle bg-surface px-4 py-3 font-body text-sm text-foreground focus:border-primary focus:outline-none"
                 />
               </div>
             </div>
@@ -1053,40 +1294,24 @@ export default function ArticleEditor({
 
       {submitError ? <AlertBanner variant="danger" title="Enregistrement impossible">{submitError}</AlertBanner> : null}
 
-      <div className="flex flex-wrap items-center justify-between gap-3 border border-border-subtle bg-surface p-4">
-        <div>
-          <p className="font-label text-xs font-extrabold uppercase tracking-[0.18em] text-muted">
-            Résumé de validation
-          </p>
-          <p className="mt-1 font-body text-sm text-foreground">
-            {missingChecks.length === 0
-              ? "Tous les blocs requis sont complétés pour une mise en ligne sereine."
-              : `Encore ${missingChecks.length} point${missingChecks.length > 1 ? "s" : ""} à compléter avant publication.`}
-          </p>
-        </div>
-        <div className="flex flex-wrap items-center gap-2">
-          <StatusChip status={normalizedStatus} />
-          <Badge variant={completionVariant}>Complétude {completionScore}%</Badge>
-          <Badge variant={statusVariant}>Traduction {translationStatus}</Badge>
-        </div>
-      </div>
-
+      {/* ── Social & collaboration ─────────────────────────────────────────── */}
       {isExistingArticle && initial?.id ? (
         <>
-          <div className="flex flex-wrap items-center gap-3 border border-primary/40 bg-primary/5 p-4">
+          <div className="flex flex-wrap items-center gap-4 border border-primary/30 bg-primary/[0.03] px-5 py-4">
             <div className="flex-1">
               <p className="font-label text-xs font-extrabold uppercase tracking-[0.18em] text-primary">
                 Réseaux sociaux
               </p>
               <p className="mt-1 font-body text-sm text-foreground">
-                Générez les visuels Instagram, Facebook, X, WhatsApp et autres plateformes pour cet article.
+                Générez les visuels Instagram, Facebook, X et WhatsApp pour cet article.
               </p>
             </div>
             <Link
               href={`/admin/social/${initial.id}`}
-              className="inline-flex items-center gap-2 border border-primary bg-primary px-4 py-2 font-label text-xs uppercase tracking-wider text-on-primary hover:bg-primary/90"
+              className="inline-flex items-center gap-2 border border-primary bg-primary px-4 py-2.5 font-label text-xs font-bold uppercase tracking-wider text-white transition-colors hover:bg-primary/90"
             >
-              Générer les visuels sociaux →
+              <Share2 className="h-3.5 w-3.5" />
+              Générer les visuels sociaux
             </Link>
           </div>
           <div className="grid gap-6 xl:grid-cols-2">
