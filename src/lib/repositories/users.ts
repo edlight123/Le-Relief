@@ -56,6 +56,10 @@ export async function updateUser(id: string, data: Record<string, unknown>) {
   return getUser(id);
 }
 
+export async function deleteUser(id: string) {
+  await collection().doc(id).delete();
+}
+
 export async function countUsers() {
   const snap = await collection().count().get();
   return snap.data().count;

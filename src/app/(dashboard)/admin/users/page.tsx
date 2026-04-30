@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import PageHeader from "@/components/ui/PageHeader";
 import EmptyState from "@/components/ui/EmptyState";
-import { Users, Shield, KeyRound, Pencil, Check, X } from "lucide-react";
+import { Users, Shield, KeyRound, Pencil, Check, X, UserPlus, Trash2 } from "lucide-react";
 
 interface User {
   id: string;
@@ -31,6 +31,14 @@ export default function AdminUsersPage() {
   const [emailSaving, setEmailSaving] = useState(false);
   const emailInputRef = useRef<HTMLInputElement>(null);
   const [roleChanging, setRoleChanging] = useState<Record<string, boolean>>({});
+  const [deleting, setDeleting] = useState<Record<string, boolean>>({});
+  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
+
+  // Add user modal state
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [addForm, setAddForm] = useState({ name: "", email: "", password: "", role: "reader" });
+  const [addSaving, setAddSaving] = useState(false);
+  const [addError, setAddError] = useState<string | null>(null);
 
   async function handleRoleChange(user: User, newRole: string) {
     if (newRole === user.role) return;
@@ -109,6 +117,50 @@ export default function AdminUsersPage() {
     }
   }
 
+  async function handleDelete(userId: string) {
+    setConfirmDeleteId(null);
+    setDeleting((prev) => ({ ...prev, [userId]: true }));
+    try {
+      const res = await fetch(`/api/users/${userId}`, { method: "DELETE" });
+      if (res.ok) {
+        setUsers((prev) => prev.filter((u) => u.id !== userId));
+      } else {
+        const err = await res.json().catch(() => ({}));
+        alert(err.error ?? "Erreur lors de la suppression");
+      }
+    } catch {
+      alert("Erreur réseau");
+    } finally {
+      setDeleting((prev) => ({ ...prev, [userId]: false }));
+    }
+  }
+
+  async function handleAddUser(e: React.FormEvent) {
+    e.preventDefault();
+    setAddError(null);
+    setAddSaving(true);
+    try {
+      const res = await fetch("/api/users", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(addForm),
+      });
+      if (res.ok) {
+        const newUser = await res.json();
+        setUsers((prev) => [newUser, ...prev]);
+        setShowAddModal(false);
+        setAddForm({ name: "", email: "", password: "", role: "reader" });
+      } else {
+        const err = await res.json().catch(() => ({}));
+        setAddError(err.error ?? "Erreur lors de la création");
+      }
+    } catch {
+      setAddError("Erreur réseau");
+    } finally {
+      setAddSaving(false);
+    }
+  }
+
   useEffect(() => {
     fetch("/api/users")
       .then((r) => r.json())
@@ -129,6 +181,14 @@ export default function AdminUsersPage() {
         <span className="font-label text-sm font-bold text-foreground">
           {loading ? "—" : users.length} utilisateur{users.length !== 1 ? "s" : ""}
         </span>
+        <button
+          type="button"
+          onClick={() => { setShowAddModal(true); setAddError(null); }}
+          className="ml-auto flex items-center gap-1.5 rounded-sm bg-primary px-3 py-1.5 font-label text-xs font-extrabold uppercase tracking-wide text-white transition-colors hover:bg-primary/90"
+        >
+          <UserPlus className="h-3.5 w-3.5" />
+          Ajouter
+        </button>
       </div>
 
       {loading ? (
@@ -243,6 +303,7 @@ export default function AdminUsersPage() {
                     </select>
                   </td>
                   <td className="px-4 py-3 text-right">
+                    <div className="flex items-center justify-end gap-3">
                     {resetStatus[user.id] === "sent" ? (
                       <span className="font-label text-xs text-muted">Lien envoyé ✓</span>
                     ) : resetStatus[user.id] === "error" ? (
@@ -259,6 +320,16 @@ export default function AdminUsersPage() {
                         {resetStatus[user.id] === "loading" ? "Envoi..." : "Réinitialiser"}
                       </button>
                     )}
+                    <button
+                      type="button"
+                      disabled={deleting[user.id]}
+                      onClick={() => setConfirmDeleteId(user.id)}
+                      className="flex items-center gap-1 font-label text-xs font-bold text-muted transition-colors hover:text-primary disabled:opacity-50"
+                      title="Supprimer cet utilisateur"
+                    >
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </button>
+                    </div>
                   </td>
                 </tr>
               ))}
@@ -269,6 +340,131 @@ export default function AdminUsersPage() {
             <p className="font-label text-xs text-muted">
               {users.length} utilisateur{users.length > 1 ? "s" : ""}
             </p>
+          </div>
+        </div>
+      )}
+
+      {/* Delete confirmation modal */}
+      {confirmDeleteId && (() => {
+        const target = users.find((u) => u.id === confirmDeleteId);
+        return (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+            <div className="w-full max-w-sm rounded-sm border border-border-subtle bg-surface shadow-xl">
+              <div className="border-b border-border-subtle px-5 py-4">
+                <h2 className="font-headline text-base font-extrabold text-foreground">Confirmer la suppression</h2>
+              </div>
+              <div className="space-y-3 px-5 py-4">
+                <p className="font-body text-sm text-foreground">
+                  Supprimer définitivement l&apos;utilisateur{" "}
+                  <span className="font-semibold">{target?.name || target?.email || confirmDeleteId}</span>
+                  {" "}? Cette action est irréversible.
+                </p>
+                {target?.email && (
+                  <p className="font-label text-xs text-muted">{target.email}</p>
+                )}
+              </div>
+              <div className="flex justify-end gap-2 border-t border-border-subtle px-5 py-3">
+                <button
+                  type="button"
+                  onClick={() => setConfirmDeleteId(null)}
+                  className="rounded-sm border border-border-subtle px-4 py-1.5 font-label text-xs font-bold text-muted transition-colors hover:text-foreground"
+                >
+                  Annuler
+                </button>
+                <button
+                  type="button"
+                  disabled={deleting[confirmDeleteId]}
+                  onClick={() => handleDelete(confirmDeleteId)}
+                  className="rounded-sm bg-primary px-4 py-1.5 font-label text-xs font-extrabold uppercase tracking-wide text-white transition-colors hover:bg-primary/90 disabled:opacity-50"
+                >
+                  {deleting[confirmDeleteId] ? "Suppression..." : "Supprimer"}
+                </button>
+              </div>
+            </div>
+          </div>
+        );
+      })()}
+
+      {/* Add User Modal */}
+      {showAddModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <div className="w-full max-w-md rounded-sm border border-border-subtle bg-surface shadow-xl">
+            <div className="flex items-center justify-between border-b border-border-subtle px-5 py-4">
+              <h2 className="font-headline text-base font-extrabold text-foreground">Ajouter un utilisateur</h2>
+              <button
+                type="button"
+                onClick={() => setShowAddModal(false)}
+                className="text-muted hover:text-foreground"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+            <form onSubmit={handleAddUser} className="space-y-4 px-5 py-4">
+              {addError && (
+                <p className="rounded border border-primary/20 bg-primary/5 px-3 py-2 font-label text-xs text-primary">
+                  {addError}
+                </p>
+              )}
+              <div>
+                <label className="mb-1 block font-label text-xs font-bold text-muted">Nom complet</label>
+                <input
+                  type="text"
+                  required
+                  value={addForm.name}
+                  onChange={(e) => setAddForm((f) => ({ ...f, name: e.target.value }))}
+                  className="w-full rounded border border-border-subtle bg-surface px-3 py-1.5 font-body text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
+                />
+              </div>
+              <div>
+                <label className="mb-1 block font-label text-xs font-bold text-muted">Courriel</label>
+                <input
+                  type="email"
+                  required
+                  value={addForm.email}
+                  onChange={(e) => setAddForm((f) => ({ ...f, email: e.target.value }))}
+                  className="w-full rounded border border-border-subtle bg-surface px-3 py-1.5 font-body text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
+                />
+              </div>
+              <div>
+                <label className="mb-1 block font-label text-xs font-bold text-muted">Mot de passe</label>
+                <input
+                  type="password"
+                  required
+                  minLength={8}
+                  value={addForm.password}
+                  onChange={(e) => setAddForm((f) => ({ ...f, password: e.target.value }))}
+                  className="w-full rounded border border-border-subtle bg-surface px-3 py-1.5 font-body text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
+                />
+              </div>
+              <div>
+                <label className="mb-1 block font-label text-xs font-bold text-muted">Rôle</label>
+                <select
+                  value={addForm.role}
+                  onChange={(e) => setAddForm((f) => ({ ...f, role: e.target.value }))}
+                  className="w-full rounded border border-border-subtle bg-surface px-3 py-1.5 font-body text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
+                >
+                  {Object.entries(ROLE_LABELS).map(([value, label]) => (
+                    <option key={value} value={value}>{label}</option>
+                  ))}
+                </select>
+              </div>
+              <div className="flex justify-end gap-2 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setShowAddModal(false)}
+                  className="rounded-sm border border-border-subtle px-4 py-1.5 font-label text-xs font-bold text-muted transition-colors hover:text-foreground"
+                >
+                  Annuler
+                </button>
+                <button
+                  type="submit"
+                  disabled={addSaving}
+                  className="rounded-sm bg-primary px-4 py-1.5 font-label text-xs font-extrabold uppercase tracking-wide text-white transition-colors hover:bg-primary/90 disabled:opacity-50"
+                >
+                  {addSaving ? "Création..." : "Créer"}
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}

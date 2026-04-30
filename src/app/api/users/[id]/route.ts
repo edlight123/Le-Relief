@@ -95,3 +95,26 @@ export async function PATCH(req: NextRequest, { params }: RouteParams) {
 
   return NextResponse.json(user);
 }
+
+export async function DELETE(_req: NextRequest, { params }: RouteParams) {
+  const session = await auth();
+  const userRole = ((session?.user as { role?: Role } | undefined)?.role ?? "writer") as Role;
+  if (!session?.user || !canManageUsers(normalizeRole(userRole))) {
+    return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
+  }
+
+  const { id } = await params;
+
+  // Prevent self-deletion
+  if ((session.user as { id?: string }).id === id) {
+    return NextResponse.json({ error: "Vous ne pouvez pas supprimer votre propre compte" }, { status: 400 });
+  }
+
+  const existing = await usersRepo.getUser(id);
+  if (!existing) {
+    return NextResponse.json({ error: "Utilisateur introuvable" }, { status: 404 });
+  }
+
+  await usersRepo.deleteUser(id);
+  return NextResponse.json({ success: true });
+}
