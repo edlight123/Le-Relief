@@ -60,6 +60,28 @@ export default function LocalizedLoginPage() {
           </Link>
         </p>
 
+        <div className="mt-6">
+          <div className="relative">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-border-subtle" />
+            </div>
+            <div className="relative flex justify-center text-xs">
+              <span className="bg-surface px-2 text-muted">
+                {locale === "fr" ? "ou continuer avec" : "or continue with"}
+              </span>
+            </div>
+          </div>
+          <div className="mt-4">
+            <button
+              type="button"
+              onClick={() => signIn("google", { callbackUrl: "/dashboard" })}
+              className="flex w-full items-center justify-center border border-border-subtle px-4 py-3 font-label text-sm font-bold text-foreground transition-colors hover:bg-surface-elevated"
+            >
+              Google
+            </button>
+          </div>
+        </div>
+
         <p className="mt-3 text-center font-body text-sm text-muted">
           {locale === "fr" ? "Invitation reçue ?" : "Got an invite?"}{" "}
           <Link href={hrefForLocale("/setup-account", locale)} className="ink-link font-label font-bold text-primary">
