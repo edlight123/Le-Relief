@@ -124,6 +124,17 @@ body::before {
   --tw-prose-pre-bg: #1a1a1a;
 }
 
+/* Prevent iOS Safari from auto-zooming when focusing inputs/textareas.
+   The browser zooms whenever font-size < 16px — pin it to 16px on mobile,
+   then reset to the designed size once the viewport is wide enough.        */
+@media (max-width: 767px) {
+  input,
+  textarea,
+  select {
+    font-size: 16px !important;
+  }
+}
+
 /* Smooth scrolling */
 html {
   scroll-behavior: smooth;
