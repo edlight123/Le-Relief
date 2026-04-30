@@ -26,6 +26,7 @@ export default function AdminUsersPage() {
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [resetStatus, setResetStatus] = useState<Record<string, "idle" | "loading" | "sent" | "error">>({});
+  const [resetMessage, setResetMessage] = useState<{ userId: string; email: string } | null>(null);
   const [editingEmail, setEditingEmail] = useState<string | null>(null);
   const [emailDraft, setEmailDraft] = useState("");
   const [emailSaving, setEmailSaving] = useState(false);
@@ -111,7 +112,12 @@ export default function AdminUsersPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email: user.email }),
       });
-      setResetStatus((prev) => ({ ...prev, [user.id]: res.ok ? "sent" : "error" }));
+      if (res.ok) {
+        setResetStatus((prev) => ({ ...prev, [user.id]: "sent" }));
+        setResetMessage({ userId: user.id, email: user.email });
+      } else {
+        setResetStatus((prev) => ({ ...prev, [user.id]: "error" }));
+      }
     } catch {
       setResetStatus((prev) => ({ ...prev, [user.id]: "error" }));
     }
@@ -305,9 +311,29 @@ export default function AdminUsersPage() {
                   <td className="px-4 py-3 text-right">
                     <div className="flex items-center justify-end gap-3">
                     {resetStatus[user.id] === "sent" ? (
-                      <span className="font-label text-xs text-muted">Lien envoyé ✓</span>
+                      <span className="flex items-center gap-1 font-label text-xs text-success">
+                        <Check className="h-3 w-3" /> Lien envoyé
+                        <button
+                          type="button"
+                          onClick={() => setResetStatus((p) => ({ ...p, [user.id]: "idle" }))}
+                          className="ml-1 text-muted hover:text-foreground"
+                          title="Fermer"
+                        >
+                          <X className="h-3 w-3" />
+                        </button>
+                      </span>
                     ) : resetStatus[user.id] === "error" ? (
-                      <span className="font-label text-xs text-primary">Erreur</span>
+                      <span className="flex items-center gap-1 font-label text-xs text-primary">
+                        Échec — réessayer
+                        <button
+                          type="button"
+                          onClick={() => setResetStatus((p) => ({ ...p, [user.id]: "idle" }))}
+                          className="ml-1 text-muted hover:text-foreground"
+                          title="Fermer"
+                        >
+                          <X className="h-3 w-3" />
+                        </button>
+                      </span>
                     ) : (
                       <button
                         type="button"
@@ -340,6 +366,30 @@ export default function AdminUsersPage() {
             <p className="font-label text-xs text-muted">
               {users.length} utilisateur{users.length > 1 ? "s" : ""}
             </p>
+          </div>
+        </div>
+      )}
+
+      {/* Password reset success banner */}
+      {resetMessage && (
+        <div className="fixed bottom-6 left-1/2 z-50 w-full max-w-md -translate-x-1/2 rounded-sm border border-success/30 bg-surface px-5 py-4 shadow-xl">
+          <div className="flex items-start justify-between gap-4">
+            <div className="space-y-1">
+              <p className="font-label text-xs font-extrabold uppercase tracking-wide text-success">Lien de réinitialisation envoyé</p>
+              <p className="font-body text-sm text-foreground">
+                Un courriel a été envoyé à{" "}
+                <span className="font-semibold">{resetMessage.email}</span>.
+                L&apos;utilisateur recevra un lien valide pour 1 heure lui permettant de choisir un nouveau mot de passe.
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() => setResetMessage(null)}
+              className="mt-0.5 shrink-0 text-muted hover:text-foreground"
+              title="Fermer"
+            >
+              <X className="h-4 w-4" />
+            </button>
           </div>
         </div>
       )}
