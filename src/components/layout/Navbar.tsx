@@ -60,10 +60,10 @@ export default function Navbar({ initialLocale = "fr" }: { initialLocale?: Local
           </Link>
         </div>
 
-        {/* Mobile: relative flex container so brand can be absolutely centred */}
-        <div className="relative flex items-center justify-between py-2.5 md:grid md:grid-cols-[auto_1fr_auto] md:items-center md:gap-3 md:py-4">
+        {/* Mobile: flex row — brand left-aligned, icons right */}
+        <div className="relative flex items-center gap-3 py-3 md:grid md:grid-cols-[auto_1fr_auto] md:items-center md:gap-3 md:py-4">
           <button
-            className="relative z-10 md:hidden border border-border-subtle p-2 transition-colors hover:bg-surface-elevated"
+            className="relative z-10 shrink-0 md:hidden border border-border-subtle p-2 transition-colors hover:bg-surface-elevated"
             onClick={() => setMobileOpen(!mobileOpen)}
             aria-label={locale === "fr" ? "Ouvrir la navigation" : "Open navigation"}
             aria-expanded={mobileOpen}
@@ -76,28 +76,27 @@ export default function Navbar({ initialLocale = "fr" }: { initialLocale?: Local
             )}
           </button>
 
-          {/* Brand — absolutely centred on mobile, static in the grid on md+ */}
+          {/* Brand — left-aligned on mobile next to hamburger, centred on md+ */}
           <Link
             href={withLocale("/")}
             prefetch={true}
-            className="absolute left-1/2 -translate-x-1/2 flex items-center gap-2 md:static md:translate-x-0 md:justify-center md:gap-3"
+            className="flex min-w-0 flex-1 items-center gap-2 md:justify-center md:gap-3"
           >
-            {/* Logo image hidden on mobile — wordmark alone is cleaner and avoids cramping */}
             <Image
               src="/logo.png"
               alt="Le Relief"
               width={40}
               height={40}
-              sizes="(min-width: 768px) 44px, 36px"
-              className="hidden md:block md:h-11 md:w-11 rounded-sm"
+              sizes="(min-width: 768px) 44px, 32px"
+              className="h-8 w-8 shrink-0 rounded-sm md:h-11 md:w-11"
               priority
             />
-            <span className="whitespace-nowrap font-headline text-[1.75rem] font-extrabold leading-none text-foreground sm:text-5xl md:text-6xl">
+            <span className="truncate font-headline text-[1.6rem] font-extrabold leading-none text-foreground sm:text-5xl md:text-6xl">
               {siteConfig.name}
             </span>
           </Link>
 
-          <div className="relative z-10 flex items-center justify-end gap-1 md:gap-2">
+          <div className="relative z-10 flex shrink-0 items-center justify-end gap-1 md:gap-2">
             <LanguageToggle locale={locale} />
             <Link
               href={withLocale("/search")}
