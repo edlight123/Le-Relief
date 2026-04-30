@@ -28,6 +28,7 @@ import {
   buildEditorialOgImage,
   buildMetaDescription,
   buildNewsArticleJsonLd,
+  buildOgImage,
   buildRobotsDirective,
   serializeJsonLd,
 } from "@/lib/seo";
@@ -127,20 +128,22 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       siteName: siteConfig.name,
       title,
       description,
-      images: buildEditorialOgImage({
-        title: article.title,
-        category: article.category?.name,
-        author: article.author?.name,
-        date: article.publishedAt
-          ? new Intl.DateTimeFormat(locale === "fr" ? "fr-FR" : "en-US", {
-              day: "numeric",
-              month: "long",
-              year: "numeric",
-            }).format(new Date(article.publishedAt))
-          : null,
-        locale,
-        alt: article.title,
-      }),
+      images: article.imageSrc
+        ? buildOgImage(article.imageSrc, buildArticleImageAlt({ title: article.title, categoryName: article.category?.name, locale }))
+        : buildEditorialOgImage({
+            title: article.title,
+            category: article.category?.name,
+            author: article.author?.name,
+            date: article.publishedAt
+              ? new Intl.DateTimeFormat(locale === "fr" ? "fr-FR" : "en-US", {
+                  day: "numeric",
+                  month: "long",
+                  year: "numeric",
+                }).format(new Date(article.publishedAt))
+              : null,
+            locale,
+            alt: article.title,
+          }),
       publishedTime: article.publishedAt || undefined,
       modifiedTime: article.updatedAt || undefined,
       section: article.category?.name,
