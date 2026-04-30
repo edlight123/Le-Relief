@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { signIn } from "next-auth/react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import Input from "@/components/ui/Input";
 import Button from "@/components/ui/Button";
@@ -12,9 +12,22 @@ import { hrefForLocale } from "@/lib/locale-routing";
 export default function LocalizedLoginPage() {
   const locale = useLocaleContext();
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const urlError = searchParams.get("error");
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
+  const [error, setError] = useState(() => {
+    if (urlError === "AccessDenied") {
+      return locale === "fr"
+        ? "Accès refusé. Ce compte n'est pas autorisé à accéder au tableau de bord."
+        : "Access denied. This account is not authorised to access the dashboard.";
+    }
+    if (urlError) {
+      return locale === "fr" ? "Une erreur est survenue. Réessayez." : "Something went wrong. Please try again.";
+    }
+    return "";
+  });
   const [loading, setLoading] = useState(false);
 
   async function handleSubmit(e: React.FormEvent) {

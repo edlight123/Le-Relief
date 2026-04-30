@@ -27,6 +27,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   session: { strategy: "jwt" },
   pages: {
     signIn: "/login",
+    error: "/login",
   },
   providers: [
     Google({
@@ -91,22 +92,25 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       return session;
     },
     async signIn({ user, account }) {
-      // For OAuth providers, create or find user in Firestore
+      // For OAuth providers, only allow pre-existing team members
       if (account?.provider !== "credentials" && user.email) {
-        // Domain validation for OAuth signups
-        if (!isDomainAllowed(user.email)) {
-          console.warn(`[auth] OAuth sign-in blocked for email domain: ${user.email.split("@").pop()}`);
-          return false;
-        }
+        try {
+          if (!isDomainAllowed(user.email)) {
+            console.warn(`[auth] OAuth sign-in blocked for email domain: ${user.email.split("@").pop()}`);
+            return false;
+          }
 
-        const existing = await usersRepo.findByEmail(user.email);
-        // Only allow pre-existing team members — no self-registration via OAuth
-        if (!existing || !canAccessDashboard(existing.role as Role)) {
-          console.warn(`[auth] OAuth sign-in rejected for ${user.email}: not a pre-created team member`);
+          const existing = await usersRepo.findByEmail(user.email);
+          if (!existing || !canAccessDashboard(existing.role as Role)) {
+            console.warn(`[auth] OAuth sign-in rejected for ${user.email}: not a pre-created team member`);
+            return "/login?error=AccessDenied";
+          }
+          user.id = existing.id as string;
+          (user as { role?: Role }).role = existing.role as Role;
+        } catch (err) {
+          console.error("[auth] signIn callback error:", err);
           return false;
         }
-        user.id = existing.id as string;
-        (user as { role?: Role }).role = existing.role as Role;
       }
       return true;
     },

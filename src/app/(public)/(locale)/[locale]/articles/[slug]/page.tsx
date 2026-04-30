@@ -310,8 +310,8 @@ export default async function LocalizedArticlePage({ params }: Props) {
             {" · Port-au-Prince"}
             {article.publishedAt ? (
               <>
-                {" · "}
-                <time dateTime={article.publishedAt}>
+                <br className="sm:hidden" />
+                <time dateTime={article.publishedAt} className="sm:before:content-['_·_']">
                   {format(new Date(article.publishedAt), "d MMMM yyyy", {
                     locale: locale === "fr" ? fr : enUS,
                   })}
@@ -402,11 +402,11 @@ export default async function LocalizedArticlePage({ params }: Props) {
 
             {bodyHasHtml ? (
               <div
-                className="prose prose-lg reading-column font-body leading-relaxed dark:prose-invert prose-headings:font-headline prose-a:text-primary animate-fade-in-up"
+                className="prose prose-lg reading-column font-body leading-relaxed dark:prose-invert prose-headings:font-headline prose-a:text-primary animate-fade-in-up [&_p]:text-justify [&_p]:hyphens-auto"
                 dangerouslySetInnerHTML={{ __html: article.body }}
               />
             ) : (
-              <div className="prose prose-lg reading-column font-body leading-relaxed dark:prose-invert prose-headings:font-headline prose-a:text-primary animate-fade-in-up">
+              <div className="prose prose-lg reading-column font-body leading-relaxed dark:prose-invert prose-headings:font-headline prose-a:text-primary animate-fade-in-up [&_p]:text-justify [&_p]:hyphens-auto">
                 {article.body.split("\n").map((paragraph, index) =>
                   paragraph.trim() ? <p key={index}>{paragraph}</p> : null,
                 )}
