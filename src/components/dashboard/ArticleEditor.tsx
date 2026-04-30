@@ -108,9 +108,9 @@ function EditorSection({
       <button
         type="button"
         onClick={onToggle}
-        className="flex w-full items-center justify-between px-4 py-3 text-left"
+        className="flex w-full items-center justify-between px-4 py-3 text-left hover:bg-surface-elevated"
       >
-        <p className="font-label text-xs font-extrabold uppercase text-muted">{title}</p>
+        <p className="font-label text-sm font-extrabold uppercase tracking-wide text-foreground">{title}</p>
         {open ? (
           <ChevronUp className="h-4 w-4 text-muted" />
         ) : (
@@ -175,9 +175,9 @@ export default function ArticleEditor({
   const [autosaveState, setAutosaveState] = useState<"idle" | "saving" | "saved" | "error">("idle");
   const [previewMode, setPreviewMode] = useState<"desktop" | "mobile" | "social">("desktop");
   const [openSections, setOpenSections] = useState(() => ({
-    workflow: role !== "writer",
+    workflow: true,
     metadata: true,
-    seo: role !== "writer",
+    seo: true,
     translation: role !== "writer",
     quality: true,
     correction: false,
@@ -438,58 +438,38 @@ export default function ArticleEditor({
 
   return (
     <div className="space-y-6 border-t-2 border-border-strong pt-5">
-      <div className="sticky top-0 z-20 space-y-3 border border-border-subtle bg-surface p-4 shadow-sm backdrop-blur supports-[backdrop-filter]:bg-surface/95">
-        <div className="flex flex-wrap items-start justify-between gap-4">
-          <div className="space-y-2">
-            <div className="flex flex-wrap items-center gap-2">
-              <span className="font-label text-xs font-extrabold uppercase tracking-[0.24em] text-muted">
-                Éditeur
-              </span>
-              <StatusChip status={normalizedStatus} />
-              <Badge variant={completionVariant}>Complétude {completionScore}%</Badge>
-              <Badge
-                variant={autosaveState === "saved" ? "success" : autosaveState === "saving" ? "info" : autosaveState === "error" ? "danger" : "default"}
-              >
-                {autosaveState === "saved"
-                  ? "Autosave actif"
-                  : autosaveState === "saving"
-                  ? "Enregistrement…"
-                  : autosaveState === "error"
-                  ? "Autosave en erreur"
-                  : "Prêt"}
-              </Badge>
-              {isBreaking ? <PriorityFlag kind="breaking" /> : null}
-              {isHomepagePinned ? <PriorityFlag kind="homepage" /> : null}
-            </div>
-            <div>
-              <h1 className="font-headline text-2xl font-extrabold text-foreground">
+      <div className="sticky top-0 z-20 border border-border-subtle bg-surface shadow-sm backdrop-blur supports-[backdrop-filter]:bg-surface/95">
+        <div className="flex flex-wrap items-center justify-between gap-3 px-4 py-3">
+          {/* Left: title + status */}
+          <div className="flex min-w-0 flex-1 items-center gap-3">
+            <div className="min-w-0">
+              <div className="flex flex-wrap items-center gap-2">
+                <StatusChip status={normalizedStatus} />
+                {isBreaking ? <PriorityFlag kind="breaking" /> : null}
+                {isHomepagePinned ? <PriorityFlag kind="homepage" /> : null}
+                <Badge
+                  variant={autosaveState === "saved" ? "success" : autosaveState === "saving" ? "info" : autosaveState === "error" ? "danger" : "default"}
+                >
+                  {autosaveState === "saved"
+                    ? "Sauvegardé"
+                    : autosaveState === "saving"
+                    ? "Enregistrement…"
+                    : autosaveState === "error"
+                    ? "Erreur autosave"
+                    : "Prêt"}
+                </Badge>
+                <Badge variant={completionVariant}>{completionScore}% complété</Badge>
+              </div>
+              <h1 className="mt-0.5 truncate font-headline text-lg font-extrabold text-foreground">
                 {title || "Nouvel article"}
               </h1>
-              <p className="mt-1 max-w-3xl font-body text-sm text-muted">
-                {subtitle || excerpt || "Préparez le contenu, la publication et les métadonnées dans un seul flux éditorial."}
-              </p>
-            </div>
-            <div className="flex flex-wrap items-center gap-2 text-[11px]">
-              {role === "writer" && (
-                <Badge variant="default">Mode rédaction</Badge>
-              )}
-              {role === "editor" && (
-                <Badge variant="info">Mode révision</Badge>
-              )}
-              {role === "publisher" && (
-                <Badge variant="warning">Mode publication</Badge>
-              )}
-              {role === "admin" && (
-                <Badge variant="danger">Mode admin</Badge>
-              )}
-              <Badge variant="default">Langue {language.toUpperCase()}</Badge>
-              <Badge variant="default">Type {contentType || "non défini"}</Badge>
-              <Badge variant={statusVariant}>Traduction {translationStatus}</Badge>
             </div>
           </div>
 
-          <div className="space-y-3">
-            <div className="flex flex-wrap items-center justify-end gap-2">
+          {/* Right: preview mode + actions */}
+          <div className="flex flex-wrap items-center gap-2">
+            {/* Preview mode toggles */}
+            <div className="flex items-center gap-1 border border-border-subtle p-0.5">
               {(["desktop", "mobile", "social"] as const).map((mode) => (
                 <button
                   key={mode}
@@ -498,7 +478,7 @@ export default function ArticleEditor({
                   className={`px-2.5 py-1 font-label text-[11px] font-bold uppercase ${
                     previewMode === mode
                       ? "bg-foreground text-background"
-                      : "border border-border-subtle text-muted"
+                      : "text-muted hover:text-foreground"
                   }`}
                 >
                   {mode}
@@ -506,58 +486,72 @@ export default function ArticleEditor({
               ))}
             </div>
 
-            <div className="flex flex-wrap justify-end gap-2">
-              {scheduledAt && role !== "writer" ? (
-                <Button
-                  variant="outline"
-                  onClick={() => handleSubmit("scheduled")}
-                  disabled={saving || !title || !body}
-                >
-                  Programmer
-                </Button>
-              ) : null}
-              {canRequestReview ? (
-                <Button
-                  variant="outline"
-                  onClick={() => handleSubmit("in_review")}
-                  disabled={saving || !title || !body}
-                >
-                  Soumettre en revue
-                </Button>
-              ) : null}
-              {canApprove && role !== "writer" ? (
-                <Button
-                  variant="outline"
-                  onClick={() => handleSubmit("approved")}
-                  disabled={saving || !title || !body}
-                >
-                  Approuver
-                </Button>
-              ) : null}
-              {canPublish && role !== "writer" ? (
-                <Button
-                  variant="outline"
-                  onClick={() => handleSubmit("published")}
-                  disabled={saving || !title || !body}
-                >
-                  Publier
-                </Button>
-              ) : null}
-              {canSaveDraft ? (
-                <Button
-                  variant="outline"
-                  onClick={() => handleSubmit("draft")}
-                  disabled={saving || !title}
-                >
-                  Sauvegarder brouillon
-                </Button>
-              ) : null}
-              <Button onClick={() => handleSubmit(status)} disabled={saving || !title || !body}>
-                {saving ? "Enregistrement..." : submitLabel}
+            {/* Workflow action buttons */}
+            {canSaveDraft ? (
+              <Button
+                variant="outline"
+                onClick={() => handleSubmit("draft")}
+                disabled={saving || !title}
+              >
+                Brouillon
               </Button>
-            </div>
+            ) : null}
+            {scheduledAt && role !== "writer" ? (
+              <Button
+                variant="outline"
+                onClick={() => handleSubmit("scheduled")}
+                disabled={saving || !title || !body}
+              >
+                Programmer
+              </Button>
+            ) : null}
+            {canRequestReview ? (
+              <Button
+                variant="outline"
+                onClick={() => handleSubmit("in_review")}
+                disabled={saving || !title || !body}
+              >
+                Soumettre en revue
+              </Button>
+            ) : null}
+            {canApprove && role !== "writer" ? (
+              <Button
+                variant="outline"
+                onClick={() => handleSubmit("approved")}
+                disabled={saving || !title || !body}
+              >
+                Approuver
+              </Button>
+            ) : null}
+            {canPublish && role !== "writer" ? (
+              <Button
+                variant="outline"
+                onClick={() => handleSubmit("published")}
+                disabled={saving || !title || !body}
+              >
+                Publier
+              </Button>
+            ) : null}
+            <Button onClick={() => handleSubmit(status)} disabled={saving || !title || !body}>
+              {saving ? "Enregistrement..." : submitLabel}
+            </Button>
           </div>
         </div>
+      </div>
+
+      {/* Role context bar */}
+      <div className="flex flex-wrap items-center gap-2 border border-border-subtle bg-surface-elevated px-4 py-2">
+        <span className="font-label text-xs text-muted">Mode :</span>
+        {role === "writer" && <Badge variant="default">Rédaction</Badge>}
+        {role === "editor" && <Badge variant="info">Révision éditoriale</Badge>}
+        {role === "publisher" && <Badge variant="warning">Publication</Badge>}
+        {role === "admin" && <Badge variant="danger">Admin</Badge>}
+        <span className="mx-1 text-border-subtle">·</span>
+        <Badge variant="default">{language === "fr" ? "Français" : "English"}</Badge>
+        <Badge variant="default">{contentType || "Type non défini"}</Badge>
+        {translationStatus && translationStatus !== "not_applicable" && (
+          <Badge variant={statusVariant}>Traduction : {translationStatus}</Badge>
+        )}
       </div>
 
       {missingChecks.length > 0 ? (
@@ -587,10 +581,14 @@ export default function ArticleEditor({
       )}
       <div className="grid gap-6 xl:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">
         <div className="space-y-6">
-          <section className="space-y-4 border border-border-subtle p-4">
-            <p className="font-label text-xs font-extrabold uppercase text-muted">Contenu principal</p>
+          <section className="space-y-5 border border-border-subtle p-5">
+            <div className="flex items-center justify-between border-b border-border-subtle pb-3">
+              <h2 className="font-label text-sm font-extrabold uppercase tracking-widest text-foreground">Contenu</h2>
+              <span className="font-label text-xs text-muted">Langue : <span className="font-bold text-foreground">{language === "fr" ? "Français" : "English"}</span></span>
+            </div>
+
             <Input
-              label="Titre"
+              label="Titre *"
               id="title"
               placeholder="Titre de l'article"
               value={title}
@@ -606,8 +604,24 @@ export default function ArticleEditor({
             />
 
             <div>
+              <label htmlFor="excerpt" className="mb-1 block font-label text-xs font-extrabold uppercase text-foreground">
+                Chapô / Résumé *
+              </label>
+              <p className="mb-2 font-body text-xs text-muted">Accroche courte affichée en page d&apos;accueil et dans les résultats de recherche.</p>
+              <textarea
+                id="excerpt"
+                rows={3}
+                value={excerpt}
+                onChange={(e) => setExcerpt(e.target.value)}
+                placeholder={language === "fr" ? "Rédigez un résumé accrocheur (2–3 phrases)…" : "Write a short compelling summary (2–3 sentences)…"}
+                className="w-full resize-none border border-border-subtle bg-surface px-4 py-3 font-body text-sm text-foreground focus:border-primary focus:outline-none"
+              />
+              <p className="mt-1 text-right font-label text-[11px] text-muted">{excerpt.length} car.</p>
+            </div>
+
+            <div>
               <label className="mb-2 block font-label text-xs font-extrabold uppercase text-foreground">
-                Corps de l&apos;article
+                Corps de l&apos;article *
               </label>
               <NovelEditor
                 value={body}
@@ -617,6 +631,18 @@ export default function ArticleEditor({
               />
             </div>
 
+          </section>
+
+          <section className="space-y-4 border border-border-subtle p-5">
+            <h2 className="border-b border-border-subtle pb-3 font-label text-sm font-extrabold uppercase tracking-widest text-foreground">Image principale</h2>
+            <MediaUploader onUpload={uploadFile} value={coverImage} onChange={setCoverImage} />
+            <Input
+              label="Crédit photo"
+              id="coverImageCaption"
+              placeholder="Photo : AFP / Le Relief Haïti"
+              value={coverImageCaption}
+              onChange={(e) => setCoverImageCaption(e.target.value)}
+            />
           </section>
 
           <section className="space-y-4 border border-border-subtle p-4">
@@ -825,25 +851,10 @@ export default function ArticleEditor({
           </EditorSection>
 
           <EditorSection
-            title="SEO & média"
+            title="SEO"
             open={openSections.seo}
             onToggle={() => toggleSection("seo")}
           >
-            <div>
-              <label className="mb-2 block font-label text-xs font-extrabold uppercase text-foreground">
-                Image de couverture
-              </label>
-              <MediaUploader onUpload={uploadFile} value={coverImage} onChange={setCoverImage} />
-            </div>
-
-            <Input
-              label="Crédit photo"
-              id="coverImageCaption"
-              placeholder="Photo : AFP / Le Relief Haïti"
-              value={coverImageCaption}
-              onChange={(e) => setCoverImageCaption(e.target.value)}
-            />
-
             <Input
               label="Slug"
               id="slug"
@@ -852,21 +863,31 @@ export default function ArticleEditor({
               onChange={(e) => setSlug(e.target.value)}
             />
 
-            <Input
-              label="SEO title"
-              id="seoTitle"
-              placeholder="Titre optimisé SEO"
-              value={seoTitle}
-              onChange={(e) => setSeoTitle(e.target.value)}
-            />
+            <div>
+              <Input
+                label="SEO title"
+                id="seoTitle"
+                placeholder="Titre optimisé SEO"
+                value={seoTitle}
+                onChange={(e) => setSeoTitle(e.target.value)}
+              />
+              <p className={`mt-1 text-right font-label text-[11px] ${seoTitle.length > 60 ? "text-danger" : "text-muted"}`}>
+                {seoTitle.length}/60
+              </p>
+            </div>
 
-            <Input
-              label="Meta description"
-              id="metaDescription"
-              placeholder="Résumé SEO (155 caractères)"
-              value={metaDescription}
-              onChange={(e) => setMetaDescription(e.target.value)}
-            />
+            <div>
+              <Input
+                label="Meta description"
+                id="metaDescription"
+                placeholder="Résumé SEO (155 caractères max)"
+                value={metaDescription}
+                onChange={(e) => setMetaDescription(e.target.value)}
+              />
+              <p className={`mt-1 text-right font-label text-[11px] ${metaDescription.length > 155 ? "text-danger" : "text-muted"}`}>
+                {metaDescription.length}/155
+              </p>
+            </div>
           </EditorSection>
 
           <EditorSection
