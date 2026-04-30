@@ -1,6 +1,7 @@
 import { headers } from "next/headers";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
+import MobileBottomNav from "@/components/layout/MobileBottomNav";
 import SkipToContent from "@/components/layout/SkipToContent";
 import { LOCALE_REQUEST_HEADER } from "@/lib/locale-routing";
 import { validateLocale, type Locale } from "@/lib/locale";
@@ -17,8 +18,10 @@ export default async function PublicLayout({
     <>
       <SkipToContent initialLocale={initialLocale} />
       <Navbar initialLocale={initialLocale} />
-      <main id="main-content" className="flex-1">{children}</main>
+      {/* pb-16 reserves space so content isn't hidden behind the mobile bottom nav */}
+      <main id="main-content" className="flex-1 pb-16 md:pb-0">{children}</main>
       <Footer initialLocale={initialLocale} />
+      <MobileBottomNav initialLocale={initialLocale} />
     </>
   );
 }
