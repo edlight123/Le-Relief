@@ -82,16 +82,17 @@ export default function Navbar({ initialLocale = "fr" }: { initialLocale?: Local
             prefetch={true}
             className="absolute left-1/2 -translate-x-1/2 flex items-center gap-2 md:static md:translate-x-0 md:justify-center md:gap-3"
           >
+            {/* Logo image hidden on mobile — wordmark alone is cleaner and avoids cramping */}
             <Image
               src="/logo.png"
               alt="Le Relief"
               width={40}
               height={40}
               sizes="(min-width: 768px) 44px, 36px"
-              className="h-8 w-8 rounded-sm sm:h-9 sm:w-9 md:h-11 md:w-11"
+              className="hidden md:block md:h-11 md:w-11 rounded-sm"
               priority
             />
-            <span className="whitespace-nowrap font-headline text-[1.6rem] font-extrabold leading-none text-foreground sm:text-5xl md:text-6xl">
+            <span className="whitespace-nowrap font-headline text-[1.75rem] font-extrabold leading-none text-foreground sm:text-5xl md:text-6xl">
               {siteConfig.name}
             </span>
           </Link>
