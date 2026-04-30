@@ -85,6 +85,8 @@ const navVisibilityByRole: Record<AppRole, string[]> = {
   ],
   admin: [
     "/admin/dashboard",
+    "/admin/articles/new",
+    "/admin/workspace",
     "/admin/articles",
     "/admin/review",
     "/admin/publishing",

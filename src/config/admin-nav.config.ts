@@ -157,6 +157,16 @@ const adminNav: NavGroup[] = [
         exact: true,
       },
       {
+        label: "Nouvel article",
+        href: "/admin/articles/new",
+        icon: PenSquare,
+      },
+      {
+        label: "Espace de travail",
+        href: "/admin/workspace",
+        icon: Newspaper,
+      },
+      {
         label: "Articles",
         href: "/admin/articles",
         icon: FileText,
