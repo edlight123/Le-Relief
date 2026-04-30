@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, LayoutGrid, Search, User } from "lucide-react";
+import { Home, LayoutGrid, Mail, Search } from "lucide-react";
 import { hrefForLocale, isActiveLocaleHref } from "@/lib/locale-routing";
 import { useResolvedLocale } from "@/hooks/useResolvedLocale";
 import type { Locale } from "@/lib/locale";
@@ -11,14 +11,14 @@ const TABS_FR = [
   { label: "Accueil", href: "/", icon: Home },
   { label: "Rubriques", href: "/categories/politique", icon: LayoutGrid },
   { label: "Recherche", href: "/search", icon: Search },
-  { label: "Compte", href: "/login", icon: User },
+  { label: "Lettre", href: "/newsletter", icon: Mail },
 ] as const;
 
 const TABS_EN = [
   { label: "Home", href: "/", icon: Home },
   { label: "Sections", href: "/categories/politique", icon: LayoutGrid },
   { label: "Search", href: "/search", icon: Search },
-  { label: "Account", href: "/login", icon: User },
+  { label: "Newsletter", href: "/newsletter", icon: Mail },
 ] as const;
 
 export default function MobileBottomNav({
