@@ -9,6 +9,7 @@ import CommandPalette from "@/components/ui/CommandPalette";
 import NotificationsPanel from "@/components/notifications/NotificationsPanel";
 import AdminBreadcrumb from "@/components/layout/AdminBreadcrumb";
 import OnboardingTip from "@/components/dashboard/OnboardingTip";
+import OnboardingTour from "@/components/dashboard/OnboardingTour";
 
 const sectionLabels: Record<string, string> = {
   // Legacy /dashboard routes
@@ -110,6 +111,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         </header>
         <main className="flex-1 overflow-y-auto p-6 sm:p-8">
           <AdminBreadcrumb />
+          <OnboardingTour />
           <OnboardingTip />
           <div className="mt-4" />
           {children}
