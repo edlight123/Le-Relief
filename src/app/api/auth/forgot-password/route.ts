@@ -17,17 +17,24 @@ export async function POST(req: NextRequest) {
     // Always return 200 to prevent email enumeration attacks.
     // Only send the email if the user actually exists and has a dashboard role.
     const user = await usersRepo.findByEmail(email);
+    console.log(`[forgot-password] lookup for ${email}: found=${!!user}, role=${user?.role ?? "none"}`);
 
     if (user && canAccessDashboard(user.role as Role)) {
       if (!passwordResetEmailConfigured()) {
-        console.error("[forgot-password] No email provider configured.");
+        console.error("[forgot-password] No email provider configured. RESEND_API_KEY set:", !!process.env.RESEND_API_KEY);
         return NextResponse.json(
           { error: "Service courriel non configuré. Contactez un administrateur." },
           { status: 503 }
         );
       }
 
-      const appUrl = process.env.NEXTAUTH_URL || process.env.NEXT_PUBLIC_APP_URL || "https://le-relief.ht";
+      const appUrl = (
+        process.env.AUTH_URL ||
+        process.env.NEXTAUTH_URL ||
+        process.env.NEXT_PUBLIC_APP_URL ||
+        (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : null) ||
+        "https://le-relief.ht"
+      ).replace(/\/$/, "");
       const { token, expiresAt } = await resetTokensRepo.createPasswordResetToken(
         user.id as string,
         user.email as string,
@@ -35,6 +42,7 @@ export async function POST(req: NextRequest) {
 
       const resetUrl = `${appUrl}/fr/reset-password?token=${token}`;
 
+      console.log(`[forgot-password] sending reset email to ${user.email as string}, url: ${resetUrl}`);
       await sendPasswordResetEmail({
         to: user.email as string,
         recipientName: user.name as string | null,
