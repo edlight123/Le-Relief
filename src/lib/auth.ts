@@ -4,6 +4,7 @@ import Google from "next-auth/providers/google";
 import bcrypt from "bcryptjs";
 import * as usersRepo from "@/lib/repositories/users";
 import type { Role } from "@/types/user";
+import { canAccessDashboard } from "@/lib/permissions";
 
 /**
  * Optional: restrict which email domains can sign up via OAuth.
@@ -52,6 +53,9 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
 
         if (!isValid) return null;
 
+        // Only allow pre-created team members to log in
+        if (!canAccessDashboard(user.role as Role)) return null;
+
         return {
           id: user.id as string,
           name: user.name as string,
@@ -96,20 +100,13 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         }
 
         const existing = await usersRepo.findByEmail(user.email);
-        if (!existing) {
-          const newUser = await usersRepo.createUser({
-            name: user.name || "",
-            email: user.email,
-            hashedPassword: "",
-            role: "writer",
-            image: user.image || null,
-          });
-          user.id = newUser.id as string;
-          (user as { role?: Role }).role = "writer";
-        } else {
-          user.id = existing.id as string;
-          (user as { role?: Role }).role = existing.role as Role;
+        // Only allow pre-existing team members — no self-registration via OAuth
+        if (!existing || !canAccessDashboard(existing.role as Role)) {
+          console.warn(`[auth] OAuth sign-in rejected for ${user.email}: not a pre-created team member`);
+          return false;
         }
+        user.id = existing.id as string;
+        (user as { role?: Role }).role = existing.role as Role;
       }
       return true;
     },

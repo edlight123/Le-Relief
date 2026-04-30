@@ -5,7 +5,7 @@ import PageHeader from "@/components/ui/PageHeader";
 import Card from "@/components/ui/Card";
 import Badge from "@/components/ui/Badge";
 import EmptyState from "@/components/ui/EmptyState";
-import { Users, Shield, PenSquare } from "lucide-react";
+import { Users, Shield, KeyRound } from "lucide-react";
 
 interface User {
   id: string;
@@ -35,6 +35,22 @@ const ROLE_VARIANTS: Record<string, "default" | "info" | "success" | "warning" |
 export default function AdminUsersPage() {
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
+  const [resetStatus, setResetStatus] = useState<Record<string, "idle" | "loading" | "sent" | "error">>({});
+
+  async function handleSendResetLink(user: User) {
+    if (!user.email) return;
+    setResetStatus((prev) => ({ ...prev, [user.id]: "loading" }));
+    try {
+      const res = await fetch("/api/auth/forgot-password", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: user.email }),
+      });
+      setResetStatus((prev) => ({ ...prev, [user.id]: res.ok ? "sent" : "error" }));
+    } catch {
+      setResetStatus((prev) => ({ ...prev, [user.id]: "error" }));
+    }
+  }
 
   useEffect(() => {
     fetch("/api/users")
@@ -86,6 +102,9 @@ export default function AdminUsersPage() {
                 <th className="px-4 py-3 text-left font-label text-[11px] font-extrabold uppercase tracking-wide text-muted">
                   Rôle
                 </th>
+                <th className="px-4 py-3 text-right font-label text-[11px] font-extrabold uppercase tracking-wide text-muted">
+                  Actions
+                </th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border-subtle">
@@ -116,6 +135,24 @@ export default function AdminUsersPage() {
                     <Badge variant={ROLE_VARIANTS[user.role || "reader"] || "default"}>
                       {ROLE_LABELS[user.role || "reader"] || user.role || "Lecteur"}
                     </Badge>
+                  </td>
+                  <td className="px-4 py-3 text-right">
+                    {resetStatus[user.id] === "sent" ? (
+                      <span className="font-label text-xs text-muted">Lien envoyé ✓</span>
+                    ) : resetStatus[user.id] === "error" ? (
+                      <span className="font-label text-xs text-primary">Erreur</span>
+                    ) : (
+                      <button
+                        type="button"
+                        disabled={resetStatus[user.id] === "loading"}
+                        onClick={() => handleSendResetLink(user)}
+                        className="flex items-center gap-1.5 font-label text-xs font-bold text-muted transition-colors hover:text-foreground disabled:opacity-50"
+                        title="Envoyer un lien de réinitialisation"
+                      >
+                        <KeyRound className="h-3.5 w-3.5" />
+                        {resetStatus[user.id] === "loading" ? "Envoi..." : "Réinitialiser"}
+                      </button>
+                    )}
                   </td>
                 </tr>
               ))}

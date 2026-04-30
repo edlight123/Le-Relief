@@ -54,32 +54,9 @@ export default function LocalizedLoginPage() {
           </Button>
         </form>
 
-        <div className="mt-6">
-          <div className="relative">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-border-subtle" />
-            </div>
-            <div className="relative flex justify-center text-xs">
-              <span className="bg-surface px-2 text-muted">
-                {locale === "fr" ? "ou continuer avec" : "or continue with"}
-              </span>
-            </div>
-          </div>
-          <div className="mt-4">
-            <button
-              type="button"
-              onClick={() => signIn("google", { callbackUrl: "/admin" })}
-              className="flex w-full items-center justify-center border border-border-subtle px-4 py-3 font-label text-sm font-bold text-foreground transition-colors hover:bg-surface-elevated"
-            >
-              Google
-            </button>
-          </div>
-        </div>
-
-        <p className="mt-8 text-center font-body text-base text-muted">
-          {locale === "fr" ? "Pas encore de compte ?" : "No account yet?"}{" "}
-          <Link href={hrefForLocale("/signup", locale)} className="ink-link font-label font-bold text-primary">
-            {locale === "fr" ? "S'inscrire" : "Sign up"}
+        <p className="mt-6 text-center font-body text-sm text-muted">
+          <Link href={hrefForLocale("/forgot-password", locale)} className="ink-link font-label font-bold text-primary">
+            {locale === "fr" ? "Mot de passe oublié ?" : "Forgot your password?"}
           </Link>
         </p>
 

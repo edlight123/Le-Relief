@@ -1,7 +1,16 @@
-import { NextRequest, NextResponse } from "next/server";
-import bcrypt from "bcryptjs";
-import * as usersRepo from "@/lib/repositories/users";
-import { signupSchema } from "@/lib/validation";
+import { NextResponse } from "next/server";
+
+/**
+ * Self-registration is disabled.
+ * All accounts are pre-created by a superadmin.
+ */
+export async function POST() {
+  return NextResponse.json(
+    { error: "L'inscription publique est désactivée. Contactez un administrateur." },
+    { status: 403 }
+  );
+}
+
 
 export async function POST(req: NextRequest) {
   try {
