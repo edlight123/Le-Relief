@@ -60,9 +60,10 @@ export default function Navbar({ initialLocale = "fr" }: { initialLocale?: Local
           </Link>
         </div>
 
-        <div className="grid grid-cols-[auto_1fr_auto] items-center gap-3 py-2.5 md:py-4">
+        {/* Mobile: relative flex container so brand can be absolutely centred */}
+        <div className="relative flex items-center justify-between py-2.5 md:grid md:grid-cols-[auto_1fr_auto] md:items-center md:gap-3 md:py-4">
           <button
-            className="md:hidden border border-border-subtle p-2 transition-colors hover:bg-surface-elevated"
+            className="relative z-10 md:hidden border border-border-subtle p-2 transition-colors hover:bg-surface-elevated"
             onClick={() => setMobileOpen(!mobileOpen)}
             aria-label={locale === "fr" ? "Ouvrir la navigation" : "Open navigation"}
             aria-expanded={mobileOpen}
@@ -75,24 +76,27 @@ export default function Navbar({ initialLocale = "fr" }: { initialLocale?: Local
             )}
           </button>
 
-          <Link href={withLocale("/")} prefetch={true} className="flex min-w-0 items-center justify-center gap-2 sm:gap-3">
+          {/* Brand — absolutely centred on mobile, static in the grid on md+ */}
+          <Link
+            href={withLocale("/")}
+            prefetch={true}
+            className="absolute left-1/2 -translate-x-1/2 flex items-center gap-2 md:static md:translate-x-0 md:justify-center md:gap-3"
+          >
             <Image
               src="/logo.png"
               alt="Le Relief"
               width={40}
               height={40}
-              sizes="40px"
-              className="hidden h-9 w-9 rounded-sm sm:block md:h-11 md:w-11"
+              sizes="(min-width: 768px) 44px, 36px"
+              className="h-8 w-8 rounded-sm sm:h-9 sm:w-9 md:h-11 md:w-11"
               priority
             />
-            <span
-              className="truncate font-headline text-3xl font-extrabold leading-none text-foreground sm:text-5xl md:text-6xl"
-            >
+            <span className="whitespace-nowrap font-headline text-[1.6rem] font-extrabold leading-none text-foreground sm:text-5xl md:text-6xl">
               {siteConfig.name}
             </span>
           </Link>
 
-          <div className="flex items-center justify-end gap-1 md:gap-2">
+          <div className="relative z-10 flex items-center justify-end gap-1 md:gap-2">
             <LanguageToggle locale={locale} />
             <Link
               href={withLocale("/search")}
@@ -149,27 +153,43 @@ export default function Navbar({ initialLocale = "fr" }: { initialLocale?: Local
           />
         )}
         {mobileOpen && (
-          <nav id="public-mobile-navigation" className="relative z-50 space-y-1 border-t border-border-strong bg-background py-3 md:hidden">
-            {navItems.map((item) => {
-              const href = withLocale(item.href);
-              const isActive = isActiveLocaleHref(pathname, item.href);
-              return (
-                <Link
-                  key={item.href}
-                  href={href}
-                  onClick={() => setMobileOpen(false)}
-                  prefetch={true}
-                  className={`block border-b border-border-subtle px-1 py-3 font-label text-sm font-bold uppercase transition-colors ${
-                    isActive
-                      ? "text-primary"
-                      : "text-foreground hover:text-primary"
-                  }`}
-                >
-                  {item.label}
-                </Link>
-              );
-            })}
-            <div className="flex items-center justify-between px-1 pt-3">
+          <nav id="public-mobile-navigation" className="relative z-50 border-t border-border-strong bg-background pb-4 md:hidden">
+            {/* Edition date strip */}
+            <div className="border-b border-border-subtle px-1 py-2">
+              <p className="font-label text-[10px] font-semibold uppercase tracking-[1.2px] text-muted">
+                {editionDate}
+                {editionDate ? " · Port-au-Prince" : ""}
+              </p>
+            </div>
+
+            {/* Nav links */}
+            <div className="mt-1 space-y-0">
+              {navItems.map((item) => {
+                const href = withLocale(item.href);
+                const isActive = isActiveLocaleHref(pathname, item.href);
+                return (
+                  <Link
+                    key={item.href}
+                    href={href}
+                    onClick={() => setMobileOpen(false)}
+                    prefetch={true}
+                    className={`flex items-center justify-between border-b border-border-subtle px-1 py-3.5 font-label text-sm font-bold uppercase tracking-[0.5px] transition-colors ${
+                      isActive
+                        ? "text-primary"
+                        : "text-foreground hover:text-primary"
+                    }`}
+                  >
+                    {item.label}
+                    {isActive && (
+                      <span className="h-1.5 w-1.5 rounded-full bg-primary" aria-hidden />
+                    )}
+                  </Link>
+                );
+              })}
+            </div>
+
+            {/* Bottom controls */}
+            <div className="mt-4 flex items-center justify-between px-1">
               <div className="flex items-center gap-3">
                 <LanguageToggle locale={locale} onSwitch={() => setMobileOpen(false)} />
                 <ThemeToggle />

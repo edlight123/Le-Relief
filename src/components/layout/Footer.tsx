@@ -31,7 +31,7 @@ export default function Footer({ initialLocale = "fr" }: { initialLocale?: Local
               className="rounded-sm"
             />
             <span
-              className="font-headline text-5xl font-extrabold leading-none text-foreground sm:text-6xl"
+              className="font-headline text-4xl font-extrabold leading-none text-foreground sm:text-5xl md:text-6xl"
             >
               {siteConfig.name}
             </span>

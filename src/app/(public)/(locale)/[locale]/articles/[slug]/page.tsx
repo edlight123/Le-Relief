@@ -273,7 +273,7 @@ export default async function LocalizedArticlePage({ params }: Props) {
             ) : null}
           </div>
 
-          <h1 className="editorial-title mt-3 max-w-5xl text-4xl text-foreground sm:text-5xl lg:text-6xl">
+          <h1 className="editorial-title mt-3 max-w-5xl text-3xl text-foreground sm:text-4xl md:text-5xl lg:text-6xl">
             {article.isBreaking && (
               <span className="mb-3 inline-flex items-center bg-red-600 px-2 py-0.5 font-label text-sm font-extrabold uppercase tracking-wider text-white align-middle mr-3">
                 {locale === "en" ? "Breaking" : "Urgent"}
@@ -283,12 +283,12 @@ export default async function LocalizedArticlePage({ params }: Props) {
           </h1>
 
           {shouldShowDeck ? (
-            <p className="editorial-deck mt-4 max-w-3xl font-body text-2xl">
+            <p className="editorial-deck mt-4 max-w-3xl font-body text-lg sm:text-xl md:text-2xl">
               {deckText}
             </p>
           ) : null}
 
-          <p className="editorial-dateline mt-5 border-y border-border-subtle py-3">
+          <p className="editorial-dateline mt-5 border-y border-border-subtle py-3 text-sm sm:text-base">
             {article.author ? (
               <>
                 {locale === "fr" ? "Par " : "By "}
@@ -350,6 +350,16 @@ export default async function LocalizedArticlePage({ params }: Props) {
             locale={locale as "fr" | "en"}
             alternateLanguageSlug={article.alternateLanguageSlug}
           />
+
+          {/* Mobile-only share buttons — placed near top for easy access */}
+          <div className="mt-5 lg:hidden">
+            <ArticleShareButtons
+              url={articleUrl}
+              title={article.title}
+              locale={locale as "fr" | "en"}
+              variant="footer"
+            />
+          </div>
         </header>
 
         {article.imageSrc ? (

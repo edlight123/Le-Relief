@@ -140,6 +140,13 @@ html {
   margin-inline: auto;
 }
 
+/* On very small screens give a little more side breathing room */
+@media (max-width: 374px) {
+  .newspaper-shell {
+    width: min(100% - 1.25rem, 1280px);
+  }
+}
+
 /* Article reading column — narrow, comfortable measure */
 .reading-column {
   max-width: 720px;
@@ -240,12 +247,15 @@ html {
   --tw-prose-headings: var(--foreground);
   --tw-prose-quote-borders: var(--primary);
   font-family: var(--font-body);
-  font-size: 1.125rem;
+  font-size: 1rem;
   line-height: 1.75;
   font-feature-settings: "kern", "liga", "onum";
   hyphens: auto;
   -webkit-hyphens: auto;
   hyphenate-limit-chars: 8 4 4;
+}
+@media (min-width: 640px) {
+  .prose { font-size: 1.125rem; }
 }
 @media (min-width: 768px) {
   .prose { text-align: justify; }
@@ -309,11 +319,16 @@ html {
   font-family: var(--font-headline);
   font-weight: 800;
   float: left;
-  font-size: 4.4em;
+  font-size: 3.8em;
   line-height: 0.85;
   padding: 0.05em 0.12em 0 0;
   margin-top: 0.06em;
   color: var(--foreground);
+}
+@media (min-width: 640px) {
+  .prose > p:first-of-type::first-letter {
+    font-size: 4.4em;
+  }
 }
 .dark .prose > p:first-of-type::first-letter { color: var(--foreground); }
 
@@ -489,7 +504,14 @@ a {
   font-style: italic;
   font-size: 0.95rem;
   color: var(--muted);
-  line-height: 1.5;
+  line-height: 1.6;
+  flex-wrap: wrap;
+}
+@media (max-width: 639px) {
+  .editorial-dateline {
+    font-size: 0.875rem;
+    line-height: 1.7;
+  }
 }
 .editorial-dateline .name {
   font-style: normal;

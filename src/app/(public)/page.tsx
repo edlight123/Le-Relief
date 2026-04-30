@@ -125,17 +125,18 @@ export default async function HomePage() {
                 <h3 className="mb-5 font-headline text-2xl font-extrabold leading-none text-foreground">
                   Les plus lus
                 </h3>
-                <div className="divide-y divide-border-subtle">
+                {/* Mobile: 2-col compact, Desktop: single column list */}
+                <div className="grid grid-cols-1 gap-0 sm:grid-cols-2 lg:grid-cols-1 lg:divide-y lg:divide-border-subtle">
                   {mostRead.map((article, index) => (
                     <Link
                       key={article.id}
                       href={`/articles/${article.slug}`}
-                      className="group grid grid-cols-[3rem_1fr] gap-3 py-4"
+                      className="group grid grid-cols-[3rem_1fr] gap-3 border-b border-border-subtle py-4 lg:border-b-0"
                     >
                       <span className="editorial-numeral" style={{ fontSize: "1.75rem", color: "var(--border-subtle)" }}>
                         {String(index + 1).padStart(2, "0")}
                       </span>
-                      <span className="font-headline text-lg font-bold leading-snug text-foreground transition-colors group-hover:text-primary">
+                      <span className="font-headline text-base font-bold leading-snug text-foreground transition-colors group-hover:text-primary lg:text-lg">
                         {formatHeadlineTypography(article.title)}
                       </span>
                     </Link>

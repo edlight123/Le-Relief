@@ -33,7 +33,7 @@ export default function HeroSection({ article, locale }: HeroSectionProps) {
           <p className="page-kicker mb-5" style={{ letterSpacing: "1.2px" }}>
             {resolvedLocale === "fr" ? "Journalisme indépendant" : "Independent journalism"}
           </p>
-          <h1 className="editorial-title mx-auto max-w-4xl text-5xl text-foreground sm:text-7xl md:text-8xl tracking-tight sm:tracking-[-0.5px] md:tracking-[-1px]">
+          <h1 className="editorial-title mx-auto max-w-4xl text-4xl text-foreground sm:text-6xl md:text-7xl lg:text-8xl tracking-tight sm:tracking-[-0.5px] md:tracking-[-1px]">
             Le Relief Haïti
           </h1>
           <p className="editorial-deck mx-auto mt-6 max-w-2xl font-body text-xl sm:text-2xl">
@@ -118,7 +118,7 @@ export default function HeroSection({ article, locale }: HeroSectionProps) {
                   {article.language === "en" ? " / English" : ""}
                 </p>
               )}
-              <h1 className="editorial-title max-w-5xl text-4xl text-foreground transition-colors group-hover:text-primary sm:text-5xl lg:text-7xl xl:text-8xl tracking-tight lg:tracking-[-1px]">
+              <h1 className="editorial-title max-w-5xl text-3xl text-foreground transition-colors group-hover:text-primary sm:text-4xl lg:text-6xl xl:text-7xl tracking-tight lg:tracking-[-1px]">
                 {displayTitle}
               </h1>
               {showExcerpt && (
@@ -155,7 +155,7 @@ export default function HeroSection({ article, locale }: HeroSectionProps) {
                     </p>
                   )}
                 </div>
-                <h1 className="editorial-title text-3xl text-foreground transition-colors group-hover:text-primary sm:text-4xl lg:text-6xl xl:text-7xl tracking-tight lg:tracking-[-0.6px]">
+                <h1 className="editorial-title text-2xl text-foreground transition-colors group-hover:text-primary sm:text-3xl lg:text-5xl xl:text-6xl tracking-tight lg:tracking-[-0.6px]">
                   {displayTitle}
                 </h1>
                 {showExcerpt && (
