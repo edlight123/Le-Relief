@@ -54,6 +54,18 @@ export async function PATCH(req: NextRequest, { params }: RouteParams) {
     data.role = body.role;
   }
 
+  if (body.email !== undefined) {
+    const newEmail = String(body.email).trim().toLowerCase();
+    if (!newEmail || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(newEmail)) {
+      return NextResponse.json({ error: "Adresse courriel invalide" }, { status: 400 });
+    }
+    const existing = await usersRepo.findByEmail(newEmail);
+    if (existing && String(existing.id) !== id) {
+      return NextResponse.json({ error: "Cette adresse courriel est déjà utilisée" }, { status: 409 });
+    }
+    data.email = newEmail;
+  }
+
   const user = await usersRepo.updateUser(id, data);
 
   if (body.role !== undefined && user && String(existingUser.role || "") !== String(body.role)) {

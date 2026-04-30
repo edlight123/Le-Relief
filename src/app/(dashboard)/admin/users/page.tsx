@@ -1,11 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import PageHeader from "@/components/ui/PageHeader";
-import Card from "@/components/ui/Card";
-import Badge from "@/components/ui/Badge";
 import EmptyState from "@/components/ui/EmptyState";
-import { Users, Shield, KeyRound } from "lucide-react";
+import { Users, Shield, KeyRound, Pencil, Check, X } from "lucide-react";
 
 interface User {
   id: string;
@@ -24,18 +22,77 @@ const ROLE_LABELS: Record<string, string> = {
   reader: "Lecteur",
 };
 
-const ROLE_VARIANTS: Record<string, "default" | "info" | "success" | "warning" | "danger"> = {
-  admin: "danger",
-  publisher: "warning",
-  editor: "info",
-  writer: "success",
-  reader: "default",
-};
-
 export default function AdminUsersPage() {
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [resetStatus, setResetStatus] = useState<Record<string, "idle" | "loading" | "sent" | "error">>({});
+  const [editingEmail, setEditingEmail] = useState<string | null>(null);
+  const [emailDraft, setEmailDraft] = useState("");
+  const [emailSaving, setEmailSaving] = useState(false);
+  const emailInputRef = useRef<HTMLInputElement>(null);
+  const [roleChanging, setRoleChanging] = useState<Record<string, boolean>>({});
+
+  async function handleRoleChange(user: User, newRole: string) {
+    if (newRole === user.role) return;
+    setRoleChanging((prev) => ({ ...prev, [user.id]: true }));
+    try {
+      const res = await fetch(`/api/users/${user.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ role: newRole }),
+      });
+      if (res.ok) {
+        const updated = await res.json();
+        setUsers((prev) => prev.map((u) => (u.id === user.id ? { ...u, role: updated.role } : u)));
+      } else {
+        const err = await res.json().catch(() => ({}));
+        alert(err.error ?? "Erreur lors du changement de rôle");
+      }
+    } catch {
+      alert("Erreur réseau");
+    } finally {
+      setRoleChanging((prev) => ({ ...prev, [user.id]: false }));
+    }
+  }
+
+  function startEditEmail(user: User) {
+    setEditingEmail(user.id);
+    setEmailDraft(user.email ?? "");
+    setTimeout(() => emailInputRef.current?.focus(), 0);
+  }
+
+  function cancelEditEmail() {
+    setEditingEmail(null);
+    setEmailDraft("");
+  }
+
+  async function saveEmail(user: User) {
+    const trimmed = emailDraft.trim().toLowerCase();
+    if (!trimmed || trimmed === (user.email ?? "").toLowerCase()) {
+      cancelEditEmail();
+      return;
+    }
+    setEmailSaving(true);
+    try {
+      const res = await fetch(`/api/users/${user.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: trimmed }),
+      });
+      if (res.ok) {
+        const updated = await res.json();
+        setUsers((prev) => prev.map((u) => (u.id === user.id ? { ...u, email: updated.email } : u)));
+        cancelEditEmail();
+      } else {
+        const err = await res.json().catch(() => ({}));
+        alert(err.error ?? "Erreur lors de la mise à jour");
+      }
+    } catch {
+      alert("Erreur réseau");
+    } finally {
+      setEmailSaving(false);
+    }
+  }
 
   async function handleSendResetLink(user: User) {
     if (!user.email) return;
@@ -129,12 +186,61 @@ export default function AdminUsersPage() {
                     </div>
                   </td>
                   <td className="hidden px-4 py-3 font-label text-xs text-muted md:table-cell">
-                    {user.email || "—"}
+                    {editingEmail === user.id ? (
+                      <form
+                        className="flex items-center gap-1"
+                        onSubmit={(e) => { e.preventDefault(); saveEmail(user); }}
+                      >
+                        <input
+                          ref={emailInputRef}
+                          type="email"
+                          value={emailDraft}
+                          onChange={(e) => setEmailDraft(e.target.value)}
+                          disabled={emailSaving}
+                          className="w-56 rounded border border-border-subtle bg-surface px-2 py-0.5 font-label text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-primary disabled:opacity-50"
+                        />
+                        <button
+                          type="submit"
+                          disabled={emailSaving}
+                          className="text-success hover:text-foreground disabled:opacity-50"
+                          title="Enregistrer"
+                        >
+                          <Check className="h-3.5 w-3.5" />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={cancelEditEmail}
+                          disabled={emailSaving}
+                          className="text-muted hover:text-foreground disabled:opacity-50"
+                          title="Annuler"
+                        >
+                          <X className="h-3.5 w-3.5" />
+                        </button>
+                      </form>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => startEditEmail(user)}
+                        className="group flex items-center gap-1.5 hover:text-foreground"
+                        title="Modifier l'adresse courriel"
+                      >
+                        <span>{user.email || "—"}</span>
+                        <Pencil className="h-3 w-3 opacity-0 transition-opacity group-hover:opacity-60" />
+                      </button>
+                    )}
                   </td>
                   <td className="px-4 py-3">
-                    <Badge variant={ROLE_VARIANTS[user.role || "reader"] || "default"}>
-                      {ROLE_LABELS[user.role || "reader"] || user.role || "Lecteur"}
-                    </Badge>
+                    <select
+                      value={user.role || "reader"}
+                      disabled={roleChanging[user.id]}
+                      onChange={(e) => handleRoleChange(user, e.target.value)}
+                      className="rounded border border-border-subtle bg-surface px-2 py-0.5 font-label text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-primary disabled:opacity-50"
+                      title="Changer le rôle"
+                    >
+                      {Object.entries(ROLE_LABELS).map(([value, label]) => (
+                        <option key={value} value={value}>{label}</option>
+                      ))}
+                    </select>
                   </td>
                   <td className="px-4 py-3 text-right">
                     {resetStatus[user.id] === "sent" ? (
