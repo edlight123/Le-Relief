@@ -4,7 +4,7 @@
  * Only caches GET requests; never caches API routes or admin pages.
  */
 
-const CACHE_VERSION = "v1";
+const CACHE_VERSION = "v2";
 const STATIC_CACHE = `le-relief-static-${CACHE_VERSION}`;
 const PAGES_CACHE = `le-relief-pages-${CACHE_VERSION}`;
 
@@ -66,11 +66,35 @@ self.addEventListener("message", (event) => {
 });
 
 // ── Install ──────────────────────────────────────────────────────────────────
+// IMPORTANT: cache.addAll() rejects atomically if ANY request fails or
+// returns a redirected response. Because the app uses locale middleware
+// ("/" → "/fr", "/offline" → "/fr/offline"), addAll would reject and the
+// SW would never activate, leaving serviceWorker.ready pending forever
+// (which is what triggered the "Le service worker ne répond pas" timeout
+// in usePushNotifications). We precache each asset independently and
+// swallow individual failures so install always succeeds.
+async function precacheSafely(cache, urls) {
+  await Promise.all(
+    urls.map(async (url) => {
+      try {
+        const response = await fetch(url, {
+          credentials: "same-origin",
+          redirect: "follow",
+        });
+        if (!response || !response.ok || response.redirected) return;
+        await cache.put(url, response.clone());
+      } catch {
+        // Ignore — a missing asset must not block SW activation.
+      }
+    })
+  );
+}
+
 self.addEventListener("install", (event) => {
   event.waitUntil(
     caches
       .open(STATIC_CACHE)
-      .then((cache) => cache.addAll(STATIC_ASSETS))
+      .then((cache) => precacheSafely(cache, STATIC_ASSETS))
       .then(() => self.skipWaiting())
   );
 });
