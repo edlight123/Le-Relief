@@ -8,7 +8,7 @@ export default function manifest(): MetadataRoute.Manifest {
       "Publication numérique haïtienne, française d'abord et ouverte au lectorat international",
     start_url: "/",
     display: "standalone",
-    background_color: "#F8F5EF",
+    background_color: "#FFFFFF",
     theme_color: "#8E1E2C",
     orientation: "portrait",
     lang: "fr",
