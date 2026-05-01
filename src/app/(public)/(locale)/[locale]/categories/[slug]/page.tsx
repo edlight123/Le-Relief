@@ -8,6 +8,7 @@ import { validateLocale } from "@/lib/locale";
 import {
   buildBreadcrumbJsonLd,
   buildCanonicalAlternates,
+  buildCollectionPageJsonLd,
   buildEditorialOgImage,
   buildMetaDescription,
   serializeJsonLd,
@@ -78,12 +79,32 @@ export default async function LocalizedCategoryPage({ params }: Props) {
     { name: locale === "fr" ? "Rubriques" : "Categories", item: `/${locale}/categories` },
     { name: category.name, item: `/${locale}/categories/${slug}` },
   ]);
+  const collectionPageJsonLd = buildCollectionPageJsonLd({
+    name: category.name,
+    description:
+      category.description ||
+      (locale === "fr"
+        ? `Articles, analyses et reportages dans la rubrique ${category.name}.`
+        : `Articles, analysis and reporting in the ${category.name} section.`),
+    url: `/${locale}/categories/${slug}`,
+    locale: locale as "fr" | "en",
+    articles: [...(featured ? [featured] : []), ...articles].map((a) => ({
+      title: a.title,
+      url: `/${locale}/articles/${a.slug}`,
+      datePublished: a.publishedAt ?? null,
+      image: a.imageSrc ?? null,
+    })),
+  });
 
   return (
     <>
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: serializeJsonLd(breadcrumbJsonLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: serializeJsonLd(collectionPageJsonLd) }}
       />
       <div className="newspaper-shell py-10 sm:py-14">
       <Breadcrumb

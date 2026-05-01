@@ -117,6 +117,12 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return {
     title,
     description,
+    keywords: [
+      ...(article.tags ?? []),
+      ...(article.category?.name ? [article.category.name] : []),
+      "Haïti",
+      "Le Relief",
+    ].filter(Boolean),
     alternates: buildCanonicalAlternates(`/${locale}/articles/${slug}`, {
       [locale]: `/${locale}/articles/${slug}`,
       [alternateLocale]: alternatePath,
@@ -206,6 +212,10 @@ export default async function LocalizedArticlePage({ params }: Props) {
     locale,
     section: article.category?.name,
     authorName: article.author?.name,
+    keywords: [
+      ...(article.tags ?? []),
+      ...(article.category?.name ? [article.category.name] : []),
+    ],
   });
   const breadcrumbJsonLd = buildBreadcrumbJsonLd([
     { name: locale === "fr" ? "Accueil" : "Home", item: `/${locale}` },

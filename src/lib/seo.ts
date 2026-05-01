@@ -31,6 +31,23 @@ interface NewsArticleJsonLdInput {
   locale: SeoLocale;
   section?: string | null;
   authorName?: string | null;
+  keywords?: string[] | null;
+}
+
+interface PersonJsonLdInput {
+  name: string;
+  url: string;
+  image?: string | null;
+  description?: string | null;
+  jobTitle?: string | null;
+}
+
+interface CollectionPageJsonLdInput {
+  name: string;
+  description: string;
+  url: string;
+  locale: SeoLocale;
+  articles: Array<{ title: string; url: string; datePublished?: string | null; image?: string | null }>;
 }
 
 interface BreadcrumbItem {
@@ -219,6 +236,7 @@ export function buildNewsArticleJsonLd({
   locale,
   section,
   authorName,
+  keywords,
 }: NewsArticleJsonLdInput) {
   return {
     "@context": "https://schema.org",
@@ -231,6 +249,7 @@ export function buildNewsArticleJsonLd({
     inLanguage: locale === "fr" ? "fr-FR" : "en-US",
     articleSection: section || undefined,
     mainEntityOfPage: buildAbsoluteUrl(url),
+    keywords: keywords?.length ? keywords.join(", ") : undefined,
     author: authorName
       ? {
           "@type": "Person",
@@ -244,6 +263,54 @@ export function buildNewsArticleJsonLd({
         "@type": "ImageObject",
         url: buildAbsoluteUrl("/logo.png"),
       },
+    },
+  };
+}
+
+export function buildPersonJsonLd({ name, url, image, description, jobTitle }: PersonJsonLdInput) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "Person",
+    name,
+    url: buildAbsoluteUrl(url),
+    image: image ? buildAbsoluteUrl(image) : undefined,
+    description: description || undefined,
+    jobTitle: jobTitle || undefined,
+    worksFor: {
+      "@type": "Organization",
+      name: siteConfig.name,
+      url: siteConfig.url,
+    },
+  };
+}
+
+export function buildCollectionPageJsonLd({
+  name,
+  description,
+  url,
+  locale,
+  articles,
+}: CollectionPageJsonLdInput) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "CollectionPage",
+    name,
+    description,
+    url: buildAbsoluteUrl(url),
+    inLanguage: locale === "fr" ? "fr-FR" : "en-US",
+    publisher: {
+      "@type": "Organization",
+      name: siteConfig.name,
+      url: siteConfig.url,
+    },
+    mainEntity: {
+      "@type": "ItemList",
+      itemListElement: articles.slice(0, 10).map((article, index) => ({
+        "@type": "ListItem",
+        position: index + 1,
+        url: buildAbsoluteUrl(article.url),
+        name: article.title,
+      })),
     },
   };
 }

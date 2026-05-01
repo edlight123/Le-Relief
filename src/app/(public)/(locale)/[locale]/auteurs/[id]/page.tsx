@@ -8,6 +8,7 @@ import {
   buildBreadcrumbJsonLd,
   buildCanonicalAlternates,
   buildMetaDescription,
+  buildPersonJsonLd,
   buildRobotsDirective,
   serializeJsonLd,
 } from "@/lib/seo";
@@ -63,12 +64,23 @@ export default async function LocalizedAuthorPage({ params }: Props) {
     { name: locale === "fr" ? "Accueil" : "Home", item: `/${locale}` },
     { name: author.name, item: `/${locale}/auteurs/${id}` },
   ]);
+  const personJsonLd = buildPersonJsonLd({
+    name: author.name,
+    url: `/${locale}/auteurs/${id}`,
+    image: author.image || null,
+    description: author.bio || null,
+    jobTitle: author.role || (locale === "fr" ? "Journaliste" : "Journalist"),
+  });
 
   return (
     <>
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: serializeJsonLd(breadcrumbJsonLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: serializeJsonLd(personJsonLd) }}
       />
       <div className="newspaper-shell py-6 sm:py-10">
       <header className="mb-8 border-y-2 border-border-strong py-8 text-center sm:py-12">
