@@ -11,6 +11,16 @@ function urlBase64ToUint8Array(base64String: string): Uint8Array {
   return Uint8Array.from([...rawData].map((c) => c.charCodeAt(0)));
 }
 
+/** Wraps a promise with a timeout; rejects with a clear message on expiry. */
+function withTimeout<T>(promise: Promise<T>, ms: number, label: string): Promise<T> {
+  return Promise.race([
+    promise,
+    new Promise<T>((_, reject) =>
+      setTimeout(() => reject(new Error(`[push] ${label} timed out after ${ms}ms`)), ms),
+    ),
+  ]);
+}
+
 export type PushPermission = "default" | "granted" | "denied" | "unsupported";
 
 function getInitialPermission(): PushPermission {
@@ -24,6 +34,7 @@ export function usePushNotifications(locale?: string) {
   const [permission, setPermission] = useState<PushPermission>(getInitialPermission);
   const [subscribed, setSubscribed] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   // Sync initial state
   useEffect(() => {
@@ -37,37 +48,58 @@ export function usePushNotifications(locale?: string) {
   }, [permission]);
 
   const subscribe = useCallback(async (): Promise<boolean> => {
+    setError(null);
     if (!VAPID_PUBLIC_KEY) {
-      console.warn("[push] NEXT_PUBLIC_VAPID_PUBLIC_KEY is not set");
+      setError("Configuration manquante (clé VAPID absente).");
       return false;
     }
     setLoading(true);
     try {
       const perm = await Notification.requestPermission();
       setPermission(perm as PushPermission);
-      if (perm !== "granted") return false;
+      if (perm !== "granted") {
+        setError(perm === "denied"
+          ? "Notifications bloquées dans les paramètres du navigateur."
+          : "Permission refusée.");
+        return false;
+      }
 
-      const reg = await navigator.serviceWorker.ready;
-      const sub = await reg.pushManager.subscribe({
-        userVisibleOnly: true,
-        applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY).buffer as ArrayBuffer,
-      });
+      const reg = await withTimeout(
+        navigator.serviceWorker.ready,
+        10_000,
+        "serviceWorker.ready",
+      );
+
+      const sub = await withTimeout(
+        reg.pushManager.subscribe({
+          userVisibleOnly: true,
+          applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY) as unknown as ArrayBuffer,
+        }),
+        10_000,
+        "pushManager.subscribe",
+      );
 
       const subJson = sub.toJSON() as {
         endpoint: string;
         keys?: { p256dh?: string; auth?: string };
       };
 
-      await fetch("/api/push/subscribe", {
+      const res = await fetch("/api/push/subscribe", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ ...subJson, locale }),
       });
 
+      if (!res.ok) throw new Error("Erreur serveur lors de l'enregistrement.");
+
       setSubscribed(true);
       return true;
     } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
       console.error("[push] subscribe failed", err);
+      setError(msg.includes("timed out")
+        ? "Le service worker ne répond pas. Rechargez la page et réessayez."
+        : "Activation impossible. Vérifiez les paramètres de notifications.");
       return false;
     } finally {
       setLoading(false);
@@ -75,6 +107,7 @@ export function usePushNotifications(locale?: string) {
   }, [locale]);
 
   const unsubscribe = useCallback(async (): Promise<boolean> => {
+    setError(null);
     setLoading(true);
     try {
       const reg = await navigator.serviceWorker.ready;
@@ -99,5 +132,5 @@ export function usePushNotifications(locale?: string) {
     }
   }, []);
 
-  return { permission, subscribed, loading, subscribe, unsubscribe };
+  return { permission, subscribed, loading, error, subscribe, unsubscribe };
 }

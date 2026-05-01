@@ -14,7 +14,7 @@ const STORAGE_KEY = "push-banner-dismissed";
  * - Sits just above the mobile bottom nav.
  */
 export default function PushNotificationBanner({ locale = "fr" }: { locale?: Locale }) {
-  const { permission, subscribed, loading, subscribe } = usePushNotifications(locale);
+  const { permission, subscribed, loading, error, subscribe } = usePushNotifications(locale);
   const [visible, setVisible] = useState(false);
   const [success, setSuccess] = useState(false);
 
@@ -37,6 +37,7 @@ export default function PushNotificationBanner({ locale = "fr" }: { locale?: Loc
       setSuccess(true);
       setTimeout(() => setVisible(false), 2500);
     }
+    // error is surfaced from the hook via the `error` field below
   }
 
   if (!visible || subscribed) return null;
@@ -79,6 +80,9 @@ export default function PushNotificationBanner({ locale = "fr" }: { locale?: Loc
               ? "Activez les notifications pour recevoir les nouveaux articles du Relief directement sur votre appareil."
               : "Enable notifications to receive new Le Relief articles directly on your device."}
           </p>
+          {error && (
+            <p className="mt-1.5 font-body text-xs text-red-600 dark:text-red-400">{error}</p>
+          )}
           <div className="mt-3 flex items-center gap-2">
             <button
               type="button"
