@@ -19,13 +19,14 @@ export default function AdminArticleEditPage() {
   const [categories, setCategories] = useState<CategoryOption[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [refreshKey, setRefreshKey] = useState(0);
 
   useEffect(() => {
     async function load() {
       setLoading(true);
       try {
         const [articleRes, catRes] = await Promise.all([
-          fetch(`/api/articles/${id}`),
+          fetch(`/api/articles/${id}`, { cache: "no-store" }),
           fetch("/api/categories"),
         ]);
         if (!articleRes.ok) {
@@ -43,7 +44,7 @@ export default function AdminArticleEditPage() {
       }
     }
     if (id) load();
-  }, [id]);
+  }, [id, refreshKey]);
 
   const handleSubmit = useCallback(
     async (data: Parameters<React.ComponentProps<typeof ArticleEditor>["onSubmit"]>[0]) => {
@@ -57,6 +58,7 @@ export default function AdminArticleEditPage() {
         throw new Error(err.error || "Erreur lors de la sauvegarde");
       }
       router.refresh();
+      setRefreshKey((k) => k + 1);
     },
     [id, router],
   );

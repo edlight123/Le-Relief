@@ -847,6 +847,11 @@ export default function ArticleEditor({
 
               {/* CTA buttons */}
               <div className="space-y-2 p-4">
+                {submitError && (
+                  <div className="mb-2 rounded border border-accent-coral/40 bg-accent-coral/10 px-3 py-2 font-label text-xs text-accent-coral">
+                    {submitError}
+                  </div>
+                )}
                 {/* Primary action — always full width, prominent */}
                 <Button
                   onClick={() => handleSubmit(status)}
