@@ -26,6 +26,7 @@ import {
   getBrandBackground,
   getBrandLabel,
   footerBarHtml,
+  brandHeaderHtml,
   premiumAtmosphereHtml,
 } from "../config/brand.js";
 
@@ -129,7 +130,7 @@ ${premiumAtmosphereHtml(accent)}
 <div class="canvas">
   <div class="top-row">
     <span class="pill">${escapeHtml(label)}</span>
-    <span class="slide-count">${BRAND.wordmark.left} ${BRAND.wordmark.right}</span>
+    ${brandHeaderHtml(accent, { logoSize: 40, fontSize: 20, compact: true })}
   </div>
   <div class="mid">
     <p class="headline">${escapeHtml(slide.headline)}</p>

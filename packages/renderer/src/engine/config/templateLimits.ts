@@ -516,6 +516,150 @@ export const TEMPLATE_CONFIGS: Record<string, TemplateConfig> = {
       },
     },
   },
+  // ── 8. Caricature Card ───────────────────────────────────────────────────
+  // Single slide: full-bleed illustration + bottom credit strip.
+  // No heavy text zones — the art must breathe.
+  // "cover" is the only variant.
+  "caricature-card": {
+    id: "caricature-card",
+    name: "Caricature Card",
+    canvasWidth: W,
+    canvasHeight: H,
+    safeMargin: { top: 92, side: SIDE, bottom: 100 },
+    maxSlides: 1,
+    zones: {
+      categoryLabel: { ...CATEGORY_LABEL_ZONE },
+      // Credit line (e.g. "Dessinateur : Francisco Silva")
+      headline: {
+        box: { x: SIDE, y: H - 260, width: INNER_W, height: 60 },
+        fontSize: 28, minFontSize: 22, fontFamily: "DM Sans", lineHeight: 1.3,
+        limits: { maxWords: 8, maxChars: 50 },
+      },
+      // Optional caption / subtitle below the title strip
+      supportLine: {
+        box: { x: SIDE, y: H - 190, width: INNER_W, height: 48 },
+        fontSize: 22, minFontSize: 18, fontFamily: "Inter", lineHeight: 1.35,
+        limits: { maxWords: 10, maxChars: 60 },
+      },
+      sourceLine: { ...SOURCE_LINE_ZONE },
+    },
+    variantZones: {
+      cover: {
+        headline: {
+          box: { x: SIDE, y: H - 260, width: INNER_W, height: 60 },
+          fontSize: 28, minFontSize: 22, fontFamily: "DM Sans", lineHeight: 1.3,
+          limits: { maxWords: 8, maxChars: 50 },
+        },
+      },
+    },
+  },
+
+  // ── 9. Story Cover ───────────────────────────────────────────────────────
+  // Single slide optimised for 9:16 platforms (stories, TikTok, Reels).
+  // Base canvas is still 1080×1350; wrapForPlatform letterboxes for 9:16.
+  // Layout: date pill top-left, large headline centre, CTA bottom.
+  "story-cover": {
+    id: "story-cover",
+    name: "Story Cover",
+    canvasWidth: W,
+    canvasHeight: H,
+    safeMargin: { top: 120, side: SIDE, bottom: 100 },
+    maxSlides: 1,
+    zones: {
+      categoryLabel: { ...CATEGORY_LABEL_ZONE },
+      headline: {
+        box: { x: SIDE, y: 280, width: INNER_W, height: 620 },
+        fontSize: 64, minFontSize: 48, fontFamily: "DM Sans", lineHeight: 1.05,
+        limits: { maxWords: 12, maxLines: 6 },
+        dynamicFontSize: [
+          { maxWords: 5,  size: 88 },
+          { maxWords: 8,  size: 76 },
+          { maxWords: 12, size: 64 },
+          { size: 54 },
+        ],
+      },
+      supportLine: {
+        box: { x: SIDE, y: 930, width: INNER_W, height: 90 },
+        fontSize: 30, minFontSize: 24, fontFamily: "Inter", lineHeight: 1.4,
+        limits: { maxWords: 14, maxLines: 2 },
+      },
+      sourceLine: { ...SOURCE_LINE_ZONE },
+    },
+    variantZones: {
+      cover: {
+        headline: {
+          box: { x: SIDE, y: 280, width: INNER_W, height: 620 },
+          fontSize: 64, minFontSize: 48, fontFamily: "DM Sans", lineHeight: 1.05,
+          limits: { maxWords: 12, maxLines: 6 },
+          dynamicFontSize: [
+            { maxWords: 5,  size: 88 },
+            { maxWords: 8,  size: 76 },
+            { maxWords: 12, size: 64 },
+            { size: 54 },
+          ],
+        },
+        supportLine: {
+          box: { x: SIDE, y: 930, width: INNER_W, height: 90 },
+          fontSize: 30, minFontSize: 24, fontFamily: "Inter", lineHeight: 1.4,
+          limits: { maxWords: 14, maxLines: 2 },
+        },
+      },
+    },
+  },
+
+  // ── 10. Quote Pull ───────────────────────────────────────────────────────
+  // Single slide: editorial pull-quote with large typographic quotation mark.
+  // Designed for official statements, declarations, source quotes.
+  "quote-pull": {
+    id: "quote-pull",
+    name: "Quote Pull",
+    canvasWidth: W,
+    canvasHeight: H,
+    safeMargin: { top: 120, side: SIDE, bottom: 100 },
+    maxSlides: 1,
+    zones: {
+      categoryLabel: { ...CATEGORY_LABEL_ZONE },
+      // The quote text — italic editorial font
+      headline: {
+        box: { x: SIDE, y: 300, width: INNER_W, height: 680 },
+        fontSize: 52, minFontSize: 36, fontFamily: "DM Sans", lineHeight: 1.3,
+        limits: { maxWords: 40, maxLines: 8 },
+        dynamicFontSize: [
+          { maxWords: 10, size: 72 },
+          { maxWords: 20, size: 60 },
+          { maxWords: 30, size: 52 },
+          { size: 44 },
+        ],
+      },
+      // Attribution: "— Name, Title"
+      supportLine: {
+        box: { x: SIDE, y: 1010, width: INNER_W, height: 60 },
+        fontSize: 26, minFontSize: 20, fontFamily: "Inter", lineHeight: 1.3,
+        limits: { maxWords: 10, maxChars: 60 },
+      },
+      sourceLine: { ...SOURCE_LINE_ZONE },
+    },
+    variantZones: {
+      quote: {
+        headline: {
+          box: { x: SIDE, y: 300, width: INNER_W, height: 680 },
+          fontSize: 52, minFontSize: 36, fontFamily: "DM Sans", lineHeight: 1.3,
+          limits: { maxWords: 40, maxLines: 8 },
+          dynamicFontSize: [
+            { maxWords: 10, size: 72 },
+            { maxWords: 20, size: 60 },
+            { maxWords: 30, size: 52 },
+            { size: 44 },
+          ],
+        },
+        supportLine: {
+          box: { x: SIDE, y: 1010, width: INNER_W, height: 60 },
+          fontSize: 26, minFontSize: 20, fontFamily: "Inter", lineHeight: 1.3,
+          limits: { maxWords: 10, maxChars: 60 },
+        },
+      },
+    },
+  },
 };
 
 // ── Derived char-budget constants ─────────────────────────────────────────────

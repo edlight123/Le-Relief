@@ -12,6 +12,9 @@ export { buildExplainerSlide } from "./ExplainerTemplate.js";
 export { buildQuoteStatSlide } from "./QuoteStatTemplate.js";
 export { buildWeeklyRecapSlide } from "./WeeklyRecapTemplate.js";
 export { buildDataCardSlide } from "./DataCardTemplate.js";
+export { buildCaricatureSlide } from "./CaricatureTemplate.js";
+export { buildStoryCoverSlide } from "./StoryCoverTemplate.js";
+export { buildQuotePullSlide } from "./QuotePullTemplate.js";
 
 import type { SlideContent, TemplateId } from "../types/post.js";
 import { buildBreakingNewsSlide } from "./BreakingNewsTemplate.js";
@@ -21,6 +24,9 @@ import { buildExplainerSlide } from "./ExplainerTemplate.js";
 import { buildQuoteStatSlide } from "./QuoteStatTemplate.js";
 import { buildWeeklyRecapSlide } from "./WeeklyRecapTemplate.js";
 import { buildDataCardSlide } from "./DataCardTemplate.js";
+import { buildCaricatureSlide } from "./CaricatureTemplate.js";
+import { buildStoryCoverSlide } from "./StoryCoverTemplate.js";
+import { buildQuotePullSlide } from "./QuotePullTemplate.js";
 
 /**
  * Build the HTML for a single slide using the correct template.
@@ -59,6 +65,15 @@ export function buildSlideHtml(
 
     case "data-card":
       return buildDataCardSlide(slide, contentType, slideIndex, totalSlides);
+
+    case "caricature-card":
+      return buildCaricatureSlide(slide, contentType);
+
+    case "story-cover":
+      return buildStoryCoverSlide(slide, contentType);
+
+    case "quote-pull":
+      return buildQuotePullSlide(slide, contentType);
 
     default: {
       // TypeScript exhaustiveness guard

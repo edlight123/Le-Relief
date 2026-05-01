@@ -96,35 +96,38 @@ app.post("/render", async (req, res) => {
     const brand = getBrand();
     const out: Record<string, unknown> = {};
 
-    for (const platform of body.platforms) {
-      const spec = getPlatformSpec(platform);
-      const subset = {
-        ...post,
-        slides:
-          spec.carousel === null
-            ? post.slides.slice(0, 1)
-            : post.slides.slice(0, Math.min(post.slides.length, spec.carousel.max)),
-      };
-      try {
-        const rendered = await renderPost(subset, contentType, platform);
-        const adapted = formatForPlatform(platform, { post: subset });
-        out[platform] = {
-          slides: rendered.map((s) => ({
-            slideNumber: s.slideNumber,
-            pngBase64: s.png.toString("base64"),
-            format: s.format,
-            width: s.widthPx,
-            height: s.heightPx,
-          })),
-          caption: adapted.caption,
-          firstComment: adapted.firstComment ?? null,
-          thread: adapted.thread ?? null,
-          meta: adapted.meta ?? null,
+    // Render all requested platforms in parallel
+    await Promise.all(
+      body.platforms.map(async (platform) => {
+        const spec = getPlatformSpec(platform);
+        const subset = {
+          ...post,
+          slides:
+            spec.carousel === null
+              ? post.slides.slice(0, 1)
+              : post.slides.slice(0, Math.min(post.slides.length, spec.carousel.max)),
         };
-      } catch (err) {
-        warnings.push(`${platform}: ${err instanceof Error ? err.message : String(err)}`);
-      }
-    }
+        try {
+          const rendered = await renderPost(subset, contentType, platform);
+          const adapted = formatForPlatform(platform, { post: subset });
+          out[platform] = {
+            slides: rendered.map((s) => ({
+              slideNumber: s.slideNumber,
+              pngBase64: s.png.toString("base64"),
+              format: s.format,
+              width: s.widthPx,
+              height: s.heightPx,
+            })),
+            caption: adapted.caption,
+            firstComment: adapted.firstComment ?? null,
+            thread: adapted.thread ?? null,
+            meta: adapted.meta ?? null,
+          };
+        } catch (err) {
+          warnings.push(`${platform}: ${err instanceof Error ? err.message : String(err)}`);
+        }
+      }),
+    );
 
     await closeBrowserInstance();
     resetBrand();
@@ -148,13 +151,39 @@ function articleToContent(a: RenderRequest["article"]) {
   const supportLine = (a.subtitle || a.excerpt || "").trim();
   const detailBody = stripHtml(a.body).slice(0, 260);
   const articleUrl = `${SITE}${isFr ? "" : "/en"}/articles/${a.slug}`;
+  const isBreaking = Boolean(a.isBreaking);
+  const categorySlug = a.category?.slug || "news";
+  const excerptClean = stripHtml(a.excerpt);
+  const firstFact = excerptClean || stripHtml(a.body).slice(0, 200);
+
+  // Category-aware hashtags (matches src/lib/social/article-to-post.ts)
+  const hashtags = ["#LeRelief", "#Haïti", "#Haiti", isFr ? "#Actualités" : "#News"];
+  if (isBreaking) hashtags.push("#Flash");
+  const categoryTagMap: Record<string, string> = {
+    politique: "#Politique", securite: "#Sécurité", "securite-publique": "#Sécurité",
+    economie: "#Économie", culture: "#Culture", sport: "#Sport", sports: "#Sport",
+    diaspora: "#Diaspora", education: "#Éducation", sante: "#Santé",
+    environnement: "#Environnement", international: "#International",
+    justice: "#Justice", humanitaire: "#Humanitaire",
+  };
+  const catTag = categoryTagMap[categorySlug];
+  if (catTag) hashtags.push(catTag);
+
+  // Short caption for X/Threads (Le Relief's Flash 🚨 / 🇭🇹 style)
+  const shortText = isBreaking
+    ? `Flash 🚨\n\n🇭🇹 ${headline}`
+    : `🇭🇹 ${headline}`.length <= 200
+      ? `🇭🇹 ${headline}`
+      : `🇭🇹 ${headline.slice(0, 197)}…`;
+
   return {
     intake: {
       topic: headline,
-      sourceSummary: stripHtml(a.excerpt) || stripHtml(a.body).slice(0, 400),
-      category: a.category?.slug || "news",
+      sourceSummary: excerptClean || stripHtml(a.body).slice(0, 400),
+      keyFacts: firstFact ? [firstFact] : undefined,
+      category: categorySlug,
       preferredLanguage: language,
-      urgencyLevel: (a.isBreaking ? "breaking" : "normal") as "breaking" | "normal",
+      urgencyLevel: (isBreaking ? "breaking" : "normal") as "breaking" | "normal",
       sourceNote: sourceLine,
     },
     rawSlides: [
@@ -163,11 +192,12 @@ function articleToContent(a: RenderRequest["article"]) {
       { slideNumber: 3, headline: isFr ? "Lire l'article" : "Read more", supportLine: `${isFr ? "Lire sur" : "Read on"} ${SITE.replace(/^https?:\/\//, "")}.`, sourceLine, layoutVariant: "cta" as const },
     ],
     caption: {
-      text: [headline, "", stripHtml(a.excerpt) || stripHtml(a.body).slice(0, 320), "", `${isFr ? "👉" : "→"} ${articleUrl}`].join("\n"),
+      text: [headline, "", excerptClean || stripHtml(a.body).slice(0, 320), "", `${isFr ? "👉" : "→"} ${articleUrl}`].join("\n"),
+      shortText,
       cta: articleUrl,
-      hashtags: ["#LeRelief", "#Haïti", isFr ? "#Actualités" : "#News"],
+      hashtags,
     },
-    contentType: a.contentType || (a.isBreaking ? "breaking" : "news"),
+    contentType: a.contentType || (isBreaking ? "breaking" : "news"),
   };
 }
 

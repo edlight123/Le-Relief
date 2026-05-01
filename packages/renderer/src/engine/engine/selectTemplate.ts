@@ -50,6 +50,16 @@ export function selectTemplate(input: ContentIntakeInput): SelectionResult {
   const summary = (input.sourceSummary ?? "").toLowerCase();
   const topic = (input.topic ?? "").toLowerCase();
 
+  // 1b. Caricature content type — illustration must use caricature-card
+  if (cat === "caricature" || cat === "caricatures" || cat === "humour") {
+    return { templateId: "caricature-card", reason: "Caricature / illustration content type" };
+  }
+
+  // 1c. Interview / reportage / analyse content types → explainer carousel
+  if (cat === "interview" || cat === "reportage" || cat === "analyse") {
+    return { templateId: "explainer-carousel", reason: `${cat} maps to explainer carousel` };
+  }
+
   // 2. Breaking / urgent
   if (urgency === "breaking" || cat === "breaking") {
     return { templateId: "breaking-news-single", reason: "Urgency level is breaking" };

@@ -19,7 +19,8 @@
     "renderer:build": "pnpm --filter @le-relief/types build && pnpm --filter @le-relief/renderer build",
     "renderer:typecheck": "pnpm --filter @le-relief/types typecheck && pnpm --filter @le-relief/renderer typecheck",
     "renderer:test": "pnpm --filter @le-relief/renderer test",
-    "renderer:smoke": "pnpm --filter @le-relief/renderer smoke"
+    "renderer:smoke": "pnpm --filter @le-relief/renderer smoke",
+    "renderer:e2e": "npx tsx scripts/test-renderer-e2e.ts"
   },
   "dependencies": {
     "@le-relief/renderer": "workspace:*",

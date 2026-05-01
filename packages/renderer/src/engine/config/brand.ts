@@ -93,7 +93,7 @@ const DEFAULT_BRAND: BrandConfig = {
   website: "lereliefhaiti.com",
   socials: {
     instagram: "@lereliefhaiti",
-    facebook: "",
+    facebook: "https://www.facebook.com/profile.php?id=100065575869522",
     x: "@lereliefhaiti",
     threads: "@lereliefhaiti",
     tiktok: "",
@@ -118,6 +118,10 @@ const DEFAULT_BRAND: BrandConfig = {
     history: "#7FB0ED",
     utility: "#5A97E4",
     data: "#6EA5EA",
+    caricature: "#5090E0",
+    interview: "#73A8EA",
+    reportage: "#6EA5EA",
+    analyse: "#5F9AE5",
   },
   backgrounds: {
     breaking: "#150408",
@@ -130,6 +134,10 @@ const DEFAULT_BRAND: BrandConfig = {
     history: "#08192d",
     utility: "#041023",
     data: "#071425",
+    caricature: "#020b17",
+    interview: "#041224",
+    reportage: "#071425",
+    analyse: "#071425",
   },
   fonts: {
     headline: "'DM Sans', -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif",
@@ -148,6 +156,10 @@ const DEFAULT_BRAND: BrandConfig = {
     utility: "GUIDE",
     data: "DONNÉES",
     default: "LE RELIEF",
+    caricature: "CARICATURE",
+    interview: "INTERVIEW",
+    reportage: "REPORTAGE",
+    analyse: "ANALYSE",
   },
 };
 
@@ -279,12 +291,9 @@ export function getBrandLogoDataUri(): string | null {
   return _cachedLogoDataUri;
 }
 
-// ── Google Fonts preload link (HTML head snippet) ─────────────────────────────
+// ── Font styles (inlined woff2 — no CDN round-trips) ─────────────────────────
 
-export const GOOGLE_FONTS_LINK =
-  `<link rel="preconnect" href="https://fonts.googleapis.com">` +
-  `<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>` +
-  `<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,600;9..40,700;9..40,800;9..40,900&family=Inter:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,500;0,700;0,800;0,900;1,500;1,700&display=swap" rel="stylesheet">`;
+export { INLINED_FONTS_STYLE as GOOGLE_FONTS_LINK } from "./inlinedFonts.js";
 
 // ── HTML helpers ──────────────────────────────────────────────────────────────
 
@@ -298,13 +307,30 @@ export function escapeHtml(s: string): string {
 
 export function brandWordmarkHtml(accent: string, fontSize = 18): string {
   const b = getBrand();
-  return `<span style="font-family:${b.fonts.headline};font-size:${fontSize}px;font-weight:800;letter-spacing:2.5px;display:inline-flex;align-items:center;gap:6px"><span style="color:rgba(255,255,255,0.85)">${b.wordmark.left}</span><span style="color:${accent}">${b.wordmark.right}</span></span>`;
+  return `<span style="font-family:${b.fonts.headline};font-size:${fontSize}px;font-weight:900;letter-spacing:${Math.max(2, fontSize * 0.14)}px;display:inline-flex;align-items:center;gap:${Math.max(4, fontSize * 0.35)}px"><span style="color:rgba(255,255,255,0.92)">${b.wordmark.left}</span><span style="color:${accent}">${b.wordmark.right}</span></span>`;
 }
 
 export function brandLogoHtml(size = 30): string {
   const logo = getBrandLogoDataUri();
   if (!logo) return "";
-  return `<span style="display:inline-flex;align-items:center;justify-content:center;width:${size}px;height:${size}px;border-radius:9px;background:linear-gradient(180deg, rgba(255,255,255,0.12), rgba(255,255,255,0.04));border:1px solid rgba(255,255,255,0.18);box-shadow:0 10px 28px rgba(0,0,0,0.32)"><img src="${logo}" alt="Le Relief logo" style="width:${Math.max(18, size - 8)}px;height:${Math.max(18, size - 8)}px;object-fit:contain;display:block" /></span>`;
+  // The Le Relief logo is itself a styled emblem — render it raw (no chrome
+  // wrapper) so it reads as the actual brand mark, not a generic icon.
+  return `<img src="${logo}" alt="Le Relief" style="width:${size}px;height:${size}px;object-fit:contain;display:block;filter:drop-shadow(0 4px 14px rgba(0,0,0,0.45))" />`;
+}
+
+/**
+ * Strong masthead-style brand header — logo + wordmark side-by-side.
+ *
+ * Drop this in the top-left of any slide so every Le Relief asset reads
+ * unmistakably as a Le Relief publication, even on cropped previews.
+ */
+export function brandHeaderHtml(accent: string, opts?: { logoSize?: number; fontSize?: number; compact?: boolean }): string {
+  const logoSize = opts?.logoSize ?? 44;
+  const fontSize = opts?.fontSize ?? 22;
+  const logo = brandLogoHtml(logoSize);
+  const wm = brandWordmarkHtml(accent, fontSize);
+  const gap = opts?.compact ? 10 : 14;
+  return `<div style="display:inline-flex;align-items:center;gap:${gap}px">${logo}${logo ? `<span style="width:1px;height:${logoSize - 8}px;background:rgba(255,255,255,0.22);border-radius:1px"></span>` : ""}${wm}</div>`;
 }
 
 export function categoryPillHtml(label: string, accent: string, fontFamily: string): string {
@@ -312,10 +338,11 @@ export function categoryPillHtml(label: string, accent: string, fontFamily: stri
 }
 
 /**
- * Footer bar with source line and brand mark.
+ * Footer bar — masthead-style brand mark on the right, source/handle on left.
  *
- * When a PlatformId is supplied, the handle shown next to the wordmark is
- * adapted per platform (IG handle, FB page URL, website on WhatsApp, etc.).
+ * Sized for high visibility: logo 36px, wordmark 22px, plus the website
+ * domain always shown beneath the wordmark so every Le Relief asset is
+ * discoverable when shared off-platform.
  */
 export function footerBarHtml(
   sourceLine: string | undefined,
@@ -323,62 +350,61 @@ export function footerBarHtml(
   fontFamily: string,
   platform?: PlatformId,
 ): string {
+  const b = getBrand();
+  const handleText = platform ? platformHandleText(platform) : b.website;
   const src = sourceLine
-    ? `<span style="font-size:17px;opacity:0.35;max-width:60%;line-height:1.3;font-weight:400;font-family:${fontFamily}">${escapeHtml(sourceLine)}</span>`
-    : `<span></span>`;
-  const handle = platform ? platformHandleHtml(platform, accent, fontFamily) : "";
-  const logo = brandLogoHtml(28);
-  const markCore = `${logo ? `${logo}<span style="width:2px;height:20px;background:rgba(255,255,255,0.12);border-radius:2px"></span>` : ""}${brandWordmarkHtml(accent, 17)}`;
-  const mark = handle
-    ? `<span style="display:inline-flex;align-items:center;gap:14px">${handle}<span style="display:inline-flex;align-items:center;gap:10px">${markCore}</span></span>`
-    : `<span style="display:inline-flex;align-items:center;gap:10px">${markCore}</span>`;
-  return `<div style="display:flex;justify-content:space-between;align-items:flex-end;padding:14px 16px 0;border-top:1px solid rgba(255,255,255,0.10);background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.00));backdrop-filter:blur(4px);border-radius:10px">${src}${mark}</div>`;
+    ? `<span style="font-size:18px;opacity:0.42;max-width:55%;line-height:1.3;font-weight:500;font-family:${fontFamily}">${escapeHtml(sourceLine)}</span>`
+    : `<span style="font-size:18px;opacity:0.45;font-weight:600;font-family:${fontFamily};letter-spacing:0.5px;color:${accent}">${escapeHtml(b.website)}</span>`;
+
+  // Right side: logo + wordmark stacked over the platform handle / website
+  const logo = brandLogoHtml(36);
+  const wordmark = brandWordmarkHtml(accent, 22);
+  const handleLine = handleText && handleText !== sourceLine
+    ? `<span style="font-size:14px;opacity:0.55;font-weight:500;font-family:${fontFamily};margin-top:2px;letter-spacing:0.4px">${escapeHtml(handleText)}</span>`
+    : "";
+  const mark = `
+    <div style="display:flex;align-items:center;gap:12px">
+      ${logo}
+      ${logo ? `<span style="width:1px;height:30px;background:rgba(255,255,255,0.22);border-radius:1px"></span>` : ""}
+      <div style="display:flex;flex-direction:column;align-items:flex-start;gap:0">
+        ${wordmark}
+        ${handleLine}
+      </div>
+    </div>`;
+
+  return `<div style="display:flex;justify-content:space-between;align-items:center;padding:18px 20px 0;border-top:1px solid rgba(255,255,255,0.14);background:linear-gradient(180deg, rgba(255,255,255,0.025), rgba(255,255,255,0.00))">${src}${mark}</div>`;
 }
 
-/** Small handle chip used in platform-aware footer bars. */
-export function platformHandleHtml(
-  platform: PlatformId,
-  _accent: string,
-  fontFamily: string,
-): string {
+/** Plain text version of platform handle (no markup). */
+function platformHandleText(platform: PlatformId): string {
   const b = getBrand();
-  let text = "";
   switch (platform) {
     case "instagram-feed":
     case "instagram-story":
     case "instagram-reel-cover":
-      text = b.socials.instagram ?? "";
-      break;
+      return b.socials.instagram ?? b.website;
     case "facebook-feed":
     case "facebook-link":
-      text = b.socials.facebook || b.website;
-      break;
+      return b.website;
     case "x-landscape":
     case "x-portrait":
-      text = b.socials.x ?? "";
-      break;
+      return b.socials.x ?? b.website;
     case "threads":
-      text = b.socials.threads ?? b.socials.instagram ?? "";
-      break;
+      return b.socials.threads ?? b.socials.instagram ?? b.website;
     case "tiktok":
-      text = b.socials.tiktok ?? "";
-      break;
+      return b.socials.tiktok || b.website;
     case "linkedin-feed":
     case "linkedin-link":
-      text = b.socials.linkedin || b.website;
-      break;
+      return b.socials.linkedin || b.website;
     case "youtube-short-cover":
-      text = b.socials.youtube || b.website;
-      break;
+      return b.socials.youtube || b.website;
     case "whatsapp-status":
     case "whatsapp-sticker":
-      // No handle on WhatsApp — website only
-      text = b.website;
-      break;
+      return b.website;
   }
-  if (!text) return "";
-  return `<span style="font-size:15px;opacity:0.45;font-weight:500;font-family:${fontFamily}">${escapeHtml(text)}</span>`;
 }
+
+
 
 export function premiumAtmosphereHtml(accent: string, width = 1080, height = 1350): string {
   return (

@@ -6,6 +6,11 @@
  *   2. detail   → first 2-3 sentences of excerpt/body
  *   3. cta      → "Lire sur lereliefhaiti.com"
  * Editors will refine slide content via a richer editor in a later iteration.
+ *
+ * Caption strategy per platform:
+ *   - Instagram/Facebook → `caption.text`  (full headline + excerpt + URL)
+ *   - X / Threads        → `caption.shortText` (Le Relief style: Flash 🚨 or 🇭🇹 headline)
+ *   - WhatsApp Status    → `caption.shortText` (no hashtags, no URL)
  */
 
 import type {
@@ -28,6 +33,70 @@ function firstSentences(text: string, maxChars = 220): string {
   const slice = clean.slice(0, maxChars);
   const lastStop = Math.max(slice.lastIndexOf("."), slice.lastIndexOf("!"));
   return lastStop > 80 ? slice.slice(0, lastStop + 1) : slice + "…";
+}
+
+/**
+ * Build a short X/Threads/WhatsApp-style caption in Le Relief's voice.
+ *
+ * Caricature → "CARICATURE du jour avec Le Relief\n\nDessinateur : {author}"
+ * Breaking   → "Flash 🚨\n\n🇭🇹 {headline}"
+ * Regular    → "🇭🇹 {headline}" (truncated to 200 chars if needed)
+ */
+function buildShortCaption(
+  headline: string,
+  isBreaking: boolean,
+  isCaricature = false,
+  caricatureAuthor?: string,
+): string {
+  if (isCaricature) {
+    const credit = caricatureAuthor ? `Dessinateur : ${caricatureAuthor}` : "Dessinateur : Francisco Silva";
+    return `CARICATURE du jour avec Le Relief\n\n${credit}`;
+  }
+  if (isBreaking) {
+    return `Flash 🚨\n\n🇭🇹 ${headline}`;
+  }
+  const prefix = "🇭🇹 ";
+  const full = `${prefix}${headline}`;
+  if (full.length <= 200) return full;
+  return `${prefix}${headline.slice(0, 200 - prefix.length - 1)}…`;
+}
+
+/**
+ * Category-aware hashtags matching Le Relief's topical coverage.
+ * Includes both #Haïti and #Haiti for bilingual discoverability.
+ */
+function buildHashtags(
+  categorySlug: string,
+  isFr: boolean,
+  isBreaking: boolean,
+): string[] {
+  const base = ["#LeRelief", "#Haïti", "#Haiti"];
+  if (isFr) base.push("#Actualités"); else base.push("#News");
+  if (isBreaking) base.push("#Flash");
+
+  const categoryMap: Record<string, string> = {
+    politique: "#Politique",
+    securite: "#Sécurité",
+    "securite-publique": "#Sécurité",
+    economie: "#Économie",
+    culture: "#Culture",
+    sport: "#Sport",
+    sports: "#Sport",
+    diaspora: "#Diaspora",
+    education: "#Éducation",
+    sante: "#Santé",
+    environnement: "#Environnement",
+    international: "#International",
+    justice: "#Justice",
+    droits: "#DroitsHumains",
+    social: "#Social",
+    technologie: "#Tech",
+    humanitaire: "#Humanitaire",
+  };
+  const catTag = categoryMap[categorySlug];
+  if (catTag) base.push(catTag);
+
+  return base;
 }
 
 export interface ArticleSocialContent {
@@ -55,62 +124,92 @@ export function articleToSocialContent(article: Article): ArticleSocialContent {
     ? `Lire l'article complet sur ${SITE_URL.replace(/^https?:\/\//, "")}.`
     : `Read the full story on ${SITE_URL.replace(/^https?:\/\//, "")}.`;
 
-  const rawSlides: SlideContent[] = [
-    {
-      slideNumber: 1,
-      headline,
-      supportLine: supportLine || undefined,
-      sourceLine,
-      layoutVariant: "cover",
-      // Cover image (already upgraded upstream by `upgradeCoverImage`).
-      // The cover template renders this as a full-bleed photo with a
-      // brand-colour gradient overlay. When absent we fall back to the
-      // brand gradient alone.
-      imageUrl: article.coverImage?.trim() || undefined,
-    },
-    {
-      slideNumber: 2,
-      headline: isFr ? "L'essentiel" : "Key points",
-      body: detailBody,
-      sourceLine,
-      layoutVariant: "detail",
-    },
-    {
-      slideNumber: 3,
-      headline: isFr ? "Lire l'article" : "Read more",
-      supportLine: ctaSupport,
-      sourceLine,
-      layoutVariant: "cta",
-    },
-  ];
+  const isBreaking = Boolean(article.isBreaking);
+  const categorySlug = article.category?.slug || "news";
+  const contentType = article.contentType || (article.isBreaking ? "breaking" : "news");
+  const isCaricature = categorySlug === "caricature" || categorySlug === "caricatures" || categorySlug === "humour";
+  const excerptClean = stripHtml(article.excerpt);
+  const firstFact = excerptClean || firstSentences(article.body, 200);
+  const authorName = article.author?.name;
+
+  // ── Slides ──────────────────────────────────────────────────────────────────
+
+  const rawSlides: SlideContent[] = isCaricature
+    ? [
+        {
+          slideNumber: 1,
+          headline: `CARICATURE du jour avec Le Relief`,
+          supportLine: authorName ? `Dessinateur : ${authorName}` : "Dessinateur : Francisco Silva",
+          sourceLine,
+          layoutVariant: "cover",
+          imageUrl: article.coverImage?.trim() || undefined,
+        },
+      ]
+    : [
+        {
+          slideNumber: 1,
+          headline,
+          supportLine: supportLine || undefined,
+          sourceLine,
+          layoutVariant: "cover",
+          imageUrl: article.coverImage?.trim() || undefined,
+        },
+        {
+          slideNumber: 2,
+          headline: isFr ? "L'essentiel" : "Key points",
+          body: detailBody,
+          sourceLine,
+          layoutVariant: "detail",
+        },
+        {
+          slideNumber: 3,
+          headline: isFr ? "Lire l'article" : "Read more",
+          supportLine: ctaSupport,
+          sourceLine,
+          layoutVariant: "cta",
+        },
+      ];
 
   const intake: ContentIntakeInput = {
     topic: headline,
     sourceSummary: stripHtml(article.excerpt) || stripHtml(article.body).slice(0, 400),
-    category: article.category?.slug || "news",
+    keyFacts: firstFact ? [firstFact] : undefined,
+    category: categorySlug,
     preferredLanguage: lang,
-    urgencyLevel: article.isBreaking ? "breaking" : "normal",
+    urgencyLevel: isBreaking ? "breaking" : "normal",
     sourceNote: sourceLine,
+    // Caricature must use the dedicated template — skip generic routing
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    contentTypeHint: isCaricature ? ("caricature-card" as any) : undefined,
   };
 
-  const captionText = [
-    headline,
-    "",
-    stripHtml(article.excerpt) || firstSentences(article.body, 320),
-    "",
-    `${isFr ? "👉" : "→"} ${articleUrl}`,
-  ].join("\n");
+  const captionText = isCaricature
+    ? [
+        `CARICATURE du jour avec Le Relief`,
+        "",
+        authorName ? `Dessinateur : ${authorName}` : "Dessinateur : Francisco Silva",
+        "",
+        `👉 ${articleUrl}`,
+      ].join("\n")
+    : [
+        headline,
+        "",
+        excerptClean || firstSentences(article.body, 320),
+        "",
+        `${isFr ? "👉" : "→"} ${articleUrl}`,
+      ].join("\n");
 
   const caption: PostCaption = {
     text: captionText,
+    shortText: buildShortCaption(headline, isBreaking, isCaricature, authorName ?? undefined),
     cta: articleUrl,
-    hashtags: ["#LeRelief", "#Haïti", isFr ? "#Actualités" : "#News"],
+    hashtags: buildHashtags(categorySlug, isFr, isBreaking),
   };
 
   return {
     intake,
     rawSlides,
     caption,
-    contentType: article.contentType || (article.isBreaking ? "breaking" : "news"),
+    contentType,
   };
 }

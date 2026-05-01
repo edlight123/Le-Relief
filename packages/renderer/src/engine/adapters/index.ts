@@ -101,8 +101,16 @@ function instagramAdapter(input: AdapterInput, spec: PlatformSpec): AdapterOutpu
 function facebookAdapter(input: AdapterInput, spec: PlatformSpec): AdapterOutput {
   const b = getBrand();
   const ov = input.overrides?.facebook ?? input.payload?.platforms?.facebook;
-  const caption = ov?.caption ?? baseCaptionText(input);
-  const withTags = withHashtags(caption, input.post.hashtags, spec.caption.allowHashtags);
+
+  // Facebook: full caption + explicit article URL so the link appears even
+  // when the link preview is suppressed (e.g. image carousels).
+  const base = ov?.caption ?? baseCaptionText(input);
+  const cta = input.post.caption.cta;
+  const withUrl =
+    cta && !base.includes(cta)
+      ? `${base}\n\n👉 ${cta}`
+      : base;
+  const withTags = withHashtags(withUrl, input.post.hashtags, spec.caption.allowHashtags);
   return {
     caption: clamp(withTags, spec.caption.maxChars),
     meta: { pageUrl: ov?.pageUrl ?? b.socials.facebook ?? b.website },
@@ -112,14 +120,27 @@ function facebookAdapter(input: AdapterInput, spec: PlatformSpec): AdapterOutput
 function xAdapter(input: AdapterInput, spec: PlatformSpec): AdapterOutput {
   const b = getBrand();
   const ov = input.overrides?.x ?? input.payload?.platforms?.x;
-  const source = ov?.caption ?? baseCaptionText(input);
+
+  // X style: short & punchy. Prefer `shortText` (Le Relief's Flash 🚨 / 🇭🇹
+  // format) over the full caption — it fits in one tweet without threading.
+  const shortBase =
+    ov?.caption ??
+    input.post.caption.shortText ??
+    baseCaptionText(input);
+
+  // Append hashtags inline (X discoverability), keep within 280 chars.
+  const maxForBody = spec.caption.maxChars - 60; // reserve room for 2-3 hashtags
+  const bodyClipped = clamp(shortBase, maxForBody);
+  const source = withHashtags(bodyClipped, input.post.hashtags.slice(0, 3), spec.caption.allowHashtags);
+
   const chunks =
     ov?.thread ??
     (spec.caption.splitIntoThread
-      ? splitIntoChunks(source, spec.caption.threadChunkMaxChars ?? spec.caption.maxChars)
+      ? splitIntoChunks(clamp(source, spec.caption.maxChars), spec.caption.threadChunkMaxChars ?? spec.caption.maxChars)
       : [clamp(source, spec.caption.maxChars)]);
+
   return {
-    caption: chunks.join("\n\n---\n\n"),
+    caption: chunks[0], // First tweet is the main shareable caption
     thread: chunks,
     meta: { handle: ov?.handle ?? b.socials.x },
   };
@@ -127,24 +148,42 @@ function xAdapter(input: AdapterInput, spec: PlatformSpec): AdapterOutput {
 
 function threadsAdapter(input: AdapterInput, spec: PlatformSpec): AdapterOutput {
   const ov = input.overrides?.threads ?? input.payload?.platforms?.threads;
-  const source = ov?.caption ?? baseCaptionText(input);
+  // Threads is Instagram-adjacent but shorter — use shortText when available.
+  const source =
+    ov?.caption ??
+    input.post.caption.shortText ??
+    baseCaptionText(input);
+  const withTags = withHashtags(clamp(source, spec.caption.maxChars - 60), input.post.hashtags.slice(0, 3), spec.caption.allowHashtags);
   const chunks =
     ov?.chunks ??
     (spec.caption.splitIntoThread
-      ? splitIntoChunks(source, spec.caption.threadChunkMaxChars ?? spec.caption.maxChars)
-      : [clamp(source, spec.caption.maxChars)]);
-  return { caption: chunks.join("\n\n---\n\n"), thread: chunks };
+      ? splitIntoChunks(clamp(withTags, spec.caption.maxChars), spec.caption.threadChunkMaxChars ?? spec.caption.maxChars)
+      : [clamp(withTags, spec.caption.maxChars)]);
+  return { caption: chunks[0], thread: chunks };
 }
 
 function whatsappAdapter(input: AdapterInput, spec: PlatformSpec): AdapterOutput {
   const b = getBrand();
   const ov = input.overrides?.whatsapp ?? input.payload?.platforms?.whatsapp;
-  const base = ov?.caption ?? baseCaptionText(input);
-  // WhatsApp status — strip hashtags (no discovery surface) even if they're
-  // already in base.
+
+  // WhatsApp: prefer the short punchy caption (no hashtag algorithm here).
+  // Append article URL so recipients can tap to read the full story.
+  const base =
+    ov?.caption ??
+    input.post.caption.shortText ??
+    baseCaptionText(input);
+
+  // Strip any hashtags (no discovery on WhatsApp).
   const stripped = base.replace(/#[^\s#]+/g, "").replace(/\s{2,}/g, " ").trim();
+
+  const cta = input.post.caption.cta;
+  const withUrl =
+    cta && !stripped.includes(cta)
+      ? `${stripped}\n\n${cta}`
+      : stripped;
+
   return {
-    caption: clamp(stripped, spec.caption.maxChars || Number.POSITIVE_INFINITY),
+    caption: clamp(withUrl, spec.caption.maxChars || Number.POSITIVE_INFINITY),
     meta: { whatsappNumber: ov?.number ?? b.socials.whatsappNumber },
   };
 }

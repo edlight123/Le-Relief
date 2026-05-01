@@ -15,7 +15,7 @@
 import type { SlideContent } from "../types/post.js";
 import { getTemplateConfig } from "../config/templateLimits.js";
 import { resolveZone } from "../types/post.js";
-import { GOOGLE_FONTS_LINK, escapeHtml } from "../config/brand.js";
+import { GOOGLE_FONTS_LINK, escapeHtml, brandHeaderHtml } from "../config/brand.js";
 import { BRAND } from "../config/brand.js";
 
 const { fonts } = BRAND;
@@ -92,7 +92,7 @@ ${hasBg ? '<div class="img-overlay"></div>' : ""}
     ${dateNote ? `<p class="date-note">${escapeHtml(dateNote)}</p>` : ""}
   </div>
   <div class="bottom">
-    <div class="wordmark"><span class="el">${BRAND.wordmark.left}</span><span class="nw">${BRAND.wordmark.right}</span></div>
+    ${brandHeaderHtml(GOLD, { logoSize: 38, fontSize: 20, compact: true })}
     <p class="source-note">${escapeHtml(footer)}</p>
   </div>
 </div>
@@ -154,7 +154,7 @@ ${hasBg ? '<div class="img-overlay"></div>' : ""}
     <div class="rows">${rowsHtml}</div>
   </div>
   <div class="bottom">
-    <div class="wordmark"><span class="el">${BRAND.wordmark.left}</span><span class="nw">${BRAND.wordmark.right}</span></div>
+    ${brandHeaderHtml(GOLD, { logoSize: 38, fontSize: 20, compact: true })}
     ${slide.sourceLine ? `<p class="src">${escapeHtml(slide.sourceLine)}</p>` : ""}
   </div>
 </div>

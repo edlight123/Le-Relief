@@ -25,6 +25,7 @@ import {
   getBrandBackground,
   getBrandLabel,
   footerBarHtml,
+  brandHeaderHtml,
   premiumAtmosphereHtml,
 } from "../config/brand.js";
 
@@ -164,7 +165,7 @@ ${hasImage ? `.img-overlay { position:absolute;inset:0;background:${overlay};poi
 ${hasImage ? `<div class="img-overlay"></div>` : ""}
 <div class="canvas">
   <div>
-    <div class="top-brand"><span class="el">${BRAND.wordmark.left}</span><span class="nw">${BRAND.wordmark.right}</span></div>
+    <div class="top-brand">${brandHeaderHtml(accent, { logoSize: 40, fontSize: 20, compact: true })}</div>
     <div class="top-rule"></div>
   </div>
   <div class="center">

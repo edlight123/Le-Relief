@@ -19,7 +19,10 @@ export type TemplateId =
   | "explainer-carousel"
   | "quote-stat-card"
   | "weekly-recap-carousel"
-  | "data-card";
+  | "data-card"
+  | "caricature-card"
+  | "story-cover"
+  | "quote-pull";
 
 // ── Language & Status ─────────────────────────────────────────────────────────
 
@@ -217,6 +220,16 @@ export interface PostCaption {
   text: string;
   hashtags: string[];
   cta?: string;
+  /**
+   * Short-form caption (≤ ~220 chars) for platforms with tight limits:
+   * X, Threads, WhatsApp Status.
+   *
+   * Le Relief style guide:
+   *   - Breaking → "Flash 🚨\n\n🇭🇹 {headline}"
+   *   - Regular  → "🇭🇹 {headline}"
+   * Falls back to `text` when absent.
+   */
+  shortText?: string;
 }
 
 // ── Intake ────────────────────────────────────────────────────────────────────

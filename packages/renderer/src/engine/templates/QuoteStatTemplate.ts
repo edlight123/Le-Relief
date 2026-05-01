@@ -23,6 +23,7 @@ import {
   getBrandBackground,
   getBrandLabel,
   footerBarHtml,
+  brandHeaderHtml,
   premiumAtmosphereHtml,
 } from "../config/brand.js";
 
@@ -83,7 +84,7 @@ ${premiumAtmosphereHtml(accent)}
 <div class="canvas">
   <div class="top">
     <span class="pill">${escapeHtml(label)}</span>
-    <span class="counter">${BRAND.wordmark.left} ${BRAND.wordmark.right}</span>
+    ${brandHeaderHtml(accent, { logoSize: 36, fontSize: 18, compact: true })}
   </div>
   <div class="mid">
     <p class="stat">${escapeHtml(slide.statValue ?? "")}</p>
@@ -127,7 +128,7 @@ ${premiumAtmosphereHtml(accent)}
 <div class="canvas">
   <div class="top">
     <span class="pill">${escapeHtml(label)}</span>
-    <span class="counter">${BRAND.wordmark.left} ${BRAND.wordmark.right}</span>
+    ${brandHeaderHtml(accent, { logoSize: 36, fontSize: 18, compact: true })}
   </div>
   <div class="mid">
     <span class="open-quote">"</span>
