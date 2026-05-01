@@ -3,6 +3,8 @@ import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import MobileBottomNav from "@/components/layout/MobileBottomNav";
 import SkipToContent from "@/components/layout/SkipToContent";
+import IOSInstallPrompt from "@/components/public/IOSInstallPrompt";
+import PushNotificationBanner from "@/components/public/PushNotificationBanner";
 import { LOCALE_REQUEST_HEADER } from "@/lib/locale-routing";
 import { validateLocale, type Locale } from "@/lib/locale";
 import { ArticleAlternateProvider } from "@/contexts/ArticleAlternateContext";
@@ -23,6 +25,8 @@ export default async function PublicLayout({
       <main id="main-content" className="flex-1 pb-16 md:pb-0">{children}</main>
       <Footer initialLocale={initialLocale} />
       <MobileBottomNav initialLocale={initialLocale} />
+      <PushNotificationBanner locale={initialLocale} />
+      <IOSInstallPrompt locale={initialLocale} />
     </ArticleAlternateProvider>
   );
 }

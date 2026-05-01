@@ -17,6 +17,7 @@ const FIREBASE_EXTERNALS = [
   "@le-relief/types",
   "playwright-core",
   "sharp",
+  "web-push",
 ];
 
 const nextConfig: NextConfig = {
