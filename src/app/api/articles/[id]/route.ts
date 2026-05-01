@@ -104,14 +104,14 @@ export async function PATCH(req: NextRequest, { params }: RouteParams) {
   const effectiveExcerpt = (data.excerpt as string | undefined) ?? (existing.excerpt as string | undefined) ?? "";
   const effectiveBody = (data.body as string | undefined) ?? (existing.body as string | undefined) ?? "";
   const rawBodyText = effectiveBody.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
-  if (data.slug === undefined && !(existing.slug as string | undefined)?.trim()) {
+  if (!data.slug && !(existing.slug as string | undefined)?.trim()) {
     const { generateSlug } = await import("@/lib/slug");
     data.slug = generateSlug(effectiveTitle);
   }
-  if (data.seoTitle === undefined && !(existing.seoTitle as string | undefined)?.trim()) {
+  if (!data.seoTitle && !(existing.seoTitle as string | undefined)?.trim()) {
     data.seoTitle = effectiveTitle ? `${effectiveTitle} | Le Relief` : null;
   }
-  if (data.metaDescription === undefined && !(existing.metaDescription as string | undefined)?.trim()) {
+  if (!data.metaDescription && !(existing.metaDescription as string | undefined)?.trim()) {
     data.metaDescription = effectiveExcerpt.trim() || rawBodyText.slice(0, 155) || null;
   }
   if (body.allowTranslation !== undefined) {
