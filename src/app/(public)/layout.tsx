@@ -5,6 +5,7 @@ import MobileBottomNav from "@/components/layout/MobileBottomNav";
 import SkipToContent from "@/components/layout/SkipToContent";
 import IOSInstallPrompt from "@/components/public/IOSInstallPrompt";
 import PushNotificationBanner from "@/components/public/PushNotificationBanner";
+import PWAUpdateToast from "@/components/public/PWAUpdateToast";
 import { LOCALE_REQUEST_HEADER } from "@/lib/locale-routing";
 import { validateLocale, type Locale } from "@/lib/locale";
 import { ArticleAlternateProvider } from "@/contexts/ArticleAlternateContext";
@@ -27,6 +28,7 @@ export default async function PublicLayout({
       <MobileBottomNav initialLocale={initialLocale} />
       <PushNotificationBanner locale={initialLocale} />
       <IOSInstallPrompt locale={initialLocale} />
+      <PWAUpdateToast />
     </ArticleAlternateProvider>
   );
 }

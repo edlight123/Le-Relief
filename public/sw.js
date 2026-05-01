@@ -57,6 +57,14 @@ self.addEventListener("notificationclick", (event) => {
   );
 });
 
+// ── Updates ──────────────────────────────────────────────────────────────────
+// Allow the page to trigger a SW swap via postMessage({ type: 'SKIP_WAITING' }).
+self.addEventListener("message", (event) => {
+  if (event.data?.type === "SKIP_WAITING") {
+    self.skipWaiting();
+  }
+});
+
 // ── Install ──────────────────────────────────────────────────────────────────
 self.addEventListener("install", (event) => {
   event.waitUntil(
