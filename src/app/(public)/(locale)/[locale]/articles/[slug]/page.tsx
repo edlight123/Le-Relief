@@ -23,14 +23,13 @@ import * as articlesRepo from "@/lib/repositories/articles";
 import { validateLocale } from "@/lib/locale";
 import { hrefForLocale } from "@/lib/locale-routing";
 import {
-  buildAbsoluteUrl,
   buildArticleImageAlt,
+  buildArticleOgImage,
   buildBreadcrumbJsonLd,
   buildCanonicalAlternates,
   buildEditorialOgImage,
   buildMetaDescription,
   buildNewsArticleJsonLd,
-  buildOgImage,
   buildRobotsDirective,
   serializeJsonLd,
 } from "@/lib/seo";
@@ -137,7 +136,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       title,
       description,
       images: article.imageSrc
-        ? buildOgImage(article.imageSrc, buildArticleImageAlt({ title: article.title, categoryName: article.category?.name, locale }))
+        ? buildArticleOgImage({
+            image: article.imageSrc,
+            title: article.title,
+            category: article.category?.name,
+            locale,
+            alt: buildArticleImageAlt({ title: article.title, categoryName: article.category?.name, locale }),
+          })
         : buildEditorialOgImage({
             title: article.title,
             category: article.category?.name,
@@ -162,7 +167,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       title,
       description,
       images: article.imageSrc
-        ? [buildAbsoluteUrl(article.imageSrc)]
+        ? buildArticleOgImage({
+            image: article.imageSrc,
+            title: article.title,
+            category: article.category?.name,
+            locale,
+            alt: article.title,
+          }).map((i) => i.url)
         : buildEditorialOgImage({
             title: article.title,
             category: article.category?.name,

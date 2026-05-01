@@ -29,6 +29,19 @@ export async function GET(req: NextRequest) {
   const author = searchParams.get("author") || "";
   const date = searchParams.get("date") || "";
   const locale = (searchParams.get("locale") || "fr") as "fr" | "en";
+  const imageParam = searchParams.get("image") || "";
+
+  // Photo-led variant — used when an article has a cover image.
+  // We always render a 1200×630 PNG so social platforms get a proper
+  // large-image card instead of a 300 px WordPress thumbnail.
+  if (imageParam && /^https?:\/\//i.test(imageParam)) {
+    return renderPhotoCard({
+      image: imageParam,
+      title,
+      category,
+      locale,
+    });
+  }
 
   const len = title.length;
   const fontSize = len > 110 ? 56 : len > 80 ? 66 : len > 50 ? 78 : 92;
@@ -233,3 +246,175 @@ export async function GET(req: NextRequest) {
   );
 }
 
+/**
+ * Photo-led 1200×630 card. Renders the supplied image edge-to-edge with a
+ * dark gradient and a Le Relief title strip at the bottom. Used by article
+ * pages so social platforms receive a guaranteed large-image card even when
+ * the source `coverImage` is a small WordPress thumbnail.
+ */
+async function renderPhotoCard(opts: {
+  image: string;
+  title: string;
+  category: string;
+  locale: "fr" | "en";
+}) {
+  const { image, title, category, locale } = opts;
+  const len = title.length;
+  const fontSize = len > 140 ? 38 : len > 100 ? 44 : len > 70 ? 52 : 60;
+
+  const displayTitle =
+    locale === "fr"
+      ? title
+          .replace(/\s+([:;!?])/g, "\u00A0$1")
+          .replace(/"([^"]+)"/g, "\u00AB\u00A0$1\u00A0\u00BB")
+      : title;
+
+  let spectralBold: ArrayBuffer | null = null;
+  try {
+    spectralBold = await loadFont("spectral-extra");
+  } catch {
+    spectralBold = null;
+  }
+
+  return new ImageResponse(
+    (
+      <div
+        style={{
+          width: "1200px",
+          height: "630px",
+          display: "flex",
+          position: "relative",
+          backgroundColor: INK,
+        }}
+      >
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={image}
+          width={1200}
+          height={630}
+          style={{
+            width: "1200px",
+            height: "630px",
+            objectFit: "cover",
+            display: "flex",
+          }}
+          alt=""
+        />
+
+        {/* Burgundy top hairline */}
+        <div
+          style={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            width: "1200px",
+            height: "8px",
+            backgroundColor: BURGUNDY,
+            display: "flex",
+          }}
+        />
+
+        {/* Bottom gradient + title strip */}
+        <div
+          style={{
+            position: "absolute",
+            left: 0,
+            bottom: 0,
+            width: "1200px",
+            height: "320px",
+            background:
+              "linear-gradient(to bottom, rgba(22,24,29,0) 0%, rgba(22,24,29,0.55) 45%, rgba(22,24,29,0.92) 100%)",
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "flex-end",
+            padding: "0 64px 48px",
+          }}
+        >
+          {category ? (
+            <span
+              style={{
+                fontSize: "18px",
+                fontFamily: "Helvetica, Arial, sans-serif",
+                fontWeight: 800,
+                textTransform: "uppercase",
+                letterSpacing: "3px",
+                color: "#F2C9CE",
+                marginBottom: "16px",
+                display: "flex",
+              }}
+            >
+              {category}
+            </span>
+          ) : null}
+          <h1
+            style={{
+              fontFamily: "Spectral, Georgia, serif",
+              fontSize: `${fontSize}px`,
+              fontWeight: 800,
+              color: CREAM,
+              lineHeight: 1.05,
+              margin: 0,
+              letterSpacing: "-0.01em",
+              maxHeight: "240px",
+              overflow: "hidden",
+              display: "flex",
+              textShadow: "0 2px 8px rgba(0,0,0,0.35)",
+            }}
+          >
+            {displayTitle}
+          </h1>
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              marginTop: "24px",
+              borderTop: `2px solid ${CREAM}`,
+              paddingTop: "16px",
+            }}
+          >
+            <span
+              style={{
+                fontFamily: "Spectral, Georgia, serif",
+                fontSize: "26px",
+                fontWeight: 800,
+                letterSpacing: "-0.6px",
+                color: CREAM,
+                display: "flex",
+              }}
+            >
+              Le Relief
+            </span>
+            <span
+              style={{
+                fontSize: "14px",
+                fontFamily: "Helvetica, Arial, sans-serif",
+                fontWeight: 700,
+                textTransform: "uppercase",
+                letterSpacing: "2px",
+                color: CREAM,
+                display: "flex",
+              }}
+            >
+              lerelief.ht
+            </span>
+          </div>
+        </div>
+      </div>
+    ),
+    {
+      width: 1200,
+      height: 630,
+      fonts: spectralBold
+        ? [
+            {
+              name: "Spectral",
+              data: spectralBold,
+              style: "normal",
+              weight: 800,
+            },
+          ]
+        : undefined,
+    },
+  );
+}
