@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 import { format, differenceInHours } from "date-fns";
@@ -178,7 +178,14 @@ export default async function LocalizedArticlePage({ params }: Props) {
   if (!validateLocale(locale)) notFound();
 
   const article = await getPublicArticleBySlug(slug, locale);
-  if (!article) notFound();
+  if (!article) {
+    // Check if this slug belongs to the other locale — if so, redirect to its translated URL
+    const wrongLocaleArticle = await articlesRepo.findBySlug(slug);
+    if (wrongLocaleArticle && wrongLocaleArticle.alternateLanguageSlug) {
+      redirect(`/${locale}/articles/${wrongLocaleArticle.alternateLanguageSlug}`);
+    }
+    notFound();
+  }
 
   try {
     await articlesRepo.incrementViews(article.id);
