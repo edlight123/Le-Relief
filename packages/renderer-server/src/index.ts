@@ -15,6 +15,7 @@ import {
   renderPost,
   getPlatformSpec,
   formatForPlatform,
+  getCaptionVariants,
   closeBrowserInstance,
   getBrand,
   setBrand,
@@ -68,6 +69,7 @@ interface RenderRequest {
     coverImage?: string | null;
     author?: { name?: string };
     category?: { slug?: string };
+    publishedAt?: string;
   };
   platforms: PlatformId[];
 }
@@ -111,6 +113,7 @@ app.post("/render", async (req, res) => {
           const rendered = await renderPost(subset, contentType, platform);
           const adapted = formatForPlatform(platform, { post: subset });
           out[platform] = {
+            captionVariants: getCaptionVariants(platform, { post: subset }),
             slides: rendered.map((s) => ({
               slideNumber: s.slideNumber,
               pngBase64: s.png.toString("base64"),
@@ -185,6 +188,7 @@ function articleToContent(a: RenderRequest["article"]) {
       preferredLanguage: language,
       urgencyLevel: (isBreaking ? "breaking" : "normal") as "breaking" | "normal",
       sourceNote: sourceLine,
+      date: a.publishedAt ?? undefined,
     },
     rawSlides: [
       { slideNumber: 1, headline, supportLine: supportLine || undefined, sourceLine, layoutVariant: "cover" as const, imageUrl: a.coverImage?.trim() || undefined },

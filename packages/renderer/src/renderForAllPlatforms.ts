@@ -38,6 +38,8 @@ export interface RenderForAllPlatformsOptions {
   forceExport?: boolean;
   /** Optional override for the ISO date string used in file names. */
   dateOverride?: string;
+  /** Article slug for human-readable export file names. */
+  slug?: string;
 }
 
 export interface RenderForAllPlatformsResult {
@@ -64,6 +66,7 @@ export async function renderForAllPlatforms(
     closeBrowser = true,
     forceExport = false,
     dateOverride,
+    slug,
   } = options;
 
   mkdirSync(outputDir, { recursive: true });
@@ -120,6 +123,7 @@ export async function renderForAllPlatforms(
           payload,
           forceExport: forceExport || !isExportReady(post),
           dateOverride,
+          slug,
         });
 
         exports[platform] = exportResult;

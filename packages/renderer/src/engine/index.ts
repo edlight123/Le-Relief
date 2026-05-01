@@ -96,8 +96,8 @@ export { buildDataCardSlide } from "./templates/DataCardTemplate.js";
 
 // ── Adapters ─────────────────────────────────────────────────────────────────
 
-export { formatForPlatform } from "./adapters/index.js";
-export type { AdapterInput, AdapterOutput } from "./adapters/index.js";
+export { formatForPlatform, getCaptionVariants } from "./adapters/index.js";
+export type { AdapterInput, AdapterOutput, CaptionVariants } from "./adapters/index.js";
 
 // ── Legacy Adapter & Production Renderer ────────────────────────────────────
 

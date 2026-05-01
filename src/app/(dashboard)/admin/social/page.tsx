@@ -100,8 +100,28 @@ export default function SocialListPage() {
                       <td className="px-4 py-3 font-body text-xs uppercase">{a.language}</td>
                       <td className="px-4 py-3">
                         {p ? (
-                          <Badge variant={p.status === "ready" ? "success" : p.status === "failed" ? "danger" : "default"}>
-                            {p.status}
+                          <Badge
+                            variant={
+                              p.status === "approved"
+                                ? "success"
+                                : p.status === "needs_review"
+                                ? "warning"
+                                : p.status === "ready"
+                                ? "info"
+                                : p.status === "failed"
+                                ? "danger"
+                                : "default"
+                            }
+                          >
+                            {p.status === "approved"
+                              ? "Approuvé"
+                              : p.status === "needs_review"
+                              ? "En révision"
+                              : p.status === "ready"
+                              ? "Prêt"
+                              : p.status === "failed"
+                              ? "Échec"
+                              : p.status}
                           </Badge>
                         ) : (
                           <Badge variant="default">non rendu</Badge>

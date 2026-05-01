@@ -229,6 +229,32 @@ function youtubeAdapter(input: AdapterInput, spec: PlatformSpec): AdapterOutput 
   };
 }
 
+export interface CaptionVariants {
+  neutral: string;
+  engaging: string;
+  short: string;
+}
+
+/**
+ * Generate 3 caption variants for a given platform.
+ * Neutral = standard adapter output.
+ * Engaging = neutral with an emotional/action hook prefix.
+ * Short = shortText or first 200 chars of neutral.
+ */
+export function getCaptionVariants(
+  platform: PlatformId,
+  input: AdapterInput,
+): CaptionVariants {
+  const neutral = formatForPlatform(platform, input).caption;
+  // Engaging: prepend an emoji hook based on post content type
+  const isBreaking = input.post.contentType === "breaking";
+  const hook = isBreaking ? "🚨 " : "📌 ";
+  const engaging = hook + neutral;
+  // Short: use shortText or trim
+  const short = input.post.caption.shortText ?? neutral.slice(0, 200);
+  return { neutral, engaging, short };
+}
+
 const ADAPTERS: Record<PlatformId, AdapterFn> = {
   "instagram-feed": instagramAdapter,
   "instagram-story": instagramAdapter,

@@ -1,13 +1,344 @@
 "use client";
 
 import { useRef, useState } from "react";
-import Image from "next/image";
 import Button from "@/components/ui/Button";
 import Card, { CardContent, CardHeader } from "@/components/ui/Card";
 import Badge from "@/components/ui/Badge";
 import CopyPasteCard from "./CopyPasteCard";
 import type { PlatformId } from "@le-relief/types";
-import type { SocialPost, PlatformPostState, PlatformPublishStatus } from "@/types/social";
+import type { SocialPost, PlatformPostState, PlatformPublishStatus, SocialAsset } from "@/types/social";
+
+// ── Platform behaviour categories ──────────────────────────────────────────
+
+/** Platforms where caption / link card should appear BEFORE the image. */
+const LINK_FIRST_PLATFORMS = new Set<PlatformId>([
+  "facebook-feed",
+  "facebook-link",
+  "x-landscape",
+  "x-portrait",
+  "threads",
+  "linkedin-feed",
+  "linkedin-link",
+]);
+
+/** Tall (9:16) platforms — preview in portrait aspect. */
+const TALL_PLATFORMS = new Set<PlatformId>([
+  "instagram-story",
+  "instagram-reel-cover",
+  "tiktok",
+  "youtube-short-cover",
+  "whatsapp-status",
+]);
+
+// ── Platform icon / colour helpers ────────────────────────────────────────
+
+const PLATFORM_ICONS: Partial<Record<PlatformId, string>> = {
+  "instagram-feed": "📷",
+  "instagram-story": "📷",
+  "instagram-reel-cover": "🎬",
+  "facebook-feed": "👤",
+  "facebook-link": "🔗",
+  "x-landscape": "𝕏",
+  "x-portrait": "𝕏",
+  threads: "〓",
+  "linkedin-feed": "in",
+  "linkedin-link": "in",
+  "whatsapp-status": "💬",
+  "whatsapp-sticker": "💬",
+  tiktok: "♪",
+  "youtube-short-cover": "▶",
+};
+
+const PLATFORM_HANDLE_HINT: Partial<Record<PlatformId, string>> = {
+  "instagram-feed": "@lereliefhaiti",
+  "instagram-story": "@lereliefhaiti",
+  "instagram-reel-cover": "@lereliefhaiti",
+  "facebook-feed": "Le Relief · lereliefhaiti.com",
+  "facebook-link": "Le Relief · lereliefhaiti.com",
+  "x-landscape": "@lereliefhaiti",
+  "x-portrait": "@lereliefhaiti",
+  threads: "@lereliefhaiti",
+  "linkedin-feed": "Le Relief",
+  "linkedin-link": "Le Relief",
+};
+
+// ── Carousel slide preview ────────────────────────────────────────────────
+
+function CarouselPreview({
+  assets,
+  tall,
+  onExpand,
+}: {
+  assets: SocialAsset[];
+  tall: boolean;
+  onExpand: (index: number) => void;
+}) {
+  const [idx, setIdx] = useState(0);
+  const total = assets.length;
+  const asset = assets[idx];
+  if (!asset) return null;
+
+  const aspectClass = tall ? "aspect-[9/16]" : "aspect-[4/5]";
+  const maxH = tall ? "max-h-[60vh]" : "max-h-[480px]";
+
+  return (
+    <div className="space-y-2">
+      {/* Main slide */}
+      <div className={`relative w-full ${aspectClass} ${maxH} mx-auto overflow-hidden rounded border border-border-subtle bg-black`}>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={asset.url}
+          alt={`Slide ${idx + 1}`}
+          className="h-full w-full object-contain"
+        />
+        {/* Slide counter badge */}
+        <span className="absolute right-2 top-2 rounded-full bg-black/60 px-2 py-0.5 font-mono text-[11px] text-white">
+          {idx + 1} / {total}
+        </span>
+        {/* Expand button */}
+        <button
+          type="button"
+          onClick={() => onExpand(idx)}
+          className="absolute inset-0 flex items-end justify-end p-2 opacity-0 hover:opacity-100 transition-opacity"
+          title="Agrandir"
+        >
+          <span className="rounded bg-black/60 px-2 py-1 font-label text-[10px] uppercase tracking-wider text-white">
+            ⤢ Agrandir
+          </span>
+        </button>
+        {/* Prev / Next arrows */}
+        {total > 1 && (
+          <>
+            <button
+              type="button"
+              onClick={() => setIdx((i) => (i - 1 + total) % total)}
+              className="absolute left-2 top-1/2 -translate-y-1/2 rounded-full bg-black/60 p-2 text-white hover:bg-black/80 disabled:opacity-30"
+              disabled={idx === 0}
+              aria-label="Slide précédente"
+            >
+              ‹
+            </button>
+            <button
+              type="button"
+              onClick={() => setIdx((i) => (i + 1) % total)}
+              className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full bg-black/60 p-2 text-white hover:bg-black/80 disabled:opacity-30"
+              disabled={idx === total - 1}
+              aria-label="Slide suivante"
+            >
+              ›
+            </button>
+          </>
+        )}
+      </div>
+
+      {/* Dot indicators */}
+      {total > 1 && (
+        <div className="flex justify-center gap-1.5">
+          {assets.map((_, i) => (
+            <button
+              key={i}
+              type="button"
+              onClick={() => setIdx(i)}
+              className={`h-1.5 rounded-full transition-all ${
+                i === idx ? "w-4 bg-primary" : "w-1.5 bg-border-subtle hover:bg-muted"
+              }`}
+              aria-label={`Aller à la slide ${i + 1}`}
+            />
+          ))}
+        </div>
+      )}
+
+      {/* Thumbnail strip for quick nav */}
+      {total > 1 && (
+        <div className="flex gap-1.5 overflow-x-auto pb-1">
+          {assets.map((a, i) => (
+            <button
+              key={a.url}
+              type="button"
+              onClick={() => setIdx(i)}
+              className={`relative h-14 w-14 shrink-0 overflow-hidden rounded border-2 transition-all ${
+                i === idx ? "border-primary" : "border-transparent opacity-60 hover:opacity-100"
+              }`}
+            >
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={a.url} alt={`Slide ${i + 1}`} className="h-full w-full object-cover" />
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ── Link-first (Facebook / X / Threads / LinkedIn) preview ───────────────
+
+function LinkFirstPreview({
+  assets,
+  caption,
+  platform,
+  onExpand,
+}: {
+  assets: SocialAsset[];
+  caption: string;
+  platform: PlatformId;
+  onExpand: (index: number) => void;
+}) {
+  const icon = PLATFORM_ICONS[platform] ?? "📄";
+  const handle = PLATFORM_HANDLE_HINT[platform] ?? "Le Relief";
+  const isX = platform === "x-landscape" || platform === "x-portrait";
+  const isLinkedIn = platform === "linkedin-feed" || platform === "linkedin-link";
+  const asset = assets[0];
+
+  // Detect aspect for image preview
+  const isLandscape = platform === "x-landscape" || platform === "facebook-link" || platform === "linkedin-link";
+  const imgAspect = isLandscape ? "aspect-video" : "aspect-[4/5]";
+
+  return (
+    <div className={`overflow-hidden rounded border border-border-subtle bg-surface ${isX ? "max-w-lg" : ""}`}>
+      {/* Platform chrome header */}
+      <div className="flex items-center gap-2 border-b border-border-subtle bg-surface-elevated px-3 py-2">
+        <span className="flex h-7 w-7 items-center justify-center rounded-full bg-primary/10 font-label text-xs font-bold text-primary">
+          {icon}
+        </span>
+        <div>
+          <p className="font-label text-xs font-bold text-foreground">Le Relief</p>
+          <p className="font-body text-[10px] text-muted">{handle}</p>
+        </div>
+      </div>
+
+      {/* Caption / post text */}
+      <div className="px-3 py-2">
+        <p className="whitespace-pre-wrap font-body text-sm text-foreground line-clamp-4">
+          {caption || "(pas de légende)"}
+        </p>
+        {isX && (
+          <p className="mt-1 font-body text-xs text-primary">lereliefhaiti.com</p>
+        )}
+        {isLinkedIn && (
+          <p className="mt-1 font-body text-xs text-muted">lereliefhaiti.com · voir l&apos;article</p>
+        )}
+      </div>
+
+      {/* Image / link card */}
+      {asset && (
+        <button
+          type="button"
+          onClick={() => onExpand(0)}
+          className="group relative block w-full overflow-hidden border-t border-border-subtle bg-black"
+        >
+          <div className={`relative w-full ${imgAspect}`}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={asset.url}
+              alt="Aperçu"
+              className="h-full w-full object-cover transition-opacity group-hover:opacity-90"
+            />
+            <span className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+              <span className="rounded bg-black/60 px-2 py-1 font-label text-[10px] uppercase tracking-wider text-white">
+                ⤢ Agrandir
+              </span>
+            </span>
+          </div>
+          {/* Facebook link card footer */}
+          {(platform === "facebook-feed" || platform === "facebook-link") && (
+            <div className="flex items-center gap-2 border-t border-border-subtle bg-surface-elevated px-3 py-1.5">
+              <span className="font-body text-[10px] uppercase text-muted">lereliefhaiti.com</span>
+              <span className="ml-auto font-label text-[10px] uppercase tracking-wider text-muted">Voir plus</span>
+            </div>
+          )}
+        </button>
+      )}
+    </div>
+  );
+}
+
+// ── Carousel modal with navigation ───────────────────────────────────────
+
+function CarouselModal({
+  assets,
+  initialIndex,
+  onClose,
+}: {
+  assets: SocialAsset[];
+  initialIndex: number;
+  onClose: () => void;
+}) {
+  const [idx, setIdx] = useState(initialIndex);
+  const total = assets.length;
+  const asset = assets[idx];
+  if (!asset) return null;
+
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 p-4"
+      onClick={onClose}
+    >
+      <div className="relative flex max-h-full max-w-3xl flex-col items-center gap-3" onClick={(e) => e.stopPropagation()}>
+        <div className="flex w-full items-center justify-between">
+          <span className="font-mono text-xs text-white/60">{idx + 1} / {total}</span>
+          <button
+            onClick={onClose}
+            className="font-label text-xs uppercase tracking-wider text-white/70 hover:text-white"
+          >
+            ✕ Fermer
+          </button>
+        </div>
+
+        <div className="relative flex items-center gap-3">
+          {total > 1 && (
+            <button
+              onClick={() => setIdx((i) => (i - 1 + total) % total)}
+              disabled={idx === 0}
+              className="rounded-full bg-white/10 p-2 text-white hover:bg-white/20 disabled:opacity-20"
+            >
+              ‹
+            </button>
+          )}
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={asset.url}
+            alt={`Slide ${idx + 1}`}
+            className="max-h-[80vh] max-w-full rounded object-contain shadow-2xl"
+          />
+          {total > 1 && (
+            <button
+              onClick={() => setIdx((i) => (i + 1) % total)}
+              disabled={idx === total - 1}
+              className="rounded-full bg-white/10 p-2 text-white hover:bg-white/20 disabled:opacity-20"
+            >
+              ›
+            </button>
+          )}
+        </div>
+
+        {/* Dot strip */}
+        {total > 1 && (
+          <div className="flex gap-1.5">
+            {assets.map((_, i) => (
+              <button
+                key={i}
+                onClick={() => setIdx(i)}
+                className={`h-1.5 rounded-full transition-all ${i === idx ? "w-4 bg-white" : "w-1.5 bg-white/30 hover:bg-white/60"}`}
+              />
+            ))}
+          </div>
+        )}
+
+        <a
+          href={asset.url}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="font-label text-[11px] uppercase tracking-wider text-white/50 hover:text-white"
+          onClick={(e) => e.stopPropagation()}
+        >
+          Ouvrir l&apos;original ↗
+        </a>
+      </div>
+    </div>
+  );
+}
+
+// ── Platform labels ───────────────────────────────────────────────────────
 
 const PLATFORM_LABELS: Record<PlatformId, string> = {
   "instagram-feed": "Instagram — Feed (4:5)",
@@ -70,12 +401,15 @@ export default function PlatformPanel({
     assetUrls: string[];
     instructions: string;
   } | null>(null);
-  // Preview modal
-  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  // Modal: which slide index is open (-1 = closed)
+  const [modalIndex, setModalIndex] = useState<number>(-1);
   // Background replace
   const [bgUrl, setBgUrl] = useState("");
   const [showBgInput, setShowBgInput] = useState(false);
   const bgInputRef = useRef<HTMLInputElement>(null);
+
+  const isLinkFirst = LINK_FIRST_PLATFORMS.has(platform);
+  const isTall = TALL_PLATFORMS.has(platform);
 
   async function saveCaption() {
     setSavingCaption(true);
@@ -177,32 +511,13 @@ export default function PlatformPanel({
 
   return (
     <>
-      {/* ── Full-screen preview modal ── */}
-      {previewUrl && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4"
-          onClick={() => setPreviewUrl(null)}
-        >
-          <div className="relative max-h-full max-w-2xl" onClick={(e) => e.stopPropagation()}>
-            <button
-              onClick={() => setPreviewUrl(null)}
-              className="absolute -top-8 right-0 font-label text-xs uppercase tracking-wider text-white/70 hover:text-white"
-            >
-              ✕ Fermer
-            </button>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={previewUrl} alt="Aperçu" className="max-h-[90vh] rounded object-contain shadow-2xl" />
-            <a
-              href={previewUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="mt-2 block text-center font-label text-[11px] uppercase tracking-wider text-white/50 hover:text-white"
-              onClick={(e) => e.stopPropagation()}
-            >
-              Ouvrir l&apos;original ↗
-            </a>
-          </div>
-        </div>
+      {/* ── Carousel modal ── */}
+      {modalIndex >= 0 && (
+        <CarouselModal
+          assets={state.assets}
+          initialIndex={modalIndex}
+          onClose={() => setModalIndex(-1)}
+        />
       )}
 
     <Card>
@@ -235,23 +550,21 @@ export default function PlatformPanel({
       </CardHeader>
       <CardContent className="space-y-4">
 
-        {/* Slide thumbnails — click to preview */}
-        <div className="grid grid-cols-3 gap-2">
-          {state.assets.map((a) => (
-            <button
-              key={a.url}
-              type="button"
-              title="Cliquer pour agrandir"
-              onClick={() => setPreviewUrl(a.url)}
-              className="group relative aspect-square overflow-hidden border border-border-subtle bg-background hover:border-primary focus:outline-none focus:ring-2 focus:ring-primary"
-            >
-              <Image src={a.url} alt={`Slide ${a.slideNumber}`} fill className="object-contain" unoptimized />
-              <span className="absolute inset-0 flex items-center justify-center bg-black/0 transition-colors group-hover:bg-black/30">
-                <span className="scale-75 opacity-0 transition-all group-hover:scale-100 group-hover:opacity-100 text-white text-xl">⤢</span>
-              </span>
-            </button>
-          ))}
-        </div>
+        {/* ── Platform-aware preview ── */}
+        {isLinkFirst ? (
+          <LinkFirstPreview
+            assets={state.assets}
+            caption={caption}
+            platform={platform}
+            onExpand={(i) => setModalIndex(i)}
+          />
+        ) : (
+          <CarouselPreview
+            assets={state.assets}
+            tall={isTall}
+            onExpand={(i) => setModalIndex(i)}
+          />
+        )}
 
         {/* Background replacement */}
         <div className="rounded border border-border-subtle bg-surface p-2 space-y-2">

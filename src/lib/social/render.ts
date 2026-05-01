@@ -20,7 +20,7 @@ import { getBucket } from "@/lib/firebase";
 import type { PlatformId } from "@le-relief/types";
 import type { Article } from "@/types/article";
 import type { PlatformPostState, SocialAsset } from "@/types/social";
-import { articleToSocialContent } from "./article-to-post";
+import { articleToSocialContentAsync } from "./article-to-post";
 import { upgradeCoverImage } from "./cover-image-upgrade";
 
 export interface RenderInput {
@@ -100,6 +100,7 @@ async function renderInline(input: RenderInput): Promise<RenderResult> {
     renderPost,
     getPlatformSpec,
     formatForPlatform,
+    getCaptionVariants,
     closeBrowserInstance,
     getBrand,
     setBrand,
@@ -122,7 +123,7 @@ async function renderInline(input: RenderInput): Promise<RenderResult> {
     } as unknown as Parameters<typeof setBrand>[0]);
   }
 
-  const { intake, rawSlides, caption, contentType } = articleToSocialContent(article);
+  const { intake, rawSlides, caption, contentType } = await articleToSocialContentAsync(article);
 
   const built = buildPost({ intake, rawSlides, caption });
   const post = built.post;
@@ -163,6 +164,7 @@ async function renderInline(input: RenderInput): Promise<RenderResult> {
           firstComment: adapted.firstComment ?? null,
           thread: adapted.thread ?? null,
           meta: (adapted.meta as Record<string, unknown>) ?? null,
+          captionVariants: getCaptionVariants(platform, { post: slidesForPlatform }),
           publish: { status: "not-published", mode: copyPasteOrApi(platform) },
           renderedAt: new Date().toISOString(),
           captionDirty: false,
@@ -253,6 +255,7 @@ async function renderViaCloudRun(input: RenderInput): Promise<RenderResult> {
         firstComment?: string | null;
         thread?: string[] | null;
         meta?: Record<string, unknown> | null;
+        captionVariants?: { neutral: string; engaging: string; short: string } | null;
       }>;
     };
     try {
@@ -290,6 +293,7 @@ async function renderViaCloudRun(input: RenderInput): Promise<RenderResult> {
           firstComment: payload.firstComment ?? null,
           thread: payload.thread ?? null,
           meta: payload.meta ?? null,
+          captionVariants: payload.captionVariants ?? undefined,
           publish: { status: "not-published", mode: copyPasteOrApi(platform) },
           renderedAt: new Date().toISOString(),
           captionDirty: false,

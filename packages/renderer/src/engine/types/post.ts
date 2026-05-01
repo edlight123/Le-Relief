@@ -22,7 +22,8 @@ export type TemplateId =
   | "data-card"
   | "caricature-card"
   | "story-cover"
-  | "quote-pull";
+  | "quote-pull"
+  | "opinion-card";
 
 // ── Language & Status ─────────────────────────────────────────────────────────
 

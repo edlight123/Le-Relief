@@ -30,6 +30,8 @@ export interface ExportOptions {
   forceExport?: boolean;
   includePreview?: boolean;
   previewBuffer?: Buffer;
+  /** Article slug used to build human-readable file names. */
+  slug?: string;
 }
 
 export function exportPost(
@@ -69,7 +71,10 @@ export function exportPost(
 
   mkdirSync(outputDir, { recursive: true });
 
-  const prefix = `${spec.fileNamePrefix}-${post.templateId}-${date}`;
+  const slugPart = opts.slug
+    ? `le-relief-${opts.slug.slice(0, 60).replace(/[^a-z0-9-]/g, "-").replace(/-+/g, "-").replace(/^-|-$/g, "")}-`
+    : "";
+  const prefix = `${slugPart}${spec.fileNamePrefix}`;
   const ext = spec.exportFormat;
   const errors: string[] = [];
   const slideFiles: string[] = [];

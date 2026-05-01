@@ -19,6 +19,7 @@ import type {
   SlideContent,
 } from "@le-relief/renderer";
 import type { Article } from "@/types/article";
+import { generateAISlides } from "./ai-slides";
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://lereliefhaiti.com";
 
@@ -178,6 +179,7 @@ export function articleToSocialContent(article: Article): ArticleSocialContent {
     preferredLanguage: lang,
     urgencyLevel: isBreaking ? "breaking" : "normal",
     sourceNote: sourceLine,
+    date: article.publishedAt?.toISOString() ?? article.updatedAt?.toISOString() ?? undefined,
     // Caricature must use the dedicated template — skip generic routing
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     contentTypeHint: isCaricature ? ("caricature-card" as any) : undefined,
@@ -212,4 +214,42 @@ export function articleToSocialContent(article: Article): ArticleSocialContent {
     caption,
     contentType,
   };
+}
+
+/**
+ * Async version of `articleToSocialContent` that first tries AI-assisted
+ * slide generation. Falls back to the synchronous version on any error or
+ * when `SOCIAL_AI_ENABLED` is not set.
+ */
+export async function articleToSocialContentAsync(
+  article: Article,
+): Promise<ArticleSocialContent> {
+  const lang = article.language === "en" ? "en" : "fr";
+  const SITE = process.env.NEXT_PUBLIC_SITE_URL || "https://lereliefhaiti.com";
+  const articleUrl = `${SITE}${lang === "fr" ? "" : "/en"}/articles/${article.slug}`;
+
+  try {
+    const ai = await generateAISlides({
+      title: article.title,
+      excerpt: article.excerpt ?? undefined,
+      body: article.body ?? "",
+      category: article.category?.slug ?? "news",
+      language: lang,
+      isBreaking: Boolean(article.isBreaking),
+      articleUrl,
+    });
+
+    if (ai) {
+      const base = articleToSocialContent(article);
+      return {
+        ...base,
+        rawSlides: ai.slides,
+        caption: ai.caption,
+      };
+    }
+  } catch {
+    // soft fail — fall through to synchronous version
+  }
+
+  return articleToSocialContent(article);
 }

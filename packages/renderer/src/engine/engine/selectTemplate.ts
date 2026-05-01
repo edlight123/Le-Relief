@@ -88,7 +88,18 @@ export function selectTemplate(input: ContentIntakeInput): SelectionResult {
     return { templateId: "weekly-recap-carousel", reason: "Weekly recap content detected" };
   }
 
-  // 7. Default: news carousel
+  // 7. Opinion / editorial / décryptage → opinion-card
+  if (
+    cat === "opinion" ||
+    cat === "editorial" ||
+    cat === "decryptage" ||
+    cat === "décryptage" ||
+    cat === "chronique"
+  ) {
+    return { templateId: "opinion-card", reason: `${cat} maps to opinion-card` };
+  }
+
+  // 8. Default: news carousel
   if (factCount <= 2 && urgency === "high") {
     return { templateId: "breaking-news-single", reason: "High urgency with few facts → single slide" };
   }

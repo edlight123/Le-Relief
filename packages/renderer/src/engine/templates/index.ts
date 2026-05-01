@@ -15,6 +15,7 @@ export { buildDataCardSlide } from "./DataCardTemplate.js";
 export { buildCaricatureSlide } from "./CaricatureTemplate.js";
 export { buildStoryCoverSlide } from "./StoryCoverTemplate.js";
 export { buildQuotePullSlide } from "./QuotePullTemplate.js";
+export { buildOpinionSlide } from "./OpinionTemplate.js";
 
 import type { SlideContent, TemplateId } from "../types/post.js";
 import { buildBreakingNewsSlide } from "./BreakingNewsTemplate.js";
@@ -27,6 +28,7 @@ import { buildDataCardSlide } from "./DataCardTemplate.js";
 import { buildCaricatureSlide } from "./CaricatureTemplate.js";
 import { buildStoryCoverSlide } from "./StoryCoverTemplate.js";
 import { buildQuotePullSlide } from "./QuotePullTemplate.js";
+import { buildOpinionSlide } from "./OpinionTemplate.js";
 
 /**
  * Build the HTML for a single slide using the correct template.
@@ -74,6 +76,9 @@ export function buildSlideHtml(
 
     case "quote-pull":
       return buildQuotePullSlide(slide, contentType);
+
+    case "opinion-card":
+      return buildOpinionSlide(slide, contentType, slideIndex, totalSlides);
 
     default: {
       // TypeScript exhaustiveness guard

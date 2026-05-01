@@ -660,6 +660,87 @@ export const TEMPLATE_CONFIGS: Record<string, TemplateConfig> = {
       },
     },
   },
+
+  // ── Opinion Card ─────────────────────────────────────────────────────────
+  // Magazine-feel carousel for opinion / editorial / décryptage pieces.
+  // Cover: italic DM Sans headline + thesis paragraph + accent bar.
+  // Detail/CTA: same structure as news-carousel equivalents.
+  "opinion-card": {
+    id: "opinion-card",
+    name: "Opinion Card",
+    canvasWidth: W,
+    canvasHeight: H,
+    safeMargin: { top: 120, side: SIDE, bottom: 100 },
+    maxSlides: 5,
+    zones: {
+      categoryLabel: { ...CATEGORY_LABEL_ZONE },
+      headline: {
+        box: { x: SIDE + 28, y: 260, width: INNER_W - 28, height: 324 },
+        fontSize: 56, minFontSize: 46, fontFamily: "DM Sans", lineHeight: 1.08,
+        limits: { maxWords: 18, maxLines: 4 },
+        dynamicFontSize: [
+          { maxWords: 7,  size: 76 },
+          { maxWords: 10, size: 66 },
+          { maxWords: 14, size: 56 },
+          { maxWords: 18, size: 48 },
+          { size: 46 },
+        ],
+      },
+      body: {
+        box: { x: SIDE + 28, y: 620, width: INNER_W - 28, height: 130 },
+        fontSize: 28, minFontSize: 22, fontFamily: "Inter", lineHeight: 1.5,
+        limits: { maxWords: 40, maxLines: 4 },
+      },
+      sourceLine: { ...SOURCE_LINE_ZONE },
+    },
+    variantZones: {
+      cover: {
+        headline: {
+          box: { x: SIDE + 28, y: 260, width: INNER_W - 28, height: 324 },
+          fontSize: 56, minFontSize: 46, fontFamily: "DM Sans", lineHeight: 1.08,
+          limits: { maxWords: 18, maxLines: 4 },
+          dynamicFontSize: [
+            { maxWords: 7,  size: 76 },
+            { maxWords: 10, size: 66 },
+            { maxWords: 14, size: 56 },
+            { maxWords: 18, size: 48 },
+            { size: 46 },
+          ],
+        },
+        body: {
+          box: { x: SIDE + 28, y: 620, width: INNER_W - 28, height: 130 },
+          fontSize: 28, minFontSize: 22, fontFamily: "Inter", lineHeight: 1.5,
+          limits: { maxWords: 40, maxLines: 4 },
+        },
+        sourceLine: { ...SOURCE_LINE_ZONE },
+        categoryLabel: { ...CATEGORY_LABEL_ZONE },
+      },
+      detail: {
+        headline: {
+          box: { x: SIDE + 28, y: 260, width: INNER_W - 28, height: 172 },
+          fontSize: 52, minFontSize: 38, fontFamily: "DM Sans", lineHeight: 1.1,
+          limits: { maxWords: 10, maxLines: 3 },
+        },
+        body: {
+          box: { x: SIDE + 28, y: 460, width: INNER_W - 28, height: 690 },
+          fontSize: 32, minFontSize: 26, fontFamily: "Inter", lineHeight: 1.5,
+          limits: { maxWords: 100, maxLines: 15, perBulletMaxLines: 5 },
+        },
+      },
+      cta: {
+        headline: {
+          box: { x: SIDE, y: 440, width: INNER_W, height: 280 },
+          fontSize: 80, minFontSize: 60, fontFamily: "DM Sans", lineHeight: 1.02,
+          limits: { maxWords: 6, maxLines: 3 },
+        },
+        body: {
+          box: { x: SIDE, y: 750, width: INNER_W, height: 150 },
+          fontSize: 34, minFontSize: 26, fontFamily: "Inter", lineHeight: 1.45,
+          limits: { maxWords: 20, maxLines: 3 },
+        },
+      },
+    },
+  },
 };
 
 // ── Derived char-budget constants ─────────────────────────────────────────────

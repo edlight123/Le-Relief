@@ -6,10 +6,12 @@ import Link from "next/link";
 import { Image as ImageIcon } from "lucide-react";
 import PageHeader from "@/components/ui/PageHeader";
 import Button from "@/components/ui/Button";
+import Badge from "@/components/ui/Badge";
+import Card, { CardContent } from "@/components/ui/Card";
 import EmptyState from "@/components/ui/EmptyState";
 import PlatformPanel from "@/components/dashboard/social/PlatformPanel";
 import type { PlatformId } from "@le-relief/types";
-import type { SocialPost } from "@/types/social";
+import type { SocialPost, SocialPostStatus } from "@/types/social";
 
 const PLATFORMS: PlatformId[] = [
   "instagram-feed",
@@ -95,6 +97,25 @@ export default function SocialEditorPage() {
     }
   }
 
+  async function updateStatus(status: SocialPostStatus) {
+    setError(null);
+    try {
+      const r = await fetch("/api/admin/social/status", {
+        method: "PATCH",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ articleId, status }),
+      });
+      const j = await r.json();
+      if (!r.ok) {
+        setError(j.error ?? `HTTP ${r.status}`);
+        return;
+      }
+      setPost(j.post ?? null);
+    } catch (err) {
+      setError(String(err));
+    }
+  }
+
   if (loading) {
     return <div className="p-8 font-body text-sm text-muted">Chargement…</div>;
   }
@@ -120,6 +141,54 @@ export default function SocialEditorPage() {
           </>
         }
       />
+
+      {post && ["ready", "needs_review", "approved"].includes(post.status) && (
+        <Card>
+          <CardContent className="flex items-center gap-4 p-4">
+            <span className="font-label text-xs uppercase tracking-wider text-muted">Statut d&apos;approbation</span>
+            <Badge
+              variant={
+                post.status === "approved"
+                  ? "success"
+                  : post.status === "needs_review"
+                  ? "warning"
+                  : "info"
+              }
+            >
+              {post.status === "approved"
+                ? "Approuvé"
+                : post.status === "needs_review"
+                ? "En révision"
+                : "Prêt"}
+            </Badge>
+            <div className="ml-auto flex gap-2">
+              {post.status !== "needs_review" && (
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={() => updateStatus("needs_review")}
+                >
+                  Marquer pour révision
+                </Button>
+              )}
+              {(post.status === "ready" || post.status === "needs_review") && (
+                <Button size="sm" onClick={() => updateStatus("approved")}>
+                  Approuver
+                </Button>
+              )}
+              {post.status === "approved" && (
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={() => updateStatus("ready")}
+                >
+                  Révoquer l&apos;approbation
+                </Button>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {error && (
         <div className="rounded border border-danger/40 bg-danger/10 p-3 font-body text-sm text-danger">

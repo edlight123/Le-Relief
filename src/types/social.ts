@@ -11,6 +11,8 @@ export type SocialPostStatus =
   | "draft"
   | "rendering"
   | "ready"
+  | "needs_review"
+  | "approved"
   | "publishing"
   | "published"
   | "partially_published"
@@ -60,6 +62,8 @@ export interface PlatformPostState {
   renderedAt?: string | null;
   /** Set when the publisher manually edited the caption. */
   captionDirty?: boolean;
+  /** Three caption variants generated at render time. */
+  captionVariants?: { neutral: string; engaging: string; short: string };
 }
 
 export interface SocialPost {
