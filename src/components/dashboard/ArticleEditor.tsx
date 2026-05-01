@@ -202,6 +202,7 @@ export default function ArticleEditor({
   const [tagsInput, setTagsInput] = useState((initial?.tags || []).join(", "));
   const [saving, setSaving] = useState(false);
   const [autosaveState, setAutosaveState] = useState<"idle" | "saving" | "saved" | "error">("idle");
+  const [hasDraftRecovered, setHasDraftRecovered] = useState(false);
   const [previewMode, setPreviewMode] = useState<"desktop" | "mobile" | "social">("desktop");
   const [openSections, setOpenSections] = useState(() => ({
     workflow: true,
@@ -351,6 +352,7 @@ export default function ArticleEditor({
         if (Array.isArray(parsed.tags) && tagsInput.length === 0) {
           setTagsInput(parsed.tags.join(", "));
         }
+        setHasDraftRecovered(true);
       });
     } catch {
       // ignore invalid local draft
@@ -587,6 +589,27 @@ export default function ArticleEditor({
       {autosaveState === "error" ? (
         <AlertBanner variant="danger" title="Autosave échoué">
           Réessayez ou enregistrez manuellement avant de quitter l&apos;éditeur.
+        </AlertBanner>
+      ) : null}
+      {hasDraftRecovered ? (
+        <AlertBanner variant="warning" title="Brouillon récupéré">
+          Le contenu de votre dernière session non sauvegardée a été restauré.{" "}
+          <button
+            type="button"
+            className="underline hover:no-underline"
+            onClick={() => {
+              if (typeof window !== "undefined") {
+                window.localStorage.removeItem("le-relief:editor-draft");
+              }
+              setHasDraftRecovered(false);
+              setTitle(""); setSubtitle(""); setBody(""); setExcerpt("");
+              setCoverImage(""); setCoverImageCaption(""); setCategoryId("");
+              setContentType("actualite"); setLanguage("fr"); setTagsInput("");
+              setSlug(""); setSeoTitle(""); setMetaDescription("");
+            }}
+          >
+            Effacer et repartir à zéro
+          </button>
         </AlertBanner>
       ) : null}
       {role === "editor" && (

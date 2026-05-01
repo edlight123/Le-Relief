@@ -35,6 +35,9 @@ export default function AdminArticlesNewPage() {
         throw new Error(err.error || "Erreur lors de la création");
       }
       const created = await res.json();
+      if (typeof window !== "undefined") {
+        window.localStorage.removeItem("le-relief:editor-draft");
+      }
       router.push(`/admin/articles/${created.id}/edit`);
     },
     [router],
