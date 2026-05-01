@@ -225,6 +225,20 @@ export async function PATCH(req: NextRequest, { params }: RouteParams) {
       return NextResponse.json({ error: "Introuvable" }, { status: 404 });
     }
 
+    // Propagate author/assignee changes to linked EN translations
+    const isfrArticle = (existing.language as string | undefined) === "fr";
+    const authorChanged = data.authorId !== undefined;
+    const assignedChanged = data.assignedTo !== undefined;
+    if (isfrArticle && (authorChanged || assignedChanged)) {
+      const enTranslations = await articlesRepo.getArticlesBySourceId(id);
+      const propagate: Record<string, unknown> = {};
+      if (authorChanged) propagate.authorId = data.authorId;
+      if (assignedChanged) propagate.assignedTo = data.assignedTo;
+      await Promise.all(
+        enTranslations.map((en) => articlesRepo.updateArticle(String(en.id), propagate)),
+      );
+    }
+
     const nextStatus = String((article as Record<string, unknown>).status || existing.status || "draft");
     if (nextStatus === "published") {
       const readiness = await validatePublishReadiness({
