@@ -57,15 +57,15 @@ const ROLE_SCOPED_ROUTE_RULES: RouteAccessRule[] = [
   { prefix: "/admin/authors", allowedRoles: ["admin"] },
   { prefix: "/admin/sections", allowedRoles: ["admin"] },
 
-  { prefix: "/admin/workspace", allowedRoles: ["writer", "admin"] },
-  { prefix: "/admin/drafts", allowedRoles: ["writer", "admin"] },
-  { prefix: "/admin/submitted", allowedRoles: ["writer", "admin"] },
-  { prefix: "/admin/revisions", allowedRoles: ["writer", "editor", "admin"] },
+  { prefix: "/admin/workspace", allowedRoles: ["writer", "publisher", "admin"] },
+  { prefix: "/admin/drafts", allowedRoles: ["writer", "publisher", "admin"] },
+  { prefix: "/admin/submitted", allowedRoles: ["writer", "publisher", "admin"] },
+  { prefix: "/admin/revisions", allowedRoles: ["writer", "editor", "publisher", "admin"] },
 
-  { prefix: "/admin/review", allowedRoles: ["editor", "admin"] },
-  { prefix: "/admin/review/attention", allowedRoles: ["editor", "admin"] },
+  { prefix: "/admin/review", allowedRoles: ["editor", "publisher", "admin"] },
+  { prefix: "/admin/review/attention", allowedRoles: ["editor", "publisher", "admin"] },
 
-  { prefix: "/admin/articles/new", allowedRoles: ["writer", "editor", "admin"] },
+  { prefix: "/admin/articles/new", allowedRoles: ["writer", "editor", "publisher", "admin"] },
   { prefix: "/admin/articles", allowedRoles: ["editor", "publisher", "admin"] },
 
   { prefix: "/admin/publishing/published", allowedRoles: ["editor", "publisher", "admin"] },

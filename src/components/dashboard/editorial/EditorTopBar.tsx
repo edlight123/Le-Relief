@@ -36,10 +36,10 @@ export default function EditorTopBar({
       </div>
       <div className="flex flex-wrap gap-2">
         <Button variant="outline" disabled={disabled} onClick={() => onAction("save_draft")}>Sauvegarder</Button>
-        {(role === "writer" || role === "admin") && (
+        {(role === "writer" || role === "publisher" || role === "admin") && (
           <Button variant="outline" disabled={disabled} onClick={() => onAction("submit_review")}>Soumettre</Button>
         )}
-        {(role === "editor" || role === "admin") && (
+        {(role === "editor" || role === "publisher" || role === "admin") && (
           <>
             <Button variant="outline" disabled={disabled} onClick={() => onAction("request_revisions")}>Révisions</Button>
             <Button variant="outline" disabled={disabled} onClick={() => onAction("approve")}>Approuver</Button>

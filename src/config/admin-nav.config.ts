@@ -100,6 +100,24 @@ const editorNav: NavGroup[] = [
 
 const publisherNav: NavGroup[] = [
   {
+    label: "Rédaction",
+    items: [
+      { label: "Espace de travail", href: "/admin/workspace", icon: Newspaper },
+      { label: "Nouvel article", href: "/admin/articles/new", icon: PenSquare },
+      { label: "Mes brouillons", href: "/admin/drafts", icon: FileText },
+      { label: "Révisions demandées", href: "/admin/revisions", icon: RotateCcw },
+      { label: "Soumis", href: "/admin/submitted", icon: SendHorizonal },
+    ],
+  },
+  {
+    label: "Review",
+    items: [
+      { label: "Review Queue", href: "/admin/review", icon: ClipboardCheck },
+      { label: "Besoin d'attention", href: "/admin/review/attention", icon: AlertCircle },
+      { label: "Tous les articles", href: "/admin/articles", icon: FileText },
+    ],
+  },
+  {
     label: "Publication",
     items: [
       {

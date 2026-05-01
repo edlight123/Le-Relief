@@ -39,7 +39,7 @@ const landingByRole: Record<AppRole, string> = {
 const routeAccessByRole: Record<AppRole, RouteKey[]> = {
   writer: ["writer-workspace"],
   editor: ["writer-workspace", "editor-review"],
-  publisher: ["publisher-ops", "homepage"],
+  publisher: ["writer-workspace", "editor-review", "publisher-ops", "homepage"],
   admin: [
     "admin-dashboard",
     "writer-workspace",
@@ -55,7 +55,18 @@ const routeAccessByRole: Record<AppRole, RouteKey[]> = {
 const actionAccessByRole: Record<AppRole, ActionKey[]> = {
   writer: ["save_draft", "submit_for_review"],
   editor: ["request_revisions", "approve_article", "reject_article"],
-  publisher: ["publish_article", "schedule_article", "manage_homepage", "manage_media"],
+  publisher: [
+    "save_draft",
+    "submit_for_review",
+    "request_revisions",
+    "approve_article",
+    "reject_article",
+    "publish_article",
+    "schedule_article",
+    "manage_homepage",
+    "manage_media",
+    "view_audit_log",
+  ],
   admin: [
     "save_draft",
     "submit_for_review",
@@ -76,6 +87,14 @@ const navVisibilityByRole: Record<AppRole, string[]> = {
   writer: ["/admin/workspace", "/admin/drafts", "/admin/revisions", "/admin/submitted", "/admin/articles/new"],
   editor: ["/admin/review", "/admin/review/attention", "/admin/revisions", "/admin/articles"],
   publisher: [
+    "/admin/workspace",
+    "/admin/articles/new",
+    "/admin/drafts",
+    "/admin/revisions",
+    "/admin/submitted",
+    "/admin/review",
+    "/admin/review/attention",
+    "/admin/articles",
     "/admin/publishing",
     "/admin/publishing/ready",
     "/admin/publishing/scheduled",
