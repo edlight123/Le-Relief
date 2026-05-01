@@ -65,6 +65,8 @@ interface ArticleEditorProps {
     seoTitle?: string;
     metaDescription?: string;
     authorId?: string;
+    coAuthors?: string[];
+    assignedTo?: string;
   };
   categories: { id: string; name: string }[];
   onSubmit: (data: {
@@ -93,6 +95,8 @@ interface ArticleEditorProps {
     slug: string;
     seoTitle: string;
     metaDescription: string;
+    coAuthors: string[];
+    assignedTo: string;
   }) => Promise<void>;
   submitLabel?: string;
 }
@@ -190,6 +194,9 @@ export default function ArticleEditor({
   const [slug, setSlug] = useState(initial?.slug || "");
   const [seoTitle, setSeoTitle] = useState(initial?.seoTitle || "");
   const [metaDescription, setMetaDescription] = useState(initial?.metaDescription || "");
+  const [coAuthorsInput, setCoAuthorsInput] = useState((initial?.coAuthors || []).join(", "));
+  const [assignedTo, setAssignedTo] = useState(initial?.assignedTo || "");
+  const [staffUsers, setStaffUsers] = useState<{ id: string; name: unknown; role: unknown }[]>([]);
   const [sourceError, setSourceError] = useState("");
   const [submitError, setSubmitError] = useState("");
   const [tagsInput, setTagsInput] = useState((initial?.tags || []).join(", "));
@@ -243,6 +250,11 @@ export default function ArticleEditor({
       slug,
       seoTitle,
       metaDescription,
+      coAuthors: coAuthorsInput
+        .split(",")
+        .map((s) => s.trim())
+        .filter(Boolean),
+      assignedTo,
     }),
     [
       title,
@@ -270,6 +282,8 @@ export default function ArticleEditor({
       slug,
       seoTitle,
       metaDescription,
+      coAuthorsInput,
+      assignedTo,
     ],
   );
 
@@ -299,6 +313,14 @@ export default function ArticleEditor({
       setAutosaveState("error");
     }
   }, [autosavePayload, initial, isExistingArticle]);
+
+  useEffect(() => {
+    if (role === "writer") return;
+    fetch("/api/users")
+      .then((r) => r.json())
+      .then((data: { id: string; name: unknown; role: unknown }[]) => setStaffUsers(Array.isArray(data) ? data : []))
+      .catch(() => undefined);
+  }, [role]);
 
   useEffect(() => {
     if (isExistingArticle || typeof window === "undefined") return;
@@ -778,10 +800,10 @@ export default function ArticleEditor({
         </div>
 
         {/* ── Sidebar ───────────────────────────────────────────────────────── */}
-        <aside className="space-y-6">
+        <aside className="space-y-6 xl:sticky xl:top-20 xl:max-h-[calc(100vh-5rem)] xl:overflow-y-auto">
 
-          {/* Action panel — sticky */}
-          <div className="xl:sticky xl:top-20 space-y-4">
+          {/* Action panel */}
+          <div className="space-y-4">
             <section className="border border-border-subtle bg-surface">
               <div className="border-b border-border-subtle px-4 py-3.5">
                 <div className="flex items-center justify-between">
@@ -976,6 +998,45 @@ export default function ArticleEditor({
                     />
                     Épingler en Une
                   </label>
+                </div>
+              </div>
+            )}
+
+            {(role === "editor" || role === "publisher" || role === "admin") && (
+              <div className="space-y-4 border-t border-border-subtle pt-4">
+                <div>
+                  <label htmlFor="assignedTo" className="mb-2 block font-label text-xs font-extrabold uppercase text-foreground">
+                    Assigner à
+                  </label>
+                  <select
+                    id="assignedTo"
+                    value={assignedTo}
+                    onChange={(e) => setAssignedTo(e.target.value)}
+                    className="w-full border border-border-subtle bg-surface px-4 py-3 font-label text-sm text-foreground focus:border-primary focus:outline-none"
+                  >
+                    <option value="">— Non assigné —</option>
+                    {staffUsers.map((u) => (
+                      <option key={u.id} value={u.id}>
+                        {String(u.name || u.id)}
+                      </option>
+                    ))}
+                  </select>
+                  <p className="mt-1.5 font-body text-xs text-muted">Journaliste ou rédacteur en charge de cet article.</p>
+                </div>
+
+                <div>
+                  <label htmlFor="coAuthors" className="mb-2 block font-label text-xs font-extrabold uppercase text-foreground">
+                    Co-auteurs
+                  </label>
+                  <input
+                    id="coAuthors"
+                    type="text"
+                    placeholder="Jean Dupont, Marie Toto"
+                    value={coAuthorsInput}
+                    onChange={(e) => setCoAuthorsInput(e.target.value)}
+                    className="w-full border border-border-subtle bg-surface px-4 py-3 font-label text-sm text-foreground focus:border-primary focus:outline-none"
+                  />
+                  <p className="mt-1.5 font-body text-xs text-muted">Noms séparés par des virgules — apparaîtront dans la signature de l&apos;article.</p>
                 </div>
               </div>
             )}
