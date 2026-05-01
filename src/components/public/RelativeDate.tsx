@@ -25,9 +25,11 @@ export default function RelativeDate({
   const [label, setLabel] = useState<string>(staticDate);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- intentional: swap static SSR date for live relative label after hydration
     setLabel(formatRelativeDate(rawDate, locale));
     // Optionally refresh every minute so "2m ago" stays accurate
     const id = setInterval(() => {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- interval refresh
       setLabel(formatRelativeDate(rawDate, locale));
     }, 60_000);
     return () => clearInterval(id);

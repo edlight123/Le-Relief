@@ -127,6 +127,7 @@ export default function OnboardingTour() {
   useEffect(() => {
     if (!session) return;
     const completed = localStorage.getItem(tourKey) === "true";
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- intentional: open tour only once based on localStorage
     if (!completed) setOpen(true);
   }, [session, tourKey]);
 
