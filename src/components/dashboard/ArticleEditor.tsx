@@ -1053,9 +1053,20 @@ export default function ArticleEditor({
                 </div>
 
                 <div>
-                  <label htmlFor="coAuthors" className="mb-2 block font-label text-xs font-extrabold uppercase text-foreground">
-                    Co-auteurs
-                  </label>
+                  <div className="mb-2 flex items-center justify-between">
+                    <label htmlFor="coAuthors" className="block font-label text-xs font-extrabold uppercase text-foreground">
+                      Co-auteurs
+                    </label>
+                    {coAuthors.length > 0 && (
+                      <button
+                        type="button"
+                        onClick={() => setCoAuthors([])}
+                        className="font-label text-[10px] uppercase tracking-wide text-muted hover:text-accent-coral transition-colors"
+                      >
+                        Effacer
+                      </button>
+                    )}
+                  </div>
                   {staffUsers.length > 0 ? (
                     <select
                       id="coAuthors"
@@ -1085,7 +1096,7 @@ export default function ArticleEditor({
                     />
                   )}
                   <p className="mt-1.5 font-body text-xs text-muted">
-                    {staffUsers.length > 0 ? "Maintenez Ctrl / ⌘ pour sélectionner plusieurs co-auteurs." : "Noms séparés par des virgules — apparaîtront dans la signature de l'article."}
+                    {staffUsers.length > 0 ? "Maintenez Ctrl / ⌘ pour sélectionner plusieurs. Cliquez sur « Effacer » pour retirer tous les co-auteurs." : "Noms séparés par des virgules — apparaîtront dans la signature de l'article."}
                   </p>
                 </div>
               </div>
