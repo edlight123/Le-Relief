@@ -22,6 +22,7 @@ type FrPublishedArticle = {
   authorId?: string | null;
   contentType?: ArticleContentType;
   coverImage?: string | null;
+  coverImageFirebaseUrl?: string | null;
   coverImageCaption?: string | null;
   tags?: unknown;
 };
@@ -191,6 +192,7 @@ export async function GET(req: NextRequest) {
         metaDescription: result.seoDescriptionEn || null,
         summary: result.summaryEn || null,
         coverImage: article.coverImage || null,
+        coverImageFirebaseUrl: article.coverImageFirebaseUrl || null,
         coverImageCaption: article.coverImageCaption || null,
         tags: Array.isArray(article.tags) ? article.tags : [],
         categoryId,
