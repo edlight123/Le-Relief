@@ -120,6 +120,12 @@ export default function Footer({ initialLocale = "fr" }: { initialLocale?: Local
           <p className="font-mono text-[10px] uppercase tracking-[2px] text-muted">
             {siteConfig.name} · Port-au-Prince · {locale === "fr" ? "Édition numérique" : "Digital edition"} · © {new Date().getFullYear()}
           </p>
+          <p className="mt-2 font-mono text-[10px] uppercase tracking-[2px] text-muted">
+            {locale === "fr" ? "Créé par" : "Created by"}{" "}
+            <a href="https://edlight.org/labs" target="_blank" rel="noopener noreferrer" className="ink-link">
+              EdLight Labs
+            </a>
+          </p>
           <p className="mt-2 font-body text-xs italic text-muted">
             {locale === "fr"
               ? "Lire en\u00a0:"
