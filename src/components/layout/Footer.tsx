@@ -43,8 +43,8 @@ export default function Footer({ initialLocale = "fr" }: { initialLocale?: Local
           </p>
         </div>
 
-        {/* 4-column link grid */}
-        <div className="grid grid-cols-1 gap-8 font-label text-sm md:grid-cols-4 md:gap-6">
+        {/* 4-column link grid — 2-col on mobile, 4-col on desktop */}
+        <div className="grid grid-cols-2 gap-8 font-label text-sm md:grid-cols-4 md:gap-6">
           <div className="md:border-r md:border-border-subtle md:pr-8">
             <h4 className="mb-4 font-label text-[11px] font-extrabold uppercase tracking-[1.4px] text-primary">
               {locale === "fr" ? "La rédaction" : "The newsroom"}
@@ -102,7 +102,7 @@ export default function Footer({ initialLocale = "fr" }: { initialLocale?: Local
             </a>
           </div>
 
-          <div className="flex flex-col gap-4">
+          <div className="col-span-2 flex flex-col gap-4 md:col-span-1">
             <h4 className="mb-1 font-label text-[11px] font-extrabold uppercase tracking-[1.4px] text-primary">
               {locale === "fr" ? "Lettre du Relief" : "Newsletter"}
             </h4>
@@ -116,7 +116,7 @@ export default function Footer({ initialLocale = "fr" }: { initialLocale?: Local
         </div>
 
         {/* ISSN-style imprint */}
-        <div className="mt-8 border-t border-border-strong pt-4 text-center">
+        <div className="mt-8 border-t border-border-strong pt-4 pb-20 text-center md:pb-4">
           <p className="font-mono text-[10px] uppercase tracking-[2px] text-muted">
             {siteConfig.name} · Port-au-Prince · {locale === "fr" ? "Édition numérique" : "Digital edition"} · © {new Date().getFullYear()}
           </p>
