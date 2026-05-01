@@ -296,6 +296,18 @@ export async function POST(req: NextRequest) {
     const rawBodyText = (body.body || "").replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
     const autoMetaDescription = resolvedExcerpt || (rawBodyText.slice(0, 155) || null);
 
+    // When an editor/publisher/admin creates an article on behalf of someone
+    // else (via the "Assigner à" field), that user should own the byline —
+    // not the staff member who happens to be logged in.
+    const requestedAssignedTo =
+      typeof body.assignedTo === "string" && body.assignedTo.trim()
+        ? body.assignedTo.trim()
+        : null;
+    const resolvedAuthorId =
+      requestedAssignedTo && hasRole(normalizedRole, "editor")
+        ? requestedAssignedTo
+        : session.user.id;
+
     const article = await articlesRepo.createArticle({
       title: body.title,
       subtitle: body.subtitle || null,
@@ -315,7 +327,7 @@ export async function POST(req: NextRequest) {
       priorityLevel: body.priorityLevel || null,
       isBreaking: Boolean(body.isBreaking),
       isHomepagePinned: Boolean(body.isHomepagePinned),
-      authorId: session.user.id,
+      authorId: resolvedAuthorId,
       categoryId: body.categoryId || null,
       contentType: body.contentType || "actualite",
       language,

@@ -145,10 +145,18 @@ export async function PATCH(req: NextRequest, { params }: RouteParams) {
     // autosave from accidentally clearing an explicitly-set assignment
     if (newAssignedTo !== existingAssignedTo) {
       data.assignedTo = newAssignedTo;
-      // When assigning to a user, update authorId so the public byline reflects them
-      if (newAssignedTo) {
-        data.authorId = newAssignedTo;
-      }
+    }
+    // Always keep authorId in sync with the effective assignedTo so that
+    // publishing reflects the assigned author's byline — even when the
+    // request does not change assignedTo (e.g. publisher hits "Publish"
+    // on an article that was assigned earlier but whose authorId still
+    // points at whoever first created the record).
+    const effectiveAssignedTo = newAssignedTo ?? existingAssignedTo;
+    if (
+      effectiveAssignedTo &&
+      (existing.authorId as string | null | undefined) !== effectiveAssignedTo
+    ) {
+      data.authorId = effectiveAssignedTo;
     }
   }
   if (body.status !== undefined) {
