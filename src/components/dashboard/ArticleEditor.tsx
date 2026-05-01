@@ -194,7 +194,7 @@ export default function ArticleEditor({
   const [slug, setSlug] = useState(initial?.slug || "");
   const [seoTitle, setSeoTitle] = useState(initial?.seoTitle || "");
   const [metaDescription, setMetaDescription] = useState(initial?.metaDescription || "");
-  const [coAuthorsInput, setCoAuthorsInput] = useState((initial?.coAuthors || []).join(", "));
+  const [coAuthors, setCoAuthors] = useState<string[]>(initial?.coAuthors || []);
   const [assignedTo, setAssignedTo] = useState(initial?.assignedTo || "");
   const [staffUsers, setStaffUsers] = useState<{ id: string; name: unknown; role: unknown }[]>([]);
   const [sourceError, setSourceError] = useState("");
@@ -250,10 +250,7 @@ export default function ArticleEditor({
       slug,
       seoTitle,
       metaDescription,
-      coAuthors: coAuthorsInput
-        .split(",")
-        .map((s) => s.trim())
-        .filter(Boolean),
+      coAuthors,
       assignedTo,
     }),
     [
@@ -282,7 +279,7 @@ export default function ArticleEditor({
       slug,
       seoTitle,
       metaDescription,
-      coAuthorsInput,
+      coAuthors,
       assignedTo,
     ],
   );
@@ -318,7 +315,10 @@ export default function ArticleEditor({
     if (role === "writer") return;
     fetch("/api/users")
       .then((r) => r.json())
-      .then((data: { id: string; name: unknown; role: unknown }[]) => setStaffUsers(Array.isArray(data) ? data : []))
+      .then((data: { users?: { id: string; name: unknown; role: unknown }[] }) => {
+        const list = Array.isArray(data?.users) ? data.users : [];
+        setStaffUsers(list.filter((u) => u.role === "admin" || u.role === "publisher" || u.role === "editor" || u.role === "writer"));
+      })
       .catch(() => undefined);
   }, [role]);
 
@@ -1033,15 +1033,37 @@ export default function ArticleEditor({
                   <label htmlFor="coAuthors" className="mb-2 block font-label text-xs font-extrabold uppercase text-foreground">
                     Co-auteurs
                   </label>
-                  <input
-                    id="coAuthors"
-                    type="text"
-                    placeholder="Jean Dupont, Marie Toto"
-                    value={coAuthorsInput}
-                    onChange={(e) => setCoAuthorsInput(e.target.value)}
-                    className="w-full border border-border-subtle bg-surface px-4 py-3 font-label text-sm text-foreground focus:border-primary focus:outline-none"
-                  />
-                  <p className="mt-1.5 font-body text-xs text-muted">Noms séparés par des virgules — apparaîtront dans la signature de l&apos;article.</p>
+                  {staffUsers.length > 0 ? (
+                    <select
+                      id="coAuthors"
+                      multiple
+                      value={coAuthors}
+                      onChange={(e) => {
+                        const selected = Array.from(e.target.selectedOptions).map((o) => o.value);
+                        setCoAuthors(selected);
+                      }}
+                      className="w-full border border-border-subtle bg-surface px-4 py-3 font-label text-sm text-foreground focus:border-primary focus:outline-none"
+                      size={Math.min(staffUsers.length, 5)}
+                    >
+                      {staffUsers.map((u) => (
+                        <option key={u.id} value={String(u.name || u.id)}>
+                          {String(u.name || u.id)}
+                        </option>
+                      ))}
+                    </select>
+                  ) : (
+                    <input
+                      id="coAuthors"
+                      type="text"
+                      placeholder="Jean Dupont, Marie Toto"
+                      value={coAuthors.join(", ")}
+                      onChange={(e) => setCoAuthors(e.target.value.split(",").map((s) => s.trim()).filter(Boolean))}
+                      className="w-full border border-border-subtle bg-surface px-4 py-3 font-label text-sm text-foreground focus:border-primary focus:outline-none"
+                    />
+                  )}
+                  <p className="mt-1.5 font-body text-xs text-muted">
+                    {staffUsers.length > 0 ? "Maintenez Ctrl / ⌘ pour sélectionner plusieurs co-auteurs." : "Noms séparés par des virgules — apparaîtront dans la signature de l'article."}
+                  </p>
                 </div>
               </div>
             )}
