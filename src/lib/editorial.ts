@@ -80,6 +80,8 @@ export interface PublicArticle {
   isBreaking: boolean;
   correction: string | null;
   correctionDate: string | null;
+  coAuthors: string[];
+  assignedTo: string | null;
 }
 
 const CONTENT_TYPE_LABELS: Record<ContentType, string> = {
@@ -482,6 +484,10 @@ export function normalizeArticle(
     isBreaking: asBoolean(article.isBreaking),
     correction: asOptionalString(article.correction) ?? null,
     correctionDate: asOptionalString(article.correctionDate) ?? null,
+    coAuthors: Array.isArray(article.coAuthors)
+      ? article.coAuthors.map(String).filter(Boolean)
+      : [],
+    assignedTo: asOptionalString(article.assignedTo) ?? null,
   };
 }
 

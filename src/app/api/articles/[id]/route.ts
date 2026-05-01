@@ -131,8 +131,16 @@ export async function PATCH(req: NextRequest, { params }: RouteParams) {
   if (body.correction !== undefined) data.correction = body.correction || null;
   if (body.correctionDate !== undefined) data.correctionDate = body.correctionDate || null;
   if (body.isHomepagePinned !== undefined) data.isHomepagePinned = Boolean(body.isHomepagePinned);
+  if (body.coAuthors !== undefined) {
+    data.coAuthors = Array.isArray(body.coAuthors)
+      ? body.coAuthors.map(String).filter(Boolean)
+      : [];
+  }
+  if (body.assignedTo !== undefined && hasRole(normalizedRole, "editor")) {
+    data.assignedTo = body.assignedTo || null;
+  }
   if (body.status !== undefined) {
-    const canPublish = hasRole(normalizedRole, "publisher");
+    const canPublish = hasRole(normalizedRole, "editor");
     const scheduledAt = (data.scheduledAt as string) ?? (existing.scheduledAt as string) ?? null;
     const scheduledInPast = scheduledAt && new Date(scheduledAt) <= new Date();
     const requestedStatus =
@@ -147,10 +155,7 @@ export async function PATCH(req: NextRequest, { params }: RouteParams) {
     if (!transitionCheck.allowed) {
       return NextResponse.json({ error: transitionCheck.reason }, { status: 403 });
     }
-    const nextStatus =
-      normalizedRequestedStatus === "published" && !canPublish
-        ? "in_review"
-        : normalizedRequestedStatus;
+    const nextStatus = normalizedRequestedStatus;
     data.status = nextStatus;
     if (nextStatus === "published" && !existing.publishedAt) {
       data.publishedAt = scheduledInPast ? new Date(scheduledAt!) : new Date();

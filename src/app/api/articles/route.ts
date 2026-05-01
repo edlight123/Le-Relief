@@ -251,7 +251,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: transitionCheck.reason }, { status: 403 });
     }
 
-    const canPublish = hasRole(normalizedRole, "publisher");
+    const canPublish = hasRole(normalizedRole, "editor");
     const status = normalizedRequestedStatus === "published" && !canPublish
       ? "in_review"
       : normalizedRequestedStatus;
@@ -327,6 +327,10 @@ export async function POST(req: NextRequest) {
       translationPriority: body.translationPriority || null,
       publishedAt,
       scheduledAt,
+      coAuthors: Array.isArray(body.coAuthors)
+        ? body.coAuthors.map(String).filter(Boolean)
+        : [],
+      assignedTo: body.assignedTo || null,
       ...workflowDates,
     });
 

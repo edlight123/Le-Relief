@@ -116,6 +116,8 @@ interface CreateArticleInputBase {
   alternateLanguageSlug?: string | null;
   allowTranslation?: boolean;
   translationPriority?: string | null;
+  coAuthors?: string[];
+  assignedTo?: string | null;
 }
 
 export type CreateFrenchArticleInput = CreateArticleInputBase & {

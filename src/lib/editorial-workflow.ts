@@ -26,6 +26,9 @@ const TRANSITIONS: Record<WorkflowRole, Partial<Record<NormalizedEditorialStatus
   editor: {
     in_review: ["approved", "revisions_requested", "rejected"],
     revisions_requested: ["in_review"],
+    approved: ["scheduled", "published", "revisions_requested"],
+    scheduled: ["published", "approved"],
+    published: ["archived", "approved"],
   },
   publisher: {
     approved: ["scheduled", "published", "revisions_requested"],

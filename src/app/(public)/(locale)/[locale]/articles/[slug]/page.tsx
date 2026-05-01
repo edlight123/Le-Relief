@@ -302,6 +302,9 @@ export default async function LocalizedArticlePage({ params }: Props) {
                 >
                   {article.author.name}
                 </Link>
+                {article.coAuthors && article.coAuthors.length > 0 && (
+                  <>, {article.coAuthors.join(", ")}</>
+                )}
               </>
             ) : (
               <>
