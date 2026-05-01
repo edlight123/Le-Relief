@@ -1,14 +1,67 @@
 rules_version = '2';
 
-// All access to Firestore from the Le Relief app goes through the
-// Firebase Admin SDK on the server (Next.js API routes + scripts).
-// Client SDKs MUST NOT read or write directly. This file therefore
-// denies all client access to every collection. The Admin SDK
-// bypasses these rules by design.
+// ── Le Relief — Firestore Security Rules ─────────────────────────────────────
+//
+// ALL write access to Firestore from the Le Relief app goes through the
+// Firebase Admin SDK on the server (Next.js API routes + Cloud Run workers).
+// The Admin SDK bypasses these rules by design, so client SDKs (browsers,
+// mobile apps) must be explicitly denied by default.
+//
+// The only client-side SDK usage allowed is:
+//   • Realtime notifications listener (authenticated users, own docs only)
+//   • Push subscription registration (authenticated users, own docs only)
+//
+// Everything else is server-only.
+//
 service cloud.firestore {
   match /databases/{database}/documents {
+
+    // ── Helper functions ────────────────────────────────────────────────────
+    function isSignedIn() {
+      return request.auth != null;
+    }
+    function isOwner(uid) {
+      return isSignedIn() && request.auth.uid == uid;
+    }
+
+    // ── Default: deny all client access ─────────────────────────────────────
     match /{document=**} {
       allow read, write: if false;
     }
+
+    // ── notifications: authenticated users can read/update their own docs ────
+    // Used by the real-time notification bell in the dashboard.
+    match /notifications/{notifId} {
+      allow read: if isOwner(resource.data.userId);
+      // Allow marking as read (only the readAt field)
+      allow update: if isOwner(resource.data.userId)
+                    && request.resource.data.diff(resource.data).affectedKeys()
+                        .hasOnly(['readAt']);
+      allow create, delete: if false;
+    }
+
+    // ── push_subscriptions: authenticated users manage their own ─────────────
+    match /push_subscriptions/{subId} {
+      allow read, write: if isOwner(resource.data.userId);
+      allow create: if isSignedIn()
+                    && request.resource.data.userId == request.auth.uid;
+      allow delete: if isOwner(resource.data.userId);
+    }
+
+    // ── All other collections: server-only (Admin SDK) ───────────────────────
+    match /articles/{id}            { allow read, write: if false; }
+    match /categories/{id}          { allow read, write: if false; }
+    match /users/{id}               { allow read, write: if false; }
+    match /social_posts/{id}        { allow read, write: if false; }
+    match /social_posts/{id}/social_events/{evId} { allow read, write: if false; }
+    match /analytics_events/{id}    { allow read, write: if false; }
+    match /editorialAuditEvents/{id}{ allow read, write: if false; }
+    match /editorialComments/{id}   { allow read, write: if false; }
+    match /subscriptions/{id}       { allow read, write: if false; }
+    match /homepage/{id}            { allow read, write: if false; }
+    match /media/{id}               { allow read, write: if false; }
+    match /social_connections/{id}  { allow read, write: if false; }
+    match /account_setup_tokens/{id}{ allow read, write: if false; }
+    match /password_reset_tokens/{id}{ allow read, write: if false; }
   }
 }
