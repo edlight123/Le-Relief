@@ -45,7 +45,7 @@ export default function Footer({ initialLocale = "fr" }: { initialLocale?: Local
 
         {/* 4-column link grid — 2-col on mobile, 4-col on desktop */}
         <div className="grid grid-cols-2 gap-8 font-label text-sm md:grid-cols-4 md:gap-6">
-          <div className="md:border-r md:border-border-subtle md:pr-8">
+          <div className="col-span-2 flex flex-col items-center text-center md:col-span-1 md:items-start md:text-left md:border-r md:border-border-subtle md:pr-8">
             <h4 className="mb-4 font-label text-[11px] font-extrabold uppercase tracking-[1.4px] text-primary">
               {locale === "fr" ? "La rédaction" : "The newsroom"}
             </h4>
