@@ -262,6 +262,17 @@ export function getBrandLogoDataUri(): string | null {
     return _cachedLogoDataUri;
   }
 
+  // Always-available build-time embed — use as first resort so the logo
+  // shows up in Docker / Cloud Run regardless of the runtime working directory.
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const mod = require("./inlinedLogo.js") as { INLINED_LOGO_DATA_URI?: string };
+    if (mod.INLINED_LOGO_DATA_URI) {
+      _cachedLogoDataUri = mod.INLINED_LOGO_DATA_URI;
+      return _cachedLogoDataUri;
+    }
+  } catch { /* fall through to file-system candidates */ }
+
   const candidates = [
     process.env.LE_RELIEF_LOGO_PATH,
     "public/logo.png",

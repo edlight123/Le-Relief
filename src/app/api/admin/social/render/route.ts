@@ -67,6 +67,9 @@ export async function POST(req: NextRequest) {
 
   const body = await req.json().catch(() => ({}));
   const articleId = body?.articleId as string | undefined;
+  const coverImageOverride = typeof body?.coverImageOverride === "string" && body.coverImageOverride.trim()
+    ? (body.coverImageOverride as string).trim()
+    : undefined;
   const platforms: PlatformId[] = Array.isArray(body?.platforms) && body.platforms.length > 0
     ? body.platforms
     : ALL_PLATFORMS;
@@ -84,7 +87,7 @@ export async function POST(req: NextRequest) {
   const actorEmail = (session.user.email as string) || null;
 
   try {
-    const result = await renderArticleSocialAssets({ article: articleForRender, platforms });
+    const result = await renderArticleSocialAssets({ article: articleForRender, platforms, coverImageOverride });
     const renderedCount = Object.keys(result.platforms).length;
 
     // If nothing rendered, surface the underlying warnings rather than

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import Image from "next/image";
 import Button from "@/components/ui/Button";
 import Card, { CardContent, CardHeader } from "@/components/ui/Card";
@@ -70,6 +70,12 @@ export default function PlatformPanel({
     assetUrls: string[];
     instructions: string;
   } | null>(null);
+  // Preview modal
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  // Background replace
+  const [bgUrl, setBgUrl] = useState("");
+  const [showBgInput, setShowBgInput] = useState(false);
+  const bgInputRef = useRef<HTMLInputElement>(null);
 
   async function saveCaption() {
     setSavingCaption(true);
@@ -98,6 +104,28 @@ export default function PlatformPanel({
       if (json.post) onPostUpdated(json.post);
     } finally {
       setRegenerating(false);
+    }
+  }
+
+  async function regenerateWithBg() {
+    if (!bgUrl.trim()) return;
+    setRegenerating(true);
+    setShowBgInput(false);
+    try {
+      const res = await fetch(`/api/admin/social/render`, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          articleId: post.articleId,
+          platforms: [platform],
+          coverImageOverride: bgUrl.trim(),
+        }),
+      });
+      const json = await res.json();
+      if (json.post) onPostUpdated(json.post);
+    } finally {
+      setRegenerating(false);
+      setBgUrl("");
     }
   }
 
@@ -148,6 +176,35 @@ export default function PlatformPanel({
   const buttonLabel = isCopyPaste ? "Préparer le copier-coller" : "Publier maintenant";
 
   return (
+    <>
+      {/* ── Full-screen preview modal ── */}
+      {previewUrl && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4"
+          onClick={() => setPreviewUrl(null)}
+        >
+          <div className="relative max-h-full max-w-2xl" onClick={(e) => e.stopPropagation()}>
+            <button
+              onClick={() => setPreviewUrl(null)}
+              className="absolute -top-8 right-0 font-label text-xs uppercase tracking-wider text-white/70 hover:text-white"
+            >
+              ✕ Fermer
+            </button>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={previewUrl} alt="Aperçu" className="max-h-[90vh] rounded object-contain shadow-2xl" />
+            <a
+              href={previewUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-2 block text-center font-label text-[11px] uppercase tracking-wider text-white/50 hover:text-white"
+              onClick={(e) => e.stopPropagation()}
+            >
+              Ouvrir l&apos;original ↗
+            </a>
+          </div>
+        </div>
+      )}
+
     <Card>
       <CardHeader>
         <div className="flex items-center justify-between gap-3">
@@ -177,12 +234,53 @@ export default function PlatformPanel({
         </div>
       </CardHeader>
       <CardContent className="space-y-4">
+
+        {/* Slide thumbnails — click to preview */}
         <div className="grid grid-cols-3 gap-2">
           {state.assets.map((a) => (
-            <div key={a.url} className="relative aspect-square overflow-hidden border border-border-subtle bg-background">
+            <button
+              key={a.url}
+              type="button"
+              title="Cliquer pour agrandir"
+              onClick={() => setPreviewUrl(a.url)}
+              className="group relative aspect-square overflow-hidden border border-border-subtle bg-background hover:border-primary focus:outline-none focus:ring-2 focus:ring-primary"
+            >
               <Image src={a.url} alt={`Slide ${a.slideNumber}`} fill className="object-contain" unoptimized />
-            </div>
+              <span className="absolute inset-0 flex items-center justify-center bg-black/0 transition-colors group-hover:bg-black/30">
+                <span className="scale-75 opacity-0 transition-all group-hover:scale-100 group-hover:opacity-100 text-white text-xl">⤢</span>
+              </span>
+            </button>
           ))}
+        </div>
+
+        {/* Background replacement */}
+        <div className="rounded border border-border-subtle bg-surface p-2 space-y-2">
+          <div className="flex items-center justify-between">
+            <span className="font-label text-[11px] uppercase tracking-wider text-muted">Remplacer l&apos;image de fond</span>
+            <button
+              type="button"
+              onClick={() => { setShowBgInput((v) => !v); setTimeout(() => bgInputRef.current?.focus(), 50); }}
+              className="font-label text-[10px] uppercase tracking-wider text-primary hover:underline"
+            >
+              {showBgInput ? "Annuler" : "Changer"}
+            </button>
+          </div>
+          {showBgInput && (
+            <div className="flex gap-2">
+              <input
+                ref={bgInputRef}
+                type="url"
+                placeholder="https://…"
+                value={bgUrl}
+                onChange={(e) => setBgUrl(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && regenerateWithBg()}
+                className="flex-1 rounded border border-border-subtle bg-background p-1.5 font-body text-xs focus:border-primary focus:outline-none"
+              />
+              <Button size="sm" onClick={regenerateWithBg} disabled={!bgUrl.trim() || regenerating}>
+                {regenerating ? "…" : "Appliquer"}
+              </Button>
+            </div>
+          )}
         </div>
 
         <div>
@@ -289,5 +387,6 @@ export default function PlatformPanel({
         )}
       </CardContent>
     </Card>
+    </>
   );
 }

@@ -26,6 +26,8 @@ import { upgradeCoverImage } from "./cover-image-upgrade";
 export interface RenderInput {
   article: Article;
   platforms: PlatformId[];
+  /** When set, skip auto-upgrade and use this URL as the cover image. */
+  coverImageOverride?: string;
 }
 
 export interface RenderResult {
@@ -46,22 +48,28 @@ export async function renderArticleSocialAssets(
   // Failure mode is "soft pass" — keeps the original on any error.
   const upgradedWarnings: string[] = [];
   let articleForRender = input.article;
-  try {
-    const upgrade = await upgradeCoverImage(input.article);
-    if (upgrade.upgraded && upgrade.imageUrl) {
-      articleForRender = { ...input.article, coverImage: upgrade.imageUrl } as Article;
+
+  if (input.coverImageOverride) {
+    // Team explicitly supplied a custom background — use it as-is.
+    articleForRender = { ...input.article, coverImage: input.coverImageOverride } as Article;
+  } else {
+    try {
+      const upgrade = await upgradeCoverImage(input.article);
+      if (upgrade.upgraded && upgrade.imageUrl) {
+        articleForRender = { ...input.article, coverImage: upgrade.imageUrl } as Article;
+        upgradedWarnings.push(
+          `cover-image: upgraded via ${upgrade.source} — ${upgrade.reason}`,
+        );
+      } else if (upgrade.source === "rejected-by-vision") {
+        upgradedWarnings.push(`cover-image: ${upgrade.reason}`);
+      }
+    } catch (err) {
       upgradedWarnings.push(
-        `cover-image: upgraded via ${upgrade.source} — ${upgrade.reason}`,
+        `cover-image upgrade failed (using publisher image): ${
+          err instanceof Error ? err.message : String(err)
+        }`,
       );
-    } else if (upgrade.source === "rejected-by-vision") {
-      upgradedWarnings.push(`cover-image: ${upgrade.reason}`);
     }
-  } catch (err) {
-    upgradedWarnings.push(
-      `cover-image upgrade failed (using publisher image): ${
-        err instanceof Error ? err.message : String(err)
-      }`,
-    );
   }
 
   const mode = process.env.RENDERER_MODE === "cloud-run" ? "cloud-run" : "inline";

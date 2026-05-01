@@ -31,6 +31,8 @@ RUN pnpm install --frozen-lockfile=false --filter "@le-relief/renderer-server...
 # Copy sources and build.
 COPY packages/types/src ./packages/types/src
 COPY packages/renderer/src ./packages/renderer/src
+# Logo asset for brand embedding (fallback to inlinedLogo.ts at runtime).
+COPY public/logo.png ./public/logo.png
 COPY packages/renderer/README.md ./packages/renderer/
 COPY packages/renderer-server/src ./packages/renderer-server/src
 
