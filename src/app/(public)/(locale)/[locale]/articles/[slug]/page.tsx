@@ -22,6 +22,7 @@ import * as articlesRepo from "@/lib/repositories/articles";
 import { validateLocale } from "@/lib/locale";
 import { hrefForLocale } from "@/lib/locale-routing";
 import {
+  buildAbsoluteUrl,
   buildArticleImageAlt,
   buildBreadcrumbJsonLd,
   buildCanonicalAlternates,
@@ -154,7 +155,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       title,
       description,
       images: article.imageSrc
-        ? [article.imageSrc]
+        ? [buildAbsoluteUrl(article.imageSrc)]
         : buildEditorialOgImage({
             title: article.title,
             category: article.category?.name,

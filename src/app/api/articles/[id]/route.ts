@@ -74,8 +74,8 @@ export async function PATCH(req: NextRequest, { params }: RouteParams) {
   const data: Record<string, unknown> = {};
   if (body.title !== undefined) data.title = body.title;
   if (body.slug !== undefined) data.slug = body.slug || null;
-  if (body.seoTitle !== undefined) data.seoTitle = body.seoTitle || null;
-  if (body.metaDescription !== undefined) data.metaDescription = body.metaDescription || null;
+  if (body.seoTitle !== undefined) data.seoTitle = body.seoTitle?.trim() || null;
+  if (body.metaDescription !== undefined) data.metaDescription = body.metaDescription?.trim() || null;
   if (body.canonicalUrl !== undefined) data.canonicalUrl = body.canonicalUrl || null;
   if (body.subtitle !== undefined) data.subtitle = body.subtitle || null;
   if (body.body !== undefined) data.body = body.body;
@@ -97,6 +97,22 @@ export async function PATCH(req: NextRequest, { params }: RouteParams) {
   }
   if (body.alternateLanguageSlug !== undefined) {
     data.alternateLanguageSlug = body.alternateLanguageSlug || null;
+  }
+
+  // Auto-fill SEO fields so publishing never blocks on missing slug/seoTitle/metaDescription
+  const effectiveTitle = (data.title as string | undefined) ?? (existing.title as string | undefined) ?? "";
+  const effectiveExcerpt = (data.excerpt as string | undefined) ?? (existing.excerpt as string | undefined) ?? "";
+  const effectiveBody = (data.body as string | undefined) ?? (existing.body as string | undefined) ?? "";
+  const rawBodyText = effectiveBody.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
+  if (data.slug === undefined && !(existing.slug as string | undefined)?.trim()) {
+    const { generateSlug } = await import("@/lib/slug");
+    data.slug = generateSlug(effectiveTitle);
+  }
+  if (data.seoTitle === undefined && !(existing.seoTitle as string | undefined)?.trim()) {
+    data.seoTitle = effectiveTitle ? `${effectiveTitle} | Le Relief` : null;
+  }
+  if (data.metaDescription === undefined && !(existing.metaDescription as string | undefined)?.trim()) {
+    data.metaDescription = effectiveExcerpt.trim() || rawBodyText.slice(0, 155) || null;
   }
   if (body.allowTranslation !== undefined) {
     data.allowTranslation = Boolean(body.allowTranslation);

@@ -1,14 +1,20 @@
 import { NextRequest, NextResponse } from "next/server";
 import * as mediaRepo from "@/lib/repositories/media";
 import { auth } from "@/lib/auth";
-import { writeFile, mkdir } from "fs/promises";
+import { getBucket } from "@/lib/firebase";
 import path from "path";
 import crypto from "crypto";
+
+export const runtime = "nodejs";
 
 const ALLOWED_EXTENSIONS = new Set([
   ".jpg", ".jpeg", ".png", ".gif", ".webp", ".svg", ".pdf", ".mp4", ".webm",
 ]);
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10 MB
+
+function firebaseDownloadUrl(bucketName: string, storagePath: string, token: string) {
+  return `https://firebasestorage.googleapis.com/v0/b/${bucketName}/o/${encodeURIComponent(storagePath)}?alt=media&token=${token}`;
+}
 
 export async function GET() {
   const session = await auth();
@@ -33,7 +39,6 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Aucun fichier fourni" }, { status: 400 });
   }
 
-  // File size validation
   if (file.size > MAX_FILE_SIZE) {
     return NextResponse.json(
       { error: `File too large: max ${MAX_FILE_SIZE / (1024 * 1024)}MB` },
@@ -41,7 +46,6 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  // File type validation — only allow safe extensions
   const ext = path.extname(file.name).toLowerCase();
   if (!ext || !ALLOWED_EXTENSIONS.has(ext)) {
     return NextResponse.json(
@@ -53,20 +57,25 @@ export async function POST(req: NextRequest) {
   const bytes = await file.arrayBuffer();
   const buffer = Buffer.from(bytes);
 
-  // Use UUID-based filename to prevent path traversal and special chars
   const safeFilename = `${crypto.randomUUID()}${ext}`;
-  const uploadDir = path.join(process.cwd(), "public", "uploads");
-  await mkdir(uploadDir, { recursive: true });
+  const storagePath = `uploads/${safeFilename}`;
+  const token = crypto.randomUUID();
 
-  // Resolve and validate the final path stays within uploadDir
-  const finalPath = path.resolve(uploadDir, safeFilename);
-  if (!finalPath.startsWith(uploadDir)) {
-    return NextResponse.json({ error: "Invalid filename" }, { status: 400 });
-  }
+  const bucket = getBucket();
+  await bucket.file(storagePath).save(buffer, {
+    resumable: false,
+    metadata: {
+      contentType: file.type || "application/octet-stream",
+      cacheControl: "public, max-age=31536000",
+      metadata: {
+        firebaseStorageDownloadTokens: token,
+        originalName: file.name,
+      },
+    },
+  });
 
-  await writeFile(finalPath, buffer);
+  const url = firebaseDownloadUrl(bucket.name, storagePath, token);
 
-  const url = `/uploads/${safeFilename}`;
   const media = await mediaRepo.createMedia({
     filename: file.name,
     url,

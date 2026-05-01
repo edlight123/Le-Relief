@@ -288,14 +288,22 @@ export async function POST(req: NextRequest) {
       workflowDates.publishedBy = session.user.id;
     }
 
+    // Auto-generate SEO fields when not provided
+    const resolvedExcerpt = body.excerpt?.trim() || null;
+    const autoSeoTitle = body.title?.trim()
+      ? `${body.title.trim()} | Le Relief`
+      : null;
+    const rawBodyText = (body.body || "").replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
+    const autoMetaDescription = resolvedExcerpt || (rawBodyText.slice(0, 155) || null);
+
     const article = await articlesRepo.createArticle({
       title: body.title,
       subtitle: body.subtitle || null,
       slug: body.slug || slug,
       body: body.body,
-      excerpt: body.excerpt || null,
-      seoTitle: body.seoTitle || null,
-      metaDescription: body.metaDescription || null,
+      excerpt: resolvedExcerpt,
+      seoTitle: body.seoTitle?.trim() || autoSeoTitle,
+      metaDescription: body.metaDescription?.trim() || autoMetaDescription,
       canonicalUrl: body.canonicalUrl || null,
       coverImage: body.coverImage || null,
       coverImageCaption: body.coverImageCaption || null,
