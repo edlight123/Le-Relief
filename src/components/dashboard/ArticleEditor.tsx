@@ -1257,6 +1257,21 @@ export default function ArticleEditor({
                   onChange={(e) => setTranslationPriority(e.target.value)}
                 />
               </div>
+            ) : initial?.id && sourceArticleId ? (
+              <div className="border border-border-subtle p-3">
+                <p className="mb-2 font-label text-xs font-extrabold uppercase text-foreground">Article source FR</p>
+                {sourceArticlePreview?.id ? (
+                  <Link
+                    href={`/admin/articles/${sourceArticlePreview.id}/edit`}
+                    className="flex items-center gap-1.5 font-label text-xs text-accent-blue hover:underline"
+                  >
+                    <GitBranch className="h-3 w-3" />
+                    {sourceArticlePreview.title}
+                  </Link>
+                ) : (
+                  <p className="font-label text-xs text-muted">{sourceArticleId}</p>
+                )}
+              </div>
             ) : (
               <SourceArticlePicker
                 value={sourceArticleId}
@@ -1292,18 +1307,7 @@ export default function ArticleEditor({
                 </ul>
               </div>
             )}
-            {language === "en" && sourceArticlePreview?.id && (
-              <div className="border-t border-border-subtle pt-3">
-                <p className="mb-2 font-label text-xs font-extrabold uppercase text-foreground">Article source FR</p>
-                <Link
-                  href={`/admin/articles/${sourceArticlePreview.id}/edit`}
-                  className="flex items-center gap-1.5 font-label text-xs text-accent-blue hover:underline"
-                >
-                  <GitBranch className="h-3 w-3" />
-                  {sourceArticlePreview.title}
-                </Link>
-              </div>
-            )}
+
           </EditorSection>
 
           {/* Quality checks */}
