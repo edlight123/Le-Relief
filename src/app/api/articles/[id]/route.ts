@@ -138,6 +138,10 @@ export async function PATCH(req: NextRequest, { params }: RouteParams) {
   }
   if (body.assignedTo !== undefined && hasRole(normalizedRole, "editor")) {
     data.assignedTo = body.assignedTo || null;
+    // Also update the article's author so the byline reflects the assigned person
+    if (body.assignedTo) {
+      data.authorId = body.assignedTo;
+    }
   }
   if (body.status !== undefined) {
     const canPublish = hasRole(normalizedRole, "editor");
