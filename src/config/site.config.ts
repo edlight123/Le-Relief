@@ -50,6 +50,7 @@ export const siteConfig = {
       { label: "International", href: "/categories/international" },
       { label: "Opinion", href: "/categories/opinion" },
       { label: "Culture", href: "/categories/culture" },
+      { label: "Sport", href: "/categories/sport" },
       { label: "Recherche", href: "/search" },
     ],
     publicEn: [
@@ -59,6 +60,7 @@ export const siteConfig = {
       { label: "International", href: "/categories/international" },
       { label: "Opinion", href: "/categories/opinion" },
       { label: "Culture", href: "/categories/culture" },
+      { label: "Sport", href: "/categories/sport" },
       { label: "Search", href: "/search" },
     ],
     dashboard: [
