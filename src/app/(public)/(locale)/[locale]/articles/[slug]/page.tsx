@@ -13,6 +13,7 @@ import ArticleViewTracker from "@/components/public/ArticleViewTracker";
 import AITranslationNotice from "@/components/public/AITranslationNotice";
 import ArticleKeyPoints from "@/components/public/ArticleKeyPoints";
 import ArticleContextBox from "@/components/public/ArticleContextBox";
+import SetArticleAlternate from "@/components/public/SetArticleAlternate";
 import SourceAttribution from "@/components/public/SourceAttribution";
 import RelatedDossier from "@/components/public/RelatedDossier";
 import ArticlePrevNext from "@/components/public/ArticlePrevNext";
@@ -228,6 +229,13 @@ export default async function LocalizedArticlePage({ params }: Props) {
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: serializeJsonLd(breadcrumbJsonLd) }}
+      />
+      <SetArticleAlternate
+        alternateHref={
+          article.alternateLanguageSlug
+            ? `/${locale === "fr" ? "en" : "fr"}/articles/${article.alternateLanguageSlug}`
+            : null
+        }
       />
       <ArticleViewTracker
         articleId={article.id}

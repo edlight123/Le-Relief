@@ -5,6 +5,7 @@ import { analyticsClient } from "@/lib/analytics-client";
 import { hrefForLocale, LOCALE_COOKIE } from "@/lib/locale-routing";
 import type { Locale } from "@/lib/locale";
 import { notifyLocaleChanged, useResolvedLocale } from "@/hooks/useResolvedLocale";
+import { useArticleAlternate } from "@/contexts/ArticleAlternateContext";
 
 interface LanguageToggleProps {
   locale?: Locale;
@@ -21,7 +22,10 @@ export default function LanguageToggle({ locale: controlledLocale, onSwitch }: L
   const targetLocale = locale === "fr" ? "en" : "fr";
   const queryString = searchParams.toString();
   const currentHref = `${pathname || "/"}${queryString ? `?${queryString}` : ""}`;
-  const targetHref = hrefForLocale(currentHref, targetLocale);
+  const { alternateHref } = useArticleAlternate();
+  // On article pages, the FR and EN slugs differ — use the registered alternate
+  // href rather than a naive locale-prefix swap which would produce a 404.
+  const targetHref = alternateHref ?? hrefForLocale(currentHref, targetLocale);
 
   function handleSwitch() {
     document.cookie = `${LOCALE_COOKIE}=${targetLocale};path=/;max-age=${60 * 60 * 24 * 365};samesite=lax`;
