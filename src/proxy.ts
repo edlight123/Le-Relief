@@ -123,8 +123,18 @@ export async function proxy(request: NextRequest) {
     const locale = firstSegment as "fr" | "en";
     const cleanPath = "/" + segments.slice(1).join("/");
     const url = request.nextUrl.clone();
-    url.pathname = cleanPath || "/";
-    return withLocaleCookie(NextResponse.redirect(url, 302), locale);
+    // Rewrite to /{locale}/{rest} internally so the locale layout handles it
+    // without stripping the locale prefix from the URL the user sees.
+    // (A redirect here would lose the locale in the address bar and break EN links.)
+    url.pathname = `/${locale}${cleanPath === "/" ? "" : cleanPath}`;
+    return withLocaleCookie(
+      NextResponse.rewrite(url, {
+        request: {
+          headers: withLocaleRequestHeader(request, locale),
+        },
+      }),
+      locale,
+    );
   }
 
   const locale = getPreferredLocale(request);
