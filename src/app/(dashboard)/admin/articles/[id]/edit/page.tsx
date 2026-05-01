@@ -115,6 +115,10 @@ export default function AdminArticleEditPage() {
     seoTitle: (article.seoTitle as string) || "",
     metaDescription: (article.metaDescription as string) || "",
     authorId: (article.authorId as string) || "",
+    coAuthors: (article.coAuthors as string[]) || [],
+    assignedTo: (article.assignedTo as string) || "",
+    correction: (article.correction as string) || "",
+    correctionDate: (article.correctionDate as string) || "",
   };
 
   return (
