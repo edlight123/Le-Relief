@@ -1,7 +1,9 @@
 /**
- * AI-assisted slide generation using Gemini API.
+ * AI-assisted slide generation using the DeepSeek API (OpenAI-compatible).
  *
  * Toggled by `SOCIAL_AI_ENABLED=true` — returns null immediately if not set.
+ * Requires `DEEPSEEK_API_KEY`. Respects `DEEPSEEK_MODEL` and
+ * `DEEPSEEK_BASE_URL` (same env vars used by the translation layer).
  * Soft-fails (returns null) on any error or 15-second timeout.
  */
 
@@ -17,25 +19,28 @@ export interface AISlideInput {
   articleUrl: string;
 }
 
-interface GeminiCandidate {
-  content?: { parts?: Array<{ text?: string }> };
+interface OpenAIMessage {
+  role: string;
+  content: string;
 }
-interface GeminiResponse {
-  candidates?: GeminiCandidate[];
+interface OpenAIChatResponse {
+  choices?: Array<{ message?: OpenAIMessage }>;
 }
 
-const GEMINI_DEFAULT_MODEL = "gemini-2.0-flash";
+const DEEPSEEK_DEFAULT_BASE_URL = "https://api.deepseek.com/v1";
+const DEEPSEEK_DEFAULT_MODEL = "deepseek-chat";
 
 export async function generateAISlides(
   input: AISlideInput,
 ): Promise<{ slides: SlideContent[]; caption: PostCaption } | null> {
   if (process.env.SOCIAL_AI_ENABLED !== "true") return null;
 
-  const apiKey = process.env.GEMINI_API_KEY?.trim();
+  const apiKey = process.env.DEEPSEEK_API_KEY?.trim();
   if (!apiKey) return null;
 
-  const model = process.env.GEMINI_MODEL?.trim() || GEMINI_DEFAULT_MODEL;
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent?key=${encodeURIComponent(apiKey)}`;
+  const model = process.env.DEEPSEEK_MODEL?.trim() || DEEPSEEK_DEFAULT_MODEL;
+  const baseUrl = (process.env.DEEPSEEK_BASE_URL?.trim() || DEEPSEEK_DEFAULT_BASE_URL).replace(/\/$/, "");
+  const url = `${baseUrl}/chat/completions`;
 
   const isFr = input.language !== "en";
 
@@ -83,39 +88,40 @@ Génère exactement ce JSON (rien d'autre) :
   try {
     const response = await fetch(url, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${apiKey}`,
+      },
       signal: controller.signal,
       body: JSON.stringify({
-        systemInstruction: { parts: [{ text: systemPrompt }] },
-        contents: [{ role: "user", parts: [{ text: userPrompt }] }],
-        generationConfig: {
-          temperature: 0.3,
-          responseMimeType: "application/json",
-        },
+        model,
+        temperature: 0.3,
+        messages: [
+          { role: "system", content: systemPrompt },
+          { role: "user", content: userPrompt },
+        ],
       }),
     });
 
     if (!response.ok) return null;
 
     const raw = await response.text();
-    let parsed: GeminiResponse;
+    let parsed: OpenAIChatResponse;
     try {
-      parsed = JSON.parse(raw) as GeminiResponse;
+      parsed = JSON.parse(raw) as OpenAIChatResponse;
     } catch {
       return null;
     }
 
-    const text =
-      parsed.candidates?.[0]?.content?.parts
-        ?.map((p) => (typeof p.text === "string" ? p.text : ""))
-        .join("")
-        .trim() ?? "";
+    const content = parsed.choices?.[0]?.message?.content?.trim() ?? "";
+    if (!content) return null;
 
-    if (!text) return null;
+    // Strip markdown code fences if the model wraps the JSON
+    const jsonText = content.replace(/^```(?:json)?\s*/i, "").replace(/\s*```$/, "").trim();
 
     let result: { slides: SlideContent[]; caption: PostCaption };
     try {
-      result = JSON.parse(text) as { slides: SlideContent[]; caption: PostCaption };
+      result = JSON.parse(jsonText) as { slides: SlideContent[]; caption: PostCaption };
     } catch {
       return null;
     }
