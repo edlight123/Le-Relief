@@ -1,264 +1,888 @@
 {
   "indexes": [
-
-    { "collectionGroup": "articles", "queryScope": "COLLECTION", "fields": [
-        { "fieldPath": "status", "order": "ASCENDING" },
-        { "fieldPath": "publishedAt", "order": "DESCENDING" }
-    ]},
-    { "collectionGroup": "articles", "queryScope": "COLLECTION", "fields": [
-        { "fieldPath": "status", "order": "ASCENDING" },
-        { "fieldPath": "language", "order": "ASCENDING" },
-        { "fieldPath": "publishedAt", "order": "DESCENDING" }
-    ]},
-    { "collectionGroup": "articles", "queryScope": "COLLECTION", "fields": [
-        { "fieldPath": "status", "order": "ASCENDING" },
-        { "fieldPath": "featured", "order": "ASCENDING" },
-        { "fieldPath": "publishedAt", "order": "DESCENDING" }
-    ]},
-    { "collectionGroup": "articles", "queryScope": "COLLECTION", "fields": [
-        { "fieldPath": "status", "order": "ASCENDING" },
-        { "fieldPath": "language", "order": "ASCENDING" },
-        { "fieldPath": "featured", "order": "ASCENDING" },
-        { "fieldPath": "publishedAt", "order": "DESCENDING" }
-    ]},
-    { "collectionGroup": "articles", "queryScope": "COLLECTION", "fields": [
-        { "fieldPath": "status", "order": "ASCENDING" },
-        { "fieldPath": "categoryId", "order": "ASCENDING" },
-        { "fieldPath": "publishedAt", "order": "DESCENDING" }
-    ]},
-    { "collectionGroup": "articles", "queryScope": "COLLECTION", "fields": [
-        { "fieldPath": "status", "order": "ASCENDING" },
-        { "fieldPath": "categoryId", "order": "ASCENDING" },
-        { "fieldPath": "language", "order": "ASCENDING" },
-        { "fieldPath": "publishedAt", "order": "DESCENDING" }
-    ]},
-    { "collectionGroup": "articles", "queryScope": "COLLECTION", "fields": [
-        { "fieldPath": "status", "order": "ASCENDING" },
-        { "fieldPath": "authorId", "order": "ASCENDING" },
-        { "fieldPath": "publishedAt", "order": "DESCENDING" }
-    ]},
-    { "collectionGroup": "articles", "queryScope": "COLLECTION", "fields": [
-        { "fieldPath": "status", "order": "ASCENDING" },
-        { "fieldPath": "authorId", "order": "ASCENDING" },
-        { "fieldPath": "language", "order": "ASCENDING" },
-        { "fieldPath": "publishedAt", "order": "DESCENDING" }
-    ]},
-
-    { "collectionGroup": "articles", "queryScope": "COLLECTION", "fields": [
-        { "fieldPath": "status", "order": "ASCENDING" },
-        { "fieldPath": "isBreaking", "order": "ASCENDING" },
-        { "fieldPath": "publishedAt", "order": "DESCENDING" }
-    ]},
-    { "collectionGroup": "articles", "queryScope": "COLLECTION", "fields": [
-        { "fieldPath": "status", "order": "ASCENDING" },
-        { "fieldPath": "isBreaking", "order": "ASCENDING" },
-        { "fieldPath": "language", "order": "ASCENDING" },
-        { "fieldPath": "publishedAt", "order": "DESCENDING" }
-    ]},
-
-    { "collectionGroup": "articles", "queryScope": "COLLECTION", "fields": [
-        { "fieldPath": "status", "order": "ASCENDING" },
-        { "fieldPath": "views", "order": "DESCENDING" }
-    ]},
-    { "collectionGroup": "articles", "queryScope": "COLLECTION", "fields": [
-        { "fieldPath": "status", "order": "ASCENDING" },
-        { "fieldPath": "language", "order": "ASCENDING" },
-        { "fieldPath": "views", "order": "DESCENDING" }
-    ]},
-    { "collectionGroup": "articles", "queryScope": "COLLECTION", "fields": [
-        { "fieldPath": "status", "order": "ASCENDING" },
-        { "fieldPath": "categoryId", "order": "ASCENDING" },
-        { "fieldPath": "views", "order": "DESCENDING" }
-    ]},
-    { "collectionGroup": "articles", "queryScope": "COLLECTION", "fields": [
-        { "fieldPath": "status", "order": "ASCENDING" },
-        { "fieldPath": "categoryId", "order": "ASCENDING" },
-        { "fieldPath": "language", "order": "ASCENDING" },
-        { "fieldPath": "views", "order": "DESCENDING" }
-    ]},
-    { "collectionGroup": "articles", "queryScope": "COLLECTION", "fields": [
-        { "fieldPath": "status", "order": "ASCENDING" },
-        { "fieldPath": "authorId", "order": "ASCENDING" },
-        { "fieldPath": "views", "order": "DESCENDING" }
-    ]},
-    { "collectionGroup": "articles", "queryScope": "COLLECTION", "fields": [
-        { "fieldPath": "status", "order": "ASCENDING" },
-        { "fieldPath": "authorId", "order": "ASCENDING" },
-        { "fieldPath": "language", "order": "ASCENDING" },
-        { "fieldPath": "views", "order": "DESCENDING" }
-    ]},
-    { "collectionGroup": "articles", "queryScope": "COLLECTION", "fields": [
-        { "fieldPath": "status", "order": "ASCENDING" },
-        { "fieldPath": "language", "order": "ASCENDING" },
-        { "fieldPath": "categoryId", "order": "ASCENDING" },
-        { "fieldPath": "views", "order": "DESCENDING" }
-    ]},
-
-    { "collectionGroup": "articles", "queryScope": "COLLECTION", "fields": [
-        { "fieldPath": "status", "order": "ASCENDING" },
-        { "fieldPath": "createdAt", "order": "DESCENDING" }
-    ]},
-    { "collectionGroup": "articles", "queryScope": "COLLECTION", "fields": [
-        { "fieldPath": "status", "order": "ASCENDING" },
-        { "fieldPath": "language", "order": "ASCENDING" },
-        { "fieldPath": "createdAt", "order": "DESCENDING" }
-    ]},
-    { "collectionGroup": "articles", "queryScope": "COLLECTION", "fields": [
-        { "fieldPath": "status", "order": "ASCENDING" },
-        { "fieldPath": "updatedAt", "order": "DESCENDING" }
-    ]},
-    { "collectionGroup": "articles", "queryScope": "COLLECTION", "fields": [
-        { "fieldPath": "status", "order": "ASCENDING" },
-        { "fieldPath": "featured", "order": "ASCENDING" },
-        { "fieldPath": "updatedAt", "order": "DESCENDING" }
-    ]},
-    { "collectionGroup": "articles", "queryScope": "COLLECTION", "fields": [
-        { "fieldPath": "status", "order": "ASCENDING" },
-        { "fieldPath": "categoryId", "order": "ASCENDING" },
-        { "fieldPath": "updatedAt", "order": "DESCENDING" }
-    ]},
-    { "collectionGroup": "articles", "queryScope": "COLLECTION", "fields": [
-        { "fieldPath": "categoryId", "order": "ASCENDING" },
-        { "fieldPath": "updatedAt", "order": "DESCENDING" }
-    ]},
-    { "collectionGroup": "articles", "queryScope": "COLLECTION", "fields": [
-        { "fieldPath": "status", "order": "ASCENDING" },
-        { "fieldPath": "scheduledAt", "order": "DESCENDING" }
-    ]},
-    { "collectionGroup": "articles", "queryScope": "COLLECTION", "fields": [
-        { "fieldPath": "status", "order": "ASCENDING" },
-        { "fieldPath": "language", "order": "ASCENDING" },
-        { "fieldPath": "scheduledAt", "order": "DESCENDING" }
-    ]},
-
-    { "collectionGroup": "articles", "queryScope": "COLLECTION", "fields": [
-        { "fieldPath": "status", "order": "ASCENDING" },
-        { "fieldPath": "language", "order": "ASCENDING" },
-        { "fieldPath": "publishedAt", "order": "ASCENDING" }
-    ]},
-
-    { "collectionGroup": "articles", "queryScope": "COLLECTION", "fields": [
-        { "fieldPath": "slug", "order": "ASCENDING" },
-        { "fieldPath": "language", "order": "ASCENDING" }
-    ]},
-    { "collectionGroup": "articles", "queryScope": "COLLECTION", "fields": [
-        { "fieldPath": "alternateLanguageSlug", "order": "ASCENDING" },
-        { "fieldPath": "language", "order": "ASCENDING" }
-    ]},
-
-    { "collectionGroup": "articles", "queryScope": "COLLECTION", "fields": [
-        { "fieldPath": "language", "order": "ASCENDING" },
-        { "fieldPath": "sourceArticleId", "order": "ASCENDING" }
-    ]},
-    { "collectionGroup": "articles", "queryScope": "COLLECTION", "fields": [
-        { "fieldPath": "sourceArticleId", "order": "ASCENDING" },
-        { "fieldPath": "language", "order": "ASCENDING" },
-        { "fieldPath": "status", "order": "ASCENDING" }
-    ]},
-    { "collectionGroup": "articles", "queryScope": "COLLECTION", "fields": [
-        { "fieldPath": "language", "order": "ASCENDING" },
-        { "fieldPath": "isCanonicalSource", "order": "ASCENDING" },
-        { "fieldPath": "status", "order": "ASCENDING" }
-    ]},
-
-    { "collectionGroup": "articles", "queryScope": "COLLECTION", "fields": [
-        { "fieldPath": "categoryId", "order": "ASCENDING" },
-        { "fieldPath": "publishedAt", "order": "DESCENDING" }
-    ]},
-    { "collectionGroup": "articles", "queryScope": "COLLECTION", "fields": [
-        { "fieldPath": "authorId", "order": "ASCENDING" },
-        { "fieldPath": "publishedAt", "order": "DESCENDING" }
-    ]},
-
-    { "collectionGroup": "social_posts", "queryScope": "COLLECTION", "fields": [
-        { "fieldPath": "updatedAt", "order": "DESCENDING" }
-    ]},
-    { "collectionGroup": "social_posts", "queryScope": "COLLECTION", "fields": [
-        { "fieldPath": "articleId", "order": "ASCENDING" },
-        { "fieldPath": "updatedAt", "order": "DESCENDING" }
-    ]},
-    { "collectionGroup": "social_posts", "queryScope": "COLLECTION", "fields": [
-        { "fieldPath": "status", "order": "ASCENDING" },
-        { "fieldPath": "updatedAt", "order": "DESCENDING" }
-    ]},
-    { "collectionGroup": "social_posts", "queryScope": "COLLECTION", "fields": [
-        { "fieldPath": "articleLanguage", "order": "ASCENDING" },
-        { "fieldPath": "updatedAt", "order": "DESCENDING" }
-    ]},
-
-    { "collectionGroup": "social_events", "queryScope": "COLLECTION_GROUP", "fields": [
-        { "fieldPath": "createdAt", "order": "DESCENDING" }
-    ]},
-
-    { "collectionGroup": "analytics_events", "queryScope": "COLLECTION", "fields": [
-        { "fieldPath": "type", "order": "ASCENDING" },
-        { "fieldPath": "timestamp", "order": "DESCENDING" }
-    ]},
-    { "collectionGroup": "analytics_events", "queryScope": "COLLECTION", "fields": [
-        { "fieldPath": "type", "order": "ASCENDING" },
-        { "fieldPath": "locale", "order": "ASCENDING" },
-        { "fieldPath": "timestamp", "order": "DESCENDING" }
-    ]},
-    { "collectionGroup": "analytics_events", "queryScope": "COLLECTION", "fields": [
-        { "fieldPath": "locale", "order": "ASCENDING" },
-        { "fieldPath": "timestamp", "order": "DESCENDING" }
-    ]},
-    { "collectionGroup": "analytics_events", "queryScope": "COLLECTION", "fields": [
-        { "fieldPath": "articleId", "order": "ASCENDING" },
-        { "fieldPath": "type", "order": "ASCENDING" },
-        { "fieldPath": "timestamp", "order": "DESCENDING" }
-    ]},
-
-    { "collectionGroup": "editorialAuditEvents", "queryScope": "COLLECTION", "fields": [
-        { "fieldPath": "articleId", "order": "ASCENDING" },
-        { "fieldPath": "createdAt", "order": "DESCENDING" }
-    ]},
-    { "collectionGroup": "editorialAuditEvents", "queryScope": "COLLECTION", "fields": [
-        { "fieldPath": "type", "order": "ASCENDING" },
-        { "fieldPath": "createdAt", "order": "ASCENDING" }
-    ]},
-    { "collectionGroup": "editorialAuditEvents", "queryScope": "COLLECTION", "fields": [
-        { "fieldPath": "type", "order": "ASCENDING" },
-        { "fieldPath": "createdAt", "order": "DESCENDING" }
-    ]},
-
-    { "collectionGroup": "editorialComments", "queryScope": "COLLECTION", "fields": [
-        { "fieldPath": "articleId", "order": "ASCENDING" },
-        { "fieldPath": "createdAt", "order": "DESCENDING" }
-    ]},
-    { "collectionGroup": "editorialComments", "queryScope": "COLLECTION", "fields": [
-        { "fieldPath": "articleId", "order": "ASCENDING" },
-        { "fieldPath": "type", "order": "ASCENDING" },
-        { "fieldPath": "resolvedAt", "order": "ASCENDING" }
-    ]},
-    { "collectionGroup": "editorialComments", "queryScope": "COLLECTION", "fields": [
-        { "fieldPath": "type", "order": "ASCENDING" },
-        { "fieldPath": "resolved", "order": "ASCENDING" }
-    ]},
-
-    { "collectionGroup": "notifications", "queryScope": "COLLECTION", "fields": [
-        { "fieldPath": "userId", "order": "ASCENDING" },
-        { "fieldPath": "createdAt", "order": "DESCENDING" }
-    ]},
-    { "collectionGroup": "notifications", "queryScope": "COLLECTION", "fields": [
-        { "fieldPath": "userId", "order": "ASCENDING" },
-        { "fieldPath": "readAt", "order": "ASCENDING" }
-    ]}
-
+    {
+      "collectionGroup": "articles",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "status",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "publishedAt",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "articles",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "status",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "language",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "publishedAt",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "articles",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "status",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "featured",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "publishedAt",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "articles",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "status",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "language",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "featured",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "publishedAt",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "articles",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "status",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "categoryId",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "publishedAt",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "articles",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "status",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "categoryId",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "language",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "publishedAt",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "articles",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "status",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "authorId",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "publishedAt",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "articles",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "status",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "authorId",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "language",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "publishedAt",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "articles",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "status",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "isBreaking",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "publishedAt",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "articles",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "status",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "isBreaking",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "language",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "publishedAt",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "articles",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "status",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "views",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "articles",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "status",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "language",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "views",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "articles",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "status",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "categoryId",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "views",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "articles",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "status",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "categoryId",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "language",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "views",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "articles",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "status",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "authorId",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "views",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "articles",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "status",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "authorId",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "language",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "views",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "articles",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "status",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "language",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "categoryId",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "views",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "articles",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "status",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "createdAt",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "articles",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "status",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "language",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "createdAt",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "articles",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "status",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "updatedAt",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "articles",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "status",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "featured",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "updatedAt",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "articles",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "status",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "categoryId",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "updatedAt",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "articles",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "categoryId",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "updatedAt",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "articles",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "status",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "scheduledAt",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "articles",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "status",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "language",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "scheduledAt",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "articles",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "status",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "language",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "publishedAt",
+          "order": "ASCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "articles",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "slug",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "language",
+          "order": "ASCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "articles",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "alternateLanguageSlug",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "language",
+          "order": "ASCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "articles",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "language",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "sourceArticleId",
+          "order": "ASCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "articles",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "sourceArticleId",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "language",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "status",
+          "order": "ASCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "articles",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "language",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "isCanonicalSource",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "status",
+          "order": "ASCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "articles",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "categoryId",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "publishedAt",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "articles",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "authorId",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "publishedAt",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "social_posts",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "articleId",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "updatedAt",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "social_posts",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "status",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "updatedAt",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "social_posts",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "articleLanguage",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "updatedAt",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "analytics_events",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "type",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "timestamp",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "analytics_events",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "type",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "locale",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "timestamp",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "analytics_events",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "locale",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "timestamp",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "analytics_events",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "articleId",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "type",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "timestamp",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "editorialAuditEvents",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "articleId",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "createdAt",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "editorialAuditEvents",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "type",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "createdAt",
+          "order": "ASCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "editorialAuditEvents",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "type",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "createdAt",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "editorialComments",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "articleId",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "createdAt",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "editorialComments",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "articleId",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "type",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "resolvedAt",
+          "order": "ASCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "editorialComments",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "type",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "resolved",
+          "order": "ASCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "notifications",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "userId",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "createdAt",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "notifications",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "userId",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "readAt",
+          "order": "ASCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "articles",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "status",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "featured",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "language",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "publishedAt",
+          "order": "DESCENDING"
+        }
+      ]
+    }
   ],
-
   "fieldOverrides": [
-    { "collectionGroup": "articles", "fieldPath": "body",            "indexes": [] },
-    { "collectionGroup": "articles", "fieldPath": "excerpt",         "indexes": [] },
-    { "collectionGroup": "articles", "fieldPath": "subtitle",        "indexes": [] },
-    { "collectionGroup": "articles", "fieldPath": "toc",             "indexes": [] },
-    { "collectionGroup": "articles", "fieldPath": "keyPoints",       "indexes": [] },
-    { "collectionGroup": "articles", "fieldPath": "sources",         "indexes": [] },
-    { "collectionGroup": "articles", "fieldPath": "context",         "indexes": [] },
-    { "collectionGroup": "articles", "fieldPath": "seoTitle",        "indexes": [] },
-    { "collectionGroup": "articles", "fieldPath": "metaDescription", "indexes": [] },
-    { "collectionGroup": "articles", "fieldPath": "canonicalUrl",    "indexes": [] },
-    { "collectionGroup": "analytics_events", "fieldPath": "data",    "indexes": [] },
-    { "collectionGroup": "social_posts",     "fieldPath": "platforms","indexes": [] }
+    {
+      "collectionGroup": "articles",
+      "fieldPath": "body",
+      "indexes": []
+    },
+    {
+      "collectionGroup": "articles",
+      "fieldPath": "excerpt",
+      "indexes": []
+    },
+    {
+      "collectionGroup": "articles",
+      "fieldPath": "subtitle",
+      "indexes": []
+    },
+    {
+      "collectionGroup": "articles",
+      "fieldPath": "toc",
+      "indexes": []
+    },
+    {
+      "collectionGroup": "articles",
+      "fieldPath": "keyPoints",
+      "indexes": []
+    },
+    {
+      "collectionGroup": "articles",
+      "fieldPath": "sources",
+      "indexes": []
+    },
+    {
+      "collectionGroup": "articles",
+      "fieldPath": "context",
+      "indexes": []
+    },
+    {
+      "collectionGroup": "articles",
+      "fieldPath": "seoTitle",
+      "indexes": []
+    },
+    {
+      "collectionGroup": "articles",
+      "fieldPath": "metaDescription",
+      "indexes": []
+    },
+    {
+      "collectionGroup": "articles",
+      "fieldPath": "canonicalUrl",
+      "indexes": []
+    },
+    {
+      "collectionGroup": "analytics_events",
+      "fieldPath": "data",
+      "indexes": []
+    },
+    {
+      "collectionGroup": "social_posts",
+      "fieldPath": "platforms",
+      "indexes": []
+    }
   ]
 }
