@@ -124,6 +124,7 @@ export default function AdminArticleEditPage() {
   return (
     <div className="space-y-6">
       <ArticleEditor
+        key={refreshKey}
         initial={initial}
         categories={categories}
         onSubmit={handleSubmit}

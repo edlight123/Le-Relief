@@ -137,10 +137,16 @@ export async function PATCH(req: NextRequest, { params }: RouteParams) {
       : [];
   }
   if (body.assignedTo !== undefined && hasRole(normalizedRole, "editor")) {
-    data.assignedTo = body.assignedTo || null;
-    // Also update the article's author so the byline reflects the assigned person
-    if (body.assignedTo) {
-      data.authorId = body.assignedTo;
+    const newAssignedTo = body.assignedTo || null;
+    const existingAssignedTo = (existing.assignedTo as string | null | undefined) ?? null;
+    // Only update assignedTo if the value is actually changing to prevent
+    // autosave from accidentally clearing an explicitly-set assignment
+    if (newAssignedTo !== existingAssignedTo) {
+      data.assignedTo = newAssignedTo;
+      // When assigning to a user, update authorId so the public byline reflects them
+      if (newAssignedTo) {
+        data.authorId = newAssignedTo;
+      }
     }
   }
   if (body.status !== undefined) {
