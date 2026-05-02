@@ -164,51 +164,26 @@ export default function SearchExperience() {
   }, [locale]);
 
   useEffect(() => {
-    let cancelled = false;
+    const controller = new AbortController();
     const url = trimmedQuery
       ? `/api/search/suggestions?locale=${locale}&q=${encodeURIComponent(trimmedQuery)}`
       : `/api/search/suggestions?locale=${locale}`;
 
-    fetch(url)
+    fetch(url, { signal: controller.signal })
       .then((response) => response.json())
-      .then((suggestionData: SuggestionsResponse) => {
-        if (cancelled) return;
-        setSuggestions({
-          articles: suggestionData.articles || [],
-          queries: suggestionData.queries || [],
-          categories: suggestionData.categories || [],
-        });
-      })
-      .catch(() => {
-        // keep previous suggestions on error
-      });
-
-    return () => {
-      cancelled = true;
-    };
-  }, [locale, trimmedQuery]);
-
-  useEffect(() => {
-    if (trimmedQuery.length < 2) {
-      return;
-    }
-
-    const controller = new AbortController();
-    fetch(`/api/search/suggestions?q=${encodeURIComponent(trimmedQuery)}&locale=${locale}`, {
-      signal: controller.signal,
-    })
-      .then((response) => response.json())
-      .then((data) => {
+      .then((data: SuggestionsResponse) => {
         setSuggestions({
           articles: data.articles || [],
           queries: data.queries || [],
           categories: data.categories || [],
         });
-        setShowSuggestions(true);
+        if (trimmedQuery.length >= 2) {
+          setShowSuggestions(true);
+        }
       })
       .catch(() => {
-        if (!controller.signal.aborted) {
-          setSuggestions((current) => ({ ...current, articles: [], categories: [] }));
+        if (!controller.signal.aborted && trimmedQuery.length >= 2) {
+          setSuggestions((prev) => ({ ...prev, articles: [], categories: [] }));
         }
       });
 
