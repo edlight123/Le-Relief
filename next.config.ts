@@ -97,6 +97,15 @@ const nextConfig: NextConfig = {
   },
   async headers() {
     return [
+      // Service worker must never be served from HTTP cache — PWA update checks
+      // depend on the browser fetching a fresh copy to detect changes.
+      {
+        source: "/sw.js",
+        headers: [
+          { key: "Cache-Control", value: "no-cache, no-store, must-revalidate" },
+          { key: "Pragma", value: "no-cache" },
+        ],
+      },
       {
         source: "/:path*",
         headers: [

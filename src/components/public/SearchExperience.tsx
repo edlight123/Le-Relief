@@ -146,17 +146,11 @@ export default function SearchExperience() {
     Promise.all([
       fetch("/api/categories?public=true").then((response) => response.json()),
       fetch("/api/users?public=true").then((response) => response.json()),
-      fetch(`/api/search/suggestions?locale=${locale}`).then((response) => response.json()),
     ])
-      .then(([categoryData, userData, suggestionData]) => {
+      .then(([categoryData, userData]) => {
         if (cancelled) return;
         setCategories(categoryData.categories || []);
         setAuthors(userData.users || []);
-        setSuggestions({
-          articles: suggestionData.articles || [],
-          queries: suggestionData.queries || [],
-          categories: suggestionData.categories || [],
-        });
       })
       .catch(() => {
         if (cancelled) return;
@@ -168,6 +162,31 @@ export default function SearchExperience() {
       cancelled = true;
     };
   }, [locale]);
+
+  useEffect(() => {
+    let cancelled = false;
+    const url = trimmedQuery
+      ? `/api/search/suggestions?locale=${locale}&q=${encodeURIComponent(trimmedQuery)}`
+      : `/api/search/suggestions?locale=${locale}`;
+
+    fetch(url)
+      .then((response) => response.json())
+      .then((suggestionData: SuggestionsResponse) => {
+        if (cancelled) return;
+        setSuggestions({
+          articles: suggestionData.articles || [],
+          queries: suggestionData.queries || [],
+          categories: suggestionData.categories || [],
+        });
+      })
+      .catch(() => {
+        // keep previous suggestions on error
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [locale, trimmedQuery]);
 
   useEffect(() => {
     if (trimmedQuery.length < 2) {
@@ -292,9 +311,13 @@ export default function SearchExperience() {
         <input
           type="text"
           value={query}
-          onFocus={() => setShowSuggestions(trimmedQuery.length >= 2)}
+          onFocus={() => setShowSuggestions(query.trim().length >= 2)}
           onBlur={() => window.setTimeout(() => setShowSuggestions(false), 150)}
-          onChange={(event) => setQuery(event.target.value)}
+          onChange={(event) => {
+            const value = event.target.value;
+            setQuery(value);
+            setShowSuggestions(value.trim().length >= 2);
+          }}
           placeholder={locale === "fr" ? "Rechercher un sujet, une rubrique ou un auteur" : "Search for a topic, category or author"}
           className="w-full border-0 bg-transparent py-3 pl-10 pr-4 font-body text-xl font-bold text-foreground placeholder:text-muted focus:outline-none sm:text-2xl"
           aria-label={locale === "fr" ? "Rechercher" : "Search"}

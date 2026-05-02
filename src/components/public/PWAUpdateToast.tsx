@@ -38,8 +38,12 @@ export default function PWAUpdateToast() {
       intervalId = setInterval(() => r.update(), 60_000);
     });
 
-    // When the SW takes control after SKIP_WAITING, reload
+    // When the SW takes control after SKIP_WAITING, reload.
+    // Guard against firing multiple times (e.g. rapid controllerchange events).
+    let reloading = false;
     navigator.serviceWorker.addEventListener("controllerchange", () => {
+      if (reloading) return;
+      reloading = true;
       window.location.reload();
     });
 
