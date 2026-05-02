@@ -6,6 +6,7 @@ import SkipToContent from "@/components/layout/SkipToContent";
 import IOSInstallPrompt from "@/components/public/IOSInstallPrompt";
 import PushNotificationBanner from "@/components/public/PushNotificationBanner";
 import PWAUpdateToast from "@/components/public/PWAUpdateToast";
+import BackToTop from "@/components/public/BackToTop";
 import { LOCALE_REQUEST_HEADER } from "@/lib/locale-routing";
 import { validateLocale, type Locale } from "@/lib/locale";
 import { ArticleAlternateProvider } from "@/contexts/ArticleAlternateContext";
@@ -29,6 +30,7 @@ export default async function PublicLayout({
       <PushNotificationBanner locale={initialLocale} />
       <IOSInstallPrompt locale={initialLocale} />
       <PWAUpdateToast />
+      <BackToTop locale={initialLocale} />
     </ArticleAlternateProvider>
   );
 }
