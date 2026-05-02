@@ -1,9 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
-import { Image as ImageIcon } from "lucide-react";
+import { CheckCircle2, Clock3, Image as ImageIcon, LayoutGrid, Megaphone, MessageCircle, MonitorPlay } from "lucide-react";
 import PageHeader from "@/components/ui/PageHeader";
 import Button from "@/components/ui/Button";
 import Badge from "@/components/ui/Badge";
@@ -30,6 +30,39 @@ const PLATFORMS: PlatformId[] = [
   "instagram-reel-cover",
 ];
 
+const PLATFORM_GROUPS = [
+  {
+    id: "instagram",
+    label: "Instagram",
+    description: "Carousel, stories et couvertures Reels.",
+    icon: LayoutGrid,
+    platforms: ["instagram-feed", "instagram-story", "instagram-reel-cover"] as PlatformId[],
+  },
+  {
+    id: "facebook",
+    label: "Facebook",
+    description: "Légende + lien en priorité, puis visuel de support.",
+    icon: Megaphone,
+    platforms: ["facebook-feed", "facebook-link"] as PlatformId[],
+  },
+  {
+    id: "conversation",
+    label: "Conversation",
+    description: "X, Threads et WhatsApp en formats copy/paste.",
+    icon: MessageCircle,
+    platforms: ["x-portrait", "x-landscape", "threads", "whatsapp-status", "whatsapp-sticker"] as PlatformId[],
+  },
+  {
+    id: "pro-video",
+    label: "Pro & vidéo",
+    description: "LinkedIn, TikTok et YouTube Shorts.",
+    icon: MonitorPlay,
+    platforms: ["linkedin-feed", "linkedin-link", "tiktok", "youtube-short-cover"] as PlatformId[],
+  },
+] as const;
+
+type PlatformGroupId = (typeof PLATFORM_GROUPS)[number]["id"];
+
 export default function SocialEditorPage() {
   const params = useParams<{ articleId: string }>();
   const articleId = params.articleId;
@@ -38,6 +71,15 @@ export default function SocialEditorPage() {
   const [rendering, setRendering] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [warnings, setWarnings] = useState<string[]>([]);
+  const [activeGroupId, setActiveGroupId] = useState<PlatformGroupId>("instagram");
+
+  const activeGroup = PLATFORM_GROUPS.find((group) => group.id === activeGroupId) ?? PLATFORM_GROUPS[0];
+  const renderedPlatforms = useMemo(() => post ? Object.keys(post.platforms).length : 0, [post]);
+  const approvedOrReady = post?.status === "approved" || post?.status === "ready";
+  const activeRenderedCount = useMemo(
+    () => activeGroup.platforms.filter((platform) => Boolean(post?.platforms[platform])).length,
+    [activeGroup.platforms, post],
+  );
 
   useEffect(() => {
     let cancel = false;
@@ -97,6 +139,42 @@ export default function SocialEditorPage() {
     }
   }
 
+  async function generateActiveGroup() {
+    setRendering(true);
+    setError(null);
+    setWarnings([]);
+    try {
+      const r = await fetch(`/api/admin/social/render`, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ articleId, platforms: activeGroup.platforms }),
+      });
+      const text = await r.text();
+      let j: {
+        post?: typeof post;
+        warnings?: string[];
+        error?: string;
+        detail?: string;
+      } = {};
+      try {
+        j = text ? JSON.parse(text) : {};
+      } catch {
+        j = { error: `HTTP ${r.status}`, detail: text.slice(0, 300) };
+      }
+      if (!r.ok) {
+        setError([j.error ?? `HTTP ${r.status}`, j.detail, j.warnings?.join(" · ")].filter(Boolean).join(" — "));
+        if (j.warnings?.length) setWarnings(j.warnings);
+        return;
+      }
+      setPost(j.post ?? null);
+      setWarnings(j.warnings ?? []);
+    } catch (err) {
+      setError(String(err));
+    } finally {
+      setRendering(false);
+    }
+  }
+
   async function updateStatus(status: SocialPostStatus) {
     setError(null);
     try {
@@ -127,20 +205,65 @@ export default function SocialEditorPage() {
         title={post?.articleTitle ?? "Génération sociale"}
         description={
           post
-            ? `Brand : ${post.brandName} · ${Object.keys(post.platforms).length} plateforme(s) rendue(s)`
-            : "Aucun rendu pour cet article."
+            ? `${post.brandName} · ${renderedPlatforms}/14 plateformes · ${approvedOrReady ? "prêt pour publication" : "à finaliser"}`
+            : "Générez les formats sociaux par famille de plateformes, puis validez les légendes avant publication."
         }
         actions={
           <>
-            <Link href="/admin/social" className="font-label text-xs uppercase tracking-wider text-muted hover:text-foreground">
+            <Link href="/admin/social" prefetch={false} className="font-label text-xs uppercase tracking-wider text-muted hover:text-foreground">
               ← Retour
             </Link>
+            <Button variant="secondary" onClick={generateActiveGroup} disabled={rendering}>
+              {rendering ? "Rendu…" : `Rendre ${activeGroup.label}`}
+            </Button>
             <Button onClick={() => generate(true)} disabled={rendering}>
               {rendering ? "Rendu en cours…" : post ? "Re-générer toutes les images" : "Générer toutes les images"}
             </Button>
           </>
         }
       />
+
+      <div className="grid gap-3 md:grid-cols-3">
+        <Card><CardContent className="flex items-center gap-3 p-4"><LayoutGrid className="h-5 w-5 text-primary" /><div><p className="font-mono text-2xl font-bold">{renderedPlatforms}</p><p className="font-label text-[11px] uppercase text-muted">plateformes rendues</p></div></CardContent></Card>
+        <Card><CardContent className="flex items-center gap-3 p-4"><CheckCircle2 className="h-5 w-5 text-accent-teal" /><div><p className="font-mono text-2xl font-bold">{post?.status === "approved" ? "OK" : "—"}</p><p className="font-label text-[11px] uppercase text-muted">validation</p></div></CardContent></Card>
+        <Card><CardContent className="flex items-center gap-3 p-4"><Clock3 className="h-5 w-5 text-accent-amber" /><div><p className="font-mono text-2xl font-bold">{warnings.length}</p><p className="font-label text-[11px] uppercase text-muted">avertissements</p></div></CardContent></Card>
+      </div>
+
+      <Card>
+        <CardContent className="space-y-3 p-4">
+          <div className="flex items-center justify-between gap-3">
+            <div>
+              <p className="font-label text-xs uppercase tracking-wider text-muted">Familles de plateformes</p>
+              <p className="font-body text-sm text-muted">Naviguez par usage : carousel visuel, lien Facebook, conversation, ou formats pro/vidéo.</p>
+            </div>
+            <Badge variant={activeRenderedCount === activeGroup.platforms.length ? "success" : activeRenderedCount > 0 ? "info" : "default"}>
+              {activeRenderedCount}/{activeGroup.platforms.length} rendus
+            </Badge>
+          </div>
+          <div className="grid gap-2 md:grid-cols-4">
+            {PLATFORM_GROUPS.map((group) => {
+              const Icon = group.icon;
+              const count = group.platforms.filter((platform) => Boolean(post?.platforms[platform])).length;
+              const active = group.id === activeGroupId;
+              return (
+                <button
+                  key={group.id}
+                  type="button"
+                  onClick={() => setActiveGroupId(group.id)}
+                  className={`rounded-sm border p-3 text-left transition-colors ${active ? "border-primary bg-primary/10" : "border-border-subtle bg-background hover:border-primary"}`}
+                >
+                  <div className="mb-2 flex items-center justify-between gap-2">
+                    <Icon className="h-4 w-4 text-primary" />
+                    <span className="font-mono text-xs text-muted">{count}/{group.platforms.length}</span>
+                  </div>
+                  <p className="font-label text-xs uppercase tracking-wider text-foreground">{group.label}</p>
+                  <p className="mt-1 line-clamp-2 font-body text-xs text-muted">{group.description}</p>
+                </button>
+              );
+            })}
+          </div>
+        </CardContent>
+      </Card>
 
       {post && ["ready", "needs_review", "approved"].includes(post.status) && (
         <Card>
@@ -210,13 +333,38 @@ export default function SocialEditorPage() {
         <EmptyState
           icon={ImageIcon}
           title="Aucun rendu pour cet article"
-          description="Cliquez sur « Générer » pour produire les images des 14 plateformes."
+          description="Cliquez sur « Générer toutes les images » ou choisissez une famille de plateformes à rendre."
         />
       ) : (
-        <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-          {PLATFORMS.map((p) => {
+        <div className="space-y-3">
+          <div className="flex items-center justify-between gap-3 rounded-sm border border-border-subtle bg-surface p-3">
+            <div>
+              <p className="font-label text-xs uppercase tracking-wider text-foreground">{activeGroup.label}</p>
+              <p className="font-body text-sm text-muted">{activeGroup.description}</p>
+            </div>
+            <Button variant="outline" size="sm" onClick={generateActiveGroup} disabled={rendering}>
+              {rendering ? "Rendu…" : "Rendre ce groupe"}
+            </Button>
+          </div>
+          <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
+          {activeGroup.platforms.map((p) => {
             const state = post?.platforms[p];
-            if (!state) return null;
+            if (!state) {
+              return (
+                <Card key={p}>
+                  <CardContent className="flex min-h-48 flex-col items-center justify-center gap-3 p-6 text-center">
+                    <ImageIcon className="h-8 w-8 text-muted" />
+                    <div>
+                      <p className="font-label text-xs uppercase tracking-wider text-foreground">{p}</p>
+                      <p className="mt-1 font-body text-sm text-muted">Pas encore rendu pour cette plateforme.</p>
+                    </div>
+                    <Button size="sm" variant="secondary" onClick={() => generateActiveGroup()} disabled={rendering}>
+                      Rendre le groupe
+                    </Button>
+                  </CardContent>
+                </Card>
+              );
+            }
             return (
               <PlatformPanel
                 key={p}
@@ -227,6 +375,7 @@ export default function SocialEditorPage() {
               />
             );
           })}
+          </div>
         </div>
       )}
 
