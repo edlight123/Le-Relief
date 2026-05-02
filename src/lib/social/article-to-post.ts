@@ -28,6 +28,20 @@ function stripHtml(input: string | null | undefined): string {
   return input.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
 }
 
+/** Coerce a Date | ISO-string | Firestore Timestamp-ish value to ISO string. */
+function toIso(value: unknown): string | undefined {
+  if (!value) return undefined;
+  if (value instanceof Date) return value.toISOString();
+  if (typeof value === "string") return value;
+  if (typeof value === "object") {
+    const v = value as { toDate?: () => Date; seconds?: number; _seconds?: number };
+    if (typeof v.toDate === "function") return v.toDate().toISOString();
+    const secs = v.seconds ?? v._seconds;
+    if (typeof secs === "number") return new Date(secs * 1000).toISOString();
+  }
+  return undefined;
+}
+
 function firstSentences(text: string, maxChars = 220): string {
   const clean = stripHtml(text);
   if (clean.length <= maxChars) return clean;
@@ -179,7 +193,10 @@ export function articleToSocialContent(article: Article): ArticleSocialContent {
     preferredLanguage: lang,
     urgencyLevel: isBreaking ? "breaking" : "normal",
     sourceNote: sourceLine,
-    date: article.publishedAt?.toISOString() ?? article.updatedAt?.toISOString() ?? undefined,
+    // serializeTimestamps() flattens Firestore Timestamps to ISO strings on
+    // the way out of the repository, but the static type still says Date.
+    // Accept either and normalise to an ISO string for the renderer.
+    date: toIso(article.publishedAt) ?? toIso(article.updatedAt) ?? undefined,
     // Caricature must use the dedicated template — skip generic routing
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     contentTypeHint: isCaricature ? ("caricature-card" as any) : undefined,

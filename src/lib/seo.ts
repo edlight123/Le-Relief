@@ -205,38 +205,6 @@ export function buildEditorialOgImage(input: {
   ];
 }
 
-/**
- * Build a photo-led Open Graph card URL via /api/og?image=…
- *
- * Wraps the article's cover photo in a guaranteed 1200×630 PNG with a
- * Le Relief title strip. Use this in place of pointing `og:image` straight
- * at the raw cover URL — many of those (especially WordPress imports) are
- * 300-px-wide thumbnails that social platforms render as a tiny preview.
- */
-export function buildArticleOgImage(input: {
-  image: string;
-  title: string;
-  category?: string | null;
-  locale: SeoLocale;
-  alt: string;
-}) {
-  const params = new URLSearchParams({
-    image: buildAbsoluteUrl(input.image),
-    title: input.title,
-    locale: input.locale,
-  });
-  if (input.category) params.set("category", input.category);
-
-  return [
-    {
-      url: buildAbsoluteUrl(`/api/og?${params.toString()}`),
-      width: 1200,
-      height: 630,
-      alt: input.alt,
-    },
-  ];
-}
-
 
 export function buildArticleImageAlt({
   title,

@@ -11,12 +11,19 @@ const libreFranklin = Libre_Franklin({
   display: "swap",
 });
 
+// NOTE on preload: Next.js auto-emits a <link rel="preload"> for every
+// font variant declared. Many internal pages (dashboard, /admin/social…)
+// only ever paint UI text in Libre Franklin, so preloading every weight of
+// every editorial face spams the console with "preloaded but not used"
+// warnings. We keep Libre Franklin preloaded (it IS used everywhere) and
+// let the editorial faces hydrate on-demand via their CSS variables.
 const sourceSerif = Source_Serif_4({
   variable: "--font-source-serif",
   subsets: ["latin"],
   weight: ["400", "600", "700"],
   style: ["normal", "italic"],
   display: "swap",
+  preload: false,
 });
 
 const spectral = Spectral({
@@ -25,6 +32,7 @@ const spectral = Spectral({
   weight: ["700", "800"],
   style: ["normal", "italic"],
   display: "swap",
+  preload: false,
 });
 
 const ibmPlexMono = IBM_Plex_Mono({
@@ -32,6 +40,7 @@ const ibmPlexMono = IBM_Plex_Mono({
   subsets: ["latin"],
   weight: ["400"],
   display: "swap",
+  preload: false,
 });
 
 export const metadata: Metadata = {
