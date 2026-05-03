@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import * as articlesRepo from "@/lib/repositories/articles";
 import { validatePublishReadiness } from "@/lib/editorial-quality";
 import { logEditorialEvent } from "@/lib/repositories/editorial/audit";
+import { broadcastArticlePublished } from "@/lib/push";
 
 export async function GET(req: NextRequest) {
   const cronSecret = process.env.CRON_SECRET;
@@ -49,6 +50,15 @@ export async function GET(req: NextRequest) {
         fromStatus: "scheduled",
         toStatus: "published",
         note: "Publication automatique CRON",
+      });
+
+      broadcastArticlePublished({
+        id: String(a.id),
+        title: String(a.title || ""),
+        slug: String(a.slug || ""),
+        excerpt: String(a.excerpt || ""),
+        language: String(a.language || "fr"),
+        coverImage: String(a.coverImage || ""),
       });
 
       return { published: true, id: String(a.id) };

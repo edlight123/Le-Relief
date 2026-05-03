@@ -10,8 +10,7 @@ import { canEditArticle, canTransitionStatus, normalizeEditorialStatus, normaliz
 import { validatePublishReadiness } from "@/lib/editorial-quality";
 import { logEditorialEvent } from "@/lib/repositories/editorial/audit";
 import * as notificationsRepo from "@/lib/repositories/notifications";
-import * as pushRepo from "@/lib/repositories/push-subscriptions";
-import { sendPushToAll } from "@/lib/push";
+import { broadcastArticlePublished } from "@/lib/push";
 
 interface RouteParams {
   params: Promise<{ id: string }>;
@@ -359,21 +358,15 @@ export async function PATCH(req: NextRequest, { params }: RouteParams) {
 
       // Broadcast push notification to subscribed readers when an article is published
       if (nextStatus === "published") {
-        const articleSlug = String((article as Record<string, unknown>).slug || "");
-        const articleLanguage = String((article as Record<string, unknown>).language || existing.language || "fr");
-        const pushUrl = articleSlug ? `/${articleSlug}` : "/";
-        const pushBody = String((article as Record<string, unknown>).excerpt || "").slice(0, 120) ||
-          (articleLanguage === "fr" ? "Lire l'article sur Le Relief." : "Read the article on Le Relief.");
-        const pushTitle = articleTitle || (articleLanguage === "fr" ? "Nouvel article" : "New article");
-
-        const subscriptions = await pushRepo.getSubscriptionsByLocale(articleLanguage).catch(() => []);
-        if (subscriptions.length > 0) {
-          sendPushToAll(
-            subscriptions,
-            { title: pushTitle, body: pushBody, url: pushUrl, icon: "/icon-192.png" },
-            (endpoint) => pushRepo.deleteSubscription(endpoint),
-          ).catch((e) => console.warn("[push] broadcast failed", e));
-        }
+        const a = article as Record<string, unknown>;
+        broadcastArticlePublished({
+          id: String(a.id || id),
+          title: String(a.title || ""),
+          slug: String(a.slug || ""),
+          excerpt: String(a.excerpt || ""),
+          language: String(a.language || existing.language || "fr"),
+          coverImage: String(a.coverImage || ""),
+        });
       }
     } else {
       await logEditorialEvent({

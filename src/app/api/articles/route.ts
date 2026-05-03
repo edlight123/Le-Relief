@@ -22,6 +22,7 @@ import { validateSourceArticleReference } from "@/lib/validation";
 import type { Role } from "@/types/user";
 import { validatePublishReadiness } from "@/lib/editorial-quality";
 import { logEditorialEvent } from "@/lib/repositories/editorial/audit";
+import { broadcastArticlePublished } from "@/lib/push";
 
 function parseBoundedInt(value: string | null, fallback: number, min: number, max: number) {
   const parsed = Number.parseInt(value || "", 10);
@@ -425,6 +426,14 @@ export async function POST(req: NextRequest) {
         actorId: session.user.id,
         type: "published",
         toStatus: "published",
+      });
+      broadcastArticlePublished({
+        id: String(article.id),
+        title: String(article.title || ""),
+        slug: String(article.slug || ""),
+        excerpt: String(article.excerpt || ""),
+        language: String(article.language || "fr"),
+        coverImage: String(article.coverImage || ""),
       });
     }
 

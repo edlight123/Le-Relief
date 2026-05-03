@@ -74,3 +74,51 @@ export async function sendPushToAll(
 
   return { sent, failed, expired };
 }
+
+/**
+ * Broadcast a "new article published" push notification to every subscriber
+ * matching the article's language. Safe to fire-and-forget: errors are logged
+ * but never thrown so callers cannot have their request fail because of push.
+ *
+ * Returns immediately (does not await delivery) — the actual sending happens
+ * in the background so it does not delay the publish API response.
+ */
+export function broadcastArticlePublished(article: {
+  id?: string | number;
+  title?: string | null;
+  slug?: string | null;
+  excerpt?: string | null;
+  language?: string | null;
+  coverImage?: string | null;
+}): void {
+  const language = (article.language || "fr").toString();
+  const slug = (article.slug || "").toString();
+  const title =
+    (article.title || "").toString() ||
+    (language === "fr" ? "Nouvel article" : "New article");
+  const body =
+    (article.excerpt || "").toString().slice(0, 120) ||
+    (language === "fr"
+      ? "Lire l'article sur Le Relief."
+      : "Read the article on Le Relief.");
+  const url = slug ? `/${slug}` : "/";
+  const icon = (article.coverImage || "/icon-192.png").toString();
+
+  // Run async without blocking the caller.
+  void (async () => {
+    try {
+      const pushRepo = await import("./repositories/push-subscriptions");
+      const subscriptions = await pushRepo
+        .getSubscriptionsByLocale(language)
+        .catch(() => []);
+      if (subscriptions.length === 0) return;
+      await sendPushToAll(
+        subscriptions,
+        { title, body, url, icon },
+        (endpoint) => pushRepo.deleteSubscription(endpoint),
+      );
+    } catch (err) {
+      console.warn("[push] broadcastArticlePublished failed", err);
+    }
+  })();
+}
