@@ -1,5 +1,14 @@
 const DEFAULT_APP_URL = "http://localhost:3000";
 
+/**
+ * Production canonical host. We always emit absolute URLs (canonical, og:image,
+ * og:url, sitemap entries…) against this host because the apex
+ * `lereliefhaiti.com` issues a 307 redirect to `www`, and several social
+ * scrapers (WhatsApp, Messenger…) refuse to follow redirects on og:image and
+ * fall back to a generic favicon.
+ */
+const CANONICAL_PROD_ORIGIN = "https://www.lereliefhaiti.com";
+
 function normalizeCandidateUrl(value?: string) {
   const token = value?.split(/\s+/)[0]?.replaceAll('"', "").trim();
   if (!token) return null;
@@ -9,7 +18,12 @@ function normalizeCandidateUrl(value?: string) {
     : `https://${token}`;
 
   try {
-    return new URL(withProtocol).origin;
+    const origin = new URL(withProtocol).origin;
+    // Promote apex production host → www so we never emit URLs that 307-redirect.
+    if (origin === "https://lereliefhaiti.com" || origin === "http://lereliefhaiti.com") {
+      return CANONICAL_PROD_ORIGIN;
+    }
+    return origin;
   } catch {
     return null;
   }
