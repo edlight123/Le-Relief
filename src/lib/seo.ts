@@ -166,8 +166,12 @@ export function buildRobotsDirective(
  *
  * Falls back to the absolute URL if the input is already a Le Relief OG endpoint
  * (e.g. `/api/og?...`) or a relative path under the site origin.
+ *
+ * NOTE: width MUST be one of the values declared in next.config.ts
+ * `images.deviceSizes` ([320, 424, 640, 768, 1024, 1280, 1536]) or the optimizer
+ * returns INVALID_IMAGE_OPTIMIZE_REQUEST (400).
  */
-export function optimizedOgUrl(absoluteImageUrl: string, width = 1200, quality = 85) {
+export function optimizedOgUrl(absoluteImageUrl: string, width = 1280, quality = 85) {
   // Avoid double-optimizing our own /_next/image or /api/og endpoints.
   if (
     absoluteImageUrl.includes("/_next/image") ||
