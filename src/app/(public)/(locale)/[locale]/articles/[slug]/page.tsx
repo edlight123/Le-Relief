@@ -32,6 +32,7 @@ import {
   buildNewsArticleJsonLd,
   buildOgImage,
   buildRobotsDirective,
+  optimizedOgUrl,
   serializeJsonLd,
 } from "@/lib/seo";
 
@@ -162,7 +163,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       title,
       description,
       images: article.imageSrc
-        ? [buildAbsoluteUrl(article.imageSrc)]
+        ? [optimizedOgUrl(buildAbsoluteUrl(article.imageSrc))]
         : buildEditorialOgImage({
             title: article.title,
             category: article.category?.name,

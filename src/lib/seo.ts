@@ -158,13 +158,34 @@ export function buildRobotsDirective(
       };
 }
 
+/**
+ * Route a remote/raw image through Next.js's image optimizer so that:
+ *   - EXIF metadata is stripped (avoids orientation / huge thumbnails)
+ *   - File size is normalized (Facebook's scraper times out on heavy uploads)
+ *   - Output dimensions match the declared `og:image:width` / `og:image:height`
+ *
+ * Falls back to the absolute URL if the input is already a Le Relief OG endpoint
+ * (e.g. `/api/og?...`) or a relative path under the site origin.
+ */
+export function optimizedOgUrl(absoluteImageUrl: string, width = 1200, quality = 85) {
+  // Avoid double-optimizing our own /_next/image or /api/og endpoints.
+  if (
+    absoluteImageUrl.includes("/_next/image") ||
+    absoluteImageUrl.includes("/api/og")
+  ) {
+    return absoluteImageUrl;
+  }
+  const optimizerPath = `/_next/image?url=${encodeURIComponent(absoluteImageUrl)}&w=${width}&q=${quality}`;
+  return `${siteConfig.url}${optimizerPath}`;
+}
+
 export function buildOgImage(
   image: string | null | undefined,
   alt: string,
   fallbackTitle?: string,
 ) {
   const finalUrl = image
-    ? buildAbsoluteUrl(image)
+    ? optimizedOgUrl(buildAbsoluteUrl(image))
     : buildAbsoluteUrl(`/api/og?title=${encodeURIComponent(fallbackTitle || alt)}`);
 
   return [
