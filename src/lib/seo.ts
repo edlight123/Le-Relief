@@ -169,9 +169,10 @@ export function buildRobotsDirective(
  *
  * NOTE: width MUST be one of the values declared in next.config.ts
  * `images.deviceSizes` ([320, 424, 640, 768, 1024, 1280, 1536]) or the optimizer
- * returns INVALID_IMAGE_OPTIMIZE_REQUEST (400).
+ * returns INVALID_IMAGE_OPTIMIZE_REQUEST (400). Same for `quality` — Next.js 16
+ * defaults `images.qualities` to [75] unless explicitly configured.
  */
-export function optimizedOgUrl(absoluteImageUrl: string, width = 1280, quality = 85) {
+export function optimizedOgUrl(absoluteImageUrl: string, width = 1280, quality = 75) {
   // Avoid double-optimizing our own /_next/image or /api/og endpoints.
   if (
     absoluteImageUrl.includes("/_next/image") ||
