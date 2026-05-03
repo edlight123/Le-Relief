@@ -7,6 +7,7 @@ import IOSInstallPrompt from "@/components/public/IOSInstallPrompt";
 import PushNotificationBanner from "@/components/public/PushNotificationBanner";
 import PWAUpdateToast from "@/components/public/PWAUpdateToast";
 import BackToTop from "@/components/public/BackToTop";
+import PullToRefresh from "@/components/public/PullToRefresh";
 import { LOCALE_REQUEST_HEADER } from "@/lib/locale-routing";
 import { validateLocale, type Locale } from "@/lib/locale";
 import { ArticleAlternateProvider } from "@/contexts/ArticleAlternateContext";
@@ -22,6 +23,7 @@ export default async function PublicLayout({
   return (
     <ArticleAlternateProvider>
       <SkipToContent initialLocale={initialLocale} />
+      <PullToRefresh />
       <Navbar initialLocale={initialLocale} />
       {/* pb-16 reserves space so content isn't hidden behind the mobile bottom nav */}
       <main id="main-content" className="flex-1 pb-16 md:pb-0">{children}</main>
