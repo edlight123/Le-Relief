@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest, NextResponse, after } from "next/server";
 import { subDays } from "date-fns";
 import * as articlesRepo from "@/lib/repositories/articles";
 import * as analyticsRepo from "@/lib/repositories/analytics";
@@ -427,14 +427,16 @@ export async function POST(req: NextRequest) {
         type: "published",
         toStatus: "published",
       });
-      broadcastArticlePublished({
-        id: String(article.id),
-        title: String(article.title || ""),
-        slug: String(article.slug || ""),
-        excerpt: String(article.excerpt || ""),
-        language: String(article.language || "fr"),
-        coverImage: String(article.coverImage || ""),
-      });
+      after(() =>
+        broadcastArticlePublished({
+          id: String(article.id),
+          title: String(article.title || ""),
+          slug: String(article.slug || ""),
+          excerpt: String(article.excerpt || ""),
+          language: String(article.language || "fr"),
+          coverImage: String(article.coverImage || ""),
+        }),
+      );
     }
 
     return NextResponse.json(article, { status: 201 });

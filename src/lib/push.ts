@@ -77,20 +77,24 @@ export async function sendPushToAll(
 
 /**
  * Broadcast a "new article published" push notification to every subscriber
- * matching the article's language. Safe to fire-and-forget: errors are logged
- * but never thrown so callers cannot have their request fail because of push.
+ * matching the article's language. Errors are logged but never thrown so
+ * callers cannot have their request fail because of push.
  *
- * Returns immediately (does not await delivery) — the actual sending happens
- * in the background so it does not delay the publish API response.
+ * IMPORTANT: this returns a Promise that callers MUST keep alive on
+ * serverless runtimes (Vercel) — otherwise the Lambda terminates after the
+ * HTTP response is sent and `webpush.sendNotification` is killed mid-flight,
+ * which is why no notifications were being delivered in production. Wrap the
+ * call in `after(() => broadcastArticlePublished(...))` from `next/server`
+ * (or `await` it) at every call site.
  */
-export function broadcastArticlePublished(article: {
+export async function broadcastArticlePublished(article: {
   id?: string | number;
   title?: string | null;
   slug?: string | null;
   excerpt?: string | null;
   language?: string | null;
   coverImage?: string | null;
-}): void {
+}): Promise<{ sent: number; failed: number; expired: number } | null> {
   const language = (article.language || "fr").toString();
   const slug = (article.slug || "").toString();
   const title =
@@ -104,21 +108,28 @@ export function broadcastArticlePublished(article: {
   const url = slug ? `/${slug}` : "/";
   const icon = (article.coverImage || "/icon-192.png").toString();
 
-  // Run async without blocking the caller.
-  void (async () => {
-    try {
-      const pushRepo = await import("./repositories/push-subscriptions");
-      const subscriptions = await pushRepo
-        .getSubscriptionsByLocale(language)
-        .catch(() => []);
-      if (subscriptions.length === 0) return;
-      await sendPushToAll(
-        subscriptions,
-        { title, body, url, icon },
-        (endpoint) => pushRepo.deleteSubscription(endpoint),
+  try {
+    const pushRepo = await import("./repositories/push-subscriptions");
+    const subscriptions = await pushRepo
+      .getSubscriptionsByLocale(language)
+      .catch(() => []);
+    if (subscriptions.length === 0) {
+      console.info(
+        `[push] broadcastArticlePublished: no subscribers for locale="${language}" (article ${article.id ?? "?"})`,
       );
-    } catch (err) {
-      console.warn("[push] broadcastArticlePublished failed", err);
+      return { sent: 0, failed: 0, expired: 0 };
     }
-  })();
+    const result = await sendPushToAll(
+      subscriptions,
+      { title, body, url, icon },
+      (endpoint) => pushRepo.deleteSubscription(endpoint),
+    );
+    console.info(
+      `[push] broadcastArticlePublished article=${article.id ?? "?"} locale=${language} sent=${result.sent} failed=${result.failed} expired=${result.expired}`,
+    );
+    return result;
+  } catch (err) {
+    console.warn("[push] broadcastArticlePublished failed", err);
+    return null;
+  }
 }

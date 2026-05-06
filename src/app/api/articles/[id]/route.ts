@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest, NextResponse, after } from "next/server";
 import * as articlesRepo from "@/lib/repositories/articles";
 import * as usersRepo from "@/lib/repositories/users";
 import * as categoriesRepo from "@/lib/repositories/categories";
@@ -359,14 +359,16 @@ export async function PATCH(req: NextRequest, { params }: RouteParams) {
       // Broadcast push notification to subscribed readers when an article is published
       if (nextStatus === "published") {
         const a = article as Record<string, unknown>;
-        broadcastArticlePublished({
-          id: String(a.id || id),
-          title: String(a.title || ""),
-          slug: String(a.slug || ""),
-          excerpt: String(a.excerpt || ""),
-          language: String(a.language || existing.language || "fr"),
-          coverImage: String(a.coverImage || ""),
-        });
+        after(() =>
+          broadcastArticlePublished({
+            id: String(a.id || id),
+            title: String(a.title || ""),
+            slug: String(a.slug || ""),
+            excerpt: String(a.excerpt || ""),
+            language: String(a.language || existing.language || "fr"),
+            coverImage: String(a.coverImage || ""),
+          }),
+        );
       }
     } else {
       await logEditorialEvent({
